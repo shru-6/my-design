@@ -4,14 +4,15 @@ All documentation has been moved to the application directory for better organiz
 
 ## 📚 Documentation Location
 
-All documentation is now located in `apps/v4/`:
+All documentation is now located in `apps/design-system/`:
 
-- **[ARCHITECTURE.md](../apps/v4/ARCHITECTURE.md)** - Overall architecture and project structure
-- **[COMPONENT_SYSTEM.md](../apps/v4/src/design-system/components/COMPONENT_SYSTEM.md)** - Component organization and patterns
-- **[SHOWCASE_SYSTEM.md](../apps/v4/src/design-system/components/SHOWCASE_SYSTEM.md)** - Component showcase system
-- **[CATEGORY_SYSTEM.md](../apps/v4/src/design-system/components/CATEGORY_SYSTEM.md)** - Component categorization
-- **[THEME_SYSTEM.md](../apps/v4/src/design-system/themes/THEME_SYSTEM.md)** - Theme system documentation
-- **[DESIGN_SYSTEM_PAGE.md](../apps/v4/app/DESIGN_SYSTEM_PAGE.md)** - Design system showcase page
+- **[ARCHITECTURE.md](../apps/design-system/ARCHITECTURE.md)** - Overall architecture and project structure
+- **[Component System](../apps/design-system/src/design-system/components/README.md)** - Component organization and usage
+- **[Theme System](../apps/design-system/src/design-system/themes/README.md)** - Theme system documentation
+- **[App Routes](../apps/design-system/app/README.md)** - Route structure and patterns
+- **[App Configuration](../apps/design-system/config/README.md)** - Site configuration
+- **[App Hooks](../apps/design-system/hooks/README.md)** - Application hooks
+- **[Shared Utilities](../apps/design-system/lib/README.md)** - Utility functions
 
 ## Why Moved?
 
