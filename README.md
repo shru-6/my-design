@@ -55,7 +55,9 @@ apps/design-system/
 
 ## Documentation
 
-- **[Main README](./apps/v4/README.md)** - Quick start and overview
+All documentation is co-located with the code it describes in `apps/design-system/`:
+
+- **[Main README](./apps/design-system/README.md)** - Quick start and overview
 - **[Architecture Overview](./apps/design-system/ARCHITECTURE.md)** - Overall project structure and systems
 - **[Component System](./apps/design-system/src/design-system/components/README.md)** - Components organization and usage
 - **[Theme System](./apps/design-system/src/design-system/themes/README.md)** - Theming system and tokens
@@ -63,6 +65,8 @@ apps/design-system/
 - **[App Configuration](./apps/design-system/config/README.md)** - Site configuration
 - **[App Hooks](./apps/design-system/hooks/README.md)** - Application hooks
 - **[Shared Utilities](./apps/design-system/lib/README.md)** - Utility functions
+
+Documentation is co-located with code to make it easier to find relevant docs when working on specific areas and keep them in sync with code changes.
 
 ## Component Organization
 
