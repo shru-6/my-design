@@ -1,0 +1,14 @@
+{
+  "duration": {
+    "fast": "150ms",
+    "normal": "300ms",
+    "slow": "500ms"
+  },
+  "easing": {
+    "default": "ease-in-out",
+    "in": "ease-in",
+    "out": "ease-out",
+    "in-out": "ease-in-out"
+  }
+}
+

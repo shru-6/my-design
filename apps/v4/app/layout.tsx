@@ -4,11 +4,7 @@ import { META_THEME_COLORS, siteConfig } from "@/lib/config"
 import { fontVariables } from "@/lib/fonts"
 import { cn } from "@/lib/utils"
 import { LayoutProvider } from "@/hooks/use-layout"
-import { ActiveThemeProvider } from "@/components/active-theme"
-import { Analytics } from "@/components/analytics"
-import { TailwindIndicator } from "@/components/tailwind-indicator"
-import { ThemeProvider } from "@/components/theme-provider"
-import { Toaster } from "@/registry/new-york-v4/ui/sonner"
+import { Toaster } from "@/src/design-system/components/molecules/Toaster"
 
 import "@/styles/globals.css"
 
@@ -17,45 +13,38 @@ export const metadata: Metadata = {
     default: siteConfig.name,
     template: `%s - ${siteConfig.name}`,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL!),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || ""),
   description: siteConfig.description,
-  keywords: ["Next.js", "React", "Tailwind CSS", "Components", "shadcn"],
+  keywords: ["Next.js", "React", "Tailwind CSS", "Components", "design system"],
   authors: [
     {
-      name: "shadcn",
-      url: "https://shadcn.com",
+      name: "design system",
+      url: "https://www.designsystem.com",
     },
   ],
-  creator: "shadcn",
+  creator: "design system",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: process.env.NEXT_PUBLIC_APP_URL!,
+    url: process.env.NEXT_PUBLIC_APP_URL || "",
     title: siteConfig.name,
     description: siteConfig.description,
     siteName: siteConfig.name,
-    images: [
-      {
-        url: `${process.env.NEXT_PUBLIC_APP_URL}/opengraph-image.png`,
-        width: 1200,
-        height: 630,
-        alt: siteConfig.name,
-      },
-    ],
+    images: [], // OG images removed - not needed for design system
   },
   twitter: {
     card: "summary_large_image",
     title: siteConfig.name,
     description: siteConfig.description,
-    images: [`${process.env.NEXT_PUBLIC_APP_URL}/opengraph-image.png`],
-    creator: "@shadcn",
+    images: [], // OG images removed - not needed for design system
+    creator: "@designsystem",
   },
   icons: {
     icon: "/favicon.ico",
     shortcut: "/favicon-16x16.png",
     apple: "/apple-touch-icon.png",
   },
-  manifest: `${siteConfig.url}/site.webmanifest`,
+  manifest: "/site.webmanifest",
 }
 
 export default function RootLayout({
@@ -88,16 +77,10 @@ export default function RootLayout({
           fontVariables
         )}
       >
-        <ThemeProvider>
           <LayoutProvider>
-            <ActiveThemeProvider>
               {children}
-              <TailwindIndicator />
               <Toaster position="top-center" />
-              <Analytics />
-            </ActiveThemeProvider>
           </LayoutProvider>
-        </ThemeProvider>
       </body>
     </html>
   )

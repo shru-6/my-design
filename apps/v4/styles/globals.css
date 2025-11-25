@@ -1,7 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
-
-@import "./themes.css";
+/* refer: https://tailwindcss.com/docs/theme */
 
 @custom-variant dark (&:is(.dark *));
 
@@ -55,6 +54,7 @@
   --color-code-number: var(--code-number);
   --color-selection: var(--selection);
   --color-selection-foreground: var(--selection-foreground);
+  --color-skeleton: var(--skeleton);
 }
 
 :root {
@@ -98,6 +98,7 @@
   --code-number: oklch(0.56 0 0);
   --selection: oklch(0.145 0 0);
   --selection-foreground: oklch(1 0 0);
+  --skeleton: oklch(0.92 0 0);
 }
 
 .dark {
@@ -140,6 +141,7 @@
   --code-number: oklch(0.72 0 0);
   --selection: oklch(0.922 0 0);
   --selection-foreground: oklch(0.205 0 0);
+  --skeleton: oklch(0.32 0 0);
 }
 
 @layer base {
@@ -153,6 +155,7 @@
     @apply overscroll-none scroll-smooth;
   }
   body {
+    @apply bg-background text-foreground;
     font-synthesis-weight: none;
     text-rendering: optimizeLegibility;
   }

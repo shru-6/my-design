@@ -1,0 +1,161 @@
+{
+  "color": {
+    "primary": "{palette.blue.500}",
+    "primary-hover": "{palette.blue.600}",
+    "primary-foreground": "{palette.white}",
+    "secondary": "{palette.gray.100}",
+    "secondary-foreground": "{palette.gray.900}",
+    "background": "{palette.white}",
+    "foreground": "{palette.gray.900}",
+    "card": "{palette.white}",
+    "card-foreground": "{palette.gray.900}",
+    "popover": "{palette.white}",
+    "popover-foreground": "{palette.gray.900}",
+    "muted": "{palette.gray.100}",
+    "muted-foreground": "{palette.gray.500}",
+    "accent": "{palette.gray.100}",
+    "accent-foreground": "{palette.gray.900}",
+    "destructive": "{palette.red.500}",
+    "destructive-foreground": "{palette.white}",
+    "border": "{palette.gray.200}",
+    "input": "{palette.gray.200}",
+    "ring": "{palette.gray.400}",
+    "chart-1": "{palette.blue.300}",
+    "chart-2": "{palette.blue.500}",
+    "chart-3": "{palette.blue.600}",
+    "chart-4": "{palette.blue.700}",
+    "chart-5": "{palette.blue.800}",
+    "sidebar": "{palette.white}",
+    "sidebar-foreground": "{palette.gray.900}",
+    "sidebar-primary": "{palette.blue.600}",
+    "sidebar-primary-foreground": "{palette.white}",
+    "sidebar-accent": "{palette.gray.100}",
+    "sidebar-accent-foreground": "{palette.gray.900}",
+    "sidebar-border": "{palette.gray.200}",
+    "sidebar-ring": "{palette.gray.400}",
+    "surface": "{palette.gray.50}",
+    "surface-foreground": "{palette.gray.900}",
+    "code": "{palette.gray.50}",
+    "code-foreground": "{palette.gray.900}",
+    "code-highlight": "{palette.gray.100}",
+    "code-number": "{palette.gray.500}",
+    "selection": "{palette.gray.900}",
+    "selection-foreground": "{palette.white}",
+    "skeleton": "{palette.gray.200}"
+  },
+  "spacing": {
+    "component": {
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2rem"
+    },
+    "layout": {
+      "sm": "1rem",
+      "md": "2rem",
+      "lg": "3rem",
+      "xl": "4rem",
+      "2xl": "6rem"
+    },
+    "section": {
+      "sm": "2rem",
+      "md": "4rem",
+      "lg": "6rem",
+      "xl": "8rem"
+    },
+    "base": "0.25rem"
+  },
+  "typography": {
+    "font": {
+      "sans": "var(--font-sans)",
+      "mono": "var(--font-mono)"
+    },
+    "fontSize": {
+      "xs": "0.75rem",
+      "sm": "0.875rem",
+      "base": "1rem",
+      "lg": "1.125rem",
+      "xl": "1.25rem",
+      "2xl": "1.5rem",
+      "3xl": "1.875rem",
+      "4xl": "2.25rem",
+      "5xl": "3rem",
+      "6xl": "3.75rem",
+      "7xl": "4.5rem",
+      "8xl": "6rem"
+    },
+    "fontWeight": {
+      "normal": "400",
+      "medium": "500",
+      "semibold": "600",
+      "bold": "700"
+    },
+    "lineHeight": {
+      "tight": "1.25",
+      "normal": "1.5",
+      "relaxed": "1.75"
+    }
+  },
+  "shape": {
+    "radius": {
+      "none": "0",
+      "sm": "0.25rem",
+      "md": "0.5rem",
+      "lg": "0.625rem",
+      "xl": "0.75rem",
+      "2xl": "1rem",
+      "full": "9999px"
+    },
+    "radiusComponent": {
+      "button": "{shape.radius.md}",
+      "card": "{shape.radius.lg}",
+      "input": "{shape.radius.md}",
+      "modal": "{shape.radius.xl}",
+      "tooltip": "{shape.radius.md}",
+      "badge": "{shape.radius.full}"
+    }
+  },
+  "motion": {
+    "duration": {
+      "fast": "150ms",
+      "normal": "200ms",
+      "slow": "300ms"
+    },
+    "easing": {
+      "ease": "cubic-bezier(0.4, 0, 0.2, 1)",
+      "ease-in": "cubic-bezier(0.4, 0, 1, 1)",
+      "ease-out": "cubic-bezier(0, 0, 0.2, 1)",
+      "ease-in-out": "cubic-bezier(0.4, 0, 0.2, 1)"
+    }
+  },
+  "shadow": {
+    "xs": "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+    "sm": "0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)",
+    "md": "0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)",
+    "lg": "0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)",
+    "xl": "0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)",
+    "2xl": "0 25px 50px -12px rgb(0 0 0 / 0.25)",
+    "none": "none"
+  },
+  "zIndex": {
+    "base": "0",
+    "dropdown": "1000",
+    "sticky": "1020",
+    "fixed": "1030",
+    "modal-backdrop": "1040",
+    "modal": "1050",
+    "popover": "1060",
+    "tooltip": "1070"
+  },
+  "breakpoint": {
+    "sm": "640px",
+    "md": "768px",
+    "lg": "1024px",
+    "xl": "1280px",
+    "2xl": "1536px",
+    "3xl": "1600px",
+    "4xl": "2000px"
+  }
+}
+

@@ -1,0 +1,38 @@
+{
+  "color": {
+    "primary": "{palette.blue.400}",
+    "primary-foreground": "{palette.gray.900}",
+    "background": "{palette.gray.900}",
+    "foreground": "{palette.gray.50}",
+    "card": "{palette.gray.800}",
+    "card-foreground": "{palette.gray.50}",
+    "popover": "{palette.gray.800}",
+    "popover-foreground": "{palette.gray.50}",
+    "secondary": "{palette.gray.800}",
+    "secondary-foreground": "{palette.gray.50}",
+    "muted": "{palette.gray.800}",
+    "muted-foreground": "{palette.gray.400}",
+    "accent": "{palette.gray.800}",
+    "accent-foreground": "{palette.gray.50}",
+    "destructive": "{palette.red.500}",
+    "destructive-foreground": "{palette.white}",
+    "border": "{palette.gray.700}",
+    "input": "{palette.gray.700}",
+    "ring": "{palette.gray.600}",
+    "chart-1": "{palette.blue.400}",
+    "chart-2": "{palette.blue.500}",
+    "chart-3": "{palette.blue.600}",
+    "chart-4": "{palette.blue.700}",
+    "chart-5": "{palette.blue.800}",
+    "sidebar": "{palette.gray.800}",
+    "sidebar-foreground": "{palette.gray.50}",
+    "sidebar-primary": "{palette.blue.500}",
+    "sidebar-primary-foreground": "{palette.white}",
+    "sidebar-accent": "{palette.gray.700}",
+    "sidebar-accent-foreground": "{palette.gray.50}",
+    "sidebar-border": "{palette.gray.700}",
+    "sidebar-ring": "{palette.gray.500}",
+    "skeleton": "{palette.gray.700}"
+  }
+}
+

@@ -1,0 +1,11 @@
+{
+  "radius": {
+    "button": "0rem",
+    "card": "0rem",
+    "input": "0rem",
+    "modal": "0rem",
+    "tooltip": "0rem",
+    "badge": "0rem"
+  }
+}
+

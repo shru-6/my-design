@@ -1,20 +1,9 @@
 import { Metadata } from "next"
-import Image from "next/image"
 import Link from "next/link"
 
-import { Announcement } from "@/components/announcement"
-import { ExamplesNav } from "@/components/examples-nav"
-import {
-  PageActions,
-  PageHeader,
-  PageHeaderDescription,
-  PageHeaderHeading,
-} from "@/components/page-header"
-import { PageNav } from "@/components/page-nav"
-import { ThemeSelector } from "@/components/theme-selector"
-import { Button } from "@/registry/new-york-v4/ui/button"
+import { Button } from "@/src/design-system/components/atoms/Button"
 
-import { RootComponents } from "./components"
+// RootComponents removed - demo components deleted
 
 const title = "The Foundation for your Design System"
 const description =
@@ -50,45 +39,25 @@ export const metadata: Metadata = {
 export default function IndexPage() {
   return (
     <div className="flex flex-1 flex-col">
-      <PageHeader>
-        <Announcement />
-        <PageHeaderHeading className="max-w-4xl">{title}</PageHeaderHeading>
-        <PageHeaderDescription>{description}</PageHeaderDescription>
-        <PageActions>
           <Button asChild size="sm">
             <Link href="/docs/installation">Get Started</Link>
           </Button>
           <Button asChild size="sm" variant="ghost">
             <Link href="/docs/components">View Components</Link>
           </Button>
-        </PageActions>
-      </PageHeader>
-      <PageNav className="hidden md:flex">
-        <ExamplesNav className="[&>a:first-child]:text-primary flex-1 overflow-hidden" />
-        <ThemeSelector className="mr-4 hidden md:flex" />
-      </PageNav>
       <div className="container-wrapper section-soft flex-1 pb-6">
         <div className="container overflow-hidden">
           <section className="border-border/50 -mx-4 w-[160vw] overflow-hidden rounded-lg border md:hidden md:w-[150vw]">
-            <Image
-              src="/r/styles/new-york-v4/dashboard-01-light.png"
-              width={1400}
-              height={875}
-              alt="Dashboard"
-              className="block dark:hidden"
-              priority
-            />
-            <Image
-              src="/r/styles/new-york-v4/dashboard-01-dark.png"
-              width={1400}
-              height={875}
-              alt="Dashboard"
-              className="hidden dark:block"
-              priority
-            />
+            {/* Dashboard images removed - registry files deleted */}
+            <div className="flex items-center justify-center p-12 text-muted-foreground">
+              <p>Design System Showcase</p>
+            </div>
           </section>
           <section className="theme-container hidden md:block">
-            <RootComponents />
+            {/* RootComponents removed - demo components deleted */}
+            <div className="flex items-center justify-center p-12 text-muted-foreground">
+              <p>Component demos removed - see <a href="/design-system">design-system</a> for component showcase</p>
+            </div>
           </section>
         </div>
       </div>

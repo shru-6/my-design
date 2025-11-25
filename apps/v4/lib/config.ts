@@ -1,42 +1,50 @@
 export const siteConfig = {
-  name: "shadcn/ui",
-  url: "https://ui.shadcn.com",
-  ogImage: "https://ui.shadcn.com/og.jpg",
+  name: "design system",
+  url: "https://www.designsystem.com",
+  ogImage: "https://www.designsystem.com/og.jpg",
   description:
-    "A set of beautifully designed components that you can customize, extend, and build on. Start here then make it your own. Open Source. Open Code.",
+    "A set of beautifully designed components that you can customize, extend, and build on. Start here then make it your own..",
   links: {
-    twitter: "https://twitter.com/shadcn",
-    github: "https://github.com/shadcn-ui/ui",
+    twitter: "https://twitter.com/designsystem",
+    github: "https://github.com/designsystem/designsystem",
   },
   navItems: [
     {
-      href: "/docs/installation",
-      label: "Docs",
+      href: "/",
+      label: "Home",
     },
     {
-      href: "/docs/components",
-      label: "Components",
+      href: "/design-system",
+      label: "Design System",
     },
-    {
-      href: "/blocks",
-      label: "Blocks",
-    },
-    {
-      href: "/charts/area",
-      label: "Charts",
-    },
-    {
-      href: "/docs/directory",
-      label: "Directory",
-    },
-    {
-      href: "/themes",
-      label: "Themes",
-    },
-    {
-      href: "/colors",
-      label: "Colors",
-    },
+    // {
+    //   href: "/docs/installation",
+    //   label: "Docs",
+    // },
+    // {
+    //   href: "/docs/components",
+    //   label: "Components",
+    // },
+    // {
+    //   href: "/blocks",
+    //   label: "Blocks",
+    // },
+    // {
+    //   href: "/charts/area",
+    //   label: "Charts",
+    // },
+    // {
+    //   href: "/docs/directory",
+    //   label: "Directory",
+    // },
+    // {
+    //   href: "/themes",
+    //   label: "Themes",
+    // },
+    // {
+    //   href: "/colors",
+    //   label: "Colors",
+    // },
   ],
 }
 
