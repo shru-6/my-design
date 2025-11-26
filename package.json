@@ -1,14 +1,29 @@
 {
-  "name": "my-design",
+  "name": "@shru/theme-toggle",
   "version": "0.0.1",
-  "private": true,
+  "description": "Reusable theme toggle component with Tailwind CSS variable support",
   "license": "MIT",
   "type": "module",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist",
+    "src/tokens"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
   "workspaces": [
     "apps/*"
   ],
   "scripts": {
-    "build": "turbo run build",
+    "build": "tsup src/index.ts --dts --format esm,cjs",
+    "build:lib": "tsup src/index.ts --dts --format esm,cjs",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
@@ -17,6 +32,10 @@
     "format:write": "turbo run format:write",
     "format:check": "turbo run format:check",
     "check": "turbo lint typecheck format:check"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
   },
   "packageManager": "pnpm@9.0.6",
   "dependencies": {
@@ -50,6 +69,7 @@
     "@types/node": "^20.11.27",
     "@types/react": "^18.2.65",
     "@types/react-dom": "^18.2.22",
+    "tsup": "^8.5.1",
     "typescript": "^5.5.3"
   },
   "pnpm": {
