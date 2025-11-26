@@ -24,6 +24,7 @@
   "scripts": {
     "build": "tsup src/index.ts --dts --format esm,cjs",
     "build:lib": "tsup src/index.ts --dts --format esm,cjs",
+    "postinstall": "npm run build:lib",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",

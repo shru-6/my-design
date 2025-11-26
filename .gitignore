@@ -39,4 +39,4 @@ tsconfig.tsbuildinfo
 .idea
 .fleet
 .vscode
-dist/
+# dist/ - Keep dist/ for library publishing (needed for GitHub installs)
