@@ -25,6 +25,8 @@ export function Image({
       className={cn("object-cover", className)}
       alt={alt || ""}
       onError={() => setHasError(true)}
+      priority={false}
+      loading="lazy"
       {...props}
     />
   )

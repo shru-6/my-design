@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { getComponentsByCategory, getCategories } from "@/src/design-system/components/componentUtils"
 import { getComponentShowcase } from "@/src/design-system/components/componentConfig"
 import { ThemeToggle } from "@/src/design-system/themes/ui"
@@ -44,6 +44,24 @@ import {
 export function DesignSystemPage() {
   const categories = getCategories()
   const [openCategory, setOpenCategory] = useState<string | null>(null)
+  const [mounted, setMounted] = useState(false)
+
+  // Prevent hydration mismatch by only rendering on client
+  useEffect(() => {
+    setMounted(true)
+    // Prevent auto-scroll on mount
+    if (!window.location.hash) {
+      window.scrollTo(0, 0)
+      requestAnimationFrame(() => {
+        window.scrollTo(0, 0)
+      })
+    }
+  }, [])
+
+  // Don't render until mounted to avoid hydration mismatch
+  if (!mounted) {
+    return null
+  }
 
   return (
     <SidebarProvider>
@@ -96,7 +114,7 @@ export function DesignSystemPage() {
                         <CollapsibleTrigger asChild>
                           <SidebarMenuButton className="w-full">
                             <Icon className="size-4" />
-                            <span className="flex-1 text-left text-xs">{category}</span>
+                            <span className="flex-1 text-left text-xs whitespace-nowrap">{category}</span>
                             <span className="text-xs text-muted-foreground">
                               ({categoryComponents.length})
                             </span>
@@ -150,6 +168,7 @@ export function DesignSystemPage() {
           </SidebarFooter>
         </Sidebar>
         <SidebarInset>
+          <ThemeToggle position="top-right" />
           <div className="container mx-auto p-8 max-w-7xl">
             <div className="mb-12">
               <div className="flex items-start justify-between mb-4">
@@ -162,16 +181,6 @@ export function DesignSystemPage() {
                   </p>
                 </div>
               </div>
-              
-              {/* Full Theme Toggle (collapsible) */}
-              <details id="theme-toggle" className="mb-6">
-                <summary className="cursor-pointer text-sm font-medium text-muted-foreground hover:text-foreground">
-                  Customize Theme (Color, Typography, Shape)
-                </summary>
-                <div className="mt-4 p-4 border rounded-lg bg-card">
-                  <ThemeToggle />
-                </div>
-              </details>
             </div>
 
             {categories.map((category) => {
