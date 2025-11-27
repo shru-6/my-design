@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 import { Text } from "../atoms/Text"
 import { CheckCircleIcon, XCircleIcon, AlertCircleIcon } from "lucide-react"
 

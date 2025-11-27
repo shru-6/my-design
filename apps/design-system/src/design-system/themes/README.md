@@ -4,27 +4,22 @@
 
 Token-based theming system with support for multiple theme categories (color, typography, shape, density, animation). Themes can be composed and customized dynamically.
 
+**Note:** This is the single source of truth for the theme system. The library (`@shru/theme-toggle`) re-exports from this folder to maintain consistency.
+
 ## Module Structure
 
 ```
 themes/
 ├── ui/
-│   ├── ThemeToggle.tsx  # Pure UI component
+│   ├── ThemeToggle.tsx  # Pure UI component (uses design system Tooltip)
 │   └── index.ts          # Centralized exports
 ├── useTheme.tsx          # Business logic & state management hook
 ├── themeConfig.js        # Configuration, constants, validation rules
 └── themeUtils.js         # Pure utility functions (no side effects)
 ```
 
-## Data Flow
+**Note:** The app's `ThemeToggle` uses the design system's `Tooltip` component. For external library use, see `@shru/theme-toggle` which re-exports from this folder.
 
-```
-UI Components  →      Hooks     →  Global State →      Utils    →   Config
-
-     ↓                  ↓               ↓                ↓            ↓
-
-  User Actions → Business Logic → State Updates → Pure Functions → Constants
-```
 
 ## Usage
 
@@ -90,22 +85,6 @@ Tokens are defined in `public/tokens/`:
 - `themes/animation/`: Animation theme tokens
 - `themes/custom/`: Custom theme tokens
 
-## Key Functions
-
-### From `useTheme.tsx`
-- `useTheme()`: Hook for theme management
-- Returns: `{ selectedThemes, updateTheme, resetToDefaults, isLoading, error, getAvailableThemes }`
-
-### From `themeUtils.js`
-- `generateAndApplyTheme(selectedThemes)`: Generate and apply theme to DOM
-- `getDefaultThemes()`: Get default theme selections
-- `validateThemeSelection(selectedThemes, themeCategories)`: Validate theme selection
-- `getThemeName(selectedThemes)`: Generate theme combination name
-
-### From `themeConfig.js`
-- `themeCategories`: Theme category registry
-- `getThemeFilePath(category, themeId)`: Get theme file path
-- `getThemesForCategory(category)`: Get all themes for a category
 
 ## Adding a New Theme
 
@@ -153,11 +132,4 @@ Themes generate CSS variables that are applied to `:root`:
 
 Variables are automatically mapped to Tailwind-compatible names where needed.
 
-## Best Practices
-
-1. **Pure Functions**: Keep `themeUtils.js` functions pure (no side effects except `generateAndApplyTheme`)
-2. **Configuration**: All constants and validation in `themeConfig.js`
-3. **UI Components**: Pure UI in `ui/` folder with centralized exports
-4. **Hooks**: Business logic and state in `useTheme.tsx`
-5. **Token References**: Use `{palette.color.shade}` syntax for token references
 

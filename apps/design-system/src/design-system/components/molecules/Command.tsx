@@ -6,14 +6,14 @@ import { Command as CommandPrimitive } from "cmdk"
 import { SearchIcon, CalendarIcon } from "lucide-react"
 import { Button } from "../atoms/Button"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 import {
   Modal,
   ModalContent,
   ModalDescription,
   ModalHeader,
   ModalTitle,
-} from "@/src/design-system/components/molecules/Modal"
+} from "./Modal"
 
 function Command({
   className,

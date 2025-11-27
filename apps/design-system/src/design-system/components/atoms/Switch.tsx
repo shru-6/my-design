@@ -5,7 +5,7 @@ import { useState } from "react"
 import * as SwitchPrimitive from "@radix-ui/react-switch"
 import { Label } from "./Label"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function Switch({
   className,

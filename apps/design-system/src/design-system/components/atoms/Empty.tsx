@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { PackageIcon } from "lucide-react"
 import { Button } from "./Button"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function Empty({ className, ...props }: React.ComponentProps<"div">) {
   return (

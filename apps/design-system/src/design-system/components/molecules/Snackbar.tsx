@@ -1,5 +1,5 @@
 import * as React from "react"
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 import { Alert, AlertDescription } from "../atoms/Alert"
 import { Button } from "../atoms/Button"
 

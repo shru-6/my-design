@@ -4,7 +4,7 @@ import * as React from "react"
 import { useState } from "react"
 import { Label } from "./Label"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
   return (

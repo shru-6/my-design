@@ -5,7 +5,7 @@ import * as TooltipPrimitive from "@radix-ui/react-tooltip"
 import { Button } from "../atoms/Button"
 import { HelpCircleIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function TooltipProvider({
   delayDuration = 0,

@@ -23,7 +23,7 @@ apps/design-system/
 │   ├── use-mobile.ts     # Mobile breakpoint detection
 │   └── index.ts          # Centralized exports
 ├── lib/                  # Shared utilities
-│   └── utils.ts          # cn(), absoluteUrl()
+│   └── utils.ts          # cn()
 ├── styles/               # Global styles and theme CSS
 └── public/               # Static assets
     └── tokens/          # Design tokens (JSON)
@@ -118,7 +118,7 @@ Quick steps:
    - `index.ts` - Centralized exports
 
 5. **`lib/`** - Shared Utilities
-   - `utils.ts` - `cn()` function (clsx + tailwind-merge), `absoluteUrl()`
+   - `utils.ts` - `cn()` function (clsx + tailwind-merge)
 
 6. **`public/tokens/`** - Design Tokens
    - `base.json` - Base tokens

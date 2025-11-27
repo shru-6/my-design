@@ -3,10 +3,10 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/src/design-system/components/atoms/Button"
-import { TextInput } from "@/src/design-system/components/atoms/TextInput"
-import { Textarea } from "@/src/design-system/components/atoms/Textarea"
+import { cn } from "../utils"
+import { Button } from "../atoms/Button"
+import { TextInput } from "../atoms/TextInput"
+import { Textarea } from "../atoms/Textarea"
 import { MailIcon, SearchIcon } from "lucide-react"
 
 function InputGroup({ className, ...props }: React.ComponentProps<"div">) {

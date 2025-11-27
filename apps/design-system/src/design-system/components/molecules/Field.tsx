@@ -4,10 +4,10 @@ import * as React from "react"
 import { useMemo } from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 
-import { cn } from "@/lib/utils"
-import { Label } from "@/src/design-system/components/atoms/Label"
-import { Separator } from "@/src/design-system/components/atoms/Separator"
-import { TextInput } from "@/src/design-system/components/atoms/TextInput"
+import { cn } from "../utils"
+import { Label } from "../atoms/Label"
+import { Separator } from "../atoms/Separator"
+import { TextInput } from "../atoms/TextInput"
 
 function FieldSet({ className, ...props }: React.ComponentProps<"fieldset">) {
   return (

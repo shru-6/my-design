@@ -2,7 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { InfoIcon, AlertCircleIcon } from "lucide-react"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 const alertVariantsConfig = {
   variants: {

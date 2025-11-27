@@ -5,7 +5,7 @@ import { useState } from "react"
 import * as ProgressPrimitive from "@radix-ui/react-progress"
 import { Button } from "./Button"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function Progress({
   className,

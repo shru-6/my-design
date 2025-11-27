@@ -13,10 +13,10 @@ import {
   type FieldValues,
 } from "react-hook-form"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 import { useForm } from "react-hook-form"
 import { TextInput } from "../atoms/TextInput"
-import { Label } from "@/src/design-system/components/atoms/Label"
+import { Label } from "../atoms/Label"
 
 const Form = FormProvider
 

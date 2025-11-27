@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from "./Resizable"
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 export interface ResizeContainerProps {
   children: React.ReactNode

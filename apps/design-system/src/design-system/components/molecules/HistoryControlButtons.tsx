@@ -2,16 +2,31 @@
 
 import { Button } from "../atoms/Button"
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
-import { useRouter } from "next/navigation"
 
 export interface HistoryControlButtonsProps {
   className?: string
 }
 
+/**
+ * History Control Buttons - Library-compatible version
+ * 
+ * Uses browser history API instead of Next.js router for library compatibility.
+ * For Next.js apps, you can use next/navigation's useRouter directly.
+ */
 export function HistoryControlButtons({
   className,
 }: HistoryControlButtonsProps) {
-  const router = useRouter()
+  const handleBack = () => {
+    if (typeof window !== "undefined") {
+      window.history.back()
+    }
+  }
+
+  const handleForward = () => {
+    if (typeof window !== "undefined") {
+      window.history.forward()
+    }
+  }
 
   return (
     <div
@@ -21,7 +36,7 @@ export function HistoryControlButtons({
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => router.back()}
+        onClick={handleBack}
         title="Go back"
       >
         <ChevronLeftIcon className="size-4" />
@@ -29,7 +44,7 @@ export function HistoryControlButtons({
       <Button
         variant="ghost"
         size="icon"
-        onClick={() => router.forward()}
+        onClick={handleForward}
         title="Go forward"
       >
         <ChevronRightIcon className="size-4" />

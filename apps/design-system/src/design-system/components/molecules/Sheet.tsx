@@ -7,7 +7,7 @@ import { Button } from "../atoms/Button"
 import { Label } from "../atoms/Label"
 import { TextInput } from "../atoms/TextInput"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function Sheet({ ...props }: React.ComponentProps<typeof SheetPrimitive.Root>) {
   return <SheetPrimitive.Root data-slot="sheet" {...props} />

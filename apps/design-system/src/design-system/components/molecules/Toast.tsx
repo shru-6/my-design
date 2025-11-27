@@ -1,4 +1,4 @@
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 import { Alert, AlertTitle, AlertDescription } from "../atoms/Alert"
 
 export interface ToastProps {

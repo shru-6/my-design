@@ -1,7 +1,7 @@
 import * as React from "react"
 import { Button } from "../atoms/Button"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 
 function Card({ className, ...props }: React.ComponentProps<"div">) {
   return (

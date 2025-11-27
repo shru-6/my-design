@@ -35,27 +35,6 @@ import { cn } from "@/lib/utils"
 - Handles conditional classes
 - Merges arrays and objects
 
-### `absoluteUrl(path: string)`
-
-Creates absolute URL from relative path.
-
-**Purpose**: Generate full URLs for metadata, OpenGraph, etc.
-
-**Usage**:
-```tsx
-import { absoluteUrl } from "@/lib/utils"
-
-const url = absoluteUrl("/design-system")
-// Returns: "https://www.designsystem.com/design-system"
-```
-
-**Implementation**:
-```typescript
-export function absoluteUrl(path: string) {
-  return `${process.env.NEXT_PUBLIC_APP_URL}${path}`
-}
-```
-
 ## Adding Utilities
 
 ### When to Add Here

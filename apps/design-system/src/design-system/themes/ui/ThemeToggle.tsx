@@ -1,16 +1,16 @@
 "use client"
 
 import React, { useState, useRef, useEffect } from "react"
-import { motion, AnimatePresence } from "motion/react"
 import { useTheme, type ThemeSelection, type ThemeMetadata } from "../useTheme"
 import { themeCategories } from "../themeConfig.js"
 import { cn } from "@/lib/utils"
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "@/src/design-system/components/molecules"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../../components/molecules/Tooltip"
 
 export interface ThemeToggleProps {
   className?: string
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"
 }
+// for internal use only, cant be used outside of the design system as it would have to be self contained
 
 // Category icon mapping
 const categoryIcons: Record<string, string> = {
@@ -84,10 +84,11 @@ export function ThemeToggle({
   return (
     <div 
       ref={menuRef}
+      id="theme-toggle"
       className={cn("fixed z-50", positionClasses[position], className)}
     >
       {/* Main Toggle Button */}
-      <motion.button
+      <button
         onClick={() => {
           setIsOpen(!isOpen)
           if (!isOpen) {
@@ -98,12 +99,11 @@ export function ThemeToggle({
           "w-14 h-14 rounded-full bg-primary text-primary-foreground",
           "shadow-lg hover:shadow-xl",
           "flex items-center justify-center",
-          "relative z-10"
+          "relative z-10",
+          "transition-all duration-200",
+          "hover:scale-110 active:scale-95",
+          isOpen && "rotate-90"
         )}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
-        animate={{ rotate: isOpen ? 90 : 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 20 }}
         aria-label="Theme settings"
         title="Theme settings"
       >
@@ -120,35 +120,33 @@ export function ThemeToggle({
           <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73 2.15l.22.38a2 2 0 0 1 0 2.73l-.22.38a2 2 0 0 0 2.15 2.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-2.15l-.22-.38a2 2 0 0 1 0-2.73l.22-.38a2 2 0 0 0-2.15-2.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
           <circle cx="12" cy="12" r="3" />
         </svg>
-      </motion.button>
+      </button>
 
       {/* Radial Menu */}
-      <AnimatePresence>
-        {isOpen && (
-          <TooltipProvider delayDuration={300}>
-            <div className="absolute inset-0 pointer-events-none">
-              {!selectedCategory ? (
-                <CategoryRing
-                  categories={categories}
-                  onCategoryClick={handleCategoryClick}
-                  selectedThemes={selectedThemes}
-                  position={position}
-                />
-              ) : (
-                <ThemeRing
-                  category={selectedCategory}
-                  themes={getAvailableThemes(selectedCategory)}
-                  selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
-                  onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
-                  onBack={handleBack}
-                  isLoading={isLoading}
-                  position={position}
-                />
-              )}
-            </div>
-          </TooltipProvider>
-        )}
-      </AnimatePresence>
+      {isOpen && (
+        <TooltipProvider delayDuration={300}>
+          <div className="absolute inset-0 pointer-events-none">
+            {!selectedCategory ? (
+              <CategoryRing
+                categories={categories}
+                onCategoryClick={handleCategoryClick}
+                selectedThemes={selectedThemes}
+                position={position}
+              />
+            ) : (
+              <ThemeRing
+                category={selectedCategory}
+                themes={getAvailableThemes(selectedCategory)}
+                selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
+                onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
+                onBack={handleBack}
+                isLoading={isLoading}
+                position={position}
+              />
+            )}
+          </div>
+        </TooltipProvider>
+      )}
     </div>
   )
 }
@@ -164,11 +162,88 @@ function getArcConfig(position: "bottom-right" | "bottom-left" | "top-right" | "
       return { startAngle: -120, endAngle: 0, sweep: 150 }
     case "top-right":
       // Open towards bottom-left: arc from bottom to left
-      return { startAngle: 60, endAngle: 180, sweep: 150 }
+      return { startAngle: 60, endAngle: 0, sweep: 150 }
     case "top-left":
       // Open towards bottom-right: arc from bottom to right
       return { startAngle: 120, endAngle: 0, sweep: -150 }
   }
+}
+
+// Common radial wheel component
+// Handles both positioning and UI rendering
+interface RadialWheelItem {
+  id: string
+  content: React.ReactNode
+  label: string
+  onClick: () => void
+  isSelected?: boolean
+  disabled?: boolean
+  className?: string
+}
+
+interface RadialWheelProps {
+  items: RadialWheelItem[]
+  position: "bottom-right" | "bottom-left" | "top-right" | "top-left"
+  radius: number
+  buttonSize: number
+  startOffset?: number
+}
+
+function RadialWheel({
+  items,
+  position,
+  radius,
+  buttonSize,
+  startOffset = 0.75,
+}: RadialWheelProps) {
+  const arcConfig = getArcConfig(position)
+  const totalItems = items.length
+  const angleStep = Math.abs(arcConfig.sweep) / totalItems
+
+  return (
+    <div className="absolute inset-0">
+      {items.map((item, index) => {
+        const angle = arcConfig.startAngle + angleStep * (index + startOffset) * Math.sign(arcConfig.sweep)
+        const pos = getPositionOnArc(angle, radius)
+
+        return (
+          <Tooltip key={item.id}>
+            <TooltipTrigger asChild>
+              <button
+                onClick={item.onClick}
+                disabled={item.disabled}
+                className={cn(
+                  "absolute rounded-full",
+                  "bg-background border-2 shadow-lg",
+                  "flex items-center justify-center text-lg",
+                  "pointer-events-auto",
+                  "transition-all duration-200",
+                  "hover:scale-110 active:scale-95",
+                  "disabled:opacity-50 disabled:cursor-not-allowed",
+                  item.isSelected
+                    ? "border-primary bg-primary text-primary-foreground"
+                    : "border-border hover:border-primary/50",
+                  item.className
+                )}
+                style={{
+                  width: `${buttonSize}px`,
+                  height: `${buttonSize}px`,
+                  left: `${pos.x}px`,
+                  top: `${pos.y}px`,
+                }}
+                aria-label={item.label}
+              >
+                {item.content}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right" sideOffset={8}>
+              {item.label}
+            </TooltipContent>
+          </Tooltip>
+        )
+      })}
+    </div>
+  )
 }
 
 // Category Ring Component
@@ -185,78 +260,30 @@ function CategoryRing({
   selectedThemes,
   position,
 }: CategoryRingProps) {
-  const radius = 40 // Distance from button center - close but not overlapping
-  const arcConfig = getArcConfig(position)
-  const totalItems = categories.length
-  // Better spacing: use totalItems + 0.5 to give more space between items
-  const angleStep = Math.abs(arcConfig.sweep) / (totalItems + 0.5) // Quarter circle divided evenly
-  const buttonSize = 40 // Smaller button size to prevent overlap
-  const svgSize = (radius + buttonSize / 2) * 2
+  const radius = 60
+  const buttonSize = 40
+
+  // Prepare items for RadialWheel
+  const items: RadialWheelItem[] = categories.map(([categoryKey, category]) => {
+    const hasSelection = !!selectedThemes[categoryKey as keyof ThemeSelection]
+    return {
+      id: categoryKey,
+      content: categoryIcons[categoryKey] || "⚙️",
+      label: category.name,
+      onClick: () => onCategoryClick(categoryKey),
+      isSelected: hasSelection,
+      className: hasSelection ? "bg-primary/10" : undefined,
+    }
+  })
 
   return (
-    <motion.div
-      className="absolute inset-0"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.2 }}
-    >
-
-      {/* Category Buttons */}
-      {categories.map(([categoryKey, category], index) => {
-        const angle = arcConfig.startAngle + angleStep * (index + 0.75) * Math.sign(arcConfig.sweep) // Start slightly offset
-        const pos = getPositionOnArc(angle, radius)
-        const hasSelection = selectedThemes[categoryKey as keyof ThemeSelection]
-
-        return (
-          <Tooltip key={categoryKey}>
-            <TooltipTrigger asChild>
-              <motion.button
-                onClick={() => onCategoryClick(categoryKey)}
-                className={cn(
-                  "absolute rounded-full",
-                  "bg-background border-2 shadow-lg",
-                  "flex items-center justify-center text-lg",
-                  "pointer-events-auto",
-                  hasSelection
-                    ? "border-primary bg-primary/10"
-                    : "border-border hover:border-primary/50"
-                )}
-                style={{
-                  width: `${buttonSize}px`,
-                  height: `${buttonSize}px`,
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
-                  transform: `translate(-50%, -50%)`,
-                }}
-                initial={{ opacity: 0, scale: 0, x: 0, y: 0 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: 1,
-                  x: pos.x,
-                  y: pos.y,
-                }}
-                exit={{ opacity: 0, scale: 0 }}
-                transition={{ 
-                  delay: index * 0.05,
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                }}
-                whileHover={{ scale: 1.15 }}
-                whileTap={{ scale: 0.95 }}
-                aria-label={category.name}
-              >
-                {categoryIcons[categoryKey] || "⚙️"}
-              </motion.button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              {category.name}
-            </TooltipContent>
-          </Tooltip>
-        )
-      })}
-    </motion.div>
+    <RadialWheel
+      items={items}
+      position={position}
+      radius={radius}
+      buttonSize={buttonSize}
+      startOffset={0.5}
+    />
   )
 }
 
@@ -281,46 +308,44 @@ function ThemeRing({
   position,
 }: ThemeRingProps) {
   const themeEntries = Object.entries(themes)
-  const radius = 65 // Distance from button center - close but not overlapping
-  const arcConfig = getArcConfig(position)
-  const totalItems = themeEntries.length
-  // Better spacing: use totalItems + 1.5 to give more space (0.5 for back button, 1 for spacing)
-  const angleStep = Math.abs(arcConfig.sweep) / (totalItems + 1.5)
-  const buttonSize = 40 // Smaller button size to prevent overlap
+  const radius = 65
+  const buttonSize = 40
   const backButtonSize = 36
-  const svgSize = (radius + buttonSize / 2) * 2
+
+  // Back button position (at start of arc)
+  const arcConfig = getArcConfig(position)
+  const backButtonPos = getPositionOnArc(arcConfig.startAngle, radius)
+
+  // Prepare items for RadialWheel
+  const items: RadialWheelItem[] = themeEntries.map(([themeId, theme]) => ({
+    id: themeId,
+    content: theme.icon,
+    label: theme.name,
+    onClick: () => !isLoading && onThemeSelect(themeId),
+    isSelected: selectedTheme === themeId,
+    disabled: isLoading,
+    className: "text-base", // Smaller text for theme icons
+  }))
 
   return (
-    <motion.div
-      className="absolute inset-0"
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 1, scale: 1 }}
-      exit={{ opacity: 0, scale: 0.8 }}
-      transition={{ duration: 0.2 }}
-    >
-
+    <div className="absolute inset-0">
       {/* Back Button */}
-      <motion.button
+      <button
         onClick={onBack}
         className={cn(
           "absolute rounded-full",
           "bg-muted border border-border shadow-md",
           "flex items-center justify-center",
-          "pointer-events-auto"
+          "pointer-events-auto",
+          "transition-all duration-200",
+          "hover:scale-110 active:scale-95"
         )}
         style={{
           width: `${backButtonSize}px`,
           height: `${backButtonSize}px`,
-          left: `${getPositionOnArc(arcConfig.startAngle, radius).x}px`,
-          top: `${getPositionOnArc(arcConfig.startAngle, radius).y}px`,
-          transform: `translate(-50%, -50%)`,
+          left: `${backButtonPos.x}px`,
+          top: `${backButtonPos.y}px`,
         }}
-        initial={{ opacity: 0, scale: 0 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0 }}
-        transition={{ type: "spring", stiffness: 300, damping: 25 }}
-        whileHover={{ scale: 1.1 }}
-        whileTap={{ scale: 0.95 }}
         aria-label="Back"
       >
         <svg
@@ -336,84 +361,28 @@ function ThemeRing({
           <path d="m12 19-7-7 7-7" />
           <path d="M19 12H5" />
         </svg>
-      </motion.button>
+      </button>
 
       {/* Theme Option Buttons */}
-      {themeEntries.map(([themeId, theme], index) => {
-        const itemIndex = index + 1 // +1 to skip back button
-        const angle = arcConfig.startAngle + angleStep * (itemIndex + 0.25) * Math.sign(arcConfig.sweep) // Offset for better spacing
-        const pos = getPositionOnArc(angle, radius)
-        const isSelected = selectedTheme === themeId
-
-        return (
-          <Tooltip key={themeId}>
-            <TooltipTrigger asChild>
-              <motion.button
-                onClick={() => !isLoading && onThemeSelect(themeId)}
-                disabled={isLoading}
-                className={cn(
-                  "absolute rounded-full",
-                  "bg-background border-2 shadow-lg",
-                  "flex items-center justify-center text-base",
-                  "pointer-events-auto",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
-                  isSelected
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border hover:border-primary/50"
-                )}
-                style={{
-                  width: `${buttonSize}px`,
-                  height: `${buttonSize}px`,
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
-                  transform: `translate(-50%, -50%)`,
-                }}
-                initial={{ opacity: 0, scale: 0 }}
-                animate={{ 
-                  opacity: 1, 
-                  scale: isSelected ? 1.1 : 1,
-                }}
-                exit={{ opacity: 0, scale: 0 }}
-                transition={{ 
-                  delay: index * 0.05,
-                  type: "spring",
-                  stiffness: 300,
-                  damping: 25,
-                }}
-                whileHover={{ scale: isLoading ? 1 : 1.15 }}
-                whileTap={{ scale: 0.95 }}
-                aria-label={theme.name}
-              >
-                {theme.icon}
-              </motion.button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              {theme.name}
-            </TooltipContent>
-          </Tooltip>
-        )
-      })}
+      <RadialWheel
+        items={items}
+        position={position}
+        radius={radius}
+        buttonSize={buttonSize}
+        startOffset={1}
+      />
 
       {/* Loading Indicator */}
       {isLoading && (
-        <motion.div
-          className="absolute w-12 h-12 rounded-full bg-primary/20 border-2 border-primary pointer-events-none"
+        <div
+          className="absolute w-12 h-12 rounded-full bg-primary/20 border-2 border-primary animate-pulse pointer-events-none"
           style={{
             left: "50%",
             top: "50%",
             transform: "translate(-50%, -50%)",
           }}
-          animate={{ 
-            scale: [1, 1.2, 1],
-            opacity: [0.5, 0.8, 0.5],
-          }}
-          transition={{
-            duration: 1.5,
-            repeat: Infinity,
-            ease: "easeInOut",
-          }}
         />
       )}
-    </motion.div>
+    </div>
   )
 }

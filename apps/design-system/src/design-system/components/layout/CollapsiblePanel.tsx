@@ -2,7 +2,7 @@
 
 import * as React from "react"
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "../molecules/Collapsible"
-import { cn } from "@/lib/utils"
+import { cn } from "../utils"
 import { ChevronDownIcon } from "lucide-react"
 
 export interface CollapsiblePanelProps {

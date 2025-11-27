@@ -28,15 +28,7 @@ function App() {
 
 **That's it!** The CSS variables are automatically generated and loaded when the component mounts.
 
-## How It Works
-
-1. **Component Mounts**: When you render `<ThemeToggle />`, it uses the `useTheme()` hook
-2. **Hook Initializes**: The hook automatically loads default themes on mount
-3. **CSS Generated**: Theme tokens are loaded from JSON files and converted to CSS variables
-4. **CSS Injected**: CSS variables are automatically injected into the page's `<head>` as a `<style>` tag
-5. **Theme Applied**: Your app immediately uses the generated CSS variables
-
-No manual CSS imports needed - everything happens automatically!
+CSS variables are automatically generated and injected when the component mounts. No manual CSS imports needed.
 
 ## Setting Up Tokens
 
@@ -66,17 +58,17 @@ if (typeof window !== 'undefined') {
 
 ### `ThemeToggle`
 
-Main component for toggling themes.
+Main component for toggling themes. Renders a floating button that opens a radial menu for theme selection.
 
 **Props:**
 - `className?: string` - Additional CSS classes
-- `showLabels?: boolean` - Show category labels (default: `true`)
+- `position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"` - Position of the toggle button (default: `"bottom-right"`)
 
 **Example:**
 ```tsx
 <ThemeToggle 
   className="my-custom-class"
-  showLabels={false}
+  position="top-right"
 />
 ```
 
@@ -129,30 +121,9 @@ The library supports multiple theme categories:
 - **Animation**: `gentle`, `brisk`
 - **Custom**: `brand`, `minimal`
 
-## Generated CSS Variables
+## CSS Variables
 
-When themes are applied, the library generates CSS variables like:
-
-```css
-:root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  /* ... and many more */
-}
-```
-
-These variables are automatically available for use in your Tailwind classes:
-
-```tsx
-<div className="bg-background text-foreground">
-  <button className="bg-primary text-primary-foreground">
-    Click me
-  </button>
-</div>
-```
+Themes generate CSS variables (e.g., `--background`, `--primary`) that are automatically available in your Tailwind classes.
 
 ## Token Structure
 
@@ -225,55 +196,4 @@ if (typeof window !== 'undefined') {
 <ThemeToggle />
 ```
 
-## Advanced Usage
-
-### Programmatic Theme Control
-
-```tsx
-import { useTheme } from "@shru/theme-toggle"
-
-function ThemeController() {
-  const { updateTheme, selectedThemes } = useTheme()
-  
-  const switchToDark = () => {
-    updateTheme('color', 'dark')
-  }
-  
-  const switchToLight = () => {
-    updateTheme('color', 'white')
-  }
-  
-  return (
-    <div>
-      <button onClick={switchToDark}>Dark Mode</button>
-      <button onClick={switchToLight}>Light Mode</button>
-    </div>
-  )
-}
-```
-
-### Custom Theme Combinations
-
-```tsx
-import { useTheme } from "@shru/theme-toggle"
-
-function CustomTheme() {
-  const { updateTheme } = useTheme()
-  
-  useEffect(() => {
-    // Apply custom combination
-    updateTheme('color', 'dark')
-    updateTheme('typography', 'serif')
-    updateTheme('shape', 'sharp')
-  }, [])
-  
-  return <div>My custom themed content</div>
-}
-```
-
-## Next Steps
-
-- See [apps/design-system/README.md](./apps/design-system/README.md) for the design system app documentation
-- See [apps/design-system/ARCHITECTURE.md](./apps/design-system/ARCHITECTURE.md) for architecture details
-- See [apps/design-system/src/design-system/themes/README.md](./apps/design-system/src/design-system/themes/README.md) for theme system internals
 

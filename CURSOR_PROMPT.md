@@ -8,8 +8,8 @@ Copy and paste this prompt into Cursor in your other repository:
 
 ## Task:
 1. **Install the library** from GitHub:
-   - Add `"@shru/theme-toggle": "github:shru-6/my-design#main"` to `package.json` dependencies
-   - Run `npm install` (or `pnpm install` / `yarn install`)
+   - **Add to `package.json`**: Manually add `"@shru/theme-toggle": "github:shru-6/my-design#main"` to your `package.json` dependencies section, OR run the install command below which will add it automatically
+   - **Install**: Run `npm install github:shru-6/my-design#main` (or `pnpm add github:shru-6/my-design#main` / `yarn add github:shru-6/my-design#main`) to add your `package.json` dependencies automatically
    - The library has a `postinstall` script that will automatically build, but if you get module errors, run `cd node_modules/@shru/theme-toggle && npm run build:lib`
 
 2. **Set up token files**:
