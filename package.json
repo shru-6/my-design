@@ -9,7 +9,9 @@
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "src/tokens"
+    "src/tokens",
+    "scripts",
+    "apps/design-system/styles/globals.css"
   ],
   "exports": {
     ".": {
@@ -26,6 +28,7 @@
     "build:lib": "tsup src/index.ts --dts --format esm,cjs",
     "postinstall": "npm run build:lib",
     "copy:tokens": "node scripts/copy-tokens.js",
+    "copy:globals": "node scripts/copy-globals.js",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
@@ -36,7 +39,8 @@
     "check": "turbo lint typecheck format:check"
   },
   "bin": {
-    "copy-tokens": "./scripts/copy-tokens.js"
+    "copy-tokens": "./scripts/copy-tokens.js",
+    "copy-globals": "./scripts/copy-globals.js"
   },
   "peerDependencies": {
     "react": ">=18",

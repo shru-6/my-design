@@ -12,22 +12,30 @@ Copy and paste this prompt into Cursor in your other repository:
    - This automatically adds the dependency to your `package.json`
    - The library has a `postinstall` script that will automatically build, but if you get module errors, run `cd node_modules/@shru/theme-toggle && npm run build:lib`
 
-2. **Set up token files**:
+2. **Set up Tailwind v4 and CSS**:
+   - Install Tailwind v4: `npm install tailwindcss@next @tailwindcss/postcss@next`
+   - Configure PostCSS: Create `postcss.config.mjs` with `@tailwindcss/postcss` plugin
+   - **Copy `globals.css`**: Run `npx copy-globals` to automatically copy `globals.css` to your project
+   - Alternatively, manually copy `apps/design-system/styles/globals.css` from the repository to your project (e.g., `app/globals.css`)
+   - Import the CSS file in your root layout: `import './globals.css'`
+   - **Why**: The globals.css contains base CSS variable definitions and `@theme inline` block that maps variables to Tailwind colors. The theme system will override these at runtime, but base definitions are required.
+
+3. **Set up token files**:
    - Run `npx copy-tokens` to automatically copy tokens from the package to your `public/tokens` folder
    - Alternatively, manually copy from `node_modules/@shru/theme-toggle/src/tokens` to `public/tokens`
    - Ensure the tokens are accessible at `/tokens/` path in your app
    - The folder structure should be: `public/tokens/base.json`, `public/tokens/palettes.json`, `public/tokens/themes/color/`, etc.
 
-3. **Add the component** to my app:
+4. **Add the component** to my app:
    - Import `ThemeToggle` from `@shru/theme-toggle` in your layout or main page
    - Add `<ThemeToggle position="bottom-right" />` to your component
    - Make sure it's a client component (add `"use client"` if needed)
 
-4. **Handle Next.js specifics**:
+5. **Handle Next.js specifics**:
    - If you get SSR errors, wrap it in a dynamic import with `ssr: false`
    - The component is already marked as `"use client"` but Next.js might need dynamic import
 
-5. **Verify it works**:
+6. **Verify it works**:
    - Check that CSS variables are being generated in the `<head>` (look for `<style id="dynamic-theme">`)
    - Test that theme switching works
    - Ensure tokens are loading correctly (check Network tab for `/tokens/` requests)
@@ -58,9 +66,9 @@ export default function Layout({ children }) {
 ```
 
 ## Requirements:
-- The component should be self-contained (no external CSS imports needed)
-- CSS variables should be automatically generated and injected
-- The component should work with my existing Tailwind CSS setup
+- **Tailwind CSS v4** must be installed and configured
+- **globals.css** must be copied from the repository (contains base CSS variables and `@theme inline` block)
+- CSS variables will be automatically generated and injected by the theme system
 - Token files should be accessible at runtime at `/tokens/` path
 - React 18+ must be installed
 
