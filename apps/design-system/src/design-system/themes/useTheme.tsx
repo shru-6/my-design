@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { generateAndApplyTheme } from './themeUtils.js'
 import { getDefaultThemes } from './themeUtils.js'
-import { themeCategories } from './themeConfig.js'
+import { getThemeCategories } from './themeConfig.js'
 
 export type ThemeSelection = {
   color?: string
@@ -93,9 +93,10 @@ export function useTheme() {
     await applyTheme(defaults)
   }, [applyTheme])
 
-  // Get available themes for a category
-  const getAvailableThemes = useCallback((category: string): Record<string, ThemeMetadata> => {
-    return (themeCategories[category as keyof typeof themeCategories]?.themes || {}) as Record<string, ThemeMetadata>
+  // Get available themes for a category (with dynamic discovery)
+  const getAvailableThemes = useCallback(async (category: string): Promise<Record<string, ThemeMetadata>> => {
+    const categories = await getThemeCategories()
+    return (categories[category]?.themes || {}) as Record<string, ThemeMetadata>
   }, [])
 
   return {

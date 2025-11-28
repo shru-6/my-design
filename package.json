@@ -25,6 +25,7 @@
     "build": "tsup src/index.ts --dts --format esm,cjs",
     "build:lib": "tsup src/index.ts --dts --format esm,cjs",
     "postinstall": "npm run build:lib",
+    "copy:tokens": "node scripts/copy-tokens.js",
     "dev": "turbo run dev --parallel",
     "lint": "turbo run lint",
     "lint:fix": "turbo run lint:fix",
@@ -33,6 +34,9 @@
     "format:write": "turbo run format:write",
     "format:check": "turbo run format:check",
     "check": "turbo lint typecheck format:check"
+  },
+  "bin": {
+    "copy-tokens": "./scripts/copy-tokens.js"
   },
   "peerDependencies": {
     "react": ">=18",

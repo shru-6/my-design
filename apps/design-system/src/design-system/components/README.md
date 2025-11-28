@@ -26,9 +26,11 @@ Each component category follows this pattern:
 - **componentConfig.ts**: Showcase registry and component configuration
 - **componentUtils.ts**: Category mapping and utility functions
 
-## Adding a Component
+## How to Add a Component
 
-### 1. Create Component File
+When contributing to this repository, follow these steps to add a new component while maintaining all existing features:
+
+### Step 1: Create Component File
 Place in appropriate folder (`atoms/`, `molecules/`, `layout/`, or `primitives/`):
 
 ```tsx
@@ -48,13 +50,13 @@ export function NewComponentShowcase() {
 }
 ```
 
-### 2. Export from Category Index
+### Step 2: Export from Category Index
 ```typescript
 // atoms/index.ts
 export { NewComponent, NewComponentShowcase } from "./NewComponent"
 ```
 
-### 3. Register Showcase
+### Step 3: Register Showcase
 ```typescript
 // componentConfig.ts
 import { NewComponentShowcase } from "./atoms"
@@ -65,7 +67,7 @@ const showcaseRegistry = {
 }
 ```
 
-### 4. Add Category Mapping
+### Step 4: Add Category Mapping
 ```typescript
 // componentUtils.ts
 const componentCategoryMap = {

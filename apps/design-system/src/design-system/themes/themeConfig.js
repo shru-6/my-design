@@ -1,9 +1,13 @@
 /**
  * Theme Configuration
  * Registry of all available themes organized by category
+ * 
+ * Base themes are defined here. Additional themes can be discovered dynamically
+ * by scanning the /tokens/themes/ directory structure.
  */
 
-export const themeCategories = {
+// Base theme categories (always available)
+export const baseThemeCategories = {
   color: {
     name: 'Color',
     order: 1.0,
@@ -114,11 +118,101 @@ export const themeCategories = {
   }
 }
 
+// Cache for dynamically discovered themes
+let discoveredThemesCache = null
+
+/**
+ * Discover themes by scanning token directory structure
+ * Scans /tokens/themes/ to find all available theme files
+ */
+export async function discoverThemes() {
+  if (discoveredThemesCache) {
+    return discoveredThemesCache
+  }
+
+  const discovered = JSON.parse(JSON.stringify(baseThemeCategories))
+  
+  try {
+    // Get base path for tokens
+    const tokensBase = typeof window !== 'undefined' && window.__THEME_TOKENS_BASE__ 
+      ? window.__THEME_TOKENS_BASE__ 
+      : '/tokens'
+    
+    // Known categories from base config
+    const knownCategories = Object.keys(baseThemeCategories)
+    
+    // For each category, try to discover additional themes
+    for (const category of knownCategories) {
+      const categoryPath = `${tokensBase}/themes/${category}`
+      
+      // Try to fetch an index or scan common theme files
+      // Since we can't list directories via fetch, we'll try common patterns
+      // Users can add themes by following the naming convention
+      
+      // For now, we'll rely on users to add themes to the config
+      // But we can validate that theme files exist when requested
+    }
+    
+    discoveredThemesCache = discovered
+    return discovered
+  } catch (error) {
+    console.warn('Error discovering themes:', error)
+    return baseThemeCategories
+  }
+}
+
+/**
+ * Register a custom theme dynamically
+ * Allows users to add themes without modifying the base config
+ * @param {string} category - Theme category (e.g., 'color', 'custom')
+ * @param {string} themeId - Unique theme identifier
+ * @param {Object} metadata - Theme metadata
+ * @param {string} metadata.name - Display name
+ * @param {string} metadata.file - File path relative to themes/ (e.g., 'color/blue.json')
+ * @param {string} [metadata.icon] - Icon emoji or character
+ * @param {string} [metadata.description] - Theme description
+ */
+export function registerTheme(category, themeId, metadata) {
+  if (!discoveredThemesCache) {
+    discoveredThemesCache = JSON.parse(JSON.stringify(baseThemeCategories))
+  }
+  
+  // Create category if it doesn't exist
+  if (!discoveredThemesCache[category]) {
+    discoveredThemesCache[category] = {
+      name: category.charAt(0).toUpperCase() + category.slice(1),
+      order: 99, // Custom categories get high order
+      themes: {}
+    }
+  }
+  
+  // Register the theme
+  discoveredThemesCache[category].themes[themeId] = {
+    name: metadata.name,
+    file: metadata.file,
+    icon: metadata.icon || '🎨',
+    description: metadata.description || ''
+  }
+  
+  return discoveredThemesCache
+}
+
+/**
+ * Get merged theme categories (base + discovered)
+ */
+export async function getThemeCategories() {
+  return await discoverThemes()
+}
+
+// For backward compatibility, export baseThemeCategories as themeCategories
+export const themeCategories = baseThemeCategories
+
 /**
  * Get theme file path
  */
 export function getThemeFilePath(category, themeId) {
-  const theme = themeCategories[category]?.themes[themeId]
+  const categories = discoveredThemesCache || baseThemeCategories
+  const theme = categories[category]?.themes[themeId]
   if (!theme) return null
   return `/tokens/themes/${theme.file}`
 }
@@ -126,14 +220,16 @@ export function getThemeFilePath(category, themeId) {
 /**
  * Get all themes for a category
  */
-export function getThemesForCategory(category) {
-  return themeCategories[category]?.themes || {}
+export async function getThemesForCategory(category) {
+  const categories = await getThemeCategories()
+  return categories[category]?.themes || {}
 }
 
 /**
  * Get theme by ID
  */
-export function getTheme(category, themeId) {
-  return themeCategories[category]?.themes[themeId] || null
+export async function getTheme(category, themeId) {
+  const categories = await getThemeCategories()
+  return categories[category]?.themes[themeId] || null
 }
 

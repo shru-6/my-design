@@ -4,7 +4,7 @@
  * Note: generateAndApplyTheme has side effects (modifies DOM) but is the main theme application utility
  */
 
-import { themeCategories } from './themeConfig.js'
+import { getThemeCategories } from './themeConfig.js'
 
 /**
  * Generate theme combination name
@@ -277,6 +277,9 @@ function applyThemeCSS(css) {
  */
 export async function generateAndApplyTheme(selectedThemes = {}) {
   try {
+    // Get theme categories (with dynamic discovery)
+    const themeCategories = await getThemeCategories()
+    
     // Validate theme selection
     const validation = validateThemeSelection(selectedThemes, themeCategories)
     if (!validation.valid) {

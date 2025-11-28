@@ -86,9 +86,11 @@ Tokens are defined in `public/tokens/`:
 - `themes/custom/`: Custom theme tokens
 
 
-## Adding a New Theme
+## How to Add a New Theme
 
-### 1. Create Token File
+When contributing, follow these steps to add a new theme:
+
+### Step 1: Create Token File
 ```json
 // public/tokens/themes/category/new-theme.json
 {
@@ -98,7 +100,7 @@ Tokens are defined in `public/tokens/`:
 }
 ```
 
-### 2. Register in Config
+### Step 2: Register in Config
 ```javascript
 // themeConfig.js
 export const themeCategories = {

@@ -2,7 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react"
 import { useTheme, type ThemeSelection, type ThemeMetadata } from "../useTheme"
-import { themeCategories } from "../themeConfig.js"
+import { getThemeCategories } from "../themeConfig.js"
 import { cn } from "@/lib/utils"
 import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../../components/molecules/Tooltip"
 
@@ -37,7 +37,13 @@ export function ThemeToggle({
   const { selectedThemes, updateTheme, isLoading, getAvailableThemes } = useTheme()
   const [isOpen, setIsOpen] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
+  const [themeCategories, setThemeCategories] = useState<any>(null)
   const menuRef = useRef<HTMLDivElement>(null)
+
+  // Load theme categories on mount
+  useEffect(() => {
+    getThemeCategories().then(setThemeCategories)
+  }, [])
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -68,10 +74,11 @@ export function ThemeToggle({
     setSelectedCategory(null)
   }
 
-  // Get categories (excluding custom)
-  const categories = Object.entries(themeCategories)
-    .filter(([key]) => key !== 'custom')
-    .sort(([, a], [, b]) => a.order - b.order)
+  // Get categories (including custom)
+  const categories = themeCategories 
+    ? Object.entries(themeCategories)
+        .sort(([, a], [, b]) => a.order - b.order)
+    : []
 
   // Position classes
   const positionClasses = {
@@ -133,17 +140,17 @@ export function ThemeToggle({
                 selectedThemes={selectedThemes}
                 position={position}
               />
-            ) : (
-              <ThemeRing
-                category={selectedCategory}
-                themes={getAvailableThemes(selectedCategory)}
-                selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
-                onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
-                onBack={handleBack}
-                isLoading={isLoading}
-                position={position}
-              />
-            )}
+                    ) : (
+                      <ThemeRingAsync
+                        category={selectedCategory}
+                        getAvailableThemes={getAvailableThemes}
+                        selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
+                        onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
+                        onBack={handleBack}
+                        isLoading={isLoading}
+                        position={position}
+                      />
+                    )}
           </div>
         </TooltipProvider>
       )}
@@ -298,15 +305,22 @@ interface ThemeRingProps {
   position: "bottom-right" | "bottom-left" | "top-right" | "top-left"
 }
 
-function ThemeRing({
+// Async version that loads themes dynamically
+function ThemeRingAsync({
   category,
-  themes,
+  getAvailableThemes,
   selectedTheme,
   onThemeSelect,
   onBack,
   isLoading,
   position,
-}: ThemeRingProps) {
+}: Omit<ThemeRingProps, 'themes'> & { getAvailableThemes: (category: string) => Promise<Record<string, ThemeMetadata>> }) {
+  const [themes, setThemes] = useState<Record<string, ThemeMetadata>>({})
+
+  useEffect(() => {
+    getAvailableThemes(category).then(setThemes)
+  }, [category, getAvailableThemes])
+
   const themeEntries = Object.entries(themes)
   const radius = 65
   const buttonSize = 40

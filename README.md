@@ -59,21 +59,19 @@ npm run dev
 
 ## Documentation
 
-### Library Usage
-- **[LIBRARY.md](./LIBRARY.md)** - Complete guide for using `@shru/theme-toggle` theme library
-- **[CURSOR_PROMPT.md](./CURSOR_PROMPT.md)** - Ready-to-use Cursor prompt for GitHub integration
-- **[DESIGN_SYSTEM_USAGE.md](./DESIGN_SYSTEM_USAGE.md)** - How to use design system components in your projects
-- **[LIBRARY_COMPONENTS.md](./LIBRARY_COMPONENTS.md)** - Technical details for using components as a library
+### Getting Started
+- **[USAGE.md](./USAGE.md)** - Complete usage guide: setup, theme toggle, components, how it works
+- **[CURSOR_PROMPT.md](./CURSOR_PROMPT.md)** - Ready-to-use Cursor prompt for integrating the library
 
-### Design System Application
-- **[Design System App README](./apps/design-system/README.md)** - Quick start and overview
-- **[Architecture Overview](./apps/design-system/ARCHITECTURE.md)** - Overall project structure and systems
-- **[Component System](./apps/design-system/src/design-system/components/README.md)** - Components organization and usage
-- **[Theme System](./apps/design-system/src/design-system/themes/README.md)** - Theming system and tokens
-- **[App Routes](./apps/design-system/app/README.md)** - Route structure and patterns
-- **[App Configuration](./apps/design-system/config/README.md)** - Site configuration
-- **[App Hooks](./apps/design-system/hooks/README.md)** - Application hooks
-- **[Shared Utilities](./apps/design-system/lib/README.md)** - Utility functions
+### Advanced Topics
+- **[TOKEN_EXTENSION.md](./TOKEN_EXTENSION.md)** - Extending themes with custom token files
+- **[COMPONENT_DEPENDENCIES.md](./COMPONENT_DEPENDENCIES.md)** - Complete dependencies reference
+
+### Contributing & Development
+- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines and development workflow
+- **[apps/design-system/ARCHITECTURE.md](./apps/design-system/ARCHITECTURE.md)** - Architecture overview
+- **[apps/design-system/src/design-system/components/README.md](./apps/design-system/src/design-system/components/README.md)** - Adding components
+- **[apps/design-system/src/design-system/themes/README.md](./apps/design-system/src/design-system/themes/README.md)** - Theme system internals
 
 ## Contributing
 
@@ -91,9 +89,9 @@ npm run dev
    ```
 
 3. **Make changes:**
-   - **Components**: See [Component System Docs](./apps/design-system/src/design-system/components/README.md)
-   - **Themes**: See [Theme System Docs](./apps/design-system/src/design-system/themes/README.md)
-   - **Library**: Edit `src/`, then run `npm run build:lib`
+   - **Adding a component**: See [Component System Docs](./apps/design-system/src/design-system/components/README.md#how-to-add-a-component)
+   - **Adding a theme**: See [Theme System Docs](./apps/design-system/src/design-system/themes/README.md#how-to-add-a-new-theme)
+   - **Library changes**: Edit `src/`, then run `npm run build:lib`
 
 ### Development Workflow
 

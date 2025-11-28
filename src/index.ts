@@ -14,3 +14,19 @@ export { ThemeToggle, type ThemeToggleProps } from "../apps/design-system/src/de
 // Export the hook for advanced usage from app's theme system
 export { useTheme, type ThemeSelection, type ThemeMetadata } from "../apps/design-system/src/design-system/themes/useTheme"
 
+// Export theme configuration and utilities
+export { 
+  getThemeCategories,
+  registerTheme,
+  getThemeFilePath,
+  getThemesForCategory,
+  getTheme
+} from "../apps/design-system/src/design-system/themes/themeConfig"
+
+// Export theme discovery utilities
+export {
+  discoverTokenFiles,
+  scanCategory,
+  registerThemeFromFile
+} from "../apps/design-system/src/design-system/themes/themeDiscovery"
+

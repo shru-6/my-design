@@ -8,12 +8,13 @@ Copy and paste this prompt into Cursor in your other repository:
 
 ## Task:
 1. **Install the library** from GitHub:
-   - **Add to `package.json`**: Manually add `"@shru/theme-toggle": "github:shru-6/my-design#main"` to your `package.json` dependencies section, OR run the install command below which will add it automatically
-   - **Install**: Run `npm install github:shru-6/my-design#main` (or `pnpm add github:shru-6/my-design#main` / `yarn add github:shru-6/my-design#main`) to add your `package.json` dependencies automatically
+   - Run `npm install github:shru-6/my-design#main` (or `pnpm add github:shru-6/my-design#main` / `yarn add github:shru-6/my-design#main`)
+   - This automatically adds the dependency to your `package.json`
    - The library has a `postinstall` script that will automatically build, but if you get module errors, run `cd node_modules/@shru/theme-toggle && npm run build:lib`
 
 2. **Set up token files**:
-   - Copy the token files from `node_modules/@shru/theme-toggle/src/tokens` to `public/tokens` (or your public assets folder)
+   - Run `npx copy-tokens` to automatically copy tokens from the package to your `public/tokens` folder
+   - Alternatively, manually copy from `node_modules/@shru/theme-toggle/src/tokens` to `public/tokens`
    - Ensure the tokens are accessible at `/tokens/` path in your app
    - The folder structure should be: `public/tokens/base.json`, `public/tokens/palettes.json`, `public/tokens/themes/color/`, etc.
 
