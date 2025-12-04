@@ -1,6 +1,6 @@
 {
   "name": "shru-design-system",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A comprehensive design system with theme toggle, components, and token-based theming",
   "license": "MIT",
   "keywords": [
