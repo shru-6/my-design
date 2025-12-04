@@ -29,7 +29,14 @@ import { ThemeToggle } from 'shru-design-system'
 
 ## Quick Start
 
-### 1. Import Theme Toggle Component
+### 1. Import CSS (Required)
+
+```tsx
+// In your root layout or _app.tsx
+import 'shru-design-system/styles'
+```
+
+### 2. Import Theme Toggle Component
 
 ```tsx
 import { ThemeToggle } from 'shru-design-system'
@@ -44,7 +51,21 @@ function App() {
 }
 ```
 
-### 2. Use Theme Hook
+### 3. Use Design Components
+
+```tsx
+import { Button, Card, Modal } from 'shru-design-system'
+
+function MyComponent() {
+  return (
+    <Card>
+      <Button>Click me</Button>
+    </Card>
+  )
+}
+```
+
+### 4. Use Theme Hook
 
 ```tsx
 import { useTheme } from 'shru-design-system'
@@ -60,32 +81,17 @@ function MyComponent() {
 }
 ```
 
-### 3. Setup CSS (Required)
+### 5. Setup Token Files (Optional)
 
-**Yes, you need to import the CSS file.** The `globals.css` file contains:
-- Tailwind CSS imports
-- `@theme inline` block that maps CSS variables to Tailwind colors
-- Base CSS variable definitions
+If you want to use custom themes or the theme toggle needs to discover themes:
 
-The theme system will dynamically override these variables at runtime, but the base CSS is required.
-
-**Option 1: Import from package (Recommended)**
-```tsx
-// In your app's root layout or _app.tsx
-import 'shru-design-system/styles'
-```
-
-**Option 2: Copy and import locally**
 ```bash
-# Copy the CSS file
-npx copy-globals
-# or manually copy from node_modules/@shru/design-system/apps/design-system/styles/globals.css
+# Copy token files to your public folder
+npx copy-tokens
+# or manually copy from node_modules/shru-design-system/src/tokens to public/tokens
 ```
 
-Then import in your layout:
-```tsx
-import './globals.css'
-```
+Ensure tokens are accessible at `/tokens/` path in your app.
 
 ## API Reference
 
@@ -257,7 +263,7 @@ import type { ThemeToggleProps, ThemeSelection, ThemeMetadata } from 'shru-desig
 
 ### Theme not applying?
 
-1. **Make sure CSS is imported** - You must import `@shru/design-system/styles` or copy `globals.css`
+1. **Make sure CSS is imported** - You must import `shru-design-system/styles` or copy `globals.css`
 2. **Check Tailwind v4 is installed** - Required for `@theme inline` to work
 3. Check browser console for errors
 4. Verify token files are accessible at `/tokens/` path
@@ -274,6 +280,83 @@ import type { ThemeToggleProps, ThemeSelection, ThemeMetadata } from 'shru-desig
 1. Ensure you're using the correct import path
 2. Check that the package is installed
 3. Verify TypeScript configuration
+
+## Using Design System Components
+
+The package includes 72+ reusable components organized by category:
+
+### Atoms (Basic Components)
+```tsx
+import { Button, TextInput, Badge, Checkbox, Switch } from 'shru-design-system'
+
+function MyComponent() {
+  return (
+    <div>
+      <Button variant="primary">Click me</Button>
+      <TextInput placeholder="Enter text..." />
+      <Badge>New</Badge>
+    </div>
+  )
+}
+```
+
+### Molecules (Composite Components)
+```tsx
+import { Modal, Select, Form, Tabs, Accordion } from 'shru-design-system'
+
+function MyComponent() {
+  return (
+    <Modal>
+      <ModalTrigger>Open Modal</ModalTrigger>
+      <ModalContent>
+        <ModalTitle>Hello</ModalTitle>
+        <ModalDescription>This is a modal</ModalDescription>
+      </ModalContent>
+    </Modal>
+  )
+}
+```
+
+### Layout Components
+```tsx
+import { Card, Table, Sidebar, ScrollArea } from 'shru-design-system'
+
+function MyComponent() {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Title</CardTitle>
+      </CardHeader>
+      <CardContent>Content</CardContent>
+    </Card>
+  )
+}
+```
+
+### Primitives
+```tsx
+import { PrimitiveBox, PrimitiveFlex, PrimitiveText } from 'shru-design-system'
+
+function MyComponent() {
+  return (
+    <PrimitiveBox>
+      <PrimitiveFlex>
+        <PrimitiveText>Hello</PrimitiveText>
+      </PrimitiveFlex>
+    </PrimitiveBox>
+  )
+}
+```
+
+**Note:** Primitives are exported with `Primitive` prefix to avoid naming conflicts (e.g., `PrimitiveBox` instead of `Box`).
+
+### Available Components
+
+**Atoms (19):** Button, TextInput, Badge, Label, Textarea, Separator, Checkbox, Switch, Radio, Skeleton, Progress, Spinner, Avatar, Empty, Slider, Toggle, InputOTP, Kbd, Text, Image, Upload, ErrorBoundary, Alert
+
+**Molecules (29):** Select, Tabs, Breadcrumb, Pagination, Modal, Popover, Sheet, Tooltip, Accordion, Collapsible, Command, Calendar, DropdownMenu, ContextMenu, Menubar, NavigationMenu, Form, HoverCard, AlertDialog, Drawer, Carousel, InputGroup, ToggleGroup, Toaster, Field, Chart, FormInput, InlineEdit, ConfirmModal, TriggerModal, FormModal, Toast, Snackbar, InfoBanner, StatusText, CopyButton, HistoryControlButtons, Stepper
+
+**Layout (15):** Card, ScrollArea, AspectRatio, Table, Resizable, Sidebar, Container, Stack, Grid, Box, List, Header, Footer, CollapsiblePanel, ResizeContainer, EmptyScreen
 
 ## Next Steps
 

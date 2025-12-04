@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useForm } from "react-hook-form"
 import {
   Modal,
   ModalContent,
@@ -29,24 +30,32 @@ export function FormModal({
   submitLabel = "Submit",
   cancelLabel = "Cancel",
 }: FormModalProps) {
+  const form = useForm({
+    defaultValues: {},
+  })
+
+  const handleSubmit = form.handleSubmit(onSubmit)
+
   return (
     <Modal open={open} onOpenChange={onOpenChange}>
       <ModalContent data-slot="form-modal">
-        <Form onSubmit={onSubmit}>
-          <ModalHeader>
-            <ModalTitle>{title}</ModalTitle>
-          </ModalHeader>
-          {children}
-          <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              {cancelLabel}
-            </Button>
-            <Button type="submit">{submitLabel}</Button>
-          </ModalFooter>
+        <Form {...form}>
+          <form onSubmit={handleSubmit}>
+            <ModalHeader>
+              <ModalTitle>{title}</ModalTitle>
+            </ModalHeader>
+            {children}
+            <ModalFooter>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => onOpenChange(false)}
+              >
+                {cancelLabel}
+              </Button>
+              <Button type="submit">{submitLabel}</Button>
+            </ModalFooter>
+          </form>
         </Form>
       </ModalContent>
     </Modal>
