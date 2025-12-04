@@ -4,13 +4,13 @@ Copy and paste this prompt into Cursor in your other repository:
 
 ---
 
-**I want to integrate the theme toggle component library from `https://github.com/shru-6/my-design` into this Next.js project.**
+**I want to integrate the theme toggle component library `shru-design-system` into this Next.js project.**
 
 ## Task:
-1. **Install the library** from GitHub:
-   - Run `npm install github:shru-6/my-design#main` (or `pnpm add github:shru-6/my-design#main` / `yarn add github:shru-6/my-design#main`)
+1. **Install the library** from npm:
+   - Run `npm install shru-design-system` (or `pnpm add shru-design-system` / `yarn add shru-design-system`)
    - This automatically adds the dependency to your `package.json`
-   - The library has a `postinstall` script that will automatically build, but if you get module errors, run `cd node_modules/shru-design-system && npm run build:lib`
+   - The package is pre-built, so no build step is needed
 
 2. **Set up Tailwind v4 and CSS** (Required):
    - Install Tailwind v4: `npm install tailwindcss@next @tailwindcss/postcss@next`
@@ -49,6 +49,7 @@ Copy and paste this prompt into Cursor in your other repository:
 // In your layout.tsx or page.tsx
 "use client"
 
+import 'shru-design-system/styles' // Import CSS (required)
 import dynamic from 'next/dynamic'
 
 const ThemeToggle = dynamic(
@@ -70,7 +71,7 @@ export default function Layout({ children }) {
 
 ## Requirements:
 - **Tailwind CSS v4** must be installed and configured (`tailwindcss@next @tailwindcss/postcss@next`)
-- **CSS must be imported** - Either `import '@shru/design-system/styles'` or copy `globals.css` manually
+- **CSS must be imported** - Either `import 'shru-design-system/styles'` or copy `globals.css` manually
 - **Why CSS is needed**: Contains Tailwind imports and `@theme inline` block that maps CSS variables to Tailwind. Theme system overrides variables at runtime.
 - Token files should be accessible at runtime at `/tokens/` path
 - React 18+ must be installed
@@ -82,10 +83,14 @@ export default function Layout({ children }) {
 - No manual CSS imports or additional setup needed
 
 ## Troubleshooting:
-- **Module not found error**: Run `cd node_modules/shru-design-system && npm run build:lib` to build the library
-- **Token files not loading**: Verify `public/tokens/` exists and files are accessible
+- **Module not found error**: Verify the package is installed: `npm list shru-design-system`
+- **Token files not loading**: Verify `public/tokens/` exists and files are accessible at `/tokens/` path
 - **SSR errors**: Use `dynamic` import with `ssr: false` as shown above
-- **CSS variables not appearing**: Check browser console for errors, verify tokens are loading
+- **CSS variables not appearing**: 
+  - Ensure CSS is imported: `import 'shru-design-system/styles'`
+  - Check browser console for errors
+  - Verify tokens are loading (check Network tab for `/tokens/` requests)
+  - Look for `<style id="dynamic-theme">` in the DOM
 
 ---
 
