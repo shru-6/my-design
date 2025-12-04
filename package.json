@@ -1,8 +1,18 @@
 {
-  "name": "@shru/theme-toggle",
+  "name": "shru-design-system",
   "version": "0.0.1",
-  "description": "Reusable theme toggle component with Tailwind CSS variable support",
+  "description": "A comprehensive design system with theme toggle, components, and token-based theming",
   "license": "MIT",
+  "keywords": [
+    "design-system",
+    "theme-toggle",
+    "react",
+    "components",
+    "tailwind",
+    "css-variables",
+    "theming",
+    "ui-components"
+  ],
   "type": "module",
   "main": "dist/index.cjs",
   "module": "dist/index.js",
@@ -18,7 +28,8 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
-    }
+    },
+    "./styles": "./apps/design-system/styles/globals.css"
   },
   "workspaces": [
     "apps/*"

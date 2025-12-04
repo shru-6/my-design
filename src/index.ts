@@ -1,20 +1,23 @@
 /**
- * Theme Toggle Library
- * Main entry point for the reusable theme toggle component
+ * Design System Library
+ * Main entry point for the reusable design system
  * 
- * CSS variables are generated dynamically at runtime from token files.
- * No static CSS file needed - the theme system generates CSS variables on the fly.
+ * This package provides:
+ * - Theme toggle component with token-based theming
+ * - Theme management hooks and utilities
+ * - CSS variables generated dynamically from token files
  * 
- * This library re-exports from the app's theme system to maintain a single source of truth.
+ * All exports are re-exported from the app's design system to maintain a single source of truth.
  */
 
-// Export the main component from app's theme system
+// Theme Toggle Component
 export { ThemeToggle, type ThemeToggleProps } from "../apps/design-system/src/design-system/themes/ui/ThemeToggle"
+export { useThemeToggle } from "../apps/design-system/src/design-system/themes/ui/ThemeToggle"
 
-// Export the hook for advanced usage from app's theme system
+// Theme System Hooks
 export { useTheme, type ThemeSelection, type ThemeMetadata } from "../apps/design-system/src/design-system/themes/useTheme"
 
-// Export theme configuration and utilities
+// Theme Configuration and Utilities
 export { 
   getThemeCategories,
   registerTheme,
@@ -23,7 +26,7 @@ export {
   getTheme
 } from "../apps/design-system/src/design-system/themes/themeConfig"
 
-// Export theme discovery utilities
+// Theme Discovery Utilities
 export {
   discoverTokenFiles,
   scanCategory,

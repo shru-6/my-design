@@ -1,570 +1,282 @@
 # Usage Guide
 
-Complete guide for using this design system in your projects. Answers questions like:
-- How can I set up this in my repo?
-- How is this theme system working?
-- How can I add a component while contributing?
-- What are the key features?
-
-## Table of Contents
-
-1. [Quick Setup](#quick-setup)
-2. [Using Theme Toggle Library](#using-theme-toggle-library)
-3. [Using Design System Components](#using-design-system-components)
-4. [How the Theme System Works](#how-the-theme-system-works)
-5. [Key Features](#key-features)
-6. [Dependencies Reference](#dependencies-reference)
-7. [Troubleshooting](#troubleshooting)
-
----
-
-## Quick Setup
-
-### Option 1: Using Theme Toggle Only
+## Installation
 
 ```bash
-# 1. Install from GitHub
-npm install github:shru-6/my-design#main
-
-# 2. Set up Tailwind v4 (if not already installed)
-npm install tailwindcss@next @tailwindcss/postcss@next
-
-# 3. Copy globals.css from the repository
-# Run: npx copy-globals
-# Or manually copy apps/design-system/styles/globals.css to your project (e.g., app/globals.css)
-# This contains base CSS variables and @theme inline block
-
-# 4. Configure PostCSS (create postcss.config.mjs)
-# See "Setting Up Tailwind v4 and CSS" section below for details
-
-# 5. Copy tokens to your public folder
-npm run copy:tokens
+npm install shru-design-system
 # or
-npx copy-tokens
-
-# 6. Import CSS in your root layout
-# import './globals.css'
-
-# 7. Use in your app
-import { ThemeToggle } from '@shru/theme-toggle'
-
-function App() {
-  return <ThemeToggle position="bottom-right" />
-}
+pnpm add shru-design-system
+# or
+yarn add shru-design-system
 ```
 
-### Option 2: Using Components Only
+## Important: CSS Setup Required
 
-```bash
-# 1. Set up Tailwind v4 (if not already installed)
-npm install tailwindcss@next @tailwindcss/postcss@next
+**Yes, you need to import CSS.** Even though components are importable, the CSS file is required because it contains:
+- Tailwind CSS imports
+- `@theme inline` block that maps CSS variables to Tailwind
+- Base CSS variable definitions
 
-# 2. Copy globals.css from the repository
-# Run: npx copy-globals
-# Or manually copy apps/design-system/styles/globals.css to your project (e.g., app/globals.css)
-# This contains base CSS variables and @theme inline block
-
-# 3. Configure PostCSS (create postcss.config.mjs)
-# See "Styling Setup" section below for details
-
-# 4. Copy components folder
-cp -r apps/design-system/src/design-system/components /path/to/your/project/src/
-
-# 5. Install dependencies (see Dependencies Reference section)
-npm install react react-dom class-variance-authority clsx tailwind-merge lucide-react
-# Plus Radix UI packages for components you use
-
-# 6. Import CSS in your root layout
-# import './globals.css'
-
-# 7. Use components
-import { Button } from '@/components/atoms/Button'
-```
-
-### Option 3: Using Both
-
-Follow both setup processes above. Components work with theme system automatically via CSS variables.
-
----
-
-## Using Theme Toggle Library
-
-### Installation
-
-```bash
-npm install github:shru-6/my-design#main
-# or
-pnpm add github:shru-6/my-design#main
-# or
-yarn add github:shru-6/my-design#main
-```
-
-The library automatically builds on install via `postinstall` script.
-
-### Setting Up Tailwind v4 and CSS
-
-**Important**: Before using the theme toggle, you need Tailwind v4 and the base CSS configuration.
-
-1. **Install Tailwind v4**:
-   ```bash
-   npm install tailwindcss@next @tailwindcss/postcss@next
-   ```
-
-2. **Configure PostCSS** (`postcss.config.mjs`):
-   ```js
-   const config = {
-     plugins: {
-       "@tailwindcss/postcss": {},
-     },
-   }
-   export default config
-   ```
-
-3. **Copy `globals.css`**:
-   - Run `npx copy-globals` to automatically copy `globals.css` to your project
-   - Alternatively, manually copy `apps/design-system/styles/globals.css` from this repository to your project (e.g., `app/globals.css` or `styles/globals.css`)
-   - Import it in your root layout: `import './globals.css'`
-
-**Why this is needed**: The `globals.css` file contains:
-- Base CSS variable definitions (`:root` and `.dark`) that serve as defaults
-- `@theme inline` block that maps CSS variables to Tailwind color tokens
-- Base layer styles and custom utilities
-
-The theme system will override these variables at runtime, but the base definitions are required for Tailwind to recognize color tokens like `bg-background` and `text-foreground`.
-
-### Setting Up Tokens
-
-Tokens must be accessible at runtime. Copy them to your public folder:
-
-```bash
-npm run copy:tokens
-# or
-npx copy-tokens
-```
-
-This copies tokens from `node_modules/@shru/theme-toggle/src/tokens` to `public/tokens/`.
-
-**Alternative**: Set custom token path:
+The theme system dynamically overrides CSS variables at runtime, but the base CSS file is essential.
 
 ```tsx
-// Before using ThemeToggle
-if (typeof window !== 'undefined') {
-  window.__THEME_TOKENS_BASE__ = '/custom/path/to/tokens'
-}
+// Import CSS first (required)
+import 'shru-design-system/styles'
+
+// Then use components
+import { ThemeToggle } from 'shru-design-system'
 ```
 
-### Basic Usage
+## Quick Start
+
+### 1. Import Theme Toggle Component
 
 ```tsx
-import { ThemeToggle } from '@shru/theme-toggle'
+import { ThemeToggle } from 'shru-design-system'
 
 function App() {
   return (
     <div>
       <ThemeToggle position="bottom-right" />
+      {/* Your app content */}
     </div>
   )
 }
 ```
 
-**That's it!** CSS variables are automatically generated and injected.
-
-### Programmatic Control
+### 2. Use Theme Hook
 
 ```tsx
-import { useTheme } from '@shru/theme-toggle'
+import { useTheme } from 'shru-design-system'
 
 function MyComponent() {
-  const { selectedThemes, updateTheme, resetToDefaults } = useTheme()
+  const { selectedThemes, updateTheme, isLoading } = useTheme()
   
   return (
-    <div>
-      <p>Current color: {selectedThemes.color}</p>
-      <button onClick={() => updateTheme('color', 'dark')}>
-        Switch to Dark
-      </button>
-      <button onClick={resetToDefaults}>Reset</button>
-    </div>
+    <button onClick={() => updateTheme('color', 'dark')}>
+      Switch to Dark Mode
+    </button>
   )
 }
 ```
 
-### Extending Themes
+### 3. Setup CSS (Required)
 
-Add custom token files that automatically appear in ThemeToggle:
+**Yes, you need to import the CSS file.** The `globals.css` file contains:
+- Tailwind CSS imports
+- `@theme inline` block that maps CSS variables to Tailwind colors
+- Base CSS variable definitions
 
-1. **Add theme file**: `public/tokens/themes/color/ocean.json`
-2. **Register it**:
-   ```tsx
-   import { registerThemeFromFile } from '@shru/theme-toggle'
-   
-   registerThemeFromFile('color', 'ocean', 'color/ocean.json')
-   ```
-3. **Theme appears in UI automatically!**
+The theme system will dynamically override these variables at runtime, but the base CSS is required.
 
-See [TOKEN_EXTENSION.md](./TOKEN_EXTENSION.md) for advanced usage.
+**Option 1: Import from package (Recommended)**
+```tsx
+// In your app's root layout or _app.tsx
+import 'shru-design-system/styles'
+```
 
-### API Reference
+**Option 2: Copy and import locally**
+```bash
+# Copy the CSS file
+npx copy-globals
+# or manually copy from node_modules/@shru/design-system/apps/design-system/styles/globals.css
+```
 
-**`ThemeToggle` Props:**
+Then import in your layout:
+```tsx
+import './globals.css'
+```
+
+## API Reference
+
+### ThemeToggle Component
+
+```tsx
+import { ThemeToggle } from 'shru-design-system'
+
+<ThemeToggle 
+  position="bottom-right" // or "bottom-left" | "top-right" | "top-left"
+  className="custom-class" // optional
+/>
+```
+
+**Props:**
+- `position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"` - Position of the toggle button
 - `className?: string` - Additional CSS classes
-- `position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"` - Button position
 
-**`useTheme()` Returns:**
-- `selectedThemes` - Current theme selection
-- `updateTheme(category, themeId)` - Update a theme
-- `resetToDefaults()` - Reset to defaults
-- `isLoading` - Loading state
-- `error` - Error state
-- `getAvailableThemes(category)` - Get available themes for category
-
----
-
-## Using Design System Components
-
-### Installation
-
-Components are not packaged yet - copy them directly:
-
-```bash
-cp -r apps/design-system/src/design-system/components /path/to/your/project/src/
-```
-
-**Important**: Also copy `utils.ts` from the components folder (contains `cn` utility).
-
-### Required Dependencies
-
-**Core dependencies** (required for all components):
-```bash
-npm install react react-dom
-npm install class-variance-authority clsx tailwind-merge
-npm install lucide-react
-```
-
-**Radix UI primitives** (install based on components you use):
-```bash
-# Common ones
-npm install @radix-ui/react-slot @radix-ui/react-label
-npm install @radix-ui/react-dialog @radix-ui/react-dropdown-menu
-npm install @radix-ui/react-popover @radix-ui/react-tooltip
-# See Dependencies Reference for complete list
-```
-
-**Optional dependencies** (only if using specific components):
-- `input-otp` - For InputOTP component
-- `embla-carousel-react` - For Carousel component
-- `cmdk` - For Command component
-- `react-day-picker` - For Calendar component
-- `react-hook-form` - For Form component
-- `vaul` - For Drawer component
-- `recharts` - For Chart component
-- `sonner` - For Toaster component
-- `react-resizable-panels` - For Resizable component
-
-### Usage Example
+### useTheme Hook
 
 ```tsx
-import { Button } from '@/components/atoms/Button'
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/layout/Card'
+import { useTheme } from 'shru-design-system'
 
-function MyComponent() {
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Hello World</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <Button variant="default">Click me</Button>
-      </CardContent>
-    </Card>
-  )
+const {
+  selectedThemes,      // Current theme selection
+  updateTheme,         // Function to update theme
+  resetToDefaults,     // Reset to default themes
+  isLoading,           // Loading state
+  error,               // Error message if any
+  getAvailableThemes  // Get available themes for a category
+} = useTheme()
+```
+
+**Theme Selection:**
+```typescript
+type ThemeSelection = {
+  color?: string        // e.g., 'white', 'dark'
+  typography?: string   // e.g., 'sans', 'serif'
+  shape?: string        // e.g., 'smooth', 'sharp'
+  density?: string      // e.g., 'comfortable', 'compact'
+  animation?: string    // e.g., 'gentle', 'brisk'
+  custom?: string       // Custom theme
 }
 ```
 
-### Component Organization
-
-Components are organized by Atomic Design:
-
-- **Atoms** (`atoms/`) - Basic building blocks (Button, Input, Badge, etc.)
-- **Molecules** (`molecules/`) - Composite components (Form, Modal, Select, etc.)
-- **Layout** (`layout/`) - Layout components (Card, Sidebar, Table, etc.)
-- **Primitives** (`primitives/`) - Low-level primitives (Box, Flex, Text, etc.)
-
-### Styling Setup
-
-Components use **Tailwind CSS v4** with CSS variables. You need to set up Tailwind v4 and copy the base CSS configuration.
-
-#### 1. Install Tailwind v4
-
-```bash
-npm install tailwindcss@next @tailwindcss/postcss@next
-```
-
-#### 2. Configure PostCSS
-
-Create or update `postcss.config.mjs`:
-
-```js
-const config = {
-  plugins: {
-    "@tailwindcss/postcss": {},
-  },
-}
-export default config
-```
-
-#### 3. Copy Global CSS
-
-**Important**: Copy the `globals.css` file from this repository to your project. This file contains:
-
-- Tailwind v4 imports
-- Base CSS variable definitions (`:root` and `.dark`)
-- `@theme inline` block that maps CSS variables to Tailwind color tokens
-- Base layer styles and custom utilities
-
-**Easy way**: Run `npx copy-globals` to automatically copy `globals.css` to your project.
-
-**Manual way**: Copy from `apps/design-system/styles/globals.css` to your project (e.g., `app/globals.css` or `styles/globals.css`)
-
-**Why this is needed**: 
-- The base CSS variables (like `--background`, `--primary`) are defaults that the theme system will override
-- The `@theme inline` block maps these variables to Tailwind's color system (e.g., `--background` → `--color-background`)
-- Without this, Tailwind classes like `bg-background` and `text-foreground` won't work
-
-#### 4. Import CSS in Your App
-
-Import the CSS file in your root layout:
+### useThemeToggle Hook
 
 ```tsx
-// app/layout.tsx or _app.tsx
-import './globals.css' // or your CSS file path
+import { useThemeToggle } from '@shru/design-system'
+
+const {
+  isOpen,
+  selectedCategory,
+  categories,
+  handleCategoryClick,
+  handleThemeSelect,
+  handleBack,
+  toggleMenu
+} = useThemeToggle()
 ```
 
-**Note**: The theme system will override the base CSS variables at runtime, but the base definitions are required for Tailwind to recognize the color tokens.
+## Theme Configuration
 
----
+### Available Theme Categories
 
-## How the Theme System Works
+- **Color**: `white`, `dark`
+- **Typography**: `sans`, `serif`
+- **Shape**: `smooth`, `sharp`
+- **Density**: `comfortable`, `compact`
+- **Animation**: `gentle`, `brisk`
+- **Custom**: User-defined themes
 
-### Overview
+### Custom Themes
 
-The theme system uses **token-based theming** with **multi-category support**. Themes are composed from JSON token files and converted to CSS variables at runtime.
+You can register custom themes:
 
-### Architecture
+```tsx
+import { registerTheme } from '@shru/design-system'
 
-```
-Token Files (JSON) → Theme Composition → CSS Variables → Applied to DOM
-```
-
-1. **Token Files**: JSON files in `public/tokens/` define design tokens
-2. **Theme Composition**: Multiple themes are merged (base → category themes → custom)
-3. **CSS Generation**: Tokens are flattened to CSS variables
-4. **DOM Application**: CSS variables are injected into `<head>` as `<style>` tag
-
-### Theme Categories
-
-Themes are organized by category:
-
-- **Color** - Color schemes (white, dark)
-- **Typography** - Font families (sans, serif)
-- **Shape** - Border radius (smooth, sharp)
-- **Density** - Spacing (comfortable, compact)
-- **Animation** - Animation speed (gentle, brisk)
-- **Custom** - Custom themes (brand, minimal) - applied last with highest priority
-
-### Token File Structure
-
-```json
-{
-  "name": "Ocean",
-  "icon": "🌊",
-  "description": "Ocean color theme",
-  "color": {
-    "primary": "{palette.blue.600}",
-    "background": "{palette.cyan.50}"
-  }
-}
+registerTheme('custom', 'my-theme', {
+  name: 'My Theme',
+  file: 'custom/my-theme.json',
+  icon: '🎨',
+  description: 'My custom theme'
+})
 ```
 
-**Token References**: Use `{palette.color.shade}` syntax to reference palette colors.
+## CSS Variables
 
-### Theme Composition Order
-
-1. Base tokens (`base.json`)
-2. Palette (`palettes.json`)
-3. Category themes (color, typography, shape, density, animation) - in order
-4. Custom theme - applied last (highest priority)
-
-### CSS Variables
-
-Themes generate CSS variables automatically:
+The theme system generates CSS variables that are applied to `:root`:
 
 ```css
 :root {
   --primary: oklch(0.205 0 0);
   --background: oklch(1 0 0);
   --font-body: 'Inter', sans-serif;
-  /* ... */
+  --radius-button: 0.375rem;
+  /* ... more variables */
 }
 ```
 
-These are automatically available in Tailwind classes: `bg-primary`, `text-foreground`, etc.
+## Examples
 
-### Storage
+### Basic Usage
 
-Theme selections are stored in `localStorage` with key `'design-system-theme'`:
+```tsx
+import { ThemeToggle } from 'shru-design-system'
 
-```json
-{
-  "color": "white",
-  "typography": "sans",
-  "shape": "smooth",
-  "density": "comfortable",
-  "animation": "gentle"
+export default function Layout({ children }) {
+  return (
+    <div>
+      <ThemeToggle />
+      {children}
+    </div>
+  )
 }
 ```
 
----
+### Programmatic Theme Control
 
-## Key Features
+```tsx
+import { useTheme } from 'shru-design-system'
 
-### Design System Components
-
-- **72+ Components** organized by Atomic Design
-- **Radix UI Based** - Accessible, unstyled primitives with custom styling
-- **Tailwind CSS** - Utility-first styling with CSS variables
-- **TypeScript** - Full type definitions
-- **Self-contained** - Components use relative imports, no path aliases needed
-- **Library-ready** - Can be copied directly into projects
-
-### Theme System
-
-- **Token-based** - JSON token files define themes
-- **Multi-category** - Compose themes from multiple categories
-- **Dynamic** - CSS variables generated at runtime
-- **Extensible** - Add custom themes that appear in UI automatically
-- **Zero CSS imports** - No manual CSS files needed
-- **Persistent** - Theme selections saved to localStorage
-
-### Architecture
-
-- **Module-based** - Clean separation: `ui/`, hooks, config, utils
-- **Centralized exports** - Clean import paths with `index.ts` files
-- **Atomic Design** - Components organized by complexity
-- **Single source of truth** - Library re-exports from app's theme system
-
----
-
-## Dependencies Reference
-
-### Core Dependencies (All Components)
-
-```bash
-npm install react react-dom
-npm install class-variance-authority clsx tailwind-merge
-npm install lucide-react
+function ThemeSwitcher() {
+  const { selectedThemes, updateTheme } = useTheme()
+  
+  return (
+    <div>
+      <button onClick={() => updateTheme('color', 'dark')}>
+        Dark Mode
+      </button>
+      <button onClick={() => updateTheme('color', 'white')}>
+        Light Mode
+      </button>
+    </div>
+  )
+}
 ```
 
-### Radix UI Primitives
+### Custom Theme Toggle
 
-Install based on components you use:
+```tsx
+import { useThemeToggle } from '@shru/design-system'
 
-```bash
-npm install @radix-ui/react-accordion          # Accordion
-npm install @radix-ui/react-alert-dialog      # AlertDialog
-npm install @radix-ui/react-aspect-ratio      # AspectRatio
-npm install @radix-ui/react-avatar            # Avatar
-npm install @radix-ui/react-checkbox          # Checkbox
-npm install @radix-ui/react-collapsible       # Collapsible
-npm install @radix-ui/react-context-menu      # ContextMenu
-npm install @radix-ui/react-dialog            # Modal, Sheet
-npm install @radix-ui/react-dropdown-menu     # DropdownMenu
-npm install @radix-ui/react-hover-card         # HoverCard
-npm install @radix-ui/react-label             # Label, Form
-npm install @radix-ui/react-menubar           # Menubar
-npm install @radix-ui/react-navigation-menu   # NavigationMenu
-npm install @radix-ui/react-popover           # Popover
-npm install @radix-ui/react-progress           # Progress
-npm install @radix-ui/react-radio-group       # Radio
-npm install @radix-ui/react-scroll-area       # ScrollArea
-npm install @radix-ui/react-select            # Select
-npm install @radix-ui/react-separator         # Separator
-npm install @radix-ui/react-slider            # Slider
-npm install @radix-ui/react-slot              # Button, Badge, Breadcrumb, Form
-npm install @radix-ui/react-switch            # Switch
-npm install @radix-ui/react-tabs              # Tabs
-npm install @radix-ui/react-toggle            # Toggle
-npm install @radix-ui/react-toggle-group     # ToggleGroup
-npm install @radix-ui/react-tooltip           # Tooltip
+function CustomToggle() {
+  const { toggleMenu, isOpen } = useThemeToggle()
+  
+  return (
+    <button onClick={toggleMenu}>
+      {isOpen ? 'Close' : 'Open'} Theme Menu
+    </button>
+  )
+}
 ```
 
-### Component-Specific Dependencies
+## Storage
 
-Only install if using these components:
+Themes are automatically stored in `localStorage` with the key `'design-system-theme'`. The theme selection persists across page reloads.
 
-```bash
-npm install input-otp                    # InputOTP
-npm install embla-carousel-react         # Carousel
-npm install cmdk                         # Command
-npm install react-day-picker             # Calendar
-npm install react-hook-form              # Form
-npm install vaul                         # Drawer
-npm install recharts                     # Chart
-npm install sonner                       # Toaster
-npm install react-resizable-panels       # Resizable
+## TypeScript Support
+
+Full TypeScript support is included. Import types as needed:
+
+```tsx
+import type { ThemeToggleProps, ThemeSelection, ThemeMetadata } from 'shru-design-system'
 ```
-
-**Summary**: 60+ components only need core dependencies. 9 components require additional libraries.
-
-**Detailed breakdown**: See [COMPONENT_DEPENDENCIES.md](./COMPONENT_DEPENDENCIES.md) for a complete list of which components need which specific dependencies.
-
-See [COMPONENT_DEPENDENCIES.md](./COMPONENT_DEPENDENCIES.md) for detailed breakdown.
-
----
 
 ## Troubleshooting
 
-### Theme Toggle Issues
+### Theme not applying?
 
-**CSS variables not appearing:**
-- Check token files are accessible at `/tokens/`
-- Check browser console for errors loading token files
-- Verify `ThemeToggle` component is mounted
+1. **Make sure CSS is imported** - You must import `@shru/design-system/styles` or copy `globals.css`
+2. **Check Tailwind v4 is installed** - Required for `@theme inline` to work
+3. Check browser console for errors
+4. Verify token files are accessible at `/tokens/` path
+5. Look for `<style id="dynamic-theme">` in the DOM (theme system injects CSS here)
 
-**Theme not applying:**
-- Check Network tab - verify token JSON files load (status 200)
-- Check localStorage - themes saved to `'design-system-theme'`
-- Check console for validation errors
+### Toggle not appearing?
 
-**Module not found:**
-- Run `cd node_modules/@shru/theme-toggle && npm run build:lib`
-- Ensure `postinstall` script ran successfully
+1. Check z-index conflicts
+2. Verify position prop is valid
+3. Ensure component is rendered client-side (`"use client"`)
 
-### Component Issues
+### Import errors?
 
-**Import errors:**
-- Components use relative imports - ensure folder structure is maintained
-- Copy `utils.ts` along with components folder
-
-**Missing styles:**
-- Ensure Tailwind CSS is configured
-- Check CSS variables are defined (use theme toggle or define manually)
-- Verify Tailwind content paths include component files
-
-**Type errors:**
-- Install all peer dependencies
-- Ensure TypeScript types are imported correctly
-
-**Component-specific errors:**
-- Check if component requires additional dependencies (see Dependencies Reference)
-- Install missing Radix UI packages
-
----
+1. Ensure you're using the correct import path
+2. Check that the package is installed
+3. Verify TypeScript configuration
 
 ## Next Steps
 
-- **Extending themes**: See [TOKEN_EXTENSION.md](./TOKEN_EXTENSION.md) for advanced theme extension
-- **Contributing**: See [CONTRIBUTING.md](./CONTRIBUTING.md) for contribution guidelines
-- **Adding components**: See [Component System Docs](./apps/design-system/src/design-system/components/README.md#how-to-add-a-component) for detailed component addition guide
-- **Theme system internals**: See [Theme System Docs](./apps/design-system/src/design-system/themes/README.md) for theme system architecture
-
+- See [CONTRIBUTING.md](./CONTRIBUTING.md) to contribute
+- Check [README.md](./README.md) for project overview
+- Review component examples in the design system showcase

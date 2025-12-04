@@ -10,24 +10,27 @@ Copy and paste this prompt into Cursor in your other repository:
 1. **Install the library** from GitHub:
    - Run `npm install github:shru-6/my-design#main` (or `pnpm add github:shru-6/my-design#main` / `yarn add github:shru-6/my-design#main`)
    - This automatically adds the dependency to your `package.json`
-   - The library has a `postinstall` script that will automatically build, but if you get module errors, run `cd node_modules/@shru/theme-toggle && npm run build:lib`
+   - The library has a `postinstall` script that will automatically build, but if you get module errors, run `cd node_modules/shru-design-system && npm run build:lib`
 
-2. **Set up Tailwind v4 and CSS**:
+2. **Set up Tailwind v4 and CSS** (Required):
    - Install Tailwind v4: `npm install tailwindcss@next @tailwindcss/postcss@next`
    - Configure PostCSS: Create `postcss.config.mjs` with `@tailwindcss/postcss` plugin
-   - **Copy `globals.css`**: Run `npx copy-globals` to automatically copy `globals.css` to your project
-   - Alternatively, manually copy `apps/design-system/styles/globals.css` from the repository to your project (e.g., `app/globals.css`)
-   - Import the CSS file in your root layout: `import './globals.css'`
-   - **Why**: The globals.css contains base CSS variable definitions and `@theme inline` block that maps variables to Tailwind colors. The theme system will override these at runtime, but base definitions are required.
+   - **Import CSS from package** (Recommended): `import 'shru-design-system/styles'` in your root layout
+   - **OR copy CSS manually**: Run `npx copy-globals` or copy `node_modules/shru-design-system/apps/design-system/styles/globals.css` to your project
+   - **Why CSS is required**: The `globals.css` contains:
+     - Tailwind CSS imports (`@import "tailwindcss"`)
+     - `@theme inline` block that maps CSS variables to Tailwind colors
+     - Base CSS variable definitions
+   - The theme system dynamically overrides these variables at runtime, but the base CSS file is required for Tailwind to work.
 
 3. **Set up token files**:
    - Run `npx copy-tokens` to automatically copy tokens from the package to your `public/tokens` folder
-   - Alternatively, manually copy from `node_modules/@shru/theme-toggle/src/tokens` to `public/tokens`
+   - Alternatively, manually copy from `node_modules/shru-design-system/src/tokens` to `public/tokens`
    - Ensure the tokens are accessible at `/tokens/` path in your app
    - The folder structure should be: `public/tokens/base.json`, `public/tokens/palettes.json`, `public/tokens/themes/color/`, etc.
 
 4. **Add the component** to my app:
-   - Import `ThemeToggle` from `@shru/theme-toggle` in your layout or main page
+   - Import `ThemeToggle` from `shru-design-system` in your layout or main page
    - Add `<ThemeToggle position="bottom-right" />` to your component
    - Make sure it's a client component (add `"use client"` if needed)
 
@@ -49,7 +52,7 @@ Copy and paste this prompt into Cursor in your other repository:
 import dynamic from 'next/dynamic'
 
 const ThemeToggle = dynamic(
-  () => import('@shru/theme-toggle').then((mod) => mod.ThemeToggle),
+  () => import('shru-design-system').then((mod) => mod.ThemeToggle),
   { ssr: false }
 )
 
@@ -66,9 +69,9 @@ export default function Layout({ children }) {
 ```
 
 ## Requirements:
-- **Tailwind CSS v4** must be installed and configured
-- **globals.css** must be copied from the repository (contains base CSS variables and `@theme inline` block)
-- CSS variables will be automatically generated and injected by the theme system
+- **Tailwind CSS v4** must be installed and configured (`tailwindcss@next @tailwindcss/postcss@next`)
+- **CSS must be imported** - Either `import '@shru/design-system/styles'` or copy `globals.css` manually
+- **Why CSS is needed**: Contains Tailwind imports and `@theme inline` block that maps CSS variables to Tailwind. Theme system overrides variables at runtime.
 - Token files should be accessible at runtime at `/tokens/` path
 - React 18+ must be installed
 
@@ -79,7 +82,7 @@ export default function Layout({ children }) {
 - No manual CSS imports or additional setup needed
 
 ## Troubleshooting:
-- **Module not found error**: Run `cd node_modules/@shru/theme-toggle && npm run build:lib` to build the library
+- **Module not found error**: Run `cd node_modules/shru-design-system && npm run build:lib` to build the library
 - **Token files not loading**: Verify `public/tokens/` exists and files are accessible
 - **SSR errors**: Use `dynamic` import with `ssr: false` as shown above
 - **CSS variables not appearing**: Check browser console for errors, verify tokens are loading

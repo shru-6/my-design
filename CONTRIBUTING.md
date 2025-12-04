@@ -1,69 +1,252 @@
-# Contributing
+# Contributing Guide
 
-Thanks for your interest in contributing to this design system!
+Thank you for contributing to the design system! This guide will help you get started.
 
-Please take a moment to review this document before submitting your first pull request. We also strongly recommend that you check for open issues and pull requests to see if someone else is working on something similar.
+## Getting Started
 
-## About this repository
+1. **Fork and Clone**
+   ```bash
+   git clone https://github.com/your-username/design-system.git
+   cd design-system
+   ```
 
-This repository is a monorepo.
+2. **Install Dependencies**
+   ```bash
+   pnpm install
+   ```
 
-- We use [pnpm](https://pnpm.io) and [`workspaces`](https://pnpm.io/workspaces) for development.
-- We use [Turborepo](https://turbo.build/repo) as our build system.
+3. **Run Development Server**
+   ```bash
+   pnpm dev
+   ```
 
-## Structure
-
-This repository is structured as follows:
+## Project Structure
 
 ```
-apps
-└── design-system
-    ├── app
-    ├── src/design-system
-    │   ├── components
-    │   └── themes
-    ├── config
-    ├── hooks
-    └── lib
+apps/design-system/
+├── src/design-system/
+│   ├── components/          # Component library
+│   │   ├── atoms/           # Basic building blocks
+│   │   ├── molecules/      # Composite components
+│   │   ├── layout/          # Layout components
+│   │   ├── primitives/      # Low-level primitives
+│   │   └── ui/              # UI showcase components (modular)
+│   └── themes/              # Theme system
+│       ├── ui/              # Theme UI components (modular)
+│       ├── useTheme.tsx     # Theme hook
+│       ├── themeConfig.js   # Theme configuration
+│       └── themeUtils.js    # Theme utilities
 ```
 
-## Development
+## Adding a Component
 
-### Install dependencies
+### Step 1: Create Component File
 
-```bash
-pnpm install
+Place your component in the appropriate folder:
+
+- **Atoms**: Basic building blocks (Button, Input, Badge)
+- **Molecules**: Composite components (Form, Modal, Select)
+- **Layout**: Layout components (Card, Sidebar, Table)
+- **Primitives**: Low-level primitives (Box, Text, Flex)
+
+Example for a new atom:
+
+```tsx
+// apps/design-system/src/design-system/components/atoms/NewComponent.tsx
+"use client"
+
+import { cn } from "../utils"
+
+export interface NewComponentProps {
+  className?: string
+  children: React.ReactNode
+}
+
+export function NewComponent({ className, children }: NewComponentProps) {
+  return (
+    <div className={cn("base-styles", className)}>
+      {children}
+    </div>
+  )
+}
+
+// Showcase for design system page
+export function NewComponentShowcase() {
+  return (
+    <div className="space-y-6">
+      <NewComponent>Example 1</NewComponent>
+      <NewComponent className="custom-class">Example 2</NewComponent>
+    </div>
+  )
+}
 ```
 
-### Run development server
+### Step 2: Export from Category Index
 
-```bash
-pnpm dev
+```tsx
+// apps/design-system/src/design-system/components/atoms/index.ts
+export { NewComponent, NewComponentShowcase } from "./NewComponent"
 ```
 
-Or for a specific app:
+### Step 3: Register Showcase
 
-```bash
-pnpm --filter=design-system dev
+```tsx
+// apps/design-system/src/design-system/components/componentConfig.ts
+import { NewComponentShowcase } from "./atoms"
+
+const showcaseRegistry = {
+  // ... existing
+  NewComponent: NewComponentShowcase,
+}
 ```
 
-## Documentation
+### Step 4: Add to Category Utils
 
-All documentation is co-located with the code in `apps/design-system/`. See the main [README](./README.md) for links to all documentation.
+```tsx
+// apps/design-system/src/design-system/components/componentUtils.ts
+const componentCategories = {
+  // ... existing
+  "Your Category": [
+    // ... existing
+    { name: "NewComponent", file: "atoms/NewComponent.tsx", description: "..." }
+  ]
+}
+```
 
-## Commit Convention
+## Adding a Theme
 
-When you create a commit we kindly ask you to follow the convention `category(scope or module): message` in your commit message while using one of the following categories:
+### Step 1: Create Token File
 
-- `feat / feature`: all changes that introduce completely new code or new features
-- `fix`: changes that fix a bug (ideally you will additionally reference an issue if present)
-- `refactor`: any code related change that is not a fix nor a feature
-- `docs`: changing existing or creating new documentation
-- `build`: all changes regarding the build of the software, changes to dependencies or the addition of new dependencies
-- `test`: all changes regarding tests (adding new tests or changing existing ones)
-- `ci`: all changes regarding the configuration of continuous integration
-- `chore`: all changes to the repository that do not fit into any of the above categories
+```json
+// apps/design-system/public/tokens/themes/category/new-theme.json
+{
+  "color": {
+    "primary": "{palette.blue.600}"
+  }
+}
+```
 
-  e.g. `feat(components): add new prop to the avatar component`
+### Step 2: Register in Config
 
-If you are interested in the detailed specification you can visit https://www.conventionalcommits.org/
+```javascript
+// apps/design-system/src/design-system/themes/themeConfig.js
+export const baseThemeCategories = {
+  category: {
+    themes: {
+      // ... existing
+      'new-theme': {
+        name: 'New Theme',
+        file: 'category/new-theme.json',
+        icon: '🎨',
+        description: 'Description'
+      }
+    }
+  }
+}
+```
+
+## Modular Components
+
+Some components (ThemeToggle, DesignSystemPage, HomePage) use a modular structure:
+
+```
+ComponentName/
+├── ComponentName.tsx    # UI component
+├── useComponentName.ts  # Hooks
+├── componentNameConfig.ts  # Configuration
+├── componentNameUtils.ts   # Utilities
+└── index.ts             # Exports
+```
+
+When adding logic to these components:
+- **Hooks**: Extract to `useComponentName.ts`
+- **Constants**: Extract to `componentNameConfig.ts`
+- **Utilities**: Extract to `componentNameUtils.ts`
+- **UI**: Keep in `ComponentName.tsx`
+
+## Code Style
+
+### Import Order
+
+1. React/Next.js
+2. Third-party modules
+3. Design system imports (`@/src/design-system/`)
+4. Local imports
+
+### Component Structure
+
+```tsx
+"use client" // Only if needed
+
+import { Component } from "@/src/design-system/components/..."
+
+export interface ComponentProps {
+  // Props
+}
+
+export function Component({ ...props }: ComponentProps) {
+  // Implementation
+}
+```
+
+### Naming Conventions
+
+- **Components**: PascalCase (`Button`, `ThemeToggle`)
+- **Files**: Match component name (`Button.tsx`)
+- **Hooks**: `use` prefix (`useTheme`, `useThemeToggle`)
+- **Config files**: `[module]Config.js`
+- **Utils files**: `[module]Utils.js`
+
+## Testing
+
+Before submitting:
+
+1. **Build the package**
+   ```bash
+   pnpm build
+   ```
+
+2. **Type check**
+   ```bash
+   pnpm typecheck
+   ```
+
+3. **Lint**
+   ```bash
+   pnpm lint
+   ```
+
+4. **Test in development**
+   ```bash
+   pnpm dev
+   ```
+
+## Pull Request Process
+
+1. Create a feature branch
+2. Make your changes
+3. Test thoroughly
+4. Update documentation if needed
+5. Submit PR with clear description
+
+## Commit Messages
+
+Follow conventional commits:
+
+- `feat:` New feature
+- `fix:` Bug fix
+- `docs:` Documentation
+- `style:` Formatting
+- `refactor:` Code refactoring
+- `test:` Tests
+- `chore:` Maintenance
+
+Example: `feat: add NewComponent to atoms`
+
+## Questions?
+
+- Check existing issues
+- Review code in similar components
+- Ask in discussions
+
+Thank you for contributing! 🎉

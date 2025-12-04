@@ -17,14 +17,41 @@ A design system with 72+ reusable components and a theme management library. Inc
 
 ### Theme System
 - **Token-based Theming** with multi-category support (color, typography, shape, density, animation)
-- **Reusable Library** - Theme toggle component published as `@shru/theme-toggle`
+- **Reusable Library** - Theme toggle component and utilities published as `shru-design-system`
 - **Zero CSS Imports** - CSS variables generated and injected automatically
 - **Dynamic Theme Switching** - Runtime theme composition and application
+- **Modular Architecture** - Clean separation of UI, hooks, config, and utilities
 
 ### Architecture
 - **Module-based Structure** - Clean separation of UI, hooks, config, and utils
 - **Centralized Exports** - Clean import paths with `index.ts` files
 - **Atomic Design** - Components organized by complexity and purpose
+
+## Installation
+
+```bash
+npm install shru-design-system
+# or
+pnpm add shru-design-system
+```
+
+## Quick Start
+
+```tsx
+// 1. Import CSS (required)
+import '@shru/design-system/styles'
+
+// 2. Import component
+import { ThemeToggle } from 'shru-design-system'
+
+function App() {
+  return <ThemeToggle position="bottom-right" />
+}
+```
+
+**Note:** You must import the CSS file - it contains Tailwind setup and base CSS variables. The theme system will dynamically override variables at runtime.
+
+See [USAGE.md](./USAGE.md) for complete usage guide.
 
 ## Build Process
 

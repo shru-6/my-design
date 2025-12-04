@@ -1,92 +1,36 @@
 "use client"
 
-import React, { useState, useRef, useEffect } from "react"
-import { useTheme, type ThemeSelection, type ThemeMetadata } from "../useTheme"
-import { getThemeCategories } from "../themeConfig.js"
-import { cn } from "@/lib/utils"
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../../components/molecules/Tooltip"
+import React, { useState, useEffect } from "react"
+import { useThemeToggle } from "./useThemeToggle"
+import { categoryIcons, positionClasses } from "./themeToggleConfig"
+import { getPositionOnArc } from "./themeToggleUtils"
+import { getArcConfig } from "./themeToggleConfig"
+import { cn } from "../../../components/utils"
+import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../../../components/molecules/Tooltip"
+import type { ThemeSelection, ThemeMetadata } from "../../useTheme"
 
 export interface ThemeToggleProps {
   className?: string
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"
-}
-// for internal use only, cant be used outside of the design system as it would have to be self contained
-
-// Category icon mapping
-const categoryIcons: Record<string, string> = {
-  color: "🎨",
-  typography: "📝",
-  shape: "🔲",
-  density: "📏",
-  animation: "✨",
-}
-
-// Simple polar to cartesian conversion
-function getPositionOnArc(angleDeg: number, radius: number) {
-  const rad = (angleDeg * Math.PI) / 180
-  return {
-    x: Math.cos(rad) * radius,
-    y: Math.sin(rad) * radius,
-  }
 }
 
 export function ThemeToggle({ 
   className,
   position = "bottom-right"
 }: ThemeToggleProps) {
-  const { selectedThemes, updateTheme, isLoading, getAvailableThemes } = useTheme()
-  const [isOpen, setIsOpen] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null)
-  const [themeCategories, setThemeCategories] = useState<any>(null)
-  const menuRef = useRef<HTMLDivElement>(null)
-
-  // Load theme categories on mount
-  useEffect(() => {
-    getThemeCategories().then(setThemeCategories)
-  }, [])
-
-  // Close menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-        setSelectedCategory(null)
-      }
-    }
-
-    if (isOpen) {
-      document.addEventListener("mousedown", handleClickOutside)
-      return () => document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isOpen])
-
-  const handleCategoryClick = (categoryKey: string) => {
-    setSelectedCategory(categoryKey)
-  }
-
-  const handleThemeSelect = async (category: keyof ThemeSelection, themeId: string) => {
-    const currentTheme = selectedThemes[category]
-    const newTheme = currentTheme === themeId ? undefined : themeId
-    await updateTheme(category, newTheme)
-  }
-
-  const handleBack = () => {
-    setSelectedCategory(null)
-  }
-
-  // Get categories (including custom)
-  const categories = themeCategories 
-    ? Object.entries(themeCategories)
-        .sort(([, a], [, b]) => a.order - b.order)
-    : []
-
-  // Position classes
-  const positionClasses = {
-    "bottom-right": "bottom-6 right-6",
-    "bottom-left": "bottom-6 left-6",
-    "top-right": "top-6 right-6",
-    "top-left": "top-6 left-6",
-  }
+  const {
+    selectedThemes,
+    isLoading,
+    getAvailableThemes,
+    isOpen,
+    selectedCategory,
+    categories,
+    menuRef,
+    handleCategoryClick,
+    handleThemeSelect,
+    handleBack,
+    toggleMenu,
+  } = useThemeToggle()
 
   return (
     <div 
@@ -96,12 +40,7 @@ export function ThemeToggle({
     >
       {/* Main Toggle Button */}
       <button
-        onClick={() => {
-          setIsOpen(!isOpen)
-          if (!isOpen) {
-            setSelectedCategory(null)
-          }
-        }}
+        onClick={toggleMenu}
         className={cn(
           "w-14 h-14 rounded-full bg-primary text-primary-foreground",
           "shadow-lg hover:shadow-xl",
@@ -140,40 +79,22 @@ export function ThemeToggle({
                 selectedThemes={selectedThemes}
                 position={position}
               />
-                    ) : (
-                      <ThemeRingAsync
-                        category={selectedCategory}
-                        getAvailableThemes={getAvailableThemes}
-                        selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
-                        onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
-                        onBack={handleBack}
-                        isLoading={isLoading}
-                        position={position}
-                      />
-                    )}
+            ) : (
+              <ThemeRingAsync
+                category={selectedCategory}
+                getAvailableThemes={getAvailableThemes}
+                selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
+                onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
+                onBack={handleBack}
+                isLoading={isLoading}
+                position={position}
+              />
+            )}
           </div>
         </TooltipProvider>
       )}
     </div>
   )
-}
-
-// Get arc configuration based on position
-function getArcConfig(position: "bottom-right" | "bottom-left" | "top-right" | "top-left") {
-  switch (position) {
-    case "bottom-right":
-      // Open towards top-left: arc from top to left
-      return { startAngle: -60, endAngle: -180, sweep: -150 }
-    case "bottom-left":
-      // Open towards top-right: arc from top to right
-      return { startAngle: -120, endAngle: 0, sweep: 150 }
-    case "top-right":
-      // Open towards bottom-left: arc from bottom to left
-      return { startAngle: 60, endAngle: 0, sweep: 150 }
-    case "top-left":
-      // Open towards bottom-right: arc from bottom to right
-      return { startAngle: 120, endAngle: 0, sweep: -150 }
-  }
 }
 
 // Common radial wheel component
@@ -255,7 +176,7 @@ function RadialWheel({
 
 // Category Ring Component
 interface CategoryRingProps {
-  categories: Array<[string, { name: string; themes: Record<string, ThemeMetadata> }]>
+  categories: Array<[string, { name: string; themes: Record<string, ThemeMetadata>; order?: number }]>
   onCategoryClick: (categoryKey: string) => void
   selectedThemes: ThemeSelection
   position: "bottom-right" | "bottom-left" | "top-right" | "top-left"
@@ -400,3 +321,4 @@ function ThemeRingAsync({
     </div>
   )
 }
+

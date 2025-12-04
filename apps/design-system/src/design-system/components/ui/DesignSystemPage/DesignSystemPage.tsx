@@ -1,6 +1,5 @@
 "use client"
 
-import { useState, useEffect } from "react"
 import { getComponentsByCategory, getCategories } from "@/src/design-system/components/componentUtils"
 import { getComponentShowcase } from "@/src/design-system/components/componentConfig"
 import { ThemeToggle } from "@/src/design-system/themes/ui"
@@ -20,43 +19,12 @@ import {
   SidebarTrigger,
   SidebarInset,
 } from "@/src/design-system/components/layout"
-import {
-  HomeIcon,
-  SettingsIcon,
-  ZapIcon,
-  FileTextIcon,
-  LayoutIcon,
-  BarChartIcon,
-  NavigationIcon,
-  LayersIcon,
-  ComponentIcon,
-  TypeIcon,
-  ImageIcon,
-  WrenchIcon,
-  SparklesIcon,
-  MessageSquareIcon,
-  BoxIcon,
-  PaletteIcon,
-  CalendarIcon,
-  ChevronDownIcon,
-} from "lucide-react"
+import { useDesignSystemPage } from "./useDesignSystemPage"
+import { getCategoryIcon, HomeIcon, SettingsIcon, ChevronDownIcon } from "./designSystemPageConfig"
 
 export function DesignSystemPage() {
   const categories = getCategories()
-  const [openCategory, setOpenCategory] = useState<string | null>(null)
-  const [mounted, setMounted] = useState(false)
-
-  // Prevent hydration mismatch by only rendering on client
-  useEffect(() => {
-    setMounted(true)
-    // Prevent auto-scroll on mount
-    if (!window.location.hash) {
-      window.scrollTo(0, 0)
-      requestAnimationFrame(() => {
-        window.scrollTo(0, 0)
-      })
-    }
-  }, [])
+  const { openCategory, mounted, handleCategoryToggle } = useDesignSystemPage()
 
   // Don't render until mounted to avoid hydration mismatch
   if (!mounted) {
@@ -79,35 +47,14 @@ export function DesignSystemPage() {
               <SidebarGroupContent>
                 {categories.map((category) => {
                   const categoryComponents = getComponentsByCategory(category)
-                  
-                  // Map category names to appropriate icons
-                  const getCategoryIcon = (cat: string) => {
-                    const lowerCat = cat.toLowerCase()
-                    if (lowerCat.includes('action') || lowerCat.includes('button')) return ZapIcon
-                    if (lowerCat.includes('input') || lowerCat.includes('form')) return FileTextIcon
-                    if (lowerCat.includes('layout') || lowerCat.includes('structure')) return LayoutIcon
-                    if (lowerCat.includes('data display') || lowerCat.includes('data')) return BarChartIcon
-                    if (lowerCat.includes('navigation')) return NavigationIcon
-                    if (lowerCat.includes('overlay') || lowerCat.includes('dialog')) return LayersIcon
-                    if (lowerCat.includes('typography')) return TypeIcon
-                    if (lowerCat.includes('media')) return ImageIcon
-                    if (lowerCat.includes('utilit')) return WrenchIcon
-                    if (lowerCat.includes('menu')) return SparklesIcon
-                    if (lowerCat.includes('feedback') || lowerCat.includes('notification')) return MessageSquareIcon
-                    if (lowerCat.includes('primitiv')) return BoxIcon
-                    if (lowerCat.includes('development')) return PaletteIcon
-                    if (lowerCat.includes('date') || lowerCat.includes('time') || lowerCat.includes('calendar')) return CalendarIcon
-                    return ComponentIcon
-                  }
                   const Icon = getCategoryIcon(category)
-                  
                   const isOpen = openCategory === category
                   
                   return (
                     <Collapsible 
                       key={category} 
                       open={isOpen}
-                      onOpenChange={(open) => setOpenCategory(open ? category : null)}
+                      onOpenChange={(open) => handleCategoryToggle(category, open)}
                       className="mb-1"
                     >
                       <SidebarMenuItem>
