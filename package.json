@@ -35,8 +35,9 @@
     "apps/*"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --dts --format esm,cjs",
-    "build:lib": "tsup src/index.ts --dts --format esm,cjs",
+    "build": "npm run build:css && tsup src/index.ts --dts --format esm,cjs",
+    "build:lib": "npm run build:css && tsup src/index.ts --dts --format esm,cjs",
+    "build:css": "node scripts/build-css.js",
     "postinstall": "npm run build:lib",
     "copy:tokens": "node scripts/copy-tokens.js",
     "copy:globals": "node scripts/copy-globals.js",
