@@ -240,6 +240,57 @@
   }
 }
 
+/* 
+ * Force generation of utilities used by design system components
+ * Since components are bundled, Tailwind can't scan them automatically.
+ * This ensures all required utilities are generated.
+ */
+@layer utilities {
+  /* These classes are used by design system components but can't be scanned from bundled JS */
+  .rounded-md { border-radius: var(--radius-md); }
+  .rounded-lg { border-radius: var(--radius-lg); }
+  .rounded-sm { border-radius: var(--radius-sm); }
+  .rounded-xl { border-radius: var(--radius-xl); }
+  .rounded-full { border-radius: 9999px; }
+  .px-4 { padding-left: 1rem; padding-right: 1rem; }
+  .px-3 { padding-left: 0.75rem; padding-right: 0.75rem; }
+  .px-6 { padding-left: 1.5rem; padding-right: 1.5rem; }
+  .px-2 { padding-left: 0.5rem; padding-right: 0.5rem; }
+  .py-2 { padding-top: 0.5rem; padding-bottom: 0.5rem; }
+  .p-4 { padding: 1rem; }
+  .p-6 { padding: 1.5rem; }
+  .gap-2 { gap: 0.5rem; }
+  .gap-4 { gap: 1rem; }
+  .mb-8 { margin-bottom: 2rem; }
+  .mb-4 { margin-bottom: 1rem; }
+  .mb-2 { margin-bottom: 0.5rem; }
+  .mt-4 { margin-top: 1rem; }
+  .h-9 { height: 2.25rem; }
+  .h-8 { height: 2rem; }
+  .h-10 { height: 2.5rem; }
+  .h-12 { height: 3rem; }
+  .min-h-screen { min-height: 100vh; }
+  .inline-flex { display: inline-flex; }
+  .flex { display: flex; }
+  .items-center { align-items: center; }
+  .justify-center { justify-content: center; }
+  .flex-wrap { flex-wrap: wrap; }
+  .text-sm { font-size: 0.875rem; line-height: 1.25rem; }
+  .text-lg { font-size: 1.125rem; line-height: 1.75rem; }
+  .text-xl { font-size: 1.25rem; line-height: 1.75rem; }
+  .text-2xl { font-size: 1.5rem; line-height: 2rem; }
+  .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
+  .font-medium { font-weight: 500; }
+  .font-semibold { font-weight: 600; }
+  .font-bold { font-weight: 700; }
+  .whitespace-nowrap { white-space: nowrap; }
+  .shrink-0 { flex-shrink: 0; }
+  .transition-all { transition-property: all; transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1); transition-duration: 150ms; }
+  .disabled\:pointer-events-none:disabled { pointer-events: none; }
+  .disabled\:opacity-50:disabled { opacity: 0.5; }
+  .outline-none { outline: 2px solid transparent; outline-offset: 2px; }
+}
+
 @layer components {
   .steps {
     &:first-child {
