@@ -1,131 +1,131 @@
-# Design System Repository
+# shru-design-system
 
-A comprehensive design system with 72+ reusable components and a theme management library. This monorepo contains both a Next.js showcase application and publishable npm libraries.
-
-## Purpose
-
-A design system with 72+ reusable components and a theme management library. Includes both a Next.js showcase application and publishable npm libraries.
-
-## Key Features
-
-### Design System Components
-- **72+ Components** organized by category (atoms, molecules, layout, primitives)
-- **Radix UI Based** - Accessible, unstyled primitives with custom styling
-- **Tailwind CSS** - Utility-first styling with CSS variables
-- **TypeScript** - Full type definitions for all components
-- **Component Showcases** - Live, interactive examples for every component
-
-### Theme System
-- **Token-based Theming** with multi-category support (color, typography, shape, density, animation)
-- **Reusable Library** - Theme toggle component and utilities published as `shru-design-system`
-- **Zero CSS Imports** - CSS variables generated and injected automatically
-- **Dynamic Theme Switching** - Runtime theme composition and application
-- **Modular Architecture** - Clean separation of UI, hooks, config, and utilities
-
-### Architecture
-- **Module-based Structure** - Clean separation of UI, hooks, config, and utils
-- **Centralized Exports** - Clean import paths with `index.ts` files
-- **Atomic Design** - Components organized by complexity and purpose
-
-## Installation
-
-```bash
-npm install shru-design-system
-# or
-pnpm add shru-design-system
-```
-
-## Quick Start
-
-```tsx
-// 1. Import CSS (required)
-import '@shru/design-system/styles'
-
-// 2. Import component
-import { ThemeToggle } from 'shru-design-system'
-
-function App() {
-  return <ThemeToggle position="bottom-right" />
-}
-```
-
-**Note:** You must import the CSS file - it contains Tailwind setup and base CSS variables. The theme system will dynamically override variables at runtime.
-
-See [USAGE.md](./USAGE.md) for complete usage guide.
-
-## Build Process
-
-```bash
-# Build the library
-npm run build:lib
-# Generates: dist/index.js (ESM), dist/index.cjs (CJS), dist/index.d.ts (types)
-
-# Run the showcase app
-npm run dev
-# Visit: http://localhost:3000/design-system
-```
+A React component library with atoms and molecules built on Radix UI and Tailwind CSS, featuring a dynamic theme system.
 
 ## Project Structure
 
+### Root Files
+
+- **`package.json`** - Package configuration, dependencies, and scripts
+- **`tsconfig.json`** - TypeScript configuration
+- **`tsup.config.ts`** - Build configuration for bundling (ESM/CJS)
+- **`tailwind.config.js`** - Tailwind CSS configuration (for library development)
+- **`postcss.config.js`** - PostCSS configuration (for library development)
+- **`.gitignore`** - Git ignore rules
+
+### Source Code (`src/`)
+
+- **`src/index.ts`** - Main entry point, exports all components and utilities
+- **`src/utils.ts`** - Utility functions (cn helper for class merging)
+
+#### Atoms (`src/atoms/`)
+Basic UI building blocks:
+- **`Button.tsx`** - Button component with variants and sizes
+- **`Badge.tsx`** - Badge component for labels and tags
+- **`TextInput.tsx`** - Text input field component
+- **`Label.tsx`** - Form label component
+- **`Textarea.tsx`** - Multi-line text input component
+- **`Separator.tsx`** - Horizontal/vertical divider component
+- **`Checkbox.tsx`** - Checkbox input component
+
+#### Molecules (`src/molecules/`)
+Composite components:
+- **`Modal.tsx`** - Modal dialog component
+- **`Select.tsx`** - Dropdown select component
+- **`Tooltip.tsx`** - Tooltip component
+
+#### Theme System (`src/themes/`)
+- **`themeConfig.ts`** - Theme configuration and category definitions
+- **`themeUtils.ts`** - Theme utility functions (loading, merging, flattening)
+- **`applyThemeSync.ts`** - Synchronous theme application (prevents FOUC)
+- **`useTheme.tsx`** - React hook for theme management
+- **`ui/ThemeToggle/`** - Theme toggle UI component and related files
+  - **`ThemeToggle.tsx`** - Main theme toggle component
+  - **`useThemeToggle.ts`** - Hook for theme toggle UI state
+  - **`themeToggleConfig.ts`** - Theme toggle configuration
+  - **`themeToggleUtils.ts`** - Theme toggle utility functions
+  - **`index.ts`** - Theme toggle exports
+
+### Build Output (`dist/`)
+
+- **`index.js`** - CommonJS bundle
+- **`index.mjs`** - ESM bundle
+- **`index.d.ts`** - TypeScript declarations (CJS)
+- **`index.d.mts`** - TypeScript declarations (ESM)
+
+### Scripts (`scripts/`)
+
+Setup and runtime scripts:
+- **`init.js`** - Postinstall script that sets up Tailwind, PostCSS, and token files in consuming apps
+- **`apply-theme-sync.js`** - Standalone synchronous theme script (injected into HTML)
+- **`applyThemeSync.js`** - Synchronous theme application module
+- **`themeConfig.js`** - Theme configuration (JavaScript version)
+- **`themeUtils.js`** - Theme utilities (JavaScript version)
+- **`tokens/`** - Default token files (copied to consuming apps)
+  - **`base.json`** - Base design tokens
+  - **`palettes.json`** - Color palette definitions
+  - **`themes/`** - Theme category files
+    - **`color/`** - Color theme variants (white, dark)
+    - **`typography/`** - Typography themes (sans, serif)
+    - **`shape/`** - Shape themes (smooth, sharp)
+    - **`density/`** - Density themes (comfortable, compact)
+    - **`animation/`** - Animation themes (gentle, brisk)
+    - **`custom/`** - Custom theme examples (brand, minimal)
+
+### Test Application (`test/`)
+
+Local test environment for developing and testing the library:
+- **`package.json`** - Test app dependencies
+- **`vite.config.ts`** - Vite configuration for test app
+- **`index.html`** - Test app HTML entry point
+- **`src/App.tsx`** - Test app component showcasing all library components
+- **`src/main.tsx`** - Test app entry point
+- **`src/index.css`** - Test app global styles
+- **`tailwind.config.js`** - Tailwind config for test app
+- **`postcss.config.js`** - PostCSS config for test app
+- **`public/tokens/`** - Token files for testing (generated by init script)
+- **`dist/`** - Vite build output (ignored in git)
+
+## Usage
+
+Install:
+```bash
+npm install shru-design-system
 ```
-.
-├── apps/
-│   └── design-system/          # Next.js showcase application
-│       ├── app/                # Routes (minimal)
-│       ├── src/design-system/ # Component library & themes
-│       ├── config/            # App configuration
-│       ├── hooks/             # App-level hooks
-│       ├── lib/               # Shared utilities
-│       └── public/tokens/     # Design tokens (symlinked to src/tokens)
-├── src/                        # Reusable library code
-│   ├── tokens/                # Design tokens (JSON files)
-│   └── index.ts               # Library entry point (re-exports from app's theme system)
-├── dist/                       # Built library files (generated)
-└── package.json                # Root package config
+
+### Theme setup (new flow)
+- Tokens are embedded in the bundle, so the theme system works out-of-the-box (no `/public/tokens` required).
+- If you want to self-host tokens (for custom themes or CDN):
+  - Set `window.__THEME_TOKENS_BASE__ = "/tokens"` (or your URL) before the app renders, or set `DESIGN_SYSTEM_TOKENS_BASE` env at build/runtime.
+  - Serve token JSONs at `<base>/base.json`, `<base>/palettes.json`, `<base>/themes/<category>/<theme>.json`.
+- Blocking HTML injection is removed; the runtime/applyThemeSync appends `#dynamic-theme` at the end of `<head>` so its CSS vars override compiled CSS.
+
+Optional token copy:
+```bash
+npx shru-design-system-init   # copies tokens into public/tokens if you want static hosting
 ```
 
-## Documentation
+Import components:
+```tsx
+import { Button, Modal, ThemeToggle, registerThemeFromFile } from 'shru-design-system'
+```
 
-### Getting Started
-- **[USAGE.md](./USAGE.md)** - Complete usage guide: setup, theme toggle, components, how it works
-- **[CURSOR_PROMPT.md](./CURSOR_PROMPT.md)** - Ready-to-use Cursor prompt for integrating the library
+Registering themes:
+- Add a custom theme file at your token base, e.g. `/tokens/themes/custom/my-brand.json`.
+- Call at runtime (after page load):
+```ts
+registerThemeFromFile('custom', 'my-brand', '/tokens/themes/custom/my-brand.json')
+```
+The theme toggle will pick it up automatically.
 
-### Advanced Topics
-- **[TOKEN_EXTENSION.md](./TOKEN_EXTENSION.md)** - Extending themes with custom token files
-- **[COMPONENT_DEPENDENCIES.md](./COMPONENT_DEPENDENCIES.md)** - Complete dependencies reference
+## Development
 
-### Contributing & Development
-- **[CONTRIBUTING.md](./CONTRIBUTING.md)** - Contribution guidelines and development workflow
-- **[apps/design-system/ARCHITECTURE.md](./apps/design-system/ARCHITECTURE.md)** - Architecture overview
-- **[apps/design-system/src/design-system/components/README.md](./apps/design-system/src/design-system/components/README.md)** - Adding components
-- **[apps/design-system/src/design-system/themes/README.md](./apps/design-system/src/design-system/themes/README.md)** - Theme system internals
+Build the library:
+```bash
+npm run build
+```
 
-## Contributing
-
-### Getting Started
-
-1. **Clone and install:**
-   ```bash
-   git clone <repo-url>
-   npm install
-   ```
-
-2. **Run the showcase:**
-   ```bash
-   npm run dev
-   ```
-
-3. **Make changes:**
-   - **Adding a component**: See [Component System Docs](./apps/design-system/src/design-system/components/README.md#how-to-add-a-component)
-   - **Adding a theme**: See [Theme System Docs](./apps/design-system/src/design-system/themes/README.md#how-to-add-a-new-theme)
-   - **Library changes**: Edit `src/`, then run `npm run build:lib`
-
-### Development Workflow
-
-1. Make changes in appropriate module (`components/`, `themes/`, etc.)
-2. Test in the showcase app (`npm run dev`)
-3. If changing library code (`src/`), rebuild: `npm run build:lib`
-
-## License
-
-MIT
+Test locally:
+```bash
+cd test && npm run dev
+```

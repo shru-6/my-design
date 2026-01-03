@@ -1,102 +1,72 @@
 {
   "name": "shru-design-system",
-  "version": "0.0.6",
-  "description": "A comprehensive design system with theme toggle, components, and token-based theming",
-  "license": "MIT",
-  "keywords": [
-    "design-system",
-    "theme-toggle",
-    "react",
-    "components",
-    "tailwind",
-    "css-variables",
-    "theming",
-    "ui-components"
-  ],
-  "type": "module",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "version": "0.1.11",
+  "description": "A React component library with atoms and molecules built on Radix UI and Tailwind CSS",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "src/tokens",
-    "scripts",
-    "apps/design-system/styles/globals.css"
+    "scripts"
   ],
+  "bin": {
+    "shru-design-system-init": "./scripts/init.js"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs"
-    },
-    "./styles": "./apps/design-system/styles/globals.css"
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
   },
-  "workspaces": [
-    "apps/*"
-  ],
   "scripts": {
-    "build": "npm run build:css && tsup src/index.ts --dts --format esm,cjs",
-    "build:lib": "npm run build:css && tsup src/index.ts --dts --format esm,cjs",
-    "build:css": "node scripts/build-css.js",
-    "postinstall": "npm run build:lib",
-    "copy:tokens": "node scripts/copy-tokens.js",
-    "copy:globals": "node scripts/copy-globals.js",
-    "dev": "turbo run dev --parallel",
-    "lint": "turbo run lint",
-    "lint:fix": "turbo run lint:fix",
-    "preview": "turbo run preview",
-    "typecheck": "turbo run typecheck",
-    "format:write": "turbo run format:write",
-    "format:check": "turbo run format:check",
-    "check": "turbo lint typecheck format:check"
-  },
-  "bin": {
-    "copy-tokens": "./scripts/copy-tokens.js",
-    "copy-globals": "./scripts/copy-globals.js"
+    "build": "tsup src/index.ts --dts --format esm,cjs",
+    "prepublishOnly": "npm run build",
+    "postinstall": "node scripts/init.js || true"
   },
   "peerDependencies": {
+    "@radix-ui/react-checkbox": "^1.0.0",
+    "@radix-ui/react-dialog": "^1.0.0",
+    "@radix-ui/react-label": "^2.0.0",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.0.0",
+    "@radix-ui/react-slot": "^1.0.0",
+    "@radix-ui/react-tooltip": "^1.0.0",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.400.0",
     "react": ">=18",
-    "react-dom": ">=18"
-  },
-  "packageManager": "pnpm@9.0.6",
-  "dependencies": {
-    "@babel/core": "^7.22.1",
-    "@commitlint/cli": "^17.6.3",
-    "@commitlint/config-conventional": "^17.6.3",
-    "@ianvs/prettier-plugin-sort-imports": "^3.7.2",
-    "@manypkg/cli": "^0.20.0",
-    "@typescript-eslint/parser": "^5.59.7",
-    "autoprefixer": "^10.4.14",
-    "concurrently": "^8.0.1",
-    "cross-env": "^7.0.3",
-    "eslint": "^8.41.0",
-    "eslint-config-next": "13.3.0",
-    "eslint-config-prettier": "^8.8.0",
-    "eslint-config-turbo": "^1.9.9",
-    "eslint-plugin-react": "^7.32.2",
-    "eslint-plugin-tailwindcss": "3.13.1",
-    "motion": "^12.12.1",
-    "prettier": "^2.8.8",
-    "pretty-quick": "^3.1.3",
-    "tailwindcss": "^3.4.18",
-    "tsx": "^4.1.4",
-    "turbo": "^1.9.9",
-    "vite": "^7.1.12",
-    "vite-tsconfig-paths": "^4.2.0",
-    "vitest": "^2.1.9"
+    "react-dom": ">=18",
+    "tailwind-merge": "^2.0.0"
   },
   "devDependencies": {
-    "@types/hast": "^3.0.4",
-    "@types/node": "^20.11.27",
+    "@radix-ui/react-checkbox": "^1.0.7",
+    "@radix-ui/react-dialog": "^1.0.5",
+    "@radix-ui/react-label": "^2.1.0",
+    "@radix-ui/react-select": "^2.0.0",
+    "@radix-ui/react-separator": "^1.1.0",
+    "@radix-ui/react-slot": "^1.0.2",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "@types/react": "^18.2.65",
     "@types/react-dom": "^18.2.22",
+    "autoprefixer": "^10.4.23",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.1.0",
+    "lucide-react": "^0.400.0",
+    "tailwind-merge": "^2.2.0",
+    "tailwindcss": "^3.4.19",
     "tsup": "^8.5.1",
     "typescript": "^5.5.3"
   },
-  "pnpm": {
-    "overrides": {
-      "@types/react": "19.2.2",
-      "@types/react-dom": "19.2.2"
-    }
-  }
+  "license": "MIT",
+  "keywords": [
+    "react",
+    "components",
+    "design-system",
+    "radix-ui",
+    "tailwind",
+    "ui-components",
+    "atoms",
+    "molecules"
+  ]
 }

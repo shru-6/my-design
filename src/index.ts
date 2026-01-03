@@ -1,62 +1,57 @@
-/**
- * Design System Library
- * Main entry point for the reusable design system
- * 
- * This package provides:
- * - 72+ Design system components (atoms, molecules, layout, primitives)
- * - Theme toggle component with token-based theming
- * - Theme management hooks and utilities
- * - CSS variables generated dynamically from token files
- * 
- * All exports are re-exported from the app's design system to maintain a single source of truth.
- */
+// Atoms
+export { Button, buttonVariants } from "./atoms/Button"
+export { Badge, badgeVariants } from "./atoms/Badge"
+export { TextInput } from "./atoms/TextInput"
+export { Label } from "./atoms/Label"
+export { Textarea } from "./atoms/Textarea"
+export { Separator } from "./atoms/Separator"
+export { Checkbox } from "./atoms/Checkbox"
 
-// Design System Components
-// Atoms (Button, Input, Badge, etc.)
-export * from "../apps/design-system/src/design-system/components/atoms"
-
-// Molecules (Modal, Select, Form, etc.)
-export * from "../apps/design-system/src/design-system/components/molecules"
-
-// Layout (Card, Table, Sidebar, etc.)
-export * from "../apps/design-system/src/design-system/components/layout"
-
-// Primitives (Box, Flex, Text, etc.)
+// Molecules
 export {
-  Box as PrimitiveBox,
-  type BoxProps as PrimitiveBoxProps,
-  Flex as PrimitiveFlex,
-  type FlexProps as PrimitiveFlexProps,
-  Stack as PrimitiveStack,
-  type StackProps as PrimitiveStackProps,
-  Text as PrimitiveText,
-  type TextProps as PrimitiveTextProps,
-  Icon,
-  type IconProps,
-  VisuallyHidden,
-  type VisuallyHiddenProps,
-} from "../apps/design-system/src/design-system/components/primitives"
+  Modal,
+  ModalClose,
+  ModalContent,
+  ModalDescription,
+  ModalFooter,
+  ModalHeader,
+  ModalOverlay,
+  ModalPortal,
+  ModalTitle,
+  ModalTrigger,
+} from "./molecules/Modal"
 
-// Theme Toggle Component
-export { ThemeToggle, type ThemeToggleProps } from "../apps/design-system/src/design-system/themes/ui/ThemeToggle"
-export { useThemeToggle } from "../apps/design-system/src/design-system/themes/ui/ThemeToggle"
+export {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectLabel,
+  SelectScrollDownButton,
+  SelectScrollUpButton,
+  SelectSeparator,
+  SelectTrigger,
+  SelectValue,
+} from "./molecules/Select"
 
-// Theme System Hooks
-export { useTheme, type ThemeSelection, type ThemeMetadata } from "../apps/design-system/src/design-system/themes/useTheme"
+export {
+  Tooltip,
+  TooltipTrigger,
+  TooltipContent,
+  TooltipProvider,
+} from "./molecules/Tooltip"
 
-// Theme Configuration and Utilities
-export { 
+// Theme System
+export { ThemeToggle, type ThemeToggleProps, useThemeToggle } from "./themes/ui/ThemeToggle"
+export { useTheme, type ThemeSelection, type ThemeMetadata } from "./themes/useTheme"
+export {
   getThemeCategories,
   registerTheme,
+  registerThemeFromFile,
   getThemeFilePath,
   getThemesForCategory,
-  getTheme
-} from "../apps/design-system/src/design-system/themes/themeConfig"
-
-// Theme Discovery Utilities
-export {
-  discoverTokenFiles,
-  scanCategory,
-  registerThemeFromFile
-} from "../apps/design-system/src/design-system/themes/themeDiscovery"
-
+  getTheme,
+  THEME_CATEGORY_ORDER,
+} from "./themes/themeConfig"
+export { enableDebugMode, getCurrentCSSVariables } from "./themes/themeUtils"
+export { applyThemeSync } from "./themes/applyThemeSync"

@@ -1,0 +1,13 @@
+{
+  "_createdBy": "shru-design-system library",
+  "color": {
+    "primary": "{palette.purple.600}",
+    "primary-foreground": "{palette.white}",
+    "accent": "{palette.pink.500}",
+    "accent-foreground": "{palette.white}"
+  },
+  "radius": {
+    "button": "0.5rem",
+    "card": "0.75rem"
+  }
+}

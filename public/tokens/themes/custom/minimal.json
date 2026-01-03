@@ -1,0 +1,16 @@
+{
+  "_createdBy": "shru-design-system library",
+  "color": {
+    "primary": "{palette.gray.700}",
+    "primary-foreground": "{palette.white}",
+    "background": "{palette.white}",
+    "foreground": "{palette.gray.900}"
+  },
+  "spacing": {
+    "component": {
+      "xs": "0.375rem",
+      "sm": "0.5rem",
+      "md": "0.75rem"
+    }
+  }
+}
