@@ -134,27 +134,27 @@ function loadJSONSync(path: string, bases: string[]): any {
       continue
     }
 
-    try {
-      const xhr = new XMLHttpRequest()
+  try {
+    const xhr = new XMLHttpRequest()
       const url = base.endsWith('/') ? `${base}${normalizedPath}` : `${base}/${normalizedPath}`
       xhr.open('GET', url, false) // false = synchronous
-      xhr.send(null)
-      
+    xhr.send(null)
+    
       // 404 means file doesn't exist - try next base
-      if (xhr.status === 404) {
+    if (xhr.status === 404) {
         continue
+    }
+    
+    if (xhr.status === 200 || xhr.status === 0) {
+      const contentType = xhr.getResponseHeader('content-type')
+      // Check if response is actually JSON (not HTML error page)
+      if (contentType && contentType.includes('application/json')) {
+        return JSON.parse(xhr.responseText)
       }
-      
-      if (xhr.status === 200 || xhr.status === 0) {
-        const contentType = xhr.getResponseHeader('content-type')
-        // Check if response is actually JSON (not HTML error page)
-        if (contentType && contentType.includes('application/json')) {
-          return JSON.parse(xhr.responseText)
-        }
         // If not JSON (likely HTML error page), try next base
         continue
-      }
-    } catch {
+    }
+  } catch {
       // Try next base
     }
   }

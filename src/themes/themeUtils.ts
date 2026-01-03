@@ -160,27 +160,27 @@ export async function loadTokenFile(path: string): Promise<any> {
 
     // Build URL from base + normalized path
     const url = base.endsWith('/') ? `${base}${normalizedPath}` : `${base}/${normalizedPath}`
-
-    try {
+  
+  try {
       const response = await fetch(url)
-      if (!response.ok) {
+    if (!response.ok) {
         // 404 means file doesn't exist - try next base
-        if (response.status === 404) {
+      if (response.status === 404) {
           continue
-        }
+      }
         throw new Error(`Failed to load ${url}: ${response.statusText}`)
-      }
-      
-      const contentType = response.headers.get('content-type')
-      // Check if response is actually JSON (not HTML error page)
-      if (!contentType || !contentType.includes('application/json')) {
+    }
+    
+    const contentType = response.headers.get('content-type')
+    // Check if response is actually JSON (not HTML error page)
+    if (!contentType || !contentType.includes('application/json')) {
         continue
-      }
-      
-      const data = await response.json()
+    }
+    
+    const data = await response.json()
       tokenCache.set(normalizedPath, data)
-      return deepClone(data)
-    } catch (error) {
+    return deepClone(data)
+  } catch (error) {
       // Only log errors in debug mode; try next base
       if (typeof window !== 'undefined' && (window as any).__DESIGN_SYSTEM_DEBUG__) {
         console.warn(`Error loading token file ${url}:`, error)

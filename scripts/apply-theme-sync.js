@@ -88,26 +88,26 @@
   function loadJSONSync(relativePath, bases) {
     for (var i = 0; i < bases.length; i++) {
       var base = bases[i];
-      try {
+    try {
         var url = base.endsWith('/') ? base + relativePath : base + '/' + relativePath;
-        var xhr = new XMLHttpRequest();
+      var xhr = new XMLHttpRequest();
         xhr.open('GET', url, false);
-        xhr.send(null);
-        
+      xhr.send(null);
+      
         // 404 means file doesn't exist - try next base
-        if (xhr.status === 404) {
+      if (xhr.status === 404) {
           continue;
+      }
+      
+      if (xhr.status === 200 || xhr.status === 0) {
+        var contentType = xhr.getResponseHeader('content-type');
+        // Check if response is actually JSON (not HTML error page)
+        if (contentType && contentType.includes('application/json')) {
+          return JSON.parse(xhr.responseText);
         }
-        
-        if (xhr.status === 200 || xhr.status === 0) {
-          var contentType = xhr.getResponseHeader('content-type');
-          // Check if response is actually JSON (not HTML error page)
-          if (contentType && contentType.includes('application/json')) {
-            return JSON.parse(xhr.responseText);
-          }
           // If not JSON (likely HTML error page), try next base
           continue;
-        }
+      }
       } catch (e) {
         // Try next base
       }

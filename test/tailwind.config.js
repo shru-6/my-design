@@ -3,7 +3,7 @@ export default {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
-    "../dist/**/*.{js,mjs}",
+    "./node_modules/shru-design-system/dist/**/*.{js,mjs}",
   ],
   theme: {
     extend: {

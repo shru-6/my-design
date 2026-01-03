@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Button, Badge, TextInput, Label, Textarea, Separator, Checkbox, Modal, ModalTrigger, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, ThemeToggle, THEME_CATEGORY_ORDER, registerThemeFromFile } from 'shru-design-system'
+import { Button, Badge, TextInput, Label, Textarea, Separator, Checkbox, Modal, ModalTrigger, ModalContent, ModalHeader, ModalTitle, ModalDescription, ModalFooter, Select, SelectTrigger, SelectValue, SelectContent, SelectItem, Tooltip, TooltipTrigger, TooltipContent, TooltipProvider, ThemeToggle } from 'shru-design-system'
+// import { THEME_CATEGORY_ORDER, registerThemeFromFile } from 'shru-design-system'
 
 function App() {
   const [modalOpen, setModalOpen] = useState(false)
@@ -147,6 +148,22 @@ function App() {
                 Selected: {selectValue}
               </p>
             )}
+          </div>
+        </div>
+
+        <div style={{ marginTop: '2rem' }}>
+          <h3>Tooltip</h3>
+          <div style={{ marginTop: '1rem' }}>
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button variant="secondary">Hover me</Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  Tooltip content from shru-design-system
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
         </div>
       </section>
