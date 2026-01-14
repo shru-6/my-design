@@ -20,19 +20,89 @@ A React component library with atoms and molecules built on Radix UI and Tailwin
 
 #### Atoms (`src/atoms/`)
 Basic UI building blocks:
-- **`Button.tsx`** - Button component with variants and sizes
+- **`Alert.tsx`** - Alert component for notifications
+- **`Avatar.tsx`** - Avatar component with image and fallback
 - **`Badge.tsx`** - Badge component for labels and tags
-- **`TextInput.tsx`** - Text input field component
-- **`Label.tsx`** - Form label component
-- **`Textarea.tsx`** - Multi-line text input component
-- **`Separator.tsx`** - Horizontal/vertical divider component
+- **`Button.tsx`** - Button component with variants and sizes
 - **`Checkbox.tsx`** - Checkbox input component
+- **`Empty.tsx`** - Empty state component
+- **`ErrorBoundary.tsx`** - Error boundary component
+- **`Image.tsx`** - Image component with loading states
+- **`InputOTP.tsx`** - OTP input component
+- **`Kbd.tsx`** - Keyboard key display component
+- **`Label.tsx`** - Form label component
+- **`Progress.tsx`** - Progress bar component
+- **`Radio.tsx`** - Radio button group component
+- **`Separator.tsx`** - Horizontal/vertical divider component
+- **`Skeleton.tsx`** - Skeleton loading component
+- **`Slider.tsx`** - Slider input component
+- **`Spinner.tsx`** - Loading spinner component
+- **`Switch.tsx`** - Toggle switch component
+- **`Text.tsx`** - Typography text component
+- **`TextInput.tsx`** - Text input field component
+- **`Textarea.tsx`** - Multi-line text input component
+- **`Toggle.tsx`** - Toggle button component
+- **`Upload.tsx`** - File upload component
 
 #### Molecules (`src/molecules/`)
 Composite components:
+- **`Accordion.tsx`** - Collapsible accordion component
+- **`AlertDialog.tsx`** - Alert dialog component
+- **`Breadcrumb.tsx`** - Breadcrumb navigation component
+- **`Calendar.tsx`** - Calendar date picker component
+- **`Carousel.tsx`** - Image/content carousel component
+- **`Chart.tsx`** - Chart component (Recharts wrapper)
+- **`Collapsible.tsx`** - Collapsible content component
+- **`Command.tsx`** - Command palette component
+- **`ConfirmModal.tsx`** - Confirmation modal component
+- **`ContextMenu.tsx`** - Right-click context menu
+- **`CopyButton.tsx`** - Copy to clipboard button
+- **`Drawer.tsx`** - Drawer/side panel component
+- **`DropdownMenu.tsx`** - Dropdown menu component
+- **`Field.tsx`** - Form field wrapper component
+- **`Form.tsx`** - Form component (react-hook-form)
+- **`FormInput.tsx`** - Form input with label and error
+- **`FormModal.tsx`** - Modal with form integration
+- **`HistoryControlButtons.tsx`** - Browser history controls
+- **`HoverCard.tsx`** - Hover card component
+- **`InfoBanner.tsx`** - Information banner component
+- **`InlineEdit.tsx`** - Inline editing component
+- **`InputGroup.tsx`** - Input with addons/buttons
+- **`Menubar.tsx`** - Menu bar component
 - **`Modal.tsx`** - Modal dialog component
+- **`NavigationMenu.tsx`** - Navigation menu component
+- **`Pagination.tsx`** - Pagination component
+- **`Popover.tsx`** - Popover component
 - **`Select.tsx`** - Dropdown select component
+- **`Sheet.tsx`** - Sheet/side panel component
+- **`Snackbar.tsx`** - Snackbar notification component
+- **`StatusText.tsx`** - Status text with icons
+- **`Stepper.tsx`** - Step indicator component
+- **`Tabs.tsx`** - Tabs component
+- **`Toast.tsx`** - Toast notification component
+- **`Toaster.tsx`** - Toast provider component
+- **`ToggleGroup.tsx`** - Toggle group component
 - **`Tooltip.tsx`** - Tooltip component
+- **`TriggerModal.tsx`** - Modal with trigger component
+
+#### Layout (`src/layout/`)
+Layout and container components:
+- **`AspectRatio.tsx`** - Aspect ratio container
+- **`Box.tsx`** - Generic box container
+- **`Card.tsx`** - Card container component
+- **`CollapsiblePanel.tsx`** - Collapsible panel component
+- **`Container.tsx`** - Responsive container component
+- **`EmptyScreen.tsx`** - Empty screen component
+- **`Footer.tsx`** - Footer component
+- **`Grid.tsx`** - Grid layout component
+- **`Header.tsx`** - Header component
+- **`List.tsx`** - List component
+- **`Resizable.tsx`** - Resizable panels component
+- **`ResizeContainer.tsx`** - Resizable container wrapper
+- **`ScrollArea.tsx`** - Scrollable area component
+- **`Sidebar.tsx`** - Sidebar navigation component
+- **`Stack.tsx`** - Stack layout component
+- **`Table.tsx`** - Table component
 
 #### Theme System (`src/themes/`)
 - **`themeConfig.ts`** - Theme configuration and category definitions
@@ -107,8 +177,28 @@ npx shru-design-system-init   # copies tokens into public/tokens if you want sta
 
 Import components:
 ```tsx
-import { Button, Modal, ThemeToggle, registerThemeFromFile } from 'shru-design-system'
+import { 
+  Button, 
+  Modal, 
+  ThemeToggle, 
+  Alert,
+  Avatar,
+  Accordion,
+  Calendar,
+  Carousel,
+  Form,
+  Field,
+  // ... and many more
+  registerThemeFromFile 
+} from 'shru-design-system'
 ```
+
+### Available Components
+
+The library includes 67+ components organized into:
+- **Atoms** (23): Basic UI elements like Button, Input, Badge, etc.
+- **Molecules** (35): Composite components like Modal, Form, Calendar, etc.
+- **Layout** (16): Layout components like Grid, Stack, Sidebar, etc.
 
 Registering themes:
 - Add a custom theme file at your token base, e.g. `/tokens/themes/custom/my-brand.json`.
