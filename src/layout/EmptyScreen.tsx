@@ -9,8 +9,32 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "../atoms/Empty"
+import { cva, type VariantProps } from "class-variance-authority"
 
-export interface EmptyScreenProps {
+const emptyScreenVariants = cva(
+  "py-12",
+  {
+    variants: {
+      variant: {
+        default: "",
+        minimal: "py-6",
+        spacious: "py-16",
+      },
+      size: {
+        sm: "text-sm",
+        md: "text-base",
+        lg: "text-lg",
+      },
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md",
+    },
+  }
+)
+
+export interface EmptyScreenProps 
+  extends VariantProps<typeof emptyScreenVariants> {
   title?: string
   description?: string
   icon?: React.ReactNode
@@ -23,10 +47,15 @@ export function EmptyScreen({
   description,
   icon,
   action,
+  variant,
+  size,
   className,
 }: EmptyScreenProps) {
   return (
-    <Empty className={cn("py-12", className)} data-slot="empty-screen">
+    <Empty 
+      className={cn(emptyScreenVariants({ variant, size }), className)} 
+      data-slot="empty-screen"
+    >
       {icon && <EmptyContent>{icon}</EmptyContent>}
       <EmptyHeader>
         <EmptyTitle>{title}</EmptyTitle>

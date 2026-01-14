@@ -143,7 +143,8 @@ var badgeVariantsConfig = {
       default: "border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90",
       secondary: "border-transparent bg-secondary text-secondary-foreground [a&]:hover:bg-secondary/90",
       destructive: "border-transparent bg-destructive text-white [a&]:hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
-      outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground"
+      outline: "text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground",
+      disabled: "border-transparent bg-muted text-muted-foreground opacity-50 cursor-not-allowed"
     }
   },
   defaultVariants: {
@@ -154,14 +155,15 @@ var badgeVariants = classVarianceAuthority.cva(
   "inline-flex items-center justify-center rounded-full border px-2 py-0.5 text-xs font-medium font-sans w-fit whitespace-nowrap shrink-0 [&>svg]:size-3 gap-component-xs [&>svg]:pointer-events-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] duration-normal overflow-hidden",
   badgeVariantsConfig
 );
-var Badge = React14__namespace.forwardRef(({ className, variant, asChild = false, ...props }, ref) => {
+var Badge = React14__namespace.forwardRef(({ className, variant, asChild = false, onClick, ...props }, ref) => {
   const Comp = asChild ? reactSlot.Slot : "span";
   return /* @__PURE__ */ jsxRuntime.jsx(
     Comp,
     {
       ref,
       "data-slot": "badge",
-      className: cn(badgeVariants({ variant }), className),
+      className: cn(badgeVariants({ variant }), onClick && "cursor-pointer", className),
+      onClick,
       ...props
     }
   );
@@ -4004,10 +4006,12 @@ var variantMap3 = {
 function InfoBanner({
   message,
   variant = "info",
-  className
+  className,
+  tooltip = false,
+  children
 }) {
   const { icon: Icon2 } = variantMap3[variant];
-  return /* @__PURE__ */ jsxRuntime.jsxs(
+  const content = /* @__PURE__ */ jsxRuntime.jsxs(
     Alert,
     {
       "data-slot": "info-banner",
@@ -4023,6 +4027,13 @@ function InfoBanner({
       ]
     }
   );
+  if (tooltip) {
+    return /* @__PURE__ */ jsxRuntime.jsx(TooltipProvider, { children: /* @__PURE__ */ jsxRuntime.jsxs(Tooltip, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx(TooltipTrigger, { asChild: true, children: children || /* @__PURE__ */ jsxRuntime.jsx(Icon2, { className: "size-4" }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(TooltipContent, { children: /* @__PURE__ */ jsxRuntime.jsx("p", { children: message }) })
+    ] }) });
+  }
+  return content;
 }
 function InlineEdit({
   value: initialValue,
@@ -4207,21 +4218,107 @@ function InputGroupTextarea({
 }
 function FormInput({
   className,
+  type = "text",
   label,
   error,
   description,
+  variant = "default",
   id,
+  options,
+  onValueChange,
+  checked,
+  onCheckedChange,
   ...props
 }) {
   const inputId = id || React14__namespace.useId();
+  if (type === "checkbox") {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { "data-slot": "form-input", className: cn("space-y-2", className), children: [
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center space-x-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          Checkbox,
+          {
+            id: inputId,
+            checked,
+            onCheckedChange,
+            disabled: props.disabled
+          }
+        ),
+        label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: inputId, className: cn("cursor-pointer", error && "text-destructive"), children: [
+          label,
+          props.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+        ] })
+      ] }),
+      description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: description }),
+      error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+    ] });
+  }
+  if (type === "select") {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { "data-slot": "form-input", className: cn("space-y-2", className), children: [
+      label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: inputId, className: error && "text-destructive", children: [
+        label,
+        props.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+      ] }),
+      description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: description }),
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        Select,
+        {
+          value: props.value,
+          onValueChange,
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              SelectTrigger,
+              {
+                id: inputId,
+                className: cn(
+                  error && "border-destructive",
+                  variant === "minimal" && "border-0 shadow-none bg-transparent"
+                ),
+                children: /* @__PURE__ */ jsxRuntime.jsx(SelectValue, { placeholder: props.placeholder || "Select..." })
+              }
+            ),
+            /* @__PURE__ */ jsxRuntime.jsx(SelectContent, { children: options?.map((option) => /* @__PURE__ */ jsxRuntime.jsx(SelectItem, { value: option.value, children: option.label }, option.value)) })
+          ]
+        }
+      ),
+      error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+    ] });
+  }
+  if (type === "textarea") {
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { "data-slot": "form-input", className: cn("space-y-2", className), children: [
+      label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: inputId, className: error && "text-destructive", children: [
+        label,
+        props.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+      ] }),
+      description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: description }),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Textarea,
+        {
+          id: inputId,
+          className: cn(
+            error && "border-destructive",
+            variant === "minimal" && "border-0 shadow-none bg-transparent"
+          ),
+          ...props
+        }
+      ),
+      error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+    ] });
+  }
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { "data-slot": "form-input", className: cn("space-y-2", className), children: [
-    label && /* @__PURE__ */ jsxRuntime.jsx(Label, { htmlFor: inputId, className: error && "text-destructive", children: label }),
+    label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: inputId, className: error && "text-destructive", children: [
+      label,
+      props.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+    ] }),
     description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: description }),
     /* @__PURE__ */ jsxRuntime.jsx(
       TextInput,
       {
         id: inputId,
-        className: error && "border-destructive",
+        type,
+        className: cn(
+          error && "border-destructive",
+          variant === "minimal" && "border-0 shadow-none bg-transparent"
+        ),
         ...props
       }
     ),
@@ -4229,38 +4326,112 @@ function FormInput({
   ] });
 }
 function ConfirmModal({
-  open,
+  open: openProp,
   onOpenChange,
-  onConfirm,
+  triggerLabel,
+  triggerProps,
+  text,
   title,
   description,
-  confirmLabel = "Confirm",
+  onConfirm,
+  confirmLabel,
   cancelLabel = "Cancel",
-  variant = "default"
+  variant = "default",
+  loading = false,
+  error,
+  showModal = true
 }) {
-  const handleConfirm = () => {
-    onConfirm();
-    onOpenChange(false);
+  const [open, setOpen] = React14__namespace.useState(openProp ?? false);
+  const [isSubmitting, setIsSubmitting] = React14__namespace.useState(false);
+  const isControlled = openProp !== void 0;
+  const isOpen = isControlled ? openProp : open;
+  const setIsOpen = isControlled ? onOpenChange : setOpen;
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      await onConfirm();
+      setIsOpen?.(false);
+    } catch (err) {
+      console.error("Confirm action error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
-  return /* @__PURE__ */ jsxRuntime.jsx(Modal, { open, onOpenChange, children: /* @__PURE__ */ jsxRuntime.jsxs(ModalContent, { "data-slot": "confirm-modal", children: [
+  const getVariantConfig = () => {
+    switch (variant) {
+      case "delete":
+      case "destructive":
+        return {
+          buttonVariant: "destructive",
+          defaultConfirmLabel: "Delete"
+        };
+      case "save":
+        return {
+          buttonVariant: "default",
+          defaultConfirmLabel: "Save"
+        };
+      case "warning":
+        return {
+          buttonVariant: "default",
+          defaultConfirmLabel: "Continue"
+        };
+      default:
+        return {
+          buttonVariant: "default",
+          defaultConfirmLabel: "Confirm"
+        };
+    }
+  };
+  const { buttonVariant, defaultConfirmLabel } = getVariantConfig();
+  const finalConfirmLabel = confirmLabel || defaultConfirmLabel;
+  const isLoading = loading || isSubmitting;
+  const modalContent = /* @__PURE__ */ jsxRuntime.jsx(Modal, { open: isOpen && showModal, onOpenChange: setIsOpen, children: /* @__PURE__ */ jsxRuntime.jsxs(ModalContent, { "data-slot": "confirm-modal", children: [
     /* @__PURE__ */ jsxRuntime.jsxs(ModalHeader, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }),
-      description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description })
+      description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description }),
+      text && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: text })
     ] }),
+    error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-6", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: error }) }),
     /* @__PURE__ */ jsxRuntime.jsxs(ModalFooter, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "outline", onClick: () => onOpenChange(false), children: cancelLabel }),
-      /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: variant === "destructive" ? "destructive" : "default", onClick: handleConfirm, children: confirmLabel })
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          variant: "outline",
+          onClick: () => setIsOpen?.(false),
+          disabled: isLoading,
+          children: cancelLabel
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          variant: buttonVariant,
+          onClick: handleConfirm,
+          disabled: isLoading,
+          children: isLoading ? "Loading..." : finalConfirmLabel
+        }
+      )
     ] })
   ] }) });
+  if (triggerLabel) {
+    return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open: isOpen && showModal, onOpenChange: setIsOpen, children: [
+      /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntime.jsx(Button, { ...triggerProps, children: triggerLabel }) }),
+      modalContent
+    ] });
+  }
+  return modalContent;
 }
 function CopyButton({
   text,
+  getText,
   onCopy,
   ...props
 }) {
   const [copied, setCopied] = React14__namespace.useState(false);
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(text);
+    const textToCopy = getText ? getText() : text || "";
+    if (!textToCopy) return;
+    await navigator.clipboard.writeText(textToCopy);
     setCopied(true);
     onCopy?.();
     setTimeout(() => setCopied(false), 2e3);
@@ -4278,36 +4449,235 @@ function CopyButton({
   );
 }
 function FormModal({
-  open,
+  open: openProp,
   onOpenChange,
+  triggerLabel,
+  triggerProps,
   title,
   onSubmit,
-  children,
   submitLabel = "Submit",
-  cancelLabel = "Cancel"
+  cancelLabel = "Cancel",
+  fields,
+  children,
+  beforeFields,
+  afterFields
 }) {
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const data = Object.fromEntries(formData);
-    onSubmit(data);
+  const [open, setOpen] = React14__namespace.useState(openProp ?? false);
+  const [formData, setFormData] = React14__namespace.useState({});
+  const [errors, setErrors] = React14__namespace.useState({});
+  const [isSubmitting, setIsSubmitting] = React14__namespace.useState(false);
+  const isControlled = openProp !== void 0;
+  const isOpen = isControlled ? openProp : open;
+  const setIsOpen = isControlled ? onOpenChange : setOpen;
+  React14__namespace.useEffect(() => {
+    if (fields) {
+      const initialData = {};
+      fields.forEach((field) => {
+        if (field.defaultValue !== void 0) {
+          initialData[field.name] = field.defaultValue;
+        }
+      });
+      setFormData(initialData);
+    }
+  }, [fields]);
+  const handleChange = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    if (errors[name]) {
+      setErrors((prev) => {
+        const next = { ...prev };
+        delete next[name];
+        return next;
+      });
+    }
   };
-  return /* @__PURE__ */ jsxRuntime.jsx(Modal, { open, onOpenChange, children: /* @__PURE__ */ jsxRuntime.jsx(ModalContent, { "data-slot": "form-modal", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
+  const validateField = (field, value) => {
+    if (field.required && (value === void 0 || value === null || value === "")) {
+      return `${field.label || field.name} is required`;
+    }
+    if (field.validation) {
+      return field.validation(value);
+    }
+    return void 0;
+  };
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!fields) {
+      return;
+    }
+    const newErrors = {};
+    fields.forEach((field) => {
+      const isActive = typeof field.active === "function" ? field.active(formData) : field.active !== false;
+      if (isActive) {
+        const error = validateField(field, formData[field.name]);
+        if (error) {
+          newErrors[field.name] = error;
+        }
+      }
+    });
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    setIsSubmitting(true);
+    try {
+      await onSubmit(formData);
+      setIsOpen?.(false);
+      setFormData({});
+      setErrors({});
+    } catch (error) {
+      console.error("Form submission error:", error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  const renderField = (field) => {
+    const isActive = typeof field.active === "function" ? field.active(formData) : field.active !== false;
+    if (!isActive) return null;
+    const value = formData[field.name] ?? field.defaultValue;
+    const error = errors[field.name];
+    switch (field.type) {
+      case "text":
+      case "email":
+      case "url":
+        return /* @__PURE__ */ jsxRuntime.jsx(
+          FormInput,
+          {
+            label: field.label,
+            description: field.description,
+            error,
+            type: field.type,
+            placeholder: field.placeholder,
+            value: value || "",
+            onChange: (e) => handleChange(field.name, e.target.value),
+            required: field.required
+          },
+          field.name
+        );
+      case "number":
+        return /* @__PURE__ */ jsxRuntime.jsx(
+          FormInput,
+          {
+            label: field.label,
+            description: field.description,
+            error,
+            type: "number",
+            placeholder: field.placeholder,
+            value: value || "",
+            onChange: (e) => handleChange(field.name, parseFloat(e.target.value) || 0),
+            min: field.min,
+            max: field.max,
+            step: field.step,
+            required: field.required
+          },
+          field.name
+        );
+      case "textarea":
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
+          field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
+            field.label,
+            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+          ] }),
+          field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: field.description }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Textarea,
+            {
+              id: field.name,
+              placeholder: field.placeholder,
+              value: value || "",
+              onChange: (e) => handleChange(field.name, e.target.value),
+              className: error && "border-destructive",
+              required: field.required
+            }
+          ),
+          error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+        ] }, field.name);
+      case "select":
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
+          field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
+            field.label,
+            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+          ] }),
+          field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: field.description }),
+          /* @__PURE__ */ jsxRuntime.jsxs(
+            Select,
+            {
+              value: value || "",
+              onValueChange: (val) => handleChange(field.name, val),
+              children: [
+                /* @__PURE__ */ jsxRuntime.jsx(SelectTrigger, { id: field.name, className: error && "border-destructive", children: /* @__PURE__ */ jsxRuntime.jsx(SelectValue, { placeholder: field.placeholder || "Select..." }) }),
+                /* @__PURE__ */ jsxRuntime.jsx(SelectContent, { children: field.options?.map((option) => /* @__PURE__ */ jsxRuntime.jsx(SelectItem, { value: option.value, children: option.label }, option.value)) })
+              ]
+            }
+          ),
+          error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+        ] }, field.name);
+      case "checkbox":
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center space-x-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Checkbox,
+            {
+              id: field.name,
+              checked: value || false,
+              onCheckedChange: (checked) => handleChange(field.name, checked)
+            }
+          ),
+          field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: "cursor-pointer", children: [
+            field.label,
+            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+          ] }),
+          error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+        ] }, field.name);
+      case "upload":
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
+          field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
+            field.label,
+            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+          ] }),
+          field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: field.description }),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Upload,
+            {
+              id: field.name,
+              accept: field.accept,
+              multiple: field.multiple,
+              onChange: (e) => handleChange(field.name, e.target.files),
+              className: error && "border-destructive"
+            }
+          ),
+          error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+        ] }, field.name);
+      default:
+        return null;
+    }
+  };
+  const modalContent = /* @__PURE__ */ jsxRuntime.jsx(Modal, { open: isOpen, onOpenChange: setIsOpen, children: /* @__PURE__ */ jsxRuntime.jsx(ModalContent, { "data-slot": "form-modal", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
     /* @__PURE__ */ jsxRuntime.jsx(ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }) }),
-    children,
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 px-6 py-4", children: [
+      beforeFields,
+      fields ? /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fields.map((field) => renderField(field)) }) : children,
+      afterFields
+    ] }),
     /* @__PURE__ */ jsxRuntime.jsxs(ModalFooter, { children: [
       /* @__PURE__ */ jsxRuntime.jsx(
         Button,
         {
           type: "button",
           variant: "outline",
-          onClick: () => onOpenChange(false),
+          onClick: () => setIsOpen?.(false),
+          disabled: isSubmitting,
           children: cancelLabel
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx(Button, { type: "submit", children: submitLabel })
+      /* @__PURE__ */ jsxRuntime.jsx(Button, { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Submitting..." : submitLabel })
     ] })
   ] }) }) });
+  if (triggerLabel) {
+    return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open: isOpen, onOpenChange: setIsOpen, children: [
+      /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntime.jsx(Button, { ...triggerProps, children: triggerLabel }) }),
+      modalContent
+    ] });
+  }
+  return modalContent;
 }
 function TriggerModal({
   trigger,
@@ -4441,16 +4811,49 @@ function Grid({
     }
   );
 }
-function Card({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
+var cardVariants = classVarianceAuthority.cva(
+  "bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm",
+  {
+    variants: {
+      variant: {
+        minimal: "border-0 shadow-none bg-transparent",
+        filled: "bg-muted border-0",
+        subtle: "bg-muted/50 border-muted",
+        outlined: "bg-transparent border-2"
+      },
+      size: {
+        xs: "gap-3 py-3 text-xs",
+        sm: "gap-4 py-4 text-sm",
+        md: "gap-6 py-6 text-base",
+        lg: "gap-8 py-8 text-lg"
+      }
+    },
+    defaultVariants: {
+      variant: "outlined",
+      size: "md"
+    }
+  }
+);
+function Card({
+  className,
+  variant,
+  size,
+  header,
+  footer,
+  children,
+  ...props
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
       "data-slot": "card",
-      className: cn(
-        "bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm",
-        className
-      ),
-      ...props
+      className: cn(cardVariants({ variant, size }), className),
+      ...props,
+      children: [
+        header && /* @__PURE__ */ jsxRuntime.jsx(CardHeader, { children: header }),
+        children,
+        footer && /* @__PURE__ */ jsxRuntime.jsx(CardFooter, { children: footer })
+      ]
     }
   );
 }
@@ -4723,9 +5126,29 @@ function List3({
     }
   );
 }
+var headerVariants = classVarianceAuthority.cva(
+  "w-full bg-background",
+  {
+    variants: {
+      variant: {
+        default: "border-b",
+        bordered: "border-b-2"
+      }
+    },
+    defaultVariants: {
+      variant: "default"
+    }
+  }
+);
 function Header2({
   className,
   sticky = false,
+  variant,
+  heading,
+  caption,
+  left,
+  right,
+  children,
   ...props
 }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -4734,11 +5157,21 @@ function Header2({
       as: "header",
       "data-slot": "header",
       className: cn(
-        "w-full border-b bg-background",
+        headerVariants({ variant }),
         sticky && "sticky top-0 z-50",
         className
       ),
-      ...props
+      ...props,
+      children: heading || caption || left || right ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
+          left,
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+            heading && /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-lg font-semibold", children: heading }),
+            caption && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: caption })
+          ] })
+        ] }),
+        right
+      ] }) : children
     }
   );
 }
@@ -4759,21 +5192,51 @@ function Footer({
     }
   );
 }
+var emptyScreenVariants = classVarianceAuthority.cva(
+  "py-12",
+  {
+    variants: {
+      variant: {
+        default: "",
+        minimal: "py-6",
+        spacious: "py-16"
+      },
+      size: {
+        sm: "text-sm",
+        md: "text-base",
+        lg: "text-lg"
+      }
+    },
+    defaultVariants: {
+      variant: "default",
+      size: "md"
+    }
+  }
+);
 function EmptyScreen({
   title = "No items",
   description,
   icon,
   action,
+  variant,
+  size,
   className
 }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs(Empty, { className: cn("py-12", className), "data-slot": "empty-screen", children: [
-    icon && /* @__PURE__ */ jsxRuntime.jsx(EmptyContent, { children: icon }),
-    /* @__PURE__ */ jsxRuntime.jsxs(EmptyHeader, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(EmptyTitle, { children: title }),
-      description && /* @__PURE__ */ jsxRuntime.jsx(EmptyDescription, { children: description })
-    ] }),
-    action && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-4", children: action })
-  ] });
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    Empty,
+    {
+      className: cn(emptyScreenVariants({ variant, size }), className),
+      "data-slot": "empty-screen",
+      children: [
+        icon && /* @__PURE__ */ jsxRuntime.jsx(EmptyContent, { children: icon }),
+        /* @__PURE__ */ jsxRuntime.jsxs(EmptyHeader, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(EmptyTitle, { children: title }),
+          description && /* @__PURE__ */ jsxRuntime.jsx(EmptyDescription, { children: description })
+        ] }),
+        action && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-4", children: action })
+      ]
+    }
+  );
 }
 function CollapsiblePanel({
   title,

@@ -1,12 +1,15 @@
 import * as React from "react"
 import { cn } from "../utils"
 import { Alert, AlertDescription } from "../atoms/Alert"
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./Tooltip"
 import { InfoIcon, AlertCircleIcon, CheckCircleIcon } from "lucide-react"
 
 export interface InfoBannerProps {
   message: string
   variant?: "info" | "warning" | "success"
   className?: string
+  tooltip?: boolean
+  children?: React.ReactNode
 }
 
 const variantMap = {
@@ -19,10 +22,12 @@ export function InfoBanner({
   message,
   variant = "info",
   className,
+  tooltip = false,
+  children,
 }: InfoBannerProps) {
   const { icon: Icon } = variantMap[variant]
 
-  return (
+  const content = (
     <Alert
       data-slot="info-banner"
       className={cn(
@@ -36,4 +41,21 @@ export function InfoBanner({
       <AlertDescription className="text-sm">{message}</AlertDescription>
     </Alert>
   )
+
+  if (tooltip) {
+    return (
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            {children || <Icon className="size-4" />}
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>{message}</p>
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    )
+  }
+
+  return content
 }

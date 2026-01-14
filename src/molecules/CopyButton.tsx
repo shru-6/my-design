@@ -4,19 +4,24 @@ import { CopyIcon, CheckIcon } from "lucide-react"
 
 export interface CopyButtonProps
   extends React.ComponentProps<typeof Button> {
-  text: string
+  text?: string
+  getText?: () => string
   onCopy?: () => void
 }
 
 export function CopyButton({
   text,
+  getText,
   onCopy,
   ...props
 }: CopyButtonProps) {
   const [copied, setCopied] = React.useState(false)
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(text)
+    const textToCopy = getText ? getText() : text || ""
+    if (!textToCopy) return
+
+    await navigator.clipboard.writeText(textToCopy)
     setCopied(true)
     onCopy?.()
     setTimeout(() => setCopied(false), 2000)
