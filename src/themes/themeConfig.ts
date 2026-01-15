@@ -2,8 +2,8 @@
  * Theme Configuration
  * Registry of all available themes organized by category
  * 
- * Base themes are defined here. Additional themes can be discovered dynamically
- * by scanning the /tokens/themes/ directory structure.
+ * Base themes are defined here. For custom themes, use registerTheme() to add them.
+ * Create theme files in public/tokens/themes/{category}/{themeId}.json and register them.
  */
 
 export type ThemeMetadata = {
@@ -146,89 +146,36 @@ export const baseThemeCategories: Record<string, ThemeCategory> = {
 let discoveredThemesCache: Record<string, ThemeCategory> | null = null
 
 /**
- * Discover themes by scanning token directory structure
- * Scans /tokens/themes/ to find all available theme files
- * Also tries to auto-discover theme files by attempting to load them
+ * Discover themes - returns base themes from config
+ * For custom themes, use registerTheme() to add them manually
  */
 export async function discoverThemes(): Promise<Record<string, ThemeCategory>> {
   if (discoveredThemesCache) {
     return discoveredThemesCache
   }
 
-  const discovered = JSON.parse(JSON.stringify(baseThemeCategories))
-  
-  try {
-    // Get base path for tokens
-    const tokensBase = typeof window !== 'undefined' && (window as any).__THEME_TOKENS_BASE__ 
-      ? (window as any).__THEME_TOKENS_BASE__ 
-      : '/tokens'
-    
-    // Known categories from base config
-    const knownCategories = Object.keys(baseThemeCategories)
-    
-    // For each category, try to discover additional themes by attempting to load common theme files
-    for (const category of knownCategories) {
-      // Get existing themes for this category
-      const existingThemes = discovered[category]?.themes || {}
-      const themeIds = Object.keys(existingThemes)
-      
-      // Try to discover additional themes by attempting to load files
-      // We'll try common theme names that might exist
-      const commonThemeNames = ['ocean', 'forest', 'sunset', 'midnight', 'pastel', 'vibrant', 'muted', 'high-contrast']
-      
-      for (const themeName of commonThemeNames) {
-        // Skip if theme already exists
-        if (themeIds.includes(themeName)) continue
-        
-        const themePath = `${tokensBase}/themes/${category}/${themeName}.json`
-        try {
-          const response = await fetch(themePath)
-          if (response.ok && response.headers.get('content-type')?.includes('application/json')) {
-            const themeData = await response.json()
-            // Auto-register discovered theme (this modifies discoveredThemesCache)
-            registerTheme(category, themeName, {
-              name: themeData.name || themeName.charAt(0).toUpperCase() + themeName.slice(1),
-              file: `${category}/${themeName}.json`,
-              icon: themeData.icon || '🎨',
-              description: themeData.description || `Custom ${category} theme: ${themeName}`
-            })
-            // Update discovered object to include the new theme
-            if (!discovered[category]) {
-              discovered[category] = {
-                name: category.charAt(0).toUpperCase() + category.slice(1),
-                order: baseThemeCategories[category]?.order || 99,
-                themes: {}
-              }
-            }
-            discovered[category].themes[themeName] = {
-              name: themeData.name || themeName.charAt(0).toUpperCase() + themeName.slice(1),
-              file: `${category}/${themeName}.json`,
-              icon: themeData.icon || '🎨',
-              description: themeData.description || `Custom ${category} theme: ${themeName}`
-            }
-          }
-        } catch {
-          // File doesn't exist, skip silently
-        }
-      }
-    }
-    
-    // Update discovered cache with any newly registered themes
-    discoveredThemesCache = discovered
-    return discovered
-  } catch (error) {
-    // Only log in debug mode
-    if (typeof window !== 'undefined' && (window as any).__DESIGN_SYSTEM_DEBUG__) {
-      console.warn('Error discovering themes:', error)
-    }
-    return baseThemeCategories
-  }
+  // Return base themes - users can register custom themes with registerTheme()
+  const themes: Record<string, ThemeCategory> = JSON.parse(JSON.stringify(baseThemeCategories))
+  discoveredThemesCache = themes
+  return themes
 }
 
 /**
  * Register a custom theme dynamically
- * Allows users to add themes without modifying the base config
- * Can be used for any category including custom
+ * Use this to add custom themes after creating theme files in public/tokens/themes/
+ * 
+ * Example:
+ * ```ts
+ * import { registerTheme } from 'shru-design-system'
+ * 
+ * // After creating public/tokens/themes/color/ocean.json
+ * registerTheme('color', 'ocean', {
+ *   name: 'Ocean',
+ *   file: 'color/ocean.json',
+ *   icon: '🌊',
+ *   description: 'Ocean color theme'
+ * })
+ * ```
  */
 export function registerTheme(category: string, themeId: string, metadata: ThemeMetadata): Record<string, ThemeCategory> {
   if (!discoveredThemesCache) {
@@ -267,8 +214,15 @@ export function registerTheme(category: string, themeId: string, metadata: Theme
 
 /**
  * Register a theme from a token file
- * Helper function to automatically register a theme by loading its file
- * Users can call this after creating a theme file
+ * Helper function that loads the theme file and registers it automatically
+ * 
+ * Example:
+ * ```ts
+ * import { registerThemeFromFile } from 'shru-design-system'
+ * 
+ * // After creating public/tokens/themes/color/ocean.json
+ * await registerThemeFromFile('color', 'ocean')
+ * ```
  */
 export async function registerThemeFromFile(
   category: string, 

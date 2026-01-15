@@ -118,40 +118,16 @@ export const baseThemeCategories = {
 // Cache for dynamically discovered themes
 let discoveredThemesCache = null;
 /**
- * Discover themes by scanning token directory structure
- * Scans /tokens/themes/ to find all available theme files
+ * Discover themes - returns base themes from config
+ * For custom themes, use registerTheme() to add them manually
  */
 export async function discoverThemes() {
     if (discoveredThemesCache) {
         return discoveredThemesCache;
     }
-    const discovered = JSON.parse(JSON.stringify(baseThemeCategories));
-    try {
-        // Get base path for tokens
-        const tokensBase = typeof window !== 'undefined' && window.__THEME_TOKENS_BASE__
-            ? window.__THEME_TOKENS_BASE__
-            : '/tokens';
-        // Known categories from base config
-        const knownCategories = Object.keys(baseThemeCategories);
-        // For each category, try to discover additional themes
-        for (const category of knownCategories) {
-            const categoryPath = `${tokensBase}/themes/${category}`;
-            // Try to fetch an index or scan common theme files
-            // Since we can't list directories via fetch, we'll try common patterns
-            // Users can add themes by following the naming convention
-            // For now, we'll rely on users to add themes to the config
-            // But we can validate that theme files exist when requested
-        }
-        discoveredThemesCache = discovered;
-        return discovered;
-    }
-    catch (error) {
-        // Only log in debug mode
-        if (typeof window !== 'undefined' && window.__DESIGN_SYSTEM_DEBUG__) {
-            console.warn('Error discovering themes:', error);
-        }
-        return baseThemeCategories;
-    }
+    // Return base themes - users can register custom themes with registerTheme()
+    discoveredThemesCache = JSON.parse(JSON.stringify(baseThemeCategories));
+    return discoveredThemesCache;
 }
 /**
  * Register a custom theme dynamically

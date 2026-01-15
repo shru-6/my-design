@@ -446,7 +446,7 @@ function getLibraryTokensPath() {
 
 /**
  * Recursively copy directory, always overwriting library files
- * Never preserves existing library files - always overwrites or creates new
+ * Library files are ALWAYS overwritten on every install to ensure updates
  */
 function copyDirectory(src, dest) {
   if (!fs.existsSync(src)) {
@@ -469,38 +469,18 @@ function copyDirectory(src, dest) {
       const subCopied = copyDirectory(srcPath, destPath);
       if (subCopied) copiedCount += subCopied;
     } else if (entry.isFile() && entry.name.endsWith('.json')) {
-      // For JSON files, always overwrite if source is a library file
-      try {
-        const srcContent = JSON.parse(fs.readFileSync(srcPath, 'utf8'));
-        const isLibraryFile = srcContent._createdBy && srcContent._createdBy.includes(LIBRARY_NAME.split(' ')[0]);
-        
-        if (isLibraryFile) {
-          // Always overwrite library files (never preserve)
-          fs.copyFileSync(srcPath, destPath);
-          copiedCount++;
-        } else if (!fs.existsSync(destPath)) {
-          // New library file that doesn't exist in dest
-          fs.copyFileSync(srcPath, destPath);
-          copiedCount++;
-        }
-        // If source is not a library file, don't copy (preserve user's custom files)
-      } catch (e) {
-        // If JSON parsing fails, check if it's a known library file path
-        // Known library files: base.json, palettes.json, and all files in themes/
-        const isKnownLibraryFile = entry.name === 'base.json' || 
-                                   entry.name === 'palettes.json' || 
-                                   srcPath.includes(path.join('tokens', 'themes'));
-        
-        if (isKnownLibraryFile) {
-          // Always overwrite known library files
-          fs.copyFileSync(srcPath, destPath);
-          copiedCount++;
-        } else if (!fs.existsSync(destPath)) {
-          // New file that doesn't exist in dest
-          fs.copyFileSync(srcPath, destPath);
-          copiedCount++;
-        }
+      // All files from scripts/tokens/ are library files - ALWAYS overwrite
+      // Known library files: base.json, palettes.json, and all files in themes/
+      const isKnownLibraryFile = entry.name === 'base.json' || 
+                                 entry.name === 'palettes.json' || 
+                                 srcPath.includes(path.join('tokens', 'themes'));
+      
+      if (isKnownLibraryFile) {
+        // ALWAYS overwrite library files (ensures library updates are applied)
+        fs.copyFileSync(srcPath, destPath);
+        copiedCount++;
       }
+      // User's custom files (not in library) are preserved - they won't be in scripts/tokens/
     } else {
       // Non-JSON files: copy if doesn't exist
       if (!fs.existsSync(destPath)) {
@@ -511,53 +491,6 @@ function copyDirectory(src, dest) {
   }
   
   return copiedCount;
-}
-
-/**
- * Read a token file from the library
- */
-function readLibraryTokenFile(relativePath) {
-  const libraryTokensPath = getLibraryTokensPath();
-  if (!libraryTokensPath) {
-    return null;
-  }
-  
-  const filePath = path.join(libraryTokensPath, relativePath);
-  if (!fs.existsSync(filePath)) {
-    return null;
-  }
-  
-  try {
-    const content = fs.readFileSync(filePath, 'utf8');
-    return JSON.parse(content);
-  } catch (e) {
-    return null;
-  }
-}
-
-/**
- * Migrate old token structure to new structure
- */
-function migrateTokenStructure(data) {
-  if (!data || typeof data !== 'object') {
-    return data;
-  }
-  
-  const migrated = JSON.parse(JSON.stringify(data)); // Deep clone
-  
-  // Migrate typography.font → font
-  if (migrated.typography && migrated.typography.font) {
-    migrated.font = migrated.typography.font;
-    delete migrated.typography;
-  }
-  
-  // Migrate shape.radius → radius
-  if (migrated.shape && migrated.shape.radius) {
-    migrated.radius = migrated.shape.radius;
-    delete migrated.shape;
-  }
-  
-  return migrated;
 }
 
 function createTokenFiles() {
@@ -576,61 +509,20 @@ function createTokenFiles() {
     fs.mkdirSync(themesDir, { recursive: true });
   }
   
-  // Try to copy token files from library
+  // Copy ALL token files from library - ALWAYS overwrite to ensure updates
   const libraryTokensPath = getLibraryTokensPath();
   if (libraryTokensPath) {
-    log(`Copying token files from library...`, 'blue');
+    log(`Copying token files from library (always overwriting library files)...`, 'blue');
     const copiedCount = copyDirectory(libraryTokensPath, tokensDir);
     if (copiedCount > 0) {
-      log(`Token files copied from library successfully! (${copiedCount} files)`, 'green');
+      log(`Token files updated from library (${copiedCount} files)`, 'green');
     } else {
-      log('All token files already exist. Checking for updates...', 'green');
+      log('All library token files are up to date.', 'green');
     }
   } else {
-    log('Library token files not found, creating default token files...', 'yellow');
+    log('Warning: Library token files not found. Make sure the package is properly installed.', 'yellow');
+    return;
   }
-  
-  // Check and migrate old token structures
-  const tokenFilesToCheck = [
-    'base.json',
-    'palettes.json',
-    'themes/color/white.json',
-    'themes/color/dark.json',
-    'themes/typography/sans.json',
-    'themes/typography/serif.json',
-    'themes/shape/smooth.json',
-    'themes/shape/sharp.json',
-    'themes/density/comfortable.json',
-    'themes/density/compact.json',
-    'themes/animation/gentle.json',
-    'themes/animation/brisk.json',
-    'themes/custom/brand.json',
-    'themes/custom/minimal.json'
-  ];
-  
-  tokenFilesToCheck.forEach(relativePath => {
-    const destPath = path.join(tokensDir, relativePath);
-    
-    // Always read from library and overwrite (never preserve existing files)
-    const libraryData = readLibraryTokenFile(relativePath);
-    if (libraryData) {
-      // Ensure directory exists
-      const destDir = path.dirname(destPath);
-      if (!fs.existsSync(destDir)) {
-        fs.mkdirSync(destDir, { recursive: true });
-      }
-      
-      // Always overwrite with library version
-      libraryData._createdBy = LIBRARY_NAME;
-      fs.writeFileSync(destPath, JSON.stringify(libraryData, null, 2));
-      
-      if (fs.existsSync(destPath)) {
-        log(`Updated ${relativePath} from library`, 'green');
-      } else {
-        log(`Created ${relativePath} from library`, 'green');
-      }
-    }
-  });
   
   // If library tokens not found, we can't create files (user needs to install package properly)
   if (!libraryTokensPath) {
@@ -676,23 +568,21 @@ function checkMainFile() {
 function main() {
   log(`\n🚀 Setting up ${PACKAGE_NAME}...\n`, 'blue');
   
-  // Check and install Tailwind
+  // Check and install Tailwind (only if missing, skip check if already installed)
   if (!checkPackageInstalled('tailwindcss')) {
     log('Tailwind CSS not found. Installing...', 'yellow');
     if (!installPackage(`tailwindcss@${TAILWIND_VERSION}`)) {
       log('Failed to install Tailwind CSS. Please install manually.', 'red');
       process.exit(1);
     }
-  } else {
-    log('Tailwind CSS already installed.', 'green');
   }
   
-  // Check and install PostCSS
+  // Check and install PostCSS (only if missing)
   if (!checkPackageInstalled('postcss')) {
     installPackage('postcss');
   }
   
-  // Check and install Autoprefixer
+  // Check and install Autoprefixer (only if missing)
   if (!checkPackageInstalled('autoprefixer')) {
     installPackage('autoprefixer');
   }

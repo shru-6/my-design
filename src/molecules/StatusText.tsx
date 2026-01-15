@@ -4,8 +4,13 @@ import { Text } from "../atoms/Text"
 import { CheckCircleIcon, XCircleIcon, AlertCircleIcon } from "lucide-react"
 
 export interface StatusTextProps {
-  text: string
-  status: "success" | "error" | "warning" | "info"
+  // Text-based API
+  text?: string
+  status?: "success" | "error" | "warning" | "info"
+  // Count/label API (alternative)
+  count?: number
+  label?: string
+  variant?: "caption" | "body" | "heading"
   className?: string
 }
 
@@ -18,10 +23,29 @@ const statusIcons = {
 
 export function StatusText({
   text,
-  status,
+  status = "info",
+  count,
+  label,
+  variant = "body",
   className,
 }: StatusTextProps) {
+  // Determine display text
+  const displayText = React.useMemo(() => {
+    if (text) return text
+    if (count !== undefined && label) {
+      const pluralizedLabel = count === 1 ? label : `${label}s`
+      return `${count} ${pluralizedLabel}`
+    }
+    return ""
+  }, [text, count, label])
+
   const Icon = statusIcons[status]
+
+  const variantClasses = {
+    caption: "text-xs",
+    body: "text-sm",
+    heading: "text-base font-medium",
+  }
 
   return (
     <Text
@@ -29,6 +53,7 @@ export function StatusText({
       data-slot="status-text"
       className={cn(
         "flex items-center gap-2",
+        variantClasses[variant],
         status === "success" && "text-green-600 dark:text-green-400",
         status === "error" && "text-destructive",
         status === "warning" && "text-yellow-600 dark:text-yellow-400",
@@ -37,7 +62,7 @@ export function StatusText({
       )}
     >
       <Icon className="size-4" />
-      <span>{text}</span>
+      <span>{displayText}</span>
     </Text>
   )
 }

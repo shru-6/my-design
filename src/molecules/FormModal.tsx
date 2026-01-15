@@ -36,13 +36,24 @@ export interface FormFieldConfig {
   required?: boolean
   active?: boolean | ((values: Record<string, any>) => boolean)
   validation?: (value: any) => string | undefined
-  options?: Array<{ label: string; value: string }>
+  options?: 
+    | Array<{ label: string; value: string }>
+    | ((formData: Record<string, any>) => Array<{ label: string; value: string }>)
+    | (() => Array<{ label: string; value: string }>)
   accept?: string
   multiple?: boolean
   min?: number
   max?: number
   step?: number
   defaultValue?: any
+  onChange?: (
+    value: any,
+    params: {
+      formData: Record<string, any>
+      setFormData: (data: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void
+      fieldName: string
+    }
+  ) => void
 }
 
 export interface FormModalProps {
@@ -101,14 +112,31 @@ export function FormModal({
     }
   }, [fields])
 
-  const handleChange = (name: string, value: any) => {
-    setFormData((prev) => ({ ...prev, [name]: value }))
+  const handleChange = (name: string, value: any, field?: FormFieldConfig) => {
+    const newFormData = { ...formData, [name]: value }
+    setFormData(newFormData)
+    
     // Clear error when user starts typing
     if (errors[name]) {
       setErrors((prev) => {
         const next = { ...prev }
         delete next[name]
         return next
+      })
+    }
+    
+    // Call field-level onChange if provided
+    if (field?.onChange) {
+      field.onChange(value, {
+        formData: newFormData,
+        setFormData: (data) => {
+          if (typeof data === 'function') {
+            setFormData((prev) => data(prev))
+          } else {
+            setFormData(data)
+          }
+        },
+        fieldName: name,
       })
     }
   }
@@ -187,7 +215,7 @@ export function FormModal({
             type={field.type}
             placeholder={field.placeholder}
             value={value || ""}
-            onChange={(e) => handleChange(field.name, e.target.value)}
+            onChange={(e) => handleChange(field.name, e.target.value, field)}
             required={field.required}
           />
         )
@@ -202,7 +230,7 @@ export function FormModal({
             type="number"
             placeholder={field.placeholder}
             value={value || ""}
-            onChange={(e) => handleChange(field.name, parseFloat(e.target.value) || 0)}
+            onChange={(e) => handleChange(field.name, parseFloat(e.target.value) || 0, field)}
             min={field.min}
             max={field.max}
             step={field.step}
@@ -226,7 +254,7 @@ export function FormModal({
               id={field.name}
               placeholder={field.placeholder}
               value={value || ""}
-              onChange={(e) => handleChange(field.name, e.target.value)}
+              onChange={(e) => handleChange(field.name, e.target.value, field)}
               className={error && "border-destructive"}
               required={field.required}
             />
@@ -239,6 +267,21 @@ export function FormModal({
         )
 
       case "select":
+        // Resolve options - support function-based options
+        const resolvedOptions = React.useMemo(() => {
+          if (!field.options) return []
+          if (Array.isArray(field.options)) return field.options
+          if (typeof field.options === 'function') {
+            try {
+              return field.options(formData)
+            } catch (e) {
+              console.error(`Error resolving options for field ${field.name}:`, e)
+              return []
+            }
+          }
+          return []
+        }, [field.options, formData])
+        
         return (
           <div key={field.name} className="space-y-2">
             {field.label && (
@@ -252,13 +295,13 @@ export function FormModal({
             )}
             <Select
               value={value || ""}
-              onValueChange={(val) => handleChange(field.name, val)}
+              onValueChange={(val) => handleChange(field.name, val, field)}
             >
               <SelectTrigger id={field.name} className={error && "border-destructive"}>
                 <SelectValue placeholder={field.placeholder || "Select..."} />
               </SelectTrigger>
               <SelectContent>
-                {field.options?.map((option) => (
+                {resolvedOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -279,7 +322,7 @@ export function FormModal({
             <Checkbox
               id={field.name}
               checked={value || false}
-              onCheckedChange={(checked) => handleChange(field.name, checked)}
+              onCheckedChange={(checked) => handleChange(field.name, checked, field)}
             />
             {field.label && (
               <Label htmlFor={field.name} className="cursor-pointer">
