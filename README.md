@@ -35,6 +35,8 @@ Basic UI building blocks:
 - **`Radio.tsx`** - Radio button group component
 - **`Separator.tsx`** - Horizontal/vertical divider component
 - **`Skeleton.tsx`** - Skeleton loading component
+- **`SkeletonGrid.tsx`** - Grid layout skeleton component
+- **`SkeletonText.tsx`** - Text lines skeleton component
 - **`Slider.tsx`** - Slider input component
 - **`Spinner.tsx`** - Loading spinner component
 - **`Switch.tsx`** - Toggle switch component
@@ -68,6 +70,7 @@ Composite components:
 - **`InfoBanner.tsx`** - Information banner component
 - **`InlineEdit.tsx`** - Inline editing component
 - **`InputGroup.tsx`** - Input with addons/buttons
+- **`SearchInput.tsx`** - Search input with debounce and clearable
 - **`Menubar.tsx`** - Menu bar component
 - **`Modal.tsx`** - Modal dialog component
 - **`NavigationMenu.tsx`** - Navigation menu component
@@ -96,7 +99,7 @@ Layout and container components:
 - **`Footer.tsx`** - Footer component
 - **`Grid.tsx`** - Grid layout component
 - **`Header.tsx`** - Header component
-- **`List.tsx`** - List component
+- **`List.tsx`** - Enhanced list component with search, grid/list views, empty/loading states
 - **`Resizable.tsx`** - Resizable panels component
 - **`ResizeContainer.tsx`** - Resizable container wrapper
 - **`ScrollArea.tsx`** - Scrollable area component
