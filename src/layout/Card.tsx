@@ -32,6 +32,10 @@ export interface CardProps
     VariantProps<typeof cardVariants> {
   header?: React.ReactNode
   footer?: React.ReactNode
+  maxHeight?: string | number
+  maxWidth?: string | number
+  contentHeight?: string | number
+  interactive?: boolean
 }
 
 function Card({ 
@@ -41,17 +45,62 @@ function Card({
   header,
   footer,
   children,
+  maxHeight,
+  maxWidth,
+  contentHeight,
+  interactive,
+  onClick,
   ...props 
 }: CardProps) {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (interactive && onClick) {
+      e.stopPropagation()
+      onClick(e)
+    } else if (onClick) {
+      onClick(e)
+    }
+  }
+
+  const style: React.CSSProperties = {}
+  if (maxHeight) {
+    style.maxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight
+  }
+  if (maxWidth) {
+    style.maxWidth = typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth
+  }
+
   return (
     <div
       data-slot="card"
-      className={cn(cardVariants({ variant, size }), className)}
+      className={cn(
+        cardVariants({ variant, size }),
+        interactive && "cursor-pointer",
+        className
+      )}
+      style={style}
+      onClick={handleClick}
       {...props}
     >
-      {header && <CardHeader>{header}</CardHeader>}
-      {children}
-      {footer && <CardFooter>{footer}</CardFooter>}
+      {header && (
+        <CardHeader className="sticky top-0 z-10 bg-card border-b">
+          {header}
+        </CardHeader>
+      )}
+      <CardContent 
+        className={cn(
+          "flex-1 min-h-0 overflow-auto"
+        )}
+        style={contentHeight ? {
+          height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+        } : undefined}
+      >
+        {children}
+      </CardContent>
+      {footer && (
+        <CardFooter className="sticky bottom-0 z-10 bg-card border-t">
+          {footer}
+        </CardFooter>
+      )}
     </div>
   )
 }

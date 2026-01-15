@@ -23,6 +23,9 @@ export interface ListProps {
   searchValue?: string
   onSearchChange?: (value: string) => void
   filterItems?: (items: Array<any>, searchValue: string) => Array<any>
+  error?: string | React.ReactNode
+  header?: React.ReactNode
+  footer?: React.ReactNode
 }
 
 export function List({
@@ -42,6 +45,9 @@ export function List({
   searchValue: searchValueProp,
   onSearchChange: onSearchChangeProp,
   filterItems,
+  error,
+  header,
+  footer,
 }: ListProps) {
   const [internalSearchValue, setInternalSearchValue] = React.useState("")
   const isControlled = searchValueProp !== undefined
@@ -100,6 +106,9 @@ export function List({
 
   return (
     <div className={cn("space-y-4", className)} data-slot="enhanced-list">
+      {/* Header */}
+      {header && <div data-slot="list-header">{header}</div>}
+
       {/* Search */}
       {searchable && (
         <div className="relative">
@@ -114,8 +123,15 @@ export function List({
         </div>
       )}
 
+      {/* Error State */}
+      {error && !loading && (
+        <div data-slot="list-error" className="text-destructive text-sm">
+          {typeof error === "string" ? error : error}
+        </div>
+      )}
+
       {/* Loading State */}
-      {loading && (
+      {loading && !error && (
         <div
           className={cn(
             type === "grid" && "grid gap-4",
@@ -130,7 +146,7 @@ export function List({
       )}
 
       {/* Empty State */}
-      {!loading && filteredItems.length === 0 && (
+      {!loading && !error && filteredItems.length === 0 && (
         <EmptyScreen
           title={emptyTitle}
           description={emptyDescription}
@@ -139,7 +155,7 @@ export function List({
       )}
 
       {/* Items */}
-      {!loading && filteredItems.length > 0 && (
+      {!loading && !error && filteredItems.length > 0 && (
         <div
           className={cn(
             type === "grid" && "grid gap-4",
@@ -154,6 +170,9 @@ export function List({
           ))}
         </div>
       )}
+
+      {/* Footer */}
+      {footer && <div data-slot="list-footer">{footer}</div>}
     </div>
   )
 }

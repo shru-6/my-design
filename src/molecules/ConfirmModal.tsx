@@ -10,6 +10,7 @@ export interface ConfirmModalProps {
   // Uncontrolled API
   triggerLabel?: string
   triggerProps?: React.ComponentProps<typeof Button>
+  stopPropagation?: boolean
   text?: string
   // Common props
   title: string
@@ -29,6 +30,7 @@ export function ConfirmModal({
   onOpenChange,
   triggerLabel,
   triggerProps,
+  stopPropagation = true,
   text,
   title,
   description,
@@ -126,7 +128,7 @@ export function ConfirmModal({
     return (
       <Modal open={isOpen && showModal} onOpenChange={setIsOpen}>
         <ModalTrigger asChild>
-          <Button {...triggerProps}>{triggerLabel}</Button>
+          <Button {...triggerProps} stopPropagation={stopPropagation}>{triggerLabel}</Button>
         </ModalTrigger>
         {modalContent}
       </Modal>

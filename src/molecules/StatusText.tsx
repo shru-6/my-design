@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cn } from "../utils"
 import { Text } from "../atoms/Text"
+import { Badge } from "../atoms/Badge"
 import { CheckCircleIcon, XCircleIcon, AlertCircleIcon } from "lucide-react"
 
 export interface StatusTextProps {
@@ -10,7 +11,8 @@ export interface StatusTextProps {
   // Count/label API (alternative)
   count?: number
   label?: string
-  variant?: "caption" | "body" | "heading"
+  variant?: "caption" | "body" | "heading" | "badge"
+  formatText?: (text: string, count?: number, label?: string) => string
   className?: string
 }
 
@@ -27,17 +29,26 @@ export function StatusText({
   count,
   label,
   variant = "body",
+  formatText,
   className,
 }: StatusTextProps) {
   // Determine display text
   const displayText = React.useMemo(() => {
-    if (text) return text
-    if (count !== undefined && label) {
+    let baseText = ""
+    if (text) {
+      baseText = text
+    } else if (count !== undefined && label) {
       const pluralizedLabel = count === 1 ? label : `${label}s`
-      return `${count} ${pluralizedLabel}`
+      baseText = `${count} ${pluralizedLabel}`
     }
-    return ""
-  }, [text, count, label])
+    
+    // Apply custom formatting if provided
+    if (formatText) {
+      return formatText(baseText, count, label)
+    }
+    
+    return baseText
+  }, [text, count, label, formatText])
 
   const Icon = statusIcons[status]
 
@@ -45,8 +56,31 @@ export function StatusText({
     caption: "text-xs",
     body: "text-sm",
     heading: "text-base font-medium",
+    badge: "",
   }
 
+  // Badge variant
+  if (variant === "badge") {
+    const badgeVariantMap = {
+      success: "default" as const,
+      error: "destructive" as const,
+      warning: "outline" as const,
+      info: "secondary" as const,
+    }
+
+    return (
+      <Badge
+        variant={badgeVariantMap[status]}
+        data-slot="status-text"
+        className={cn("flex items-center gap-1.5", className)}
+      >
+        <Icon className="size-3" />
+        <span>{displayText}</span>
+      </Badge>
+    )
+  }
+
+  // Text variant
   return (
     <Text
       as="div"

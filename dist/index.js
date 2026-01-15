@@ -124,14 +124,21 @@ var buttonVariants = classVarianceAuthority.cva(
   "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium font-sans transition-all duration-normal disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
   buttonVariantsConfig
 );
-var Button = React15__namespace.forwardRef(({ className, variant, size, asChild = false, ...props }, ref) => {
+var Button = React15__namespace.forwardRef(({ className, variant, size, asChild = false, stopPropagation, onClick, ...props }, ref) => {
   const Comp = asChild ? reactSlot.Slot : "button";
+  const handleClick = (e) => {
+    if (stopPropagation) {
+      e.stopPropagation();
+    }
+    onClick?.(e);
+  };
   return /* @__PURE__ */ jsxRuntime.jsx(
     Comp,
     {
       ref,
       "data-slot": "button",
-      className: cn(buttonVariants({ variant, size, className })),
+      className: cn(buttonVariants({ variant, size }), className),
+      onClick: handleClick,
       ...props
     }
   );
@@ -265,7 +272,8 @@ var alertVariantsConfig = {
   variants: {
     variant: {
       default: "bg-card text-card-foreground",
-      destructive: "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90"
+      destructive: "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90",
+      error: "text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90"
     }
   },
   defaultVariants: {
@@ -3988,22 +3996,49 @@ function StatusText({
   count,
   label,
   variant = "body",
+  formatText,
   className
 }) {
   const displayText = React15__namespace.useMemo(() => {
-    if (text) return text;
-    if (count !== void 0 && label) {
+    let baseText = "";
+    if (text) {
+      baseText = text;
+    } else if (count !== void 0 && label) {
       const pluralizedLabel = count === 1 ? label : `${label}s`;
-      return `${count} ${pluralizedLabel}`;
+      baseText = `${count} ${pluralizedLabel}`;
     }
-    return "";
-  }, [text, count, label]);
+    if (formatText) {
+      return formatText(baseText, count, label);
+    }
+    return baseText;
+  }, [text, count, label, formatText]);
   const Icon2 = statusIcons[status];
   const variantClasses = {
     caption: "text-xs",
     body: "text-sm",
-    heading: "text-base font-medium"
+    heading: "text-base font-medium",
+    badge: ""
   };
+  if (variant === "badge") {
+    const badgeVariantMap = {
+      success: "default",
+      error: "destructive",
+      warning: "outline",
+      info: "secondary"
+    };
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      Badge,
+      {
+        variant: badgeVariantMap[status],
+        "data-slot": "status-text",
+        className: cn("flex items-center gap-1.5", className),
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(Icon2, { className: "size-3" }),
+          /* @__PURE__ */ jsxRuntime.jsx("span", { children: displayText })
+        ]
+      }
+    );
+  }
   return /* @__PURE__ */ jsxRuntime.jsxs(
     Text,
     {
@@ -4484,6 +4519,7 @@ function ConfirmModal({
   onOpenChange,
   triggerLabel,
   triggerProps,
+  stopPropagation = true,
   text,
   title,
   description,
@@ -4569,7 +4605,7 @@ function ConfirmModal({
   ] }) });
   if (triggerLabel) {
     return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open: isOpen && showModal, onOpenChange: setIsOpen, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntime.jsx(Button, { ...triggerProps, children: triggerLabel }) }),
+      /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntime.jsx(Button, { ...triggerProps, stopPropagation, children: triggerLabel }) }),
       modalContent
     ] });
   }
@@ -4579,10 +4615,14 @@ function CopyButton({
   text,
   getText,
   onCopy,
+  stopPropagation = true,
   ...props
 }) {
   const [copied, setCopied] = React15__namespace.useState(false);
-  const handleCopy = async () => {
+  const handleCopy = async (e) => {
+    if (stopPropagation) {
+      e.stopPropagation();
+    }
     const textToCopy = getText ? getText() : text || "";
     if (!textToCopy) return;
     await navigator.clipboard.writeText(textToCopy);
@@ -4597,6 +4637,7 @@ function CopyButton({
       variant: "ghost",
       size: "icon",
       onClick: handleCopy,
+      stopPropagation,
       ...props,
       children: copied ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.CheckIcon, { className: "size-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.CopyIcon, { className: "size-4" })
     }
@@ -4608,9 +4649,15 @@ function FormModal({
   triggerLabel,
   triggerProps,
   title,
+  variant,
+  itemType,
   onSubmit,
-  submitLabel = "Submit",
+  submitLabel,
+  submittingLabel,
   cancelLabel = "Cancel",
+  loading: loadingProp,
+  isSubmitDisabled,
+  onCreated,
   fields,
   children,
   beforeFields,
@@ -4620,6 +4667,18 @@ function FormModal({
   const [formData, setFormData] = React15__namespace.useState({});
   const [errors, setErrors] = React15__namespace.useState({});
   const [isSubmitting, setIsSubmitting] = React15__namespace.useState(false);
+  const getSubmitLabel = () => {
+    if (submittingLabel && (isSubmitting || loadingProp)) return submittingLabel;
+    if (submitLabel) return submitLabel;
+    if (variant === "create") {
+      return itemType ? `Create ${itemType}` : "Create";
+    }
+    if (variant === "edit") {
+      return itemType ? `Update ${itemType}` : "Update";
+    }
+    return "Submit";
+  };
+  const loading = loadingProp ?? isSubmitting;
   const isControlled = openProp !== void 0;
   const isOpen = isControlled ? openProp : open;
   const setIsOpen = isControlled ? onOpenChange : setOpen;
@@ -4689,6 +4748,9 @@ function FormModal({
     setIsSubmitting(true);
     try {
       await onSubmit(formData);
+      if (onCreated && variant === "create") {
+        onCreated(formData);
+      }
       setIsOpen?.(false);
       setFormData({});
       setErrors({});
@@ -4707,39 +4769,46 @@ function FormModal({
       case "text":
       case "email":
       case "url":
-        return /* @__PURE__ */ jsxRuntime.jsx(
-          FormInput,
-          {
-            label: field.label,
-            description: field.description,
-            error,
-            type: field.type,
-            placeholder: field.placeholder,
-            value: value || "",
-            onChange: (e) => handleChange(field.name, e.target.value, field),
-            required: field.required
-          },
-          field.name
-        );
+        const textHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            FormInput,
+            {
+              label: field.label,
+              description: field.description,
+              error,
+              type: field.type,
+              placeholder: field.placeholder,
+              value: value || "",
+              onChange: (e) => handleChange(field.name, e.target.value, field),
+              required: field.required
+            }
+          ),
+          textHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: textHelpText })
+        ] }, field.name);
       case "number":
-        return /* @__PURE__ */ jsxRuntime.jsx(
-          FormInput,
-          {
-            label: field.label,
-            description: field.description,
-            error,
-            type: "number",
-            placeholder: field.placeholder,
-            value: value || "",
-            onChange: (e) => handleChange(field.name, parseFloat(e.target.value) || 0, field),
-            min: field.min,
-            max: field.max,
-            step: field.step,
-            required: field.required
-          },
-          field.name
-        );
+        const numberHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            FormInput,
+            {
+              label: field.label,
+              description: field.description,
+              error,
+              type: "number",
+              placeholder: field.placeholder,
+              value: value || "",
+              onChange: (e) => handleChange(field.name, parseFloat(e.target.value) || 0, field),
+              min: field.min,
+              max: field.max,
+              step: field.step,
+              required: field.required
+            }
+          ),
+          numberHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: numberHelpText })
+        ] }, field.name);
       case "textarea":
+        const helpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
@@ -4754,9 +4823,11 @@ function FormModal({
               value: value || "",
               onChange: (e) => handleChange(field.name, e.target.value, field),
               className: error && "border-destructive",
-              required: field.required
+              required: field.required,
+              rows: field.rows
             }
           ),
+          helpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: helpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       case "select":
@@ -4773,6 +4844,7 @@ function FormModal({
           }
           return [];
         }, [field.options, formData]);
+        const selectHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
@@ -4790,25 +4862,58 @@ function FormModal({
               ]
             }
           ),
+          selectHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: selectHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       case "checkbox":
-        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center space-x-2", children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            Checkbox,
-            {
-              id: field.name,
-              checked: value || false,
-              onCheckedChange: (checked) => handleChange(field.name, checked, field)
-            }
-          ),
-          field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: "cursor-pointer", children: [
-            field.label,
-            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+        const checkboxHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
+        return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center space-x-2", children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              Checkbox,
+              {
+                id: field.name,
+                checked: value || false,
+                onCheckedChange: (checked) => handleChange(field.name, checked, field)
+              }
+            ),
+            field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: "cursor-pointer", children: [
+              field.label,
+              field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+            ] })
           ] }),
-          error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
+          field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground ml-6", children: field.description }),
+          checkboxHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground ml-6", children: checkboxHelpText }),
+          error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive ml-6", role: "alert", children: error })
         ] }, field.name);
       case "upload":
+        const uploadHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
+        const handleFileChange = (e) => {
+          const files = e.target.files;
+          handleChange(field.name, files, field);
+          if (field.onFileSelect && files && files.length > 0) {
+            field.onFileSelect(files[0], {
+              formData,
+              setFormData: (data) => {
+                if (typeof data === "function") {
+                  setFormData((prev) => data(prev));
+                } else {
+                  setFormData(data);
+                }
+              }
+            });
+          }
+        };
+        const uploadVariantClasses = {
+          default: "",
+          dashed: "border-dashed border-2",
+          outlined: "border-2"
+        };
+        const uploadSizeClasses = {
+          sm: "text-xs py-1",
+          md: "text-sm py-2",
+          lg: "text-base py-3"
+        };
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
@@ -4821,10 +4926,15 @@ function FormModal({
               id: field.name,
               accept: field.accept,
               multiple: field.multiple,
-              onChange: (e) => handleChange(field.name, e.target.files),
-              className: error && "border-destructive"
+              onChange: handleFileChange,
+              className: cn(
+                error && "border-destructive",
+                uploadVariantClasses[field.variant || "default"],
+                uploadSizeClasses[field.size || "md"]
+              )
             }
           ),
+          uploadHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: uploadHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       default:
@@ -4849,7 +4959,14 @@ function FormModal({
           children: cancelLabel
         }
       ),
-      /* @__PURE__ */ jsxRuntime.jsx(Button, { type: "submit", disabled: isSubmitting, children: isSubmitting ? "Submitting..." : submitLabel })
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          type: "submit",
+          disabled: loading || (typeof isSubmitDisabled === "function" ? isSubmitDisabled(formData) : isSubmitDisabled ?? false),
+          children: loading ? getSubmitLabel() : getSubmitLabel()
+        }
+      )
     ] })
   ] }) }) });
   if (triggerLabel) {
@@ -5022,18 +5139,55 @@ function Card({
   header,
   footer,
   children,
+  maxHeight,
+  maxWidth,
+  contentHeight,
+  interactive,
+  onClick,
   ...props
 }) {
+  const handleClick = (e) => {
+    if (interactive && onClick) {
+      e.stopPropagation();
+      onClick(e);
+    } else if (onClick) {
+      onClick(e);
+    }
+  };
+  const style = {};
+  if (maxHeight) {
+    style.maxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
+  }
+  if (maxWidth) {
+    style.maxWidth = typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
+  }
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
       "data-slot": "card",
-      className: cn(cardVariants({ variant, size }), className),
+      className: cn(
+        cardVariants({ variant, size }),
+        interactive && "cursor-pointer",
+        className
+      ),
+      style,
+      onClick: handleClick,
       ...props,
       children: [
-        header && /* @__PURE__ */ jsxRuntime.jsx(CardHeader, { children: header }),
-        children,
-        footer && /* @__PURE__ */ jsxRuntime.jsx(CardFooter, { children: footer })
+        header && /* @__PURE__ */ jsxRuntime.jsx(CardHeader, { className: "sticky top-0 z-10 bg-card border-b", children: header }),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          CardContent,
+          {
+            className: cn(
+              "flex-1 min-h-0 overflow-auto"
+            ),
+            style: contentHeight ? {
+              height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+            } : void 0,
+            children
+          }
+        ),
+        footer && /* @__PURE__ */ jsxRuntime.jsx(CardFooter, { className: "sticky bottom-0 z-10 bg-card border-t", children: footer })
       ]
     }
   );
@@ -5294,7 +5448,8 @@ var emptyScreenVariants = classVarianceAuthority.cva(
       variant: {
         default: "",
         minimal: "py-6",
-        spacious: "py-16"
+        spacious: "py-16",
+        error: "py-12"
       },
       size: {
         sm: "text-sm",
@@ -5317,13 +5472,18 @@ function EmptyScreen({
   size,
   className
 }) {
+  const errorIcon = variant === "error" ? icon || /* @__PURE__ */ jsxRuntime.jsx(lucideReact.AlertCircleIcon, { className: "size-12 text-destructive" }) : icon;
   return /* @__PURE__ */ jsxRuntime.jsxs(
     Empty,
     {
-      className: cn(emptyScreenVariants({ variant, size }), className),
+      className: cn(
+        emptyScreenVariants({ variant, size }),
+        variant === "error" && "text-destructive",
+        className
+      ),
       "data-slot": "empty-screen",
       children: [
-        icon && /* @__PURE__ */ jsxRuntime.jsx(EmptyContent, { children: icon }),
+        errorIcon && /* @__PURE__ */ jsxRuntime.jsx(EmptyContent, { children: errorIcon }),
         /* @__PURE__ */ jsxRuntime.jsxs(EmptyHeader, { children: [
           /* @__PURE__ */ jsxRuntime.jsx(EmptyTitle, { children: title }),
           description && /* @__PURE__ */ jsxRuntime.jsx(EmptyDescription, { children: description })
@@ -5349,7 +5509,10 @@ function List3({
   className,
   searchValue: searchValueProp,
   onSearchChange: onSearchChangeProp,
-  filterItems
+  filterItems,
+  error,
+  header,
+  footer
 }) {
   const [internalSearchValue, setInternalSearchValue] = React15__namespace.useState("");
   const isControlled = searchValueProp !== void 0;
@@ -5393,6 +5556,7 @@ function List3({
   const defaultRenderSkeleton = () => /* @__PURE__ */ jsxRuntime.jsx(Skeleton, { className: type === "grid" ? "h-32" : "h-16" });
   const skeletonRenderer = renderSkeleton || defaultRenderSkeleton;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("space-y-4", className), "data-slot": "enhanced-list", children: [
+    header && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "list-header", children: header }),
     searchable && /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative", children: [
       /* @__PURE__ */ jsxRuntime.jsx(lucideReact.SearchIcon, { className: "absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" }),
       /* @__PURE__ */ jsxRuntime.jsx(
@@ -5406,7 +5570,8 @@ function List3({
         }
       )
     ] }),
-    loading && /* @__PURE__ */ jsxRuntime.jsx(
+    error && !loading && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "list-error", className: "text-destructive text-sm", children: typeof error === "string" ? error : error }),
+    loading && !error && /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
         className: cn(
@@ -5417,7 +5582,7 @@ function List3({
         children: Array.from({ length: skeletonCount }).map((_, i) => /* @__PURE__ */ jsxRuntime.jsx(React15__namespace.Fragment, { children: skeletonRenderer() }, i))
       }
     ),
-    !loading && filteredItems.length === 0 && /* @__PURE__ */ jsxRuntime.jsx(
+    !loading && !error && filteredItems.length === 0 && /* @__PURE__ */ jsxRuntime.jsx(
       EmptyScreen,
       {
         title: emptyTitle,
@@ -5425,7 +5590,7 @@ function List3({
         action: emptyAction
       }
     ),
-    !loading && filteredItems.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
+    !loading && !error && filteredItems.length > 0 && /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
         className: cn(
@@ -5435,7 +5600,8 @@ function List3({
         ),
         children: filteredItems.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React15__namespace.Fragment, { children: renderItem(item, index) }, index))
       }
-    )
+    ),
+    footer && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "list-footer", children: footer })
   ] });
 }
 var headerVariants = classVarianceAuthority.cva(
@@ -5458,11 +5624,15 @@ function Header2({
   variant,
   heading,
   caption,
+  description,
+  badge,
+  actions,
   left,
   right,
   children,
   ...props
 }) {
+  const actionsContent = actions && actions.length > 0 ? actions : right;
   return /* @__PURE__ */ jsxRuntime.jsx(
     Box,
     {
@@ -5474,15 +5644,19 @@ function Header2({
         className
       ),
       ...props,
-      children: heading || caption || left || right ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4", children: [
+      children: heading || caption || description || left || actionsContent || badge ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-4", children: [
           left,
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-            heading && /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-lg font-semibold", children: heading }),
-            caption && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: caption })
+          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex-1", children: [
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-2", children: [
+              heading && /* @__PURE__ */ jsxRuntime.jsx("h1", { className: "text-lg font-semibold", children: heading }),
+              badge
+            ] }),
+            caption && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: caption }),
+            description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground mt-1", children: description })
           ] })
         ] }),
-        right
+        actionsContent && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center gap-2", children: actionsContent })
       ] }) : children
     }
   );
@@ -5640,19 +5814,63 @@ function ResizableHandle({
 function ResizeContainer({
   children,
   direction = "horizontal",
-  className
+  className,
+  maxWidth,
+  maxHeight,
+  containerClassName,
+  contentClassName,
+  padding,
+  minScale,
+  maxScale,
+  fit = "contain",
+  showControls
 }) {
   const childArray = React15__namespace.Children.toArray(children);
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    ResizablePanelGroup,
+  const containerStyle = {};
+  if (maxWidth) {
+    containerStyle.maxWidth = typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
+  }
+  if (maxHeight) {
+    containerStyle.maxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
+  }
+  const contentStyle = {};
+  if (padding !== void 0) {
+    contentStyle.padding = `${padding}px`;
+  }
+  if (minScale !== void 0 || maxScale !== void 0 || fit) {
+    contentStyle.transformOrigin = "top left";
+    if (fit === "contain" || fit === "cover") {
+      contentStyle.objectFit = fit;
+    }
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
     {
-      direction,
-      className: cn("w-full", className),
-      "data-slot": "resize-container",
-      children: childArray.map((child, index) => /* @__PURE__ */ jsxRuntime.jsxs(React15__namespace.Fragment, { children: [
-        /* @__PURE__ */ jsxRuntime.jsx(ResizablePanel, { defaultSize: 50, children: child }),
-        index < childArray.length - 1 && /* @__PURE__ */ jsxRuntime.jsx(ResizableHandle, {})
-      ] }, index))
+      className: cn("relative", containerClassName),
+      style: containerStyle,
+      "data-slot": "resize-container-wrapper",
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          ResizablePanelGroup,
+          {
+            direction,
+            className: cn("w-full", className),
+            "data-slot": "resize-container",
+            children: childArray.map((child, index) => /* @__PURE__ */ jsxRuntime.jsxs(React15__namespace.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntime.jsx(ResizablePanel, { defaultSize: 50, children: /* @__PURE__ */ jsxRuntime.jsx(
+                "div",
+                {
+                  className: cn("w-full h-full", contentClassName),
+                  style: contentStyle,
+                  children: child
+                }
+              ) }),
+              index < childArray.length - 1 && /* @__PURE__ */ jsxRuntime.jsx(ResizableHandle, {})
+            ] }, index))
+          }
+        ),
+        showControls && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-2 right-2 flex gap-2", "data-slot": "resize-controls" })
+      ]
     }
   );
 }

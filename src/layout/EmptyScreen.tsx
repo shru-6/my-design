@@ -9,6 +9,7 @@ import {
   EmptyDescription,
   EmptyContent,
 } from "../atoms/Empty"
+import { AlertCircleIcon } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 
 const emptyScreenVariants = cva(
@@ -19,6 +20,7 @@ const emptyScreenVariants = cva(
         default: "",
         minimal: "py-6",
         spacious: "py-16",
+        error: "py-12",
       },
       size: {
         sm: "text-sm",
@@ -51,12 +53,20 @@ export function EmptyScreen({
   size,
   className,
 }: EmptyScreenProps) {
+  const errorIcon = variant === "error" ? (
+    icon || <AlertCircleIcon className="size-12 text-destructive" />
+  ) : icon
+
   return (
     <Empty 
-      className={cn(emptyScreenVariants({ variant, size }), className)} 
+      className={cn(
+        emptyScreenVariants({ variant, size }), 
+        variant === "error" && "text-destructive",
+        className
+      )} 
       data-slot="empty-screen"
     >
-      {icon && <EmptyContent>{icon}</EmptyContent>}
+      {errorIcon && <EmptyContent>{errorIcon}</EmptyContent>}
       <EmptyHeader>
         <EmptyTitle>{title}</EmptyTitle>
         {description && <EmptyDescription>{description}</EmptyDescription>}

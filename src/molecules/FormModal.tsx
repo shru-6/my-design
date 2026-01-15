@@ -33,6 +33,7 @@ export interface FormFieldConfig {
   label?: string
   placeholder?: string
   description?: string
+  helpText?: string | ((formData: Record<string, any>) => string)
   required?: boolean
   active?: boolean | ((values: Record<string, any>) => boolean)
   validation?: (value: any) => string | undefined
@@ -45,6 +46,9 @@ export interface FormFieldConfig {
   min?: number
   max?: number
   step?: number
+  rows?: number
+  variant?: "default" | "dashed" | "outlined"
+  size?: "sm" | "md" | "lg"
   defaultValue?: any
   onChange?: (
     value: any,
@@ -52,6 +56,13 @@ export interface FormFieldConfig {
       formData: Record<string, any>
       setFormData: (data: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void
       fieldName: string
+    }
+  ) => void
+  onFileSelect?: (
+    file: File,
+    params: {
+      formData: Record<string, any>
+      setFormData: (data: Record<string, any> | ((prev: Record<string, any>) => Record<string, any>)) => void
     }
   ) => void
 }
@@ -65,9 +76,15 @@ export interface FormModalProps {
   triggerProps?: React.ComponentProps<typeof Button>
   // Common props
   title: string
+  variant?: "create" | "edit"
+  itemType?: string
   onSubmit: (data: Record<string, any>) => void | Promise<void>
   submitLabel?: string
+  submittingLabel?: string
   cancelLabel?: string
+  loading?: boolean
+  isSubmitDisabled?: boolean | ((formData: Record<string, any>) => boolean)
+  onCreated?: (data: Record<string, any>) => void
   // Fields API
   fields?: FormFieldConfig[]
   // Children API (for custom content)
@@ -83,9 +100,15 @@ export function FormModal({
   triggerLabel,
   triggerProps,
   title,
+  variant,
+  itemType,
   onSubmit,
-  submitLabel = "Submit",
+  submitLabel,
+  submittingLabel,
   cancelLabel = "Cancel",
+  loading: loadingProp,
+  isSubmitDisabled,
+  onCreated,
   fields,
   children,
   beforeFields,
@@ -95,6 +118,21 @@ export function FormModal({
   const [formData, setFormData] = React.useState<Record<string, any>>({})
   const [errors, setErrors] = React.useState<Record<string, string>>({})
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  
+  // Auto-generate submit label based on variant and itemType
+  const getSubmitLabel = () => {
+    if (submittingLabel && (isSubmitting || loadingProp)) return submittingLabel
+    if (submitLabel) return submitLabel
+    if (variant === "create") {
+      return itemType ? `Create ${itemType}` : "Create"
+    }
+    if (variant === "edit") {
+      return itemType ? `Update ${itemType}` : "Update"
+    }
+    return "Submit"
+  }
+  
+  const loading = loadingProp ?? isSubmitting
 
   const isControlled = openProp !== undefined
   const isOpen = isControlled ? openProp : open
@@ -182,6 +220,10 @@ export function FormModal({
     setIsSubmitting(true)
     try {
       await onSubmit(formData)
+      // Call onCreated callback if provided and variant is create
+      if (onCreated && variant === "create") {
+        onCreated(formData)
+      }
       setIsOpen?.(false)
       setFormData({})
       setErrors({})
@@ -206,39 +248,59 @@ export function FormModal({
       case "text":
       case "email":
       case "url":
+        const textHelpText = typeof field.helpText === "function" 
+          ? field.helpText(formData) 
+          : field.helpText
+        
         return (
-          <FormInput
-            key={field.name}
-            label={field.label}
-            description={field.description}
-            error={error}
-            type={field.type}
-            placeholder={field.placeholder}
-            value={value || ""}
-            onChange={(e) => handleChange(field.name, e.target.value, field)}
-            required={field.required}
-          />
+          <div key={field.name} className="space-y-2">
+            <FormInput
+              label={field.label}
+              description={field.description}
+              error={error}
+              type={field.type}
+              placeholder={field.placeholder}
+              value={value || ""}
+              onChange={(e) => handleChange(field.name, e.target.value, field)}
+              required={field.required}
+            />
+            {textHelpText && (
+              <p className="text-sm text-muted-foreground">{textHelpText}</p>
+            )}
+          </div>
         )
 
       case "number":
+        const numberHelpText = typeof field.helpText === "function" 
+          ? field.helpText(formData) 
+          : field.helpText
+        
         return (
-          <FormInput
-            key={field.name}
-            label={field.label}
-            description={field.description}
-            error={error}
-            type="number"
-            placeholder={field.placeholder}
-            value={value || ""}
-            onChange={(e) => handleChange(field.name, parseFloat(e.target.value) || 0, field)}
-            min={field.min}
-            max={field.max}
-            step={field.step}
-            required={field.required}
-          />
+          <div key={field.name} className="space-y-2">
+            <FormInput
+              label={field.label}
+              description={field.description}
+              error={error}
+              type="number"
+              placeholder={field.placeholder}
+              value={value || ""}
+              onChange={(e) => handleChange(field.name, parseFloat(e.target.value) || 0, field)}
+              min={field.min}
+              max={field.max}
+              step={field.step}
+              required={field.required}
+            />
+            {numberHelpText && (
+              <p className="text-sm text-muted-foreground">{numberHelpText}</p>
+            )}
+          </div>
         )
 
       case "textarea":
+        const helpText = typeof field.helpText === "function" 
+          ? field.helpText(formData) 
+          : field.helpText
+        
         return (
           <div key={field.name} className="space-y-2">
             {field.label && (
@@ -257,7 +319,11 @@ export function FormModal({
               onChange={(e) => handleChange(field.name, e.target.value, field)}
               className={error && "border-destructive"}
               required={field.required}
+              rows={field.rows}
             />
+            {helpText && (
+              <p className="text-sm text-muted-foreground">{helpText}</p>
+            )}
             {error && (
               <p className="text-sm text-destructive" role="alert">
                 {error}
@@ -281,6 +347,10 @@ export function FormModal({
           }
           return []
         }, [field.options, formData])
+        
+        const selectHelpText = typeof field.helpText === "function" 
+          ? field.helpText(formData) 
+          : field.helpText
         
         return (
           <div key={field.name} className="space-y-2">
@@ -308,6 +378,9 @@ export function FormModal({
                 ))}
               </SelectContent>
             </Select>
+            {selectHelpText && (
+              <p className="text-sm text-muted-foreground">{selectHelpText}</p>
+            )}
             {error && (
               <p className="text-sm text-destructive" role="alert">
                 {error}
@@ -317,21 +390,33 @@ export function FormModal({
         )
 
       case "checkbox":
+        const checkboxHelpText = typeof field.helpText === "function" 
+          ? field.helpText(formData) 
+          : field.helpText
+        
         return (
-          <div key={field.name} className="flex items-center space-x-2">
-            <Checkbox
-              id={field.name}
-              checked={value || false}
-              onCheckedChange={(checked) => handleChange(field.name, checked, field)}
-            />
-            {field.label && (
-              <Label htmlFor={field.name} className="cursor-pointer">
-                {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
-              </Label>
+          <div key={field.name} className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id={field.name}
+                checked={value || false}
+                onCheckedChange={(checked) => handleChange(field.name, checked, field)}
+              />
+              {field.label && (
+                <Label htmlFor={field.name} className="cursor-pointer">
+                  {field.label}
+                  {field.required && <span className="text-destructive ml-1">*</span>}
+                </Label>
+              )}
+            </div>
+            {field.description && (
+              <p className="text-sm text-muted-foreground ml-6">{field.description}</p>
+            )}
+            {checkboxHelpText && (
+              <p className="text-sm text-muted-foreground ml-6">{checkboxHelpText}</p>
             )}
             {error && (
-              <p className="text-sm text-destructive" role="alert">
+              <p className="text-sm text-destructive ml-6" role="alert">
                 {error}
               </p>
             )}
@@ -339,6 +424,41 @@ export function FormModal({
         )
 
       case "upload":
+        const uploadHelpText = typeof field.helpText === "function" 
+          ? field.helpText(formData) 
+          : field.helpText
+        
+        const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+          const files = e.target.files
+          handleChange(field.name, files, field)
+          
+          // Call onFileSelect if provided
+          if (field.onFileSelect && files && files.length > 0) {
+            field.onFileSelect(files[0], {
+              formData,
+              setFormData: (data) => {
+                if (typeof data === 'function') {
+                  setFormData((prev) => data(prev))
+                } else {
+                  setFormData(data)
+                }
+              },
+            })
+          }
+        }
+        
+        const uploadVariantClasses = {
+          default: "",
+          dashed: "border-dashed border-2",
+          outlined: "border-2",
+        }
+        
+        const uploadSizeClasses = {
+          sm: "text-xs py-1",
+          md: "text-sm py-2",
+          lg: "text-base py-3",
+        }
+        
         return (
           <div key={field.name} className="space-y-2">
             {field.label && (
@@ -354,9 +474,16 @@ export function FormModal({
               id={field.name}
               accept={field.accept}
               multiple={field.multiple}
-              onChange={(e) => handleChange(field.name, e.target.files)}
-              className={error && "border-destructive"}
+              onChange={handleFileChange}
+              className={cn(
+                error && "border-destructive",
+                uploadVariantClasses[field.variant || "default"],
+                uploadSizeClasses[field.size || "md"]
+              )}
             />
+            {uploadHelpText && (
+              <p className="text-sm text-muted-foreground">{uploadHelpText}</p>
+            )}
             {error && (
               <p className="text-sm text-destructive" role="alert">
                 {error}
@@ -397,8 +524,16 @@ export function FormModal({
             >
               {cancelLabel}
             </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {isSubmitting ? "Submitting..." : submitLabel}
+            <Button 
+              type="submit" 
+              disabled={
+                loading || 
+                (typeof isSubmitDisabled === "function" 
+                  ? isSubmitDisabled(formData) 
+                  : isSubmitDisabled ?? false)
+              }
+            >
+              {loading ? getSubmitLabel() : getSubmitLabel()}
             </Button>
           </ModalFooter>
         </form>

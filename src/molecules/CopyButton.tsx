@@ -7,17 +7,22 @@ export interface CopyButtonProps
   text?: string
   getText?: () => string
   onCopy?: () => void
+  stopPropagation?: boolean
 }
 
 export function CopyButton({
   text,
   getText,
   onCopy,
+  stopPropagation = true,
   ...props
 }: CopyButtonProps) {
   const [copied, setCopied] = React.useState(false)
 
-  const handleCopy = async () => {
+  const handleCopy = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (stopPropagation) {
+      e.stopPropagation()
+    }
     const textToCopy = getText ? getText() : text || ""
     if (!textToCopy) return
 
@@ -33,6 +38,7 @@ export function CopyButton({
       variant="ghost"
       size="icon"
       onClick={handleCopy}
+      stopPropagation={stopPropagation}
       {...props}
     >
       {copied ? (

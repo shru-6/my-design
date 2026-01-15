@@ -26,6 +26,9 @@ export interface HeaderProps
   sticky?: boolean
   heading?: string
   caption?: string
+  description?: string
+  badge?: React.ReactNode
+  actions?: React.ReactNode[]
   left?: React.ReactNode
   right?: React.ReactNode
 }
@@ -36,11 +39,16 @@ export function Header({
   variant,
   heading,
   caption,
+  description,
+  badge,
+  actions,
   left,
   right,
   children,
   ...props
 }: HeaderProps) {
+  const actionsContent = actions && actions.length > 0 ? actions : right
+
   return (
     <Box
       as="header"
@@ -52,16 +60,24 @@ export function Header({
       )}
       {...props}
     >
-      {heading || caption || left || right ? (
+      {heading || caption || description || left || actionsContent || badge ? (
         <div className="flex items-center justify-between px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             {left}
-            <div>
-              {heading && <h1 className="text-lg font-semibold">{heading}</h1>}
+            <div className="flex-1">
+              <div className="flex items-center gap-2">
+                {heading && <h1 className="text-lg font-semibold">{heading}</h1>}
+                {badge}
+              </div>
               {caption && <p className="text-sm text-muted-foreground">{caption}</p>}
+              {description && <p className="text-sm text-muted-foreground mt-1">{description}</p>}
             </div>
           </div>
-          {right}
+          {actionsContent && (
+            <div className="flex items-center gap-2">
+              {actionsContent}
+            </div>
+          )}
         </div>
       ) : (
         children

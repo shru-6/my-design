@@ -43,15 +43,24 @@ const Button = React.forwardRef<
   React.ComponentProps<"button"> &
   VariantProps<typeof buttonVariants> & {
     asChild?: boolean
+    stopPropagation?: boolean
     }
->(({ className, variant, size, asChild = false, ...props }, ref) => {
+>(({ className, variant, size, asChild = false, stopPropagation, onClick, ...props }, ref) => {
   const Comp = asChild ? Slot : "button"
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    if (stopPropagation) {
+      e.stopPropagation()
+    }
+    onClick?.(e)
+  }
 
   return (
     <Comp
       ref={ref}
       data-slot="button"
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size }), className)}
+      onClick={handleClick}
       {...props}
     />
   )
