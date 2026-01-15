@@ -1,7 +1,7 @@
 import * as React from "react"
 import { cn } from "../utils"
 import { TextInput } from "../atoms/TextInput"
-import { InputGroup, InputGroupControl } from "./InputGroup"
+import { InputGroup, InputGroupInput } from "./InputGroup"
 import { SearchIcon, XIcon } from "lucide-react"
 import { Button } from "../atoms/Button"
 
@@ -85,7 +85,7 @@ export function SearchInput({
       <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
         {SearchIconComponent}
       </div>
-      <InputGroupControl
+      <InputGroupInput
         type="search"
         placeholder={placeholder}
         value={value}
