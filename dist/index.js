@@ -632,7 +632,7 @@ function Toggle({
     TogglePrimitive__namespace.Root,
     {
       "data-slot": "toggle",
-      className: cn(toggleVariants({ variant, size, className })),
+      className: cn(toggleVariants({ variant, size }), className),
       ...props
     }
   );
@@ -996,16 +996,7 @@ function Card({
       ...props,
       children: [
         header && /* @__PURE__ */ jsxRuntime.jsx(CardHeader, { size, children: header }),
-        !header && !footer ? /* @__PURE__ */ jsxRuntime.jsx(
-          CardContent,
-          {
-            size,
-            style: contentHeight ? {
-              height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
-            } : void 0,
-            children
-          }
-        ) : /* @__PURE__ */ jsxRuntime.jsx(
+        /* @__PURE__ */ jsxRuntime.jsx(
           CardContent,
           {
             size,
@@ -1029,10 +1020,10 @@ function CardHeader({
   ...props
 }) {
   const sizePadding = {
-    xs: "py-2.5 px-3",
-    sm: "py-3 px-4",
-    md: "py-4 px-6",
-    lg: "py-5 px-8"
+    xs: "py-1.5 px-2",
+    sm: "py-2 px-3",
+    md: "py-3 px-4",
+    lg: "py-4 px-6"
   };
   const effectiveSize = size || "md";
   return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -1041,7 +1032,7 @@ function CardHeader({
       "data-slot": "card-header",
       className: cn(
         "flex items-center justify-between",
-        "sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/50",
+        "sticky top-0 z-10 bg-card/95 backdrop-blur-sm",
         sizePadding[effectiveSize],
         cardSizeVariants({ size: effectiveSize }),
         className
@@ -1132,7 +1123,7 @@ function CardFooter({
       "data-slot": "card-footer",
       className: cn(
         "flex items-center justify-between",
-        "sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm border-t border-border/50",
+        "sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm",
         sizePadding[effectiveSize],
         cardSizeVariants({ size: effectiveSize }),
         className
@@ -1189,6 +1180,8 @@ function ModalContent({
   onClick,
   variant,
   size,
+  header,
+  footer,
   ...props
 }) {
   const handleClick = (e) => {
@@ -1215,6 +1208,8 @@ function ModalContent({
               variant: variant || "outlined",
               size: size || "md",
               className: "rounded-lg",
+              header,
+              footer,
               children
             }
           ),
@@ -2872,7 +2867,7 @@ function Calendar({
         ...formatters
       },
       classNames: {
-        root: cn("w-fit", defaultClassNames.root),
+        root: cn("w-64", defaultClassNames.root),
         months: cn(
           "flex gap-4 flex-col md:flex-row relative",
           defaultClassNames.months
@@ -4348,9 +4343,9 @@ function InfoBanner({
     {
       "data-slot": "info-banner",
       className: cn(
-        variant === "info" && "bg-blue-50 border-blue-200 text-blue-900 dark:bg-blue-950 dark:border-blue-800 dark:text-blue-100",
-        variant === "warning" && "bg-yellow-50 border-yellow-200 text-yellow-900 dark:bg-yellow-950 dark:border-yellow-800 dark:text-yellow-100",
-        variant === "success" && "bg-green-50 border-green-200 text-green-900 dark:bg-green-950 dark:border-green-800 dark:text-green-100",
+        variant === "info" && "bg-primary/10 text-primary border-primary/20 [&>svg]:text-primary",
+        variant === "warning" && "bg-accent/50 text-accent-foreground border-accent/30 [&>svg]:text-accent-foreground",
+        variant === "success" && "bg-muted/50 text-muted-foreground border-border [&>svg]:text-muted-foreground",
         className
       ),
       children: [
@@ -4767,21 +4762,19 @@ function TriggerModal({
       icon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mr-2", children: icon }),
       triggerLabel
     ] }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(
+    /* @__PURE__ */ jsxRuntime.jsx(
       ModalContent,
       {
         "data-slot": "trigger-modal",
         showCloseButton,
         className,
         onClick: (e) => e.stopPropagation(),
-        children: [
-          /* @__PURE__ */ jsxRuntime.jsxs(ModalHeader, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }),
-            description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description })
-          ] }),
-          children,
-          footer && /* @__PURE__ */ jsxRuntime.jsx(ModalFooter, { children: footer })
-        ]
+        header: /* @__PURE__ */ jsxRuntime.jsxs(ModalHeader, { children: [
+          /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }),
+          description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description })
+        ] }),
+        footer: footer ? /* @__PURE__ */ jsxRuntime.jsx(ModalFooter, { children: footer }) : void 0,
+        children
       }
     )
   ] });
@@ -5885,8 +5878,7 @@ function CollapsiblePanel({
       className: cn(
         "relative transition-all duration-300 ease-in-out",
         getCollapseClasses(),
-        className,
-        !isOpen && "overflow-hidden"
+        className
       ),
       children: [
         isOpen && /* @__PURE__ */ jsxRuntime.jsx(

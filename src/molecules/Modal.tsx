@@ -54,11 +54,15 @@ function ModalContent({
   onClick,
   variant,
   size,
+  header,
+  footer,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
   variant?: CardProps["variant"]
   size?: CardProps["size"]
+  header?: React.ReactNode
+  footer?: React.ReactNode
 }) {
   const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
     e.stopPropagation()
@@ -82,6 +86,8 @@ function ModalContent({
           variant={variant || "outlined"}
           size={size || "md"}
           className="rounded-lg"
+          header={header}
+          footer={footer}
         >
           {children}
         </Card>

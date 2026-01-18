@@ -1,4 +1,4 @@
-import * as React from "react"
+import * as React from "react";
 import {
   Modal,
   ModalTrigger,
@@ -7,24 +7,25 @@ import {
   ModalFooter,
   ModalTitle,
   ModalDescription,
-} from "./Modal"
-import { Button } from "../atoms/Button"
+} from "./Modal";
+import { Button } from "../atoms/Button";
 
-export interface TriggerModalProps extends Omit<React.ComponentProps<typeof Modal>, "children"> {
+export interface TriggerModalProps
+  extends Omit<React.ComponentProps<typeof Modal>, "children"> {
   // Trigger button
-  triggerLabel?: string
-  trigger?: React.ReactNode
-  triggerProps?: React.ComponentProps<typeof Button>
-  stopPropagation?: boolean
-  icon?: React.ReactNode
+  triggerLabel?: string;
+  trigger?: React.ReactNode;
+  triggerProps?: React.ComponentProps<typeof Button>;
+  stopPropagation?: boolean;
+  icon?: React.ReactNode;
   // Modal content
-  title: string
-  description?: string
-  children: React.ReactNode
-  footer?: React.ReactNode
+  title: string;
+  description?: string;
+  children: React.ReactNode;
+  footer?: React.ReactNode;
   // Modal props
-  showCloseButton?: boolean
-  className?: string
+  showCloseButton?: boolean;
+  className?: string;
 }
 
 export function TriggerModal({
@@ -55,19 +56,21 @@ export function TriggerModal({
           )}
         </ModalTrigger>
       )}
-      <ModalContent 
-        data-slot="trigger-modal" 
+      <ModalContent
+        data-slot="trigger-modal"
         showCloseButton={showCloseButton}
         className={className}
         onClick={(e) => e.stopPropagation()}
+        header={
+          <ModalHeader>
+            <ModalTitle>{title}</ModalTitle>
+            {description && <ModalDescription>{description}</ModalDescription>}
+          </ModalHeader>
+        }
+        footer={footer ? <ModalFooter>{footer}</ModalFooter> : undefined}
       >
-        <ModalHeader>
-          <ModalTitle>{title}</ModalTitle>
-          {description && <ModalDescription>{description}</ModalDescription>}
-        </ModalHeader>
         {children}
-        {footer && <ModalFooter>{footer}</ModalFooter>}
       </ModalContent>
     </Modal>
-  )
+  );
 }

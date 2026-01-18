@@ -559,7 +559,7 @@ function App() {
         <div style={{ marginTop: '2rem' }}>
           <h3>Calendar</h3>
           <div style={{ marginTop: '1rem' }}>
-            <Calendar />
+            <Calendar className='w-64' />
           </div>
         </div>
 
@@ -684,8 +684,13 @@ function App() {
 
         <div style={{ marginTop: '2rem' }}>
           <h3>InfoBanner</h3>
-          <div style={{ maxWidth: '500px', marginTop: '1rem' }}>
-            <InfoBanner message="This is an info message" variant="info" />
+          <div style={{ maxWidth: '500px', marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <InfoBanner message="This is an info message with theme-aware colors" variant="info" />
+            <InfoBanner message="This is a warning message with theme-aware colors" variant="warning" />
+            <InfoBanner message="This is a success message with theme-aware colors" variant="success" />
+            <InfoBanner message="InfoBanner can also be used as a tooltip" variant="info" tooltip>
+              <Button variant="ghost" size="sm">Hover me</Button>
+            </InfoBanner>
           </div>
         </div>
 
@@ -749,17 +754,16 @@ function App() {
         <div style={{ marginTop: '2rem' }}>
           <h3>Card</h3>
           <div style={{ maxWidth: '400px', marginTop: '1rem' }}>
-            <Card>
-              <CardHeader>
-                <CardTitle>Card Title</CardTitle>
-                <CardDescription>Card description goes here.</CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p>This is the card content.</p>
-              </CardContent>
-              <CardFooter>
-                <Button>Action</Button>
-              </CardFooter>
+            <Card
+              header={
+                <>
+                  <CardTitle>Card Title</CardTitle>
+                  <CardDescription>Card description goes here.</CardDescription>
+                </>
+              }
+              footer={<Button>Action</Button>}
+            >
+              <p>This is the card content.</p>
             </Card>
           </div>
         </div>

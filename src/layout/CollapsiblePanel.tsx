@@ -106,8 +106,7 @@ export function CollapsiblePanel({
       className={cn(
         "relative transition-all duration-300 ease-in-out",
         getCollapseClasses(),
-        className,
-        !isOpen && "overflow-hidden"
+        className
       )}
     >
       {/* Panel Content */}

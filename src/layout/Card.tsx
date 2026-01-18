@@ -100,25 +100,14 @@ function Card({
           {header}
         </CardHeader>
       )}
-      {!header && !footer ? (
-        <CardContent 
-          size={size}
-          style={contentHeight ? {
-            height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
-          } : undefined}
-        >
-          {children}
-        </CardContent>
-      ) : (
-        <CardContent 
-          size={size}
-          style={contentHeight ? {
-            height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
-          } : undefined}
-        >
-          {children}
-        </CardContent>
-      )}
+      <CardContent 
+        size={size}
+        style={contentHeight ? {
+          height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+        } : undefined}
+      >
+        {children}
+      </CardContent>
       {footer && (
         <CardFooter size={size}>
           {footer}
@@ -141,10 +130,10 @@ function CardHeader({
   right?: React.ReactNode
 }) {
   const sizePadding = {
-    xs: "py-2.5 px-3",
-    sm: "py-3 px-4",
-    md: "py-4 px-6",
-    lg: "py-5 px-8",
+    xs: "py-1.5 px-2",
+    sm: "py-2 px-3",
+    md: "py-3 px-4",
+    lg: "py-4 px-6",
   }
   
   const effectiveSize = size || "md"
@@ -154,7 +143,7 @@ function CardHeader({
       data-slot="card-header"
       className={cn(
         "flex items-center justify-between",
-        "sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/50",
+        "sticky top-0 z-10 bg-card/95 backdrop-blur-sm",
         sizePadding[effectiveSize],
         cardSizeVariants({ size: effectiveSize }),
         className
@@ -252,7 +241,7 @@ function CardFooter({
       data-slot="card-footer"
       className={cn(
         "flex items-center justify-between",
-        "sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm border-t border-border/50",
+        "sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm",
         sizePadding[effectiveSize],
         cardSizeVariants({ size: effectiveSize }),
         className
