@@ -2,7 +2,7 @@ import * as React from "react"
 import { cn } from "../utils"
 
 const textVariants = ["default", "muted", "small", "large"] as const
-const textAsElements = ["p", "span", "div"] as const
+const textAsElements = ["p", "span", "div", "code"] as const
 
 export interface TextProps extends React.HTMLAttributes<HTMLParagraphElement> {
   variant?: typeof textVariants[number]

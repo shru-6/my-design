@@ -917,6 +917,235 @@ var ErrorBoundary = class extends React15__namespace.Component {
     return this.props.children;
   }
 };
+var cardVariants = classVarianceAuthority.cva(
+  "bg-card text-card-foreground flex flex-col rounded-lg border shadow-sm overflow-hidden",
+  {
+    variants: {
+      variant: {
+        minimal: "border-0 shadow-none bg-transparent",
+        filled: "bg-muted border-0 text-muted-foreground",
+        subtle: "bg-muted/30 border-muted/50 text-foreground",
+        outlined: "bg-background border-border text-foreground"
+      },
+      size: {
+        xs: "gap-0",
+        sm: "gap-0",
+        md: "gap-0",
+        lg: "gap-0"
+      }
+    },
+    defaultVariants: {
+      variant: "outlined",
+      size: "md"
+    }
+  }
+);
+var cardSizeVariants = classVarianceAuthority.cva("", {
+  variants: {
+    size: {
+      xs: "text-xs",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-lg"
+    }
+  },
+  defaultVariants: {
+    size: "md"
+  }
+});
+function Card({
+  className,
+  variant,
+  size,
+  header,
+  footer,
+  children,
+  maxHeight,
+  maxWidth,
+  contentHeight,
+  interactive,
+  onClick,
+  ...props
+}) {
+  const handleClick = (e) => {
+    if (interactive && onClick) {
+      e.stopPropagation();
+      onClick(e);
+    } else if (onClick) {
+      onClick(e);
+    }
+  };
+  const style = {};
+  if (maxHeight) {
+    style.maxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
+  }
+  if (maxWidth) {
+    style.maxWidth = typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
+  }
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      "data-slot": "card",
+      className: cn(
+        cardVariants({ variant, size }),
+        interactive && "cursor-pointer transition-all hover:shadow-md",
+        className
+      ),
+      style,
+      onClick: handleClick,
+      ...props,
+      children: [
+        header && /* @__PURE__ */ jsxRuntime.jsx(CardHeader, { size, children: header }),
+        !header && !footer ? /* @__PURE__ */ jsxRuntime.jsx(
+          CardContent,
+          {
+            size,
+            style: contentHeight ? {
+              height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+            } : void 0,
+            children
+          }
+        ) : /* @__PURE__ */ jsxRuntime.jsx(
+          CardContent,
+          {
+            size,
+            style: contentHeight ? {
+              height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+            } : void 0,
+            children
+          }
+        ),
+        footer && /* @__PURE__ */ jsxRuntime.jsx(CardFooter, { size, children: footer })
+      ]
+    }
+  );
+}
+function CardHeader({
+  className,
+  size,
+  left,
+  right,
+  children,
+  ...props
+}) {
+  const sizePadding = {
+    xs: "py-2.5 px-3",
+    sm: "py-3 px-4",
+    md: "py-4 px-6",
+    lg: "py-5 px-8"
+  };
+  const effectiveSize = size || "md";
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      "data-slot": "card-header",
+      className: cn(
+        "flex items-center justify-between",
+        "sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/50",
+        sizePadding[effectiveSize],
+        cardSizeVariants({ size: effectiveSize }),
+        className
+      ),
+      ...props,
+      children: [
+        left && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-header-left", className: "w-fit", children: left }),
+        children && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-header-content", className: "w-full", children }),
+        right && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-header-right", className: "w-fit", children: right })
+      ]
+    }
+  );
+}
+function CardTitle({ className, ...props }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      "data-slot": "card-title",
+      className: cn("leading-none font-semibold", className),
+      ...props
+    }
+  );
+}
+function CardDescription({ className, ...props }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      "data-slot": "card-description",
+      className: cn("text-muted-foreground text-sm", className),
+      ...props
+    }
+  );
+}
+function CardAction({ className, ...props }) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      "data-slot": "card-action",
+      className: cn(
+        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
+        className
+      ),
+      ...props
+    }
+  );
+}
+function CardContent({ className, size, ...props }) {
+  const sizePadding = {
+    xs: "py-2.5 px-3",
+    sm: "py-3 px-4",
+    md: "py-4 px-6",
+    lg: "py-5 px-8"
+  };
+  const effectiveSize = size || "md";
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      "data-slot": "card-content",
+      className: cn(
+        // Add scrollable content styles by default (can be overridden)
+        "flex-1 min-h-0 overflow-auto",
+        sizePadding[effectiveSize],
+        cardSizeVariants({ size: effectiveSize }),
+        className
+      ),
+      ...props
+    }
+  );
+}
+function CardFooter({
+  className,
+  size,
+  left,
+  right,
+  children,
+  ...props
+}) {
+  const sizePadding = {
+    xs: "py-2.5 px-3 [.border-t]:pt-2.5",
+    sm: "py-3 px-4 [.border-t]:pt-3",
+    md: "py-4 px-6 [.border-t]:pt-4",
+    lg: "py-5 px-8 [.border-t]:pt-5"
+  };
+  const effectiveSize = size || "md";
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      "data-slot": "card-footer",
+      className: cn(
+        "flex items-center justify-between",
+        "sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm border-t border-border/50",
+        sizePadding[effectiveSize],
+        cardSizeVariants({ size: effectiveSize }),
+        className
+      ),
+      ...props,
+      children: left !== void 0 || right !== void 0 ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+        left && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-footer-left", children: left }),
+        children && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-footer-content", children }),
+        right && /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-footer-right", children: right })
+      ] }) : children
+    }
+  );
+}
 function Modal({
   ...props
 }) {
@@ -957,8 +1186,15 @@ function ModalContent({
   className,
   children,
   showCloseButton = true,
+  onClick,
+  variant,
+  size,
   ...props
 }) {
+  const handleClick = (e) => {
+    e.stopPropagation();
+    onClick?.(e);
+  };
   return /* @__PURE__ */ jsxRuntime.jsxs(ModalPortal, { "data-slot": "modal-portal", children: [
     /* @__PURE__ */ jsxRuntime.jsx(ModalOverlay, {}),
     /* @__PURE__ */ jsxRuntime.jsxs(
@@ -966,12 +1202,22 @@ function ModalContent({
       {
         "data-slot": "modal-content",
         className: cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-component-md rounded-lg border p-component-lg shadow-lg duration-normal font-sans sm:max-w-lg",
+          // Modal-specific positioning and animations
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] duration-normal font-sans sm:max-w-lg",
           className
         ),
+        onClick: handleClick,
         ...props,
         children: [
-          children,
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Card,
+            {
+              variant: variant || "outlined",
+              size: size || "md",
+              className: "rounded-lg",
+              children
+            }
+          ),
           showCloseButton && /* @__PURE__ */ jsxRuntime.jsxs(
             DialogPrimitive__namespace.Close,
             {
@@ -988,29 +1234,6 @@ function ModalContent({
     )
   ] });
 }
-function ModalHeader({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "modal-header",
-      className: cn("flex flex-col gap-component-sm text-center sm:text-left font-sans", className),
-      ...props
-    }
-  );
-}
-function ModalFooter({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "modal-footer",
-      className: cn(
-        "flex flex-col-reverse gap-component-sm sm:flex-row sm:justify-end",
-        className
-      ),
-      ...props
-    }
-  );
-}
 function ModalTitle({
   className,
   ...props
@@ -1019,8 +1242,9 @@ function ModalTitle({
     DialogPrimitive__namespace.Title,
     {
       "data-slot": "modal-title",
-      className: cn("text-lg leading-none font-semibold", className),
-      ...props
+      asChild: true,
+      ...props,
+      children: /* @__PURE__ */ jsxRuntime.jsx(CardTitle, { className })
     }
   );
 }
@@ -1032,11 +1256,14 @@ function ModalDescription({
     DialogPrimitive__namespace.Description,
     {
       "data-slot": "modal-description",
-      className: cn("text-muted-foreground text-sm", className),
-      ...props
+      asChild: true,
+      ...props,
+      children: /* @__PURE__ */ jsxRuntime.jsx(CardDescription, { className })
     }
   );
 }
+var ModalHeader = CardHeader;
+var ModalFooter = CardFooter;
 function Select({
   ...props
 }) {
@@ -4157,7 +4384,7 @@ function InlineEdit({
     setIsEditing(false);
   };
   if (isEditing) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "inline-edit", className: cn("flex items-center gap-2", className), children: /* @__PURE__ */ jsxRuntime.jsx(
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "inline-edit", className: cn("inline-flex items-center", className), children: /* @__PURE__ */ jsxRuntime.jsx(
       TextInput,
       {
         value,
@@ -4167,7 +4394,8 @@ function InlineEdit({
           if (e.key === "Enter") handleSave();
           if (e.key === "Escape") handleCancel();
         },
-        autoFocus: true
+        autoFocus: true,
+        className: "h-9"
       }
     ) });
   }
@@ -4175,7 +4403,11 @@ function InlineEdit({
     "span",
     {
       "data-slot": "inline-edit-display",
-      className: cn("cursor-pointer hover:underline", className),
+      className: cn(
+        "inline-flex items-center h-9 cursor-pointer hover:underline px-3 py-2",
+        "border border-transparent rounded-md",
+        className
+      ),
       onClick: () => setIsEditing(true),
       children: value || placeholder || "Click to edit"
     }
@@ -4514,12 +4746,53 @@ function SearchInput({
     )
   ] });
 }
+function TriggerModal({
+  open,
+  onOpenChange,
+  triggerLabel,
+  trigger,
+  triggerProps,
+  stopPropagation = true,
+  icon,
+  title,
+  description,
+  children,
+  footer,
+  showCloseButton = true,
+  className,
+  ...props
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open, onOpenChange, ...props, children: [
+    (triggerLabel || trigger) && /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: trigger || /* @__PURE__ */ jsxRuntime.jsxs(Button, { ...triggerProps, stopPropagation, children: [
+      icon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mr-2", children: icon }),
+      triggerLabel
+    ] }) }),
+    /* @__PURE__ */ jsxRuntime.jsxs(
+      ModalContent,
+      {
+        "data-slot": "trigger-modal",
+        showCloseButton,
+        className,
+        onClick: (e) => e.stopPropagation(),
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsxs(ModalHeader, { children: [
+            /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }),
+            description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description })
+          ] }),
+          children,
+          footer && /* @__PURE__ */ jsxRuntime.jsx(ModalFooter, { children: footer })
+        ]
+      }
+    )
+  ] });
+}
 function ConfirmModal({
   open: openProp,
   onOpenChange,
   triggerLabel,
   triggerProps,
   stopPropagation = true,
+  icon,
   text,
   title,
   description,
@@ -4529,7 +4802,8 @@ function ConfirmModal({
   variant = "default",
   loading = false,
   error,
-  showModal = true
+  showModal = true,
+  ...props
 }) {
   const [open, setOpen] = React15__namespace.useState(openProp ?? false);
   const [isSubmitting, setIsSubmitting] = React15__namespace.useState(false);
@@ -4575,41 +4849,44 @@ function ConfirmModal({
   const { buttonVariant, defaultConfirmLabel } = getVariantConfig();
   const finalConfirmLabel = confirmLabel || defaultConfirmLabel;
   const isLoading = loading || isSubmitting;
-  const modalContent = /* @__PURE__ */ jsxRuntime.jsx(Modal, { open: isOpen && showModal, onOpenChange: setIsOpen, children: /* @__PURE__ */ jsxRuntime.jsxs(ModalContent, { "data-slot": "confirm-modal", children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(ModalHeader, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }),
-      description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description }),
-      text && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: text })
-    ] }),
-    error && /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-6", children: /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: error }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs(ModalFooter, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: "outline",
-          onClick: () => setIsOpen?.(false),
-          disabled: isLoading,
-          children: cancelLabel
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: buttonVariant,
-          onClick: handleConfirm,
-          disabled: isLoading,
-          children: isLoading ? "Loading..." : finalConfirmLabel
-        }
-      )
-    ] })
-  ] }) });
-  if (triggerLabel) {
-    return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open: isOpen && showModal, onOpenChange: setIsOpen, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntime.jsx(Button, { ...triggerProps, stopPropagation, children: triggerLabel }) }),
-      modalContent
-    ] });
-  }
-  return modalContent;
+  const footer = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      Button,
+      {
+        variant: "outline",
+        onClick: () => setIsOpen?.(false),
+        disabled: isLoading,
+        children: cancelLabel
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      Button,
+      {
+        variant: buttonVariant,
+        onClick: handleConfirm,
+        disabled: isLoading,
+        children: isLoading ? "Loading..." : finalConfirmLabel
+      }
+    )
+  ] });
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    TriggerModal,
+    {
+      open: isOpen && showModal,
+      onOpenChange: setIsOpen,
+      triggerLabel,
+      triggerProps,
+      icon,
+      stopPropagation,
+      title,
+      description: description || text,
+      footer,
+      showCloseButton: false,
+      className: "data-slot-confirm-modal",
+      ...props,
+      children: error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", children: error })
+    }
+  );
 }
 function CopyButton({
   text,
@@ -4648,6 +4925,7 @@ function FormModal({
   onOpenChange,
   triggerLabel,
   triggerProps,
+  icon,
   title,
   variant,
   itemType,
@@ -4661,7 +4939,8 @@ function FormModal({
   fields,
   children,
   beforeFields,
-  afterFields
+  afterFields,
+  ...props
 }) {
   const [open, setOpen] = React15__namespace.useState(openProp ?? false);
   const [formData, setFormData] = React15__namespace.useState({});
@@ -4765,11 +5044,13 @@ function FormModal({
     if (!isActive) return null;
     const value = formData[field.name] ?? field.defaultValue;
     const error = errors[field.name];
+    const resolvedPlaceholder = typeof field.placeholder === "function" ? field.placeholder(formData) : field.placeholder;
+    const resolvedRequired = typeof field.required === "function" ? field.required(formData) : field.required;
+    const resolvedHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
     switch (field.type) {
       case "text":
       case "email":
       case "url":
-        const textHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             FormInput,
@@ -4778,16 +5059,15 @@ function FormModal({
               description: field.description,
               error,
               type: field.type,
-              placeholder: field.placeholder,
+              placeholder: resolvedPlaceholder,
               value: value || "",
               onChange: (e) => handleChange(field.name, e.target.value, field),
-              required: field.required
+              required: resolvedRequired
             }
           ),
-          textHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: textHelpText })
+          resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: resolvedHelpText })
         ] }, field.name);
       case "number":
-        const numberHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             FormInput,
@@ -4796,38 +5076,37 @@ function FormModal({
               description: field.description,
               error,
               type: "number",
-              placeholder: field.placeholder,
+              placeholder: resolvedPlaceholder,
               value: value || "",
               onChange: (e) => handleChange(field.name, parseFloat(e.target.value) || 0, field),
               min: field.min,
               max: field.max,
               step: field.step,
-              required: field.required
+              required: resolvedRequired
             }
           ),
-          numberHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: numberHelpText })
+          resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: resolvedHelpText })
         ] }, field.name);
       case "textarea":
-        const helpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
-            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+            resolvedRequired && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
           ] }),
           field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: field.description }),
           /* @__PURE__ */ jsxRuntime.jsx(
             Textarea,
             {
               id: field.name,
-              placeholder: field.placeholder,
+              placeholder: resolvedPlaceholder,
               value: value || "",
               onChange: (e) => handleChange(field.name, e.target.value, field),
               className: error && "border-destructive",
-              required: field.required,
+              required: resolvedRequired,
               rows: field.rows
             }
           ),
-          helpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: helpText }),
+          resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: resolvedHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       case "select":
@@ -4844,11 +5123,10 @@ function FormModal({
           }
           return [];
         }, [field.options, formData]);
-        const selectHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
-            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+            resolvedRequired && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
           ] }),
           field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: field.description }),
           /* @__PURE__ */ jsxRuntime.jsxs(
@@ -4857,16 +5135,15 @@ function FormModal({
               value: value || "",
               onValueChange: (val) => handleChange(field.name, val, field),
               children: [
-                /* @__PURE__ */ jsxRuntime.jsx(SelectTrigger, { id: field.name, className: error && "border-destructive", children: /* @__PURE__ */ jsxRuntime.jsx(SelectValue, { placeholder: field.placeholder || "Select..." }) }),
+                /* @__PURE__ */ jsxRuntime.jsx(SelectTrigger, { id: field.name, className: error && "border-destructive", children: /* @__PURE__ */ jsxRuntime.jsx(SelectValue, { placeholder: resolvedPlaceholder || "Select..." }) }),
                 /* @__PURE__ */ jsxRuntime.jsx(SelectContent, { children: resolvedOptions.map((option) => /* @__PURE__ */ jsxRuntime.jsx(SelectItem, { value: option.value, children: option.label }, option.value)) })
               ]
             }
           ),
-          selectHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: selectHelpText }),
+          resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: resolvedHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       case "checkbox":
-        const checkboxHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center space-x-2", children: [
             /* @__PURE__ */ jsxRuntime.jsx(
@@ -4879,15 +5156,14 @@ function FormModal({
             ),
             field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: "cursor-pointer", children: [
               field.label,
-              field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+              resolvedRequired && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
             ] })
           ] }),
           field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground ml-6", children: field.description }),
-          checkboxHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground ml-6", children: checkboxHelpText }),
+          resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground ml-6", children: resolvedHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive ml-6", role: "alert", children: error })
         ] }, field.name);
       case "upload":
-        const uploadHelpText = typeof field.helpText === "function" ? field.helpText(formData) : field.helpText;
         const handleFileChange = (e) => {
           const files = e.target.files;
           handleChange(field.name, files, field);
@@ -4917,7 +5193,7 @@ function FormModal({
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
-            field.required && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
+            resolvedRequired && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-destructive ml-1", children: "*" })
           ] }),
           field.description && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: field.description }),
           /* @__PURE__ */ jsxRuntime.jsx(
@@ -4934,101 +5210,111 @@ function FormModal({
               )
             }
           ),
-          uploadHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: uploadHelpText }),
+          resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: resolvedHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       default:
         return null;
     }
   };
-  const modalContent = /* @__PURE__ */ jsxRuntime.jsx(Modal, { open: isOpen, onOpenChange: setIsOpen, children: /* @__PURE__ */ jsxRuntime.jsx(ModalContent, { "data-slot": "form-modal", children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }) }),
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-4 px-6 py-4", children: [
-      beforeFields,
-      fields ? /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fields.map((field) => renderField(field)) }) : children,
-      afterFields
-    ] }),
-    /* @__PURE__ */ jsxRuntime.jsxs(ModalFooter, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          type: "button",
-          variant: "outline",
-          onClick: () => setIsOpen?.(false),
-          disabled: isSubmitting,
-          children: cancelLabel
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          type: "submit",
-          disabled: loading || (typeof isSubmitDisabled === "function" ? isSubmitDisabled(formData) : isSubmitDisabled ?? false),
-          children: loading ? getSubmitLabel() : getSubmitLabel()
-        }
-      )
-    ] })
-  ] }) }) });
-  if (triggerLabel) {
-    return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open: isOpen, onOpenChange: setIsOpen, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: /* @__PURE__ */ jsxRuntime.jsx(Button, { ...triggerProps, children: triggerLabel }) }),
-      modalContent
-    ] });
-  }
-  return modalContent;
-}
-function TriggerModal({
-  trigger,
-  title,
-  children,
-  footer
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { children: [
-    /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, "data-slot": "trigger-modal", children: trigger }),
-    /* @__PURE__ */ jsxRuntime.jsxs(ModalContent, { children: [
-      /* @__PURE__ */ jsxRuntime.jsx(ModalHeader, { children: /* @__PURE__ */ jsxRuntime.jsx(ModalTitle, { children: title }) }),
-      children,
-      footer && /* @__PURE__ */ jsxRuntime.jsx(ModalFooter, { children: footer })
-    ] })
+  const footer = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx(
+      Button,
+      {
+        type: "button",
+        variant: "outline",
+        onClick: () => setIsOpen?.(false),
+        disabled: isSubmitting,
+        children: cancelLabel
+      }
+    ),
+    /* @__PURE__ */ jsxRuntime.jsx(
+      Button,
+      {
+        type: "submit",
+        disabled: loading || (typeof isSubmitDisabled === "function" ? isSubmitDisabled(formData) : isSubmitDisabled ?? false),
+        children: loading ? getSubmitLabel() : getSubmitLabel()
+      }
+    )
   ] });
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    TriggerModal,
+    {
+      open: isOpen,
+      onOpenChange: setIsOpen,
+      triggerLabel,
+      triggerProps,
+      icon,
+      stopPropagation: true,
+      title,
+      showCloseButton: false,
+      footer,
+      className: "data-slot-form-modal",
+      ...props,
+      children: /* @__PURE__ */ jsxRuntime.jsxs("form", { onSubmit: handleSubmit, onClick: (e) => e.stopPropagation(), children: [
+        beforeFields,
+        fields ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4", children: fields.map((field) => renderField(field)) }) : children,
+        afterFields
+      ] })
+    }
+  );
 }
 function HistoryControlButtons({
-  className
+  canUndo = false,
+  canRedo = false,
+  isDirty = false,
+  onUndo,
+  onRedo,
+  onReset,
+  className,
+  showLabels = false
 }) {
-  const handleBack = () => {
-    if (typeof window !== "undefined") {
-      window.history.back();
-    }
-  };
-  const handleForward = () => {
-    if (typeof window !== "undefined") {
-      window.history.forward();
-    }
-  };
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
       "data-slot": "history-control-buttons",
-      className,
+      className: cn("flex items-center gap-1", className),
       children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
+        /* @__PURE__ */ jsxRuntime.jsxs(
           Button,
           {
             variant: "ghost",
             size: "icon",
-            onClick: handleBack,
-            title: "Go back",
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronLeftIcon, { className: "size-4" })
+            onClick: onUndo,
+            disabled: !canUndo || !onUndo,
+            title: "Undo (Ctrl+Z)",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(lucideReact.UndoIcon, { className: "size-4" }),
+              showLabels && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "sr-only ml-2", children: "Undo" })
+            ]
           }
         ),
-        /* @__PURE__ */ jsxRuntime.jsx(
+        /* @__PURE__ */ jsxRuntime.jsxs(
           Button,
           {
             variant: "ghost",
             size: "icon",
-            onClick: handleForward,
-            title: "Go forward",
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRightIcon, { className: "size-4" })
+            onClick: onRedo,
+            disabled: !canRedo || !onRedo,
+            title: "Redo (Ctrl+Shift+Z)",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RedoIcon, { className: "size-4" }),
+              showLabels && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "sr-only ml-2", children: "Redo" })
+            ]
+          }
+        ),
+        onReset && /* @__PURE__ */ jsxRuntime.jsxs(
+          Button,
+          {
+            variant: "ghost",
+            size: "icon",
+            onClick: onReset,
+            disabled: !isDirty,
+            title: "Reset changes",
+            children: [
+              /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcwIcon, { className: "size-4" }),
+              showLabels && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "sr-only ml-2", children: "Reset" })
+            ]
           }
         )
       ]
@@ -5105,155 +5391,6 @@ function Grid({
         gap === "lg" && "gap-6",
         className
       ),
-      ...props
-    }
-  );
-}
-var cardVariants = classVarianceAuthority.cva(
-  "bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm",
-  {
-    variants: {
-      variant: {
-        minimal: "border-0 shadow-none bg-transparent",
-        filled: "bg-muted border-0",
-        subtle: "bg-muted/50 border-muted",
-        outlined: "bg-transparent border-2"
-      },
-      size: {
-        xs: "gap-3 py-3 text-xs",
-        sm: "gap-4 py-4 text-sm",
-        md: "gap-6 py-6 text-base",
-        lg: "gap-8 py-8 text-lg"
-      }
-    },
-    defaultVariants: {
-      variant: "outlined",
-      size: "md"
-    }
-  }
-);
-function Card({
-  className,
-  variant,
-  size,
-  header,
-  footer,
-  children,
-  maxHeight,
-  maxWidth,
-  contentHeight,
-  interactive,
-  onClick,
-  ...props
-}) {
-  const handleClick = (e) => {
-    if (interactive && onClick) {
-      e.stopPropagation();
-      onClick(e);
-    } else if (onClick) {
-      onClick(e);
-    }
-  };
-  const style = {};
-  if (maxHeight) {
-    style.maxHeight = typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight;
-  }
-  if (maxWidth) {
-    style.maxWidth = typeof maxWidth === "number" ? `${maxWidth}px` : maxWidth;
-  }
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      "data-slot": "card",
-      className: cn(
-        cardVariants({ variant, size }),
-        interactive && "cursor-pointer",
-        className
-      ),
-      style,
-      onClick: handleClick,
-      ...props,
-      children: [
-        header && /* @__PURE__ */ jsxRuntime.jsx(CardHeader, { className: "sticky top-0 z-10 bg-card border-b", children: header }),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          CardContent,
-          {
-            className: cn(
-              "flex-1 min-h-0 overflow-auto"
-            ),
-            style: contentHeight ? {
-              height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
-            } : void 0,
-            children
-          }
-        ),
-        footer && /* @__PURE__ */ jsxRuntime.jsx(CardFooter, { className: "sticky bottom-0 z-10 bg-card border-t", children: footer })
-      ]
-    }
-  );
-}
-function CardHeader({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "card-header",
-      className: cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
-        className
-      ),
-      ...props
-    }
-  );
-}
-function CardTitle({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "card-title",
-      className: cn("leading-none font-semibold", className),
-      ...props
-    }
-  );
-}
-function CardDescription({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "card-description",
-      className: cn("text-muted-foreground text-sm", className),
-      ...props
-    }
-  );
-}
-function CardAction({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "card-action",
-      className: cn(
-        "col-start-2 row-span-2 row-start-1 self-start justify-self-end",
-        className
-      ),
-      ...props
-    }
-  );
-}
-function CardContent({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "card-content",
-      className: cn("px-6", className),
-      ...props
-    }
-  );
-}
-function CardFooter({ className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      "data-slot": "card-footer",
-      className: cn("flex items-center px-6 [.border-t]:pt-6", className),
       ...props
     }
   );
@@ -5494,7 +5631,7 @@ function EmptyScreen({
   );
 }
 function List3({
-  items,
+  items = [],
   renderItem,
   searchable = false,
   searchPlaceholder = "Search...",
@@ -5519,17 +5656,20 @@ function List3({
   const searchValue = isControlled ? searchValueProp : internalSearchValue;
   const setSearchValue = isControlled ? onSearchChangeProp || (() => {
   }) : setInternalSearchValue;
+  const safeItems = React15__namespace.useMemo(() => {
+    return Array.isArray(items) ? items : [];
+  }, [items]);
   const filteredItems = React15__namespace.useMemo(() => {
-    if (!searchable || !searchValue) return items;
+    if (!searchable || !searchValue) return safeItems;
     if (filterItems) {
-      return filterItems(items, searchValue);
+      return filterItems(safeItems, searchValue);
     }
     const lowerSearch = searchValue.toLowerCase();
-    return items.filter((item) => {
+    return safeItems.filter((item) => {
       const itemStr = JSON.stringify(item).toLowerCase();
       return itemStr.includes(lowerSearch);
     });
-  }, [items, searchValue, searchable, filterItems]);
+  }, [safeItems, searchValue, searchable, filterItems]);
   const gridClasses = React15__namespace.useMemo(() => {
     if (type !== "grid") return "";
     const cols = gridCols || {};
@@ -5679,93 +5819,103 @@ function Footer({
   );
 }
 function CollapsiblePanel({
-  title,
-  label,
-  keyword,
   children,
-  defaultOpen = false,
+  direction = "horizontal",
+  position = "right",
+  defaultOpen = true,
+  minWidth = "w-80",
+  minHeight = "h-full",
+  keyword = "",
   className,
-  direction = "vertical",
-  triggerPosition = "top",
-  minWidth,
-  minHeight,
   triggerClassName,
-  contentClassName,
-  customTrigger
+  onToggle,
+  open: openProp,
+  onOpenChange
 }) {
-  const [open, setOpen] = React15__namespace.useState(defaultOpen);
-  const displayText = title || label || keyword || "";
-  const getIcon = () => {
+  const [internalOpen, setInternalOpen] = React15__namespace.useState(defaultOpen);
+  const isControlled = openProp !== void 0;
+  const isOpen = isControlled ? openProp : internalOpen;
+  const setIsOpen = isControlled ? onOpenChange : setInternalOpen;
+  const handleToggle = () => {
+    const newState = !isOpen;
+    setIsOpen?.(newState);
+    onToggle?.(newState);
+  };
+  const getCollapseClasses = () => {
     if (direction === "horizontal") {
-      return open ? lucideReact.ChevronLeftIcon : lucideReact.ChevronRightIcon;
+      return isOpen ? minWidth : "w-0";
+    } else {
+      return isOpen ? minHeight : "h-0";
     }
-    if (triggerPosition === "bottom") {
-      return open ? lucideReact.ChevronUpIcon : lucideReact.ChevronDownIcon;
+  };
+  const getTriggerIcon = () => {
+    if (direction === "horizontal") {
+      if (position === "left") {
+        return isOpen ? lucideReact.ChevronRight : lucideReact.ChevronLeft;
+      } else {
+        return isOpen ? lucideReact.ChevronLeft : lucideReact.ChevronRight;
+      }
+    } else {
+      if (position === "top") {
+        return isOpen ? lucideReact.ChevronDown : lucideReact.ChevronUp;
+      } else {
+        return isOpen ? lucideReact.ChevronUp : lucideReact.ChevronDown;
+      }
     }
-    return open ? lucideReact.ChevronDownIcon : lucideReact.ChevronDownIcon;
   };
-  const Icon2 = getIcon();
-  const triggerPositionClasses = {
-    top: "flex-col",
-    bottom: "flex-col-reverse",
-    left: "flex-row",
-    right: "flex-row-reverse"
+  const getTriggerPosition = () => {
+    if (direction === "horizontal") {
+      if (position === "left") {
+        return isOpen ? "absolute -left-3 top-1/2 -translate-y-1/2" : "absolute -left-6 top-1/2 -translate-y-1/2";
+      } else {
+        return isOpen ? "absolute -right-3 top-1/2 -translate-y-1/2" : "absolute -right-6 top-1/2 -translate-y-1/2";
+      }
+    } else {
+      if (position === "top") {
+        return isOpen ? "absolute -top-3 left-1/2 -translate-x-1/2" : "absolute -top-6 left-1/2 -translate-x-1/2";
+      } else {
+        return isOpen ? "absolute -bottom-3 left-1/2 -translate-x-1/2" : "absolute -bottom-6 left-1/2 -translate-x-1/2";
+      }
+    }
   };
-  const containerClasses = cn(
-    "border rounded-lg",
-    direction === "horizontal" && "flex",
-    direction === "vertical" && "flex flex-col",
-    className
-  );
-  const triggerClasses = cn(
-    "flex items-center justify-between p-4 transition-colors hover:bg-muted/50",
-    triggerPositionClasses[triggerPosition],
-    triggerClassName
-  );
-  const contentClasses = cn(
-    direction === "horizontal" && "flex-1",
-    contentClassName
-  );
-  const style = {};
-  if (minWidth) {
-    style.minWidth = typeof minWidth === "number" ? `${minWidth}px` : minWidth;
-  }
-  if (minHeight) {
-    style.minHeight = typeof minHeight === "number" ? `${minHeight}px` : minHeight;
-  }
+  const TriggerIcon = getTriggerIcon();
   return /* @__PURE__ */ jsxRuntime.jsxs(
-    Collapsible,
+    "div",
     {
-      open,
-      onOpenChange: setOpen,
-      className: containerClasses,
-      style,
+      className: cn(
+        "relative transition-all duration-300 ease-in-out",
+        getCollapseClasses(),
+        className,
+        !isOpen && "overflow-hidden"
+      ),
       children: [
-        customTrigger ? /* @__PURE__ */ jsxRuntime.jsx(CollapsibleTrigger2, { asChild: true, children: customTrigger }) : /* @__PURE__ */ jsxRuntime.jsxs(
-          CollapsibleTrigger2,
+        isOpen && /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
           {
-            "data-slot": "collapsible-panel-trigger",
-            className: triggerClasses,
-            children: [
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "font-medium", children: displayText }),
-              /* @__PURE__ */ jsxRuntime.jsx(
-                Icon2,
-                {
-                  className: cn(
-                    "size-4 transition-transform",
-                    open && "rotate-180"
-                  )
-                }
-              )
-            ]
+            className: cn(
+              "h-full transition-opacity duration-300",
+              direction === "horizontal" ? minWidth : "w-full"
+            ),
+            children
           }
         ),
         /* @__PURE__ */ jsxRuntime.jsx(
-          CollapsibleContent2,
+          Button,
           {
-            "data-slot": "collapsible-panel-content",
-            className: cn("p-4", contentClasses),
-            children
+            variant: "ghost",
+            onClick: handleToggle,
+            className: cn(
+              getTriggerPosition(),
+              "w-6 h-6 p-0 bg-muted border border-border rounded-full",
+              "flex items-center justify-center text-foreground hover:bg-accent",
+              "transition-colors shadow-lg hover:scale-110 z-50",
+              "min-w-0",
+              // Override Button's min-width
+              triggerClassName
+            ),
+            title: `${isOpen ? "Collapse" : "Expand"} ${keyword || "panel"}`,
+            "data-slot": "collapsible-panel-trigger",
+            children: /* @__PURE__ */ jsxRuntime.jsx(TriggerIcon, { className: "w-3 h-3" })
           }
         )
       ]

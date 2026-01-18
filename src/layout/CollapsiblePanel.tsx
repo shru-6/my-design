@@ -1,129 +1,144 @@
 "use client"
 
 import * as React from "react"
-import {
-  Collapsible,
-  CollapsibleContent,
-  CollapsibleTrigger,
-} from "../molecules/Collapsible"
 import { cn } from "../utils"
-import { ChevronDownIcon, ChevronRightIcon, ChevronUpIcon, ChevronLeftIcon } from "lucide-react"
+import { 
+  ChevronLeft, 
+  ChevronRight, 
+  ChevronUp, 
+  ChevronDown 
+} from "lucide-react"
+import { Button } from "../atoms/Button"
 
 export interface CollapsiblePanelProps {
-  title?: string
-  label?: string
-  keyword?: string
   children: React.ReactNode
-  defaultOpen?: boolean
-  className?: string
   direction?: "horizontal" | "vertical"
-  triggerPosition?: "left" | "right" | "top" | "bottom"
-  minWidth?: string | number
-  minHeight?: string | number
+  position?: "left" | "right" | "top" | "bottom"
+  defaultOpen?: boolean
+  minWidth?: string
+  minHeight?: string
+  keyword?: string
+  className?: string
   triggerClassName?: string
-  contentClassName?: string
-  customTrigger?: React.ReactNode
+  onToggle?: (isOpen: boolean) => void
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
 }
 
 export function CollapsiblePanel({
-  title,
-  label,
-  keyword,
   children,
-  defaultOpen = false,
+  direction = "horizontal",
+  position = "right",
+  defaultOpen = true,
+  minWidth = "w-80",
+  minHeight = "h-full",
+  keyword = "",
   className,
-  direction = "vertical",
-  triggerPosition = "top",
-  minWidth,
-  minHeight,
   triggerClassName,
-  contentClassName,
-  customTrigger,
+  onToggle,
+  open: openProp,
+  onOpenChange,
 }: CollapsiblePanelProps) {
-  const [open, setOpen] = React.useState(defaultOpen)
+  const [internalOpen, setInternalOpen] = React.useState(defaultOpen)
+  
+  const isControlled = openProp !== undefined
+  const isOpen = isControlled ? openProp : internalOpen
+  const setIsOpen = isControlled ? onOpenChange : setInternalOpen
 
-  const displayText = title || label || keyword || ""
+  const handleToggle = () => {
+    const newState = !isOpen
+    setIsOpen?.(newState)
+    onToggle?.(newState)
+  }
 
-  // Determine icon based on direction and position
-  const getIcon = () => {
+  const getCollapseClasses = () => {
     if (direction === "horizontal") {
-      return open ? ChevronLeftIcon : ChevronRightIcon
+      return isOpen ? minWidth : "w-0"
+    } else {
+      return isOpen ? minHeight : "h-0"
     }
-    // vertical
-    if (triggerPosition === "bottom") {
-      return open ? ChevronUpIcon : ChevronDownIcon
+  }
+
+  const getTriggerIcon = () => {
+    if (direction === "horizontal") {
+      if (position === "left") {
+        return isOpen ? ChevronRight : ChevronLeft
+      } else {
+        return isOpen ? ChevronLeft : ChevronRight
+      }
+    } else {
+      if (position === "top") {
+        return isOpen ? ChevronDown : ChevronUp
+      } else {
+        return isOpen ? ChevronUp : ChevronDown
+      }
     }
-    // top (default)
-    return open ? ChevronDownIcon : ChevronDownIcon
   }
 
-  const Icon = getIcon()
-
-  // Trigger position classes
-  const triggerPositionClasses = {
-    top: "flex-col",
-    bottom: "flex-col-reverse",
-    left: "flex-row",
-    right: "flex-row-reverse",
+  const getTriggerPosition = () => {
+    if (direction === "horizontal") {
+      if (position === "left") {
+        return isOpen
+          ? "absolute -left-3 top-1/2 -translate-y-1/2"
+          : "absolute -left-6 top-1/2 -translate-y-1/2"
+      } else {
+        return isOpen
+          ? "absolute -right-3 top-1/2 -translate-y-1/2"
+          : "absolute -right-6 top-1/2 -translate-y-1/2"
+      }
+    } else {
+      if (position === "top") {
+        return isOpen
+          ? "absolute -top-3 left-1/2 -translate-x-1/2"
+          : "absolute -top-6 left-1/2 -translate-x-1/2"
+      } else {
+        return isOpen
+          ? "absolute -bottom-3 left-1/2 -translate-x-1/2"
+          : "absolute -bottom-6 left-1/2 -translate-x-1/2"
+      }
+    }
   }
 
-  const containerClasses = cn(
-    "border rounded-lg",
-    direction === "horizontal" && "flex",
-    direction === "vertical" && "flex flex-col",
-    className
-  )
-
-  const triggerClasses = cn(
-    "flex items-center justify-between p-4 transition-colors hover:bg-muted/50",
-    triggerPositionClasses[triggerPosition],
-    triggerClassName
-  )
-
-  const contentClasses = cn(
-    direction === "horizontal" && "flex-1",
-    contentClassName
-  )
-
-  const style: React.CSSProperties = {}
-  if (minWidth) {
-    style.minWidth = typeof minWidth === "number" ? `${minWidth}px` : minWidth
-  }
-  if (minHeight) {
-    style.minHeight = typeof minHeight === "number" ? `${minHeight}px` : minHeight
-  }
+  const TriggerIcon = getTriggerIcon()
 
   return (
-    <Collapsible
-      open={open}
-      onOpenChange={setOpen}
-      className={containerClasses}
-      style={style}
-    >
-      {customTrigger ? (
-        <CollapsibleTrigger asChild>
-          {customTrigger}
-        </CollapsibleTrigger>
-      ) : (
-        <CollapsibleTrigger
-          data-slot="collapsible-panel-trigger"
-          className={triggerClasses}
-        >
-          <span className="font-medium">{displayText}</span>
-          <Icon
-            className={cn(
-              "size-4 transition-transform",
-              open && "rotate-180"
-            )}
-          />
-        </CollapsibleTrigger>
+    <div
+      className={cn(
+        "relative transition-all duration-300 ease-in-out",
+        getCollapseClasses(),
+        className,
+        !isOpen && "overflow-hidden"
       )}
-      <CollapsibleContent 
-        data-slot="collapsible-panel-content" 
-        className={cn("p-4", contentClasses)}
+    >
+      {/* Panel Content */}
+      {isOpen && (
+        <div
+          className={cn(
+            "h-full transition-opacity duration-300",
+            direction === "horizontal" ? minWidth : "w-full"
+          )}
+        >
+          {children}
+        </div>
+      )}
+
+      {/* Trigger Button */}
+      <Button
+        variant="ghost"
+        onClick={handleToggle}
+        className={cn(
+          getTriggerPosition(),
+          "w-6 h-6 p-0 bg-muted border border-border rounded-full",
+          "flex items-center justify-center text-foreground hover:bg-accent",
+          "transition-colors shadow-lg hover:scale-110 z-50",
+          "min-w-0", // Override Button's min-width
+          triggerClassName
+        )}
+        title={`${isOpen ? "Collapse" : "Expand"} ${keyword || "panel"}`}
+        data-slot="collapsible-panel-trigger"
       >
-        {children}
-      </CollapsibleContent>
-    </Collapsible>
+        <TriggerIcon className="w-3 h-3" />
+      </Button>
+    </div>
   )
 }

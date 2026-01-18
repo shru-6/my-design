@@ -218,7 +218,7 @@ function App() {
           <h3>Text</h3>
           <div style={{ marginTop: '1rem' }}>
             <Text as="p">This is a paragraph using the Text component.</Text>
-            <Text as="h4" style={{ marginTop: '0.5rem' }}>This is a heading using Text.</Text>
+            <Text as="div" className="text-2xl font-bold">This is a heading using Text with div.</Text>
           </div>
         </div>
 
@@ -256,21 +256,78 @@ function App() {
 
         <div style={{ marginTop: '1.5rem' }}>
           <h3>Modal</h3>
-          <Modal open={modalOpen} onOpenChange={setModalOpen}>
-            <ModalTrigger asChild>
-              <Button>Open Modal</Button>
-            </ModalTrigger>
-            <ModalContent>
-              <ModalHeader>
-                <ModalTitle>Modal Example</ModalTitle>
-                <ModalDescription>This is a modal dialog example.</ModalDescription>
-              </ModalHeader>
-              <ModalFooter>
-                <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
-                <Button onClick={() => setModalOpen(false)}>Confirm</Button>
-              </ModalFooter>
-            </ModalContent>
-          </Modal>
+          <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem', flexWrap: 'wrap' }}>
+            <Modal open={modalOpen} onOpenChange={setModalOpen}>
+              <ModalTrigger asChild>
+                <Button>Open Basic Modal</Button>
+              </ModalTrigger>
+              <ModalContent>
+                <ModalHeader>
+                  <ModalTitle>Modal Example</ModalTitle>
+                  <ModalDescription>This is a modal dialog example with title and description.</ModalDescription>
+                </ModalHeader>
+                <CardContent>
+                  <p>This is the modal content area. You can put any content here.</p>
+                  <p style={{ marginTop: '1rem' }}>ModalContent now uses Card internally for consistent styling.</p>
+                </CardContent>
+                <ModalFooter>
+                  <Button variant="outline" onClick={() => setModalOpen(false)}>Cancel</Button>
+                  <Button onClick={() => setModalOpen(false)}>Confirm</Button>
+                </ModalFooter>
+              </ModalContent>
+            </Modal>
+
+            <TriggerModal
+              triggerLabel="Open TriggerModal"
+              title="TriggerModal Example"
+              description="This is a TriggerModal with automatic trigger button"
+              footer={
+                <>
+                  <Button variant="outline" onClick={() => {}}>Cancel</Button>
+                  <Button onClick={() => {}}>Save</Button>
+                </>
+              }
+            >
+              <p>This is the TriggerModal content. It automatically includes a trigger button.</p>
+            </TriggerModal>
+
+            <FormModal
+              triggerLabel="Open FormModal"
+              title="Create New Item"
+              itemType="item"
+              variant="create"
+              fields={[
+                {
+                  name: "name",
+                  type: "text",
+                  label: "Name",
+                  placeholder: "Enter name",
+                  required: true,
+                },
+                {
+                  name: "description",
+                  type: "textarea",
+                  label: "Description",
+                  placeholder: "Enter description",
+                  rows: 4,
+                },
+              ]}
+              onSubmit={(data) => {
+                console.log("Form submitted:", data)
+                alert("Form submitted!")
+              }}
+            />
+
+            <ConfirmModal
+              triggerLabel="Delete Item"
+              title="Delete Item?"
+              description="Are you sure you want to delete this item? This action cannot be undone."
+              onConfirm={() => {
+                alert("Item deleted!")
+              }}
+              variant="destructive"
+            />
+          </div>
         </div>
 
         <div style={{ marginTop: '2rem' }}>
@@ -648,7 +705,14 @@ function App() {
         <div style={{ marginTop: '2rem' }}>
           <h3>HistoryControlButtons</h3>
           <div style={{ marginTop: '1rem' }}>
-            <HistoryControlButtons />
+            <HistoryControlButtons
+              canUndo={true}
+              canRedo={false}
+              isDirty={true}
+              onUndo={() => alert('Undo')}
+              onRedo={() => alert('Redo')}
+              onReset={() => alert('Reset')}
+            />
           </div>
         </div>
       </section>
@@ -759,11 +823,10 @@ function App() {
         <div style={{ marginTop: '2rem' }}>
           <h3>List</h3>
           <div style={{ marginTop: '1rem' }}>
-            <List variant="unordered">
-              <li>Item 1</li>
-              <li>Item 2</li>
-              <li>Item 3</li>
-            </List>
+            <List
+              items={["Item 1", "Item 2", "Item 3"]}
+              renderItem={(item) => <li>{item}</li>}
+            />
           </div>
         </div>
 
@@ -799,9 +862,21 @@ function App() {
 
         <div style={{ marginTop: '2rem' }}>
           <h3>CollapsiblePanel</h3>
-          <div style={{ maxWidth: '500px', marginTop: '1rem' }}>
-            <CollapsiblePanel title="Click to expand">
-              <p>This is the collapsible panel content.</p>
+          <div style={{ maxWidth: '500px', marginTop: '1rem', display: 'flex', gap: '1rem' }}>
+            <div style={{ flex: 1, border: '1px solid #e5e7eb', padding: '1rem', borderRadius: '8px' }}>
+              <p>Main content area</p>
+            </div>
+            <CollapsiblePanel 
+              direction="horizontal" 
+              position="right"
+              minWidth="w-64"
+              keyword="sidebar"
+              defaultOpen={true}
+            >
+              <div style={{ padding: '1rem' }}>
+                <h4>Sidebar Content</h4>
+                <p>This is the collapsible panel content.</p>
+              </div>
             </CollapsiblePanel>
           </div>
         </div>

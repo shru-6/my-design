@@ -32,7 +32,7 @@ export function InlineEdit({
 
   if (isEditing) {
     return (
-      <div data-slot="inline-edit" className={cn("flex items-center gap-2", className)}>
+      <div data-slot="inline-edit" className={cn("inline-flex items-center", className)}>
         <TextInput
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -42,6 +42,7 @@ export function InlineEdit({
             if (e.key === "Escape") handleCancel()
           }}
           autoFocus
+          className="h-9"
         />
       </div>
     )
@@ -50,7 +51,11 @@ export function InlineEdit({
   return (
     <span
       data-slot="inline-edit-display"
-      className={cn("cursor-pointer hover:underline", className)}
+      className={cn(
+        "inline-flex items-center h-9 cursor-pointer hover:underline px-3 py-2",
+        "border border-transparent rounded-md",
+        className
+      )}
       onClick={() => setIsEditing(true)}
     >
       {value || placeholder || "Click to edit"}

@@ -1,54 +1,79 @@
 "use client"
 
 import { Button } from "../atoms/Button"
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
+import { UndoIcon, RedoIcon, RotateCcwIcon } from "lucide-react"
+import { cn } from "../utils"
 
 export interface HistoryControlButtonsProps {
+  canUndo?: boolean
+  canRedo?: boolean
+  isDirty?: boolean
+  onUndo?: () => void
+  onRedo?: () => void
+  onReset?: () => void
   className?: string
+  showLabels?: boolean
 }
 
 /**
- * History Control Buttons - Library-compatible version
+ * History Control Buttons - Undo/Redo/Reset controls
  * 
- * Uses browser history API instead of Next.js router for library compatibility.
- * For Next.js apps, you can use next/navigation's useRouter directly.
+ * Provides undo, redo, and reset functionality for application state.
+ * State management should be handled by the parent component.
  */
 export function HistoryControlButtons({
+  canUndo = false,
+  canRedo = false,
+  isDirty = false,
+  onUndo,
+  onRedo,
+  onReset,
   className,
+  showLabels = false,
 }: HistoryControlButtonsProps) {
-  const handleBack = () => {
-    if (typeof window !== "undefined") {
-      window.history.back()
-    }
-  }
-
-  const handleForward = () => {
-    if (typeof window !== "undefined") {
-      window.history.forward()
-    }
-  }
-
   return (
     <div
       data-slot="history-control-buttons"
-      className={className}
+      className={cn("flex items-center gap-1", className)}
     >
       <Button
         variant="ghost"
         size="icon"
-        onClick={handleBack}
-        title="Go back"
+        onClick={onUndo}
+        disabled={!canUndo || !onUndo}
+        title="Undo (Ctrl+Z)"
       >
-        <ChevronLeftIcon className="size-4" />
+        <UndoIcon className="size-4" />
+        {showLabels && (
+          <span className="sr-only ml-2">Undo</span>
+        )}
       </Button>
       <Button
         variant="ghost"
         size="icon"
-        onClick={handleForward}
-        title="Go forward"
+        onClick={onRedo}
+        disabled={!canRedo || !onRedo}
+        title="Redo (Ctrl+Shift+Z)"
       >
-        <ChevronRightIcon className="size-4" />
+        <RedoIcon className="size-4" />
+        {showLabels && (
+          <span className="sr-only ml-2">Redo</span>
+        )}
       </Button>
+      {onReset && (
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={onReset}
+          disabled={!isDirty}
+          title="Reset changes"
+        >
+          <RotateCcwIcon className="size-4" />
+          {showLabels && (
+            <span className="sr-only ml-2">Reset</span>
+          )}
+        </Button>
+      )}
     </div>
   )
 }

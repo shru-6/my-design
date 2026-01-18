@@ -3,21 +3,21 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "../utils"
 
-const cardVariants = cva(
-  "bg-card text-card-foreground flex flex-col rounded-xl border shadow-sm",
+export const cardVariants = cva(
+  "bg-card text-card-foreground flex flex-col rounded-lg border shadow-sm overflow-hidden",
   {
     variants: {
       variant: {
         minimal: "border-0 shadow-none bg-transparent",
-        filled: "bg-muted border-0",
-        subtle: "bg-muted/50 border-muted",
-        outlined: "bg-transparent border-2",
+        filled: "bg-muted border-0 text-muted-foreground",
+        subtle: "bg-muted/30 border-muted/50 text-foreground",
+        outlined: "bg-background border-border text-foreground",
       },
       size: {
-        xs: "gap-3 py-3 text-xs",
-        sm: "gap-4 py-4 text-sm",
-        md: "gap-6 py-6 text-base",
-        lg: "gap-8 py-8 text-lg",
+        xs: "gap-0",
+        sm: "gap-0",
+        md: "gap-0",
+        lg: "gap-0",
       },
     },
     defaultVariants: {
@@ -26,6 +26,20 @@ const cardVariants = cva(
     },
   }
 )
+
+const cardSizeVariants = cva("", {
+  variants: {
+    size: {
+      xs: "text-xs",
+      sm: "text-sm",
+      md: "text-base",
+      lg: "text-lg",
+    },
+  },
+  defaultVariants: {
+    size: "md",
+  },
+})
 
 export interface CardProps 
   extends React.ComponentProps<"div">,
@@ -74,7 +88,7 @@ function Card({
       data-slot="card"
       className={cn(
         cardVariants({ variant, size }),
-        interactive && "cursor-pointer",
+        interactive && "cursor-pointer transition-all hover:shadow-md",
         className
       )}
       style={style}
@@ -82,22 +96,31 @@ function Card({
       {...props}
     >
       {header && (
-        <CardHeader className="sticky top-0 z-10 bg-card border-b">
+        <CardHeader size={size}>
           {header}
         </CardHeader>
       )}
-      <CardContent 
-        className={cn(
-          "flex-1 min-h-0 overflow-auto"
-        )}
-        style={contentHeight ? {
-          height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
-        } : undefined}
-      >
-        {children}
-      </CardContent>
+      {!header && !footer ? (
+        <CardContent 
+          size={size}
+          style={contentHeight ? {
+            height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+          } : undefined}
+        >
+          {children}
+        </CardContent>
+      ) : (
+        <CardContent 
+          size={size}
+          style={contentHeight ? {
+            height: typeof contentHeight === "number" ? `${contentHeight}px` : contentHeight
+          } : undefined}
+        >
+          {children}
+        </CardContent>
+      )}
       {footer && (
-        <CardFooter className="sticky bottom-0 z-10 bg-card border-t">
+        <CardFooter size={size}>
           {footer}
         </CardFooter>
       )}
@@ -105,16 +128,43 @@ function Card({
   )
 }
 
-function CardHeader({ className, ...props }: React.ComponentProps<"div">) {
+function CardHeader({ 
+  className, 
+  size, 
+  left,
+  right,
+  children,
+  ...props 
+}: React.ComponentProps<"div"> & { 
+  size?: "xs" | "sm" | "md" | "lg" | null
+  left?: React.ReactNode
+  right?: React.ReactNode
+}) {
+  const sizePadding = {
+    xs: "py-2.5 px-3",
+    sm: "py-3 px-4",
+    md: "py-4 px-6",
+    lg: "py-5 px-8",
+  }
+  
+  const effectiveSize = size || "md"
+  
   return (
     <div
       data-slot="card-header"
       className={cn(
-        "@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-2 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6",
+        "flex items-center justify-between",
+        "sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b border-border/50",
+        sizePadding[effectiveSize],
+        cardSizeVariants({ size: effectiveSize }),
         className
       )}
       {...props}
-    />
+    >
+      {left && <div data-slot="card-header-left" className="w-fit">{left}</div>}
+      {children && <div data-slot="card-header-content" className="w-full">{children}</div>}
+      {right && <div data-slot="card-header-right" className="w-fit">{right}</div>}
+    </div>
   )
 }
 
@@ -151,23 +201,74 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
-function CardContent({ className, ...props }: React.ComponentProps<"div">) {
+function CardContent({ className, size, ...props }: React.ComponentProps<"div"> & { size?: "xs" | "sm" | "md" | "lg" | null }) {
+  const sizePadding = {
+    xs: "py-2.5 px-3",
+    sm: "py-3 px-4",
+    md: "py-4 px-6",
+    lg: "py-5 px-8",
+  }
+  
+  const effectiveSize = size || "md"
+  
   return (
     <div
       data-slot="card-content"
-      className={cn("px-6", className)}
+      className={cn(
+        // Add scrollable content styles by default (can be overridden)
+        "flex-1 min-h-0 overflow-auto",
+        sizePadding[effectiveSize],
+        cardSizeVariants({ size: effectiveSize }),
+        className
+      )}
       {...props}
     />
   )
 }
 
-function CardFooter({ className, ...props }: React.ComponentProps<"div">) {
+function CardFooter({ 
+  className, 
+  size, 
+  left,
+  right,
+  children,
+  ...props 
+}: React.ComponentProps<"div"> & { 
+  size?: "xs" | "sm" | "md" | "lg" | null
+  left?: React.ReactNode
+  right?: React.ReactNode
+}) {
+  const sizePadding = {
+    xs: "py-2.5 px-3 [.border-t]:pt-2.5",
+    sm: "py-3 px-4 [.border-t]:pt-3",
+    md: "py-4 px-6 [.border-t]:pt-4",
+    lg: "py-5 px-8 [.border-t]:pt-5",
+  }
+  
+  const effectiveSize = size || "md"
+  
   return (
     <div
       data-slot="card-footer"
-      className={cn("flex items-center px-6 [.border-t]:pt-6", className)}
+      className={cn(
+        "flex items-center justify-between",
+        "sticky bottom-0 z-10 bg-card/95 backdrop-blur-sm border-t border-border/50",
+        sizePadding[effectiveSize],
+        cardSizeVariants({ size: effectiveSize }),
+        className
+      )}
       {...props}
-    />
+    >
+      {left !== undefined || right !== undefined ? (
+        <>
+          {left && <div data-slot="card-footer-left">{left}</div>}
+          {children && <div data-slot="card-footer-content">{children}</div>}
+          {right && <div data-slot="card-footer-right">{right}</div>}
+        </>
+      ) : (
+        children
+      )}
+    </div>
   )
 }
 

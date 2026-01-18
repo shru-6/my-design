@@ -29,7 +29,7 @@ export interface ListProps {
 }
 
 export function List({
-  items,
+  items = [],
   renderItem,
   searchable = false,
   searchPlaceholder = "Search...",
@@ -54,19 +54,24 @@ export function List({
   const searchValue = isControlled ? searchValueProp : internalSearchValue
   const setSearchValue = isControlled ? onSearchChangeProp || (() => {}) : setInternalSearchValue
 
+  // Ensure items is always an array
+  const safeItems = React.useMemo(() => {
+    return Array.isArray(items) ? items : []
+  }, [items])
+
   // Filter items based on search
   const filteredItems = React.useMemo(() => {
-    if (!searchable || !searchValue) return items
+    if (!searchable || !searchValue) return safeItems
     if (filterItems) {
-      return filterItems(items, searchValue)
+      return filterItems(safeItems, searchValue)
     }
     // Default: simple string search on item values
     const lowerSearch = searchValue.toLowerCase()
-    return items.filter((item) => {
+    return safeItems.filter((item) => {
       const itemStr = JSON.stringify(item).toLowerCase()
       return itemStr.includes(lowerSearch)
     })
-  }, [items, searchValue, searchable, filterItems])
+  }, [safeItems, searchValue, searchable, filterItems])
 
   // Grid column classes - using explicit Tailwind classes
   const gridClasses = React.useMemo(() => {

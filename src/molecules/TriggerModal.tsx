@@ -6,29 +6,64 @@ import {
   ModalHeader,
   ModalFooter,
   ModalTitle,
+  ModalDescription,
 } from "./Modal"
+import { Button } from "../atoms/Button"
 
-export interface TriggerModalProps {
-  trigger: React.ReactNode
+export interface TriggerModalProps extends Omit<React.ComponentProps<typeof Modal>, "children"> {
+  // Trigger button
+  triggerLabel?: string
+  trigger?: React.ReactNode
+  triggerProps?: React.ComponentProps<typeof Button>
+  stopPropagation?: boolean
+  icon?: React.ReactNode
+  // Modal content
   title: string
+  description?: string
   children: React.ReactNode
   footer?: React.ReactNode
+  // Modal props
+  showCloseButton?: boolean
+  className?: string
 }
 
 export function TriggerModal({
+  open,
+  onOpenChange,
+  triggerLabel,
   trigger,
+  triggerProps,
+  stopPropagation = true,
+  icon,
   title,
+  description,
   children,
   footer,
+  showCloseButton = true,
+  className,
+  ...props
 }: TriggerModalProps) {
   return (
-    <Modal>
-      <ModalTrigger asChild data-slot="trigger-modal">
-        {trigger}
-      </ModalTrigger>
-      <ModalContent>
+    <Modal open={open} onOpenChange={onOpenChange} {...props}>
+      {(triggerLabel || trigger) && (
+        <ModalTrigger asChild>
+          {trigger || (
+            <Button {...triggerProps} stopPropagation={stopPropagation}>
+              {icon && <span className="mr-2">{icon}</span>}
+              {triggerLabel}
+            </Button>
+          )}
+        </ModalTrigger>
+      )}
+      <ModalContent 
+        data-slot="trigger-modal" 
+        showCloseButton={showCloseButton}
+        className={className}
+        onClick={(e) => e.stopPropagation()}
+      >
         <ModalHeader>
           <ModalTitle>{title}</ModalTitle>
+          {description && <ModalDescription>{description}</ModalDescription>}
         </ModalHeader>
         {children}
         {footer && <ModalFooter>{footer}</ModalFooter>}

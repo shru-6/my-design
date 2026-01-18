@@ -1,7 +1,6 @@
 import * as React from "react"
-import { Modal, ModalContent, ModalHeader, ModalFooter, ModalTitle, ModalDescription, ModalTrigger } from "./Modal"
+import { TriggerModal } from "./TriggerModal"
 import { Button } from "../atoms/Button"
-import { cn } from "../utils"
 
 export interface ConfirmModalProps {
   // Controlled API
@@ -11,6 +10,7 @@ export interface ConfirmModalProps {
   triggerLabel?: string
   triggerProps?: React.ComponentProps<typeof Button>
   stopPropagation?: boolean
+  icon?: React.ReactNode
   text?: string
   // Common props
   title: string
@@ -31,6 +31,7 @@ export function ConfirmModal({
   triggerLabel,
   triggerProps,
   stopPropagation = true,
+  icon,
   text,
   title,
   description,
@@ -41,6 +42,7 @@ export function ConfirmModal({
   loading = false,
   error,
   showModal = true,
+  ...props
 }: ConfirmModalProps) {
   const [open, setOpen] = React.useState(openProp ?? false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
@@ -91,49 +93,43 @@ export function ConfirmModal({
   const finalConfirmLabel = confirmLabel || defaultConfirmLabel
   const isLoading = loading || isSubmitting
 
-  const modalContent = (
-    <Modal open={isOpen && showModal} onOpenChange={setIsOpen}>
-      <ModalContent data-slot="confirm-modal">
-        <ModalHeader>
-          <ModalTitle>{title}</ModalTitle>
-          {description && <ModalDescription>{description}</ModalDescription>}
-          {text && <ModalDescription>{text}</ModalDescription>}
-        </ModalHeader>
-        {error && (
-          <div className="px-6">
-            <p className="text-sm text-destructive">{error}</p>
-          </div>
-        )}
-        <ModalFooter>
-          <Button 
-            variant="outline" 
-            onClick={() => setIsOpen?.(false)}
-            disabled={isLoading}
-          >
-            {cancelLabel}
-          </Button>
-          <Button 
-            variant={buttonVariant} 
-            onClick={handleConfirm}
-            disabled={isLoading}
-          >
-            {isLoading ? "Loading..." : finalConfirmLabel}
-          </Button>
-        </ModalFooter>
-      </ModalContent>
-    </Modal>
+  const footer = (
+    <>
+      <Button 
+        variant="outline" 
+        onClick={() => setIsOpen?.(false)}
+        disabled={isLoading}
+      >
+        {cancelLabel}
+      </Button>
+      <Button 
+        variant={buttonVariant} 
+        onClick={handleConfirm}
+        disabled={isLoading}
+      >
+        {isLoading ? "Loading..." : finalConfirmLabel}
+      </Button>
+    </>
   )
 
-  if (triggerLabel) {
-    return (
-      <Modal open={isOpen && showModal} onOpenChange={setIsOpen}>
-        <ModalTrigger asChild>
-          <Button {...triggerProps} stopPropagation={stopPropagation}>{triggerLabel}</Button>
-        </ModalTrigger>
-        {modalContent}
-      </Modal>
-    )
-  }
-
-  return modalContent
+  return (
+    <TriggerModal
+      open={isOpen && showModal}
+      onOpenChange={setIsOpen}
+      triggerLabel={triggerLabel}
+      triggerProps={triggerProps}
+      icon={icon}
+      stopPropagation={stopPropagation}
+      title={title}
+      description={description || text}
+      footer={footer}
+      showCloseButton={false}
+      className="data-slot-confirm-modal"
+      {...props}
+    >
+      {error && (
+        <p className="text-sm text-destructive">{error}</p>
+      )}
+    </TriggerModal>
+  )
 }

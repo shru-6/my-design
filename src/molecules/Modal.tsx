@@ -3,7 +3,7 @@
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
-import { Button } from "../atoms/Button"
+import { Card, CardHeader, CardFooter, CardTitle, CardDescription, type CardProps } from "../layout/Card"
 
 import { cn } from "../utils"
 
@@ -51,22 +51,40 @@ function ModalContent({
   className,
   children,
   showCloseButton = true,
+  onClick,
+  variant,
+  size,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
+  variant?: CardProps["variant"]
+  size?: CardProps["size"]
 }) {
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation()
+    onClick?.(e)
+  }
+
   return (
     <ModalPortal data-slot="modal-portal">
       <ModalOverlay />
       <DialogPrimitive.Content
         data-slot="modal-content"
         className={cn(
-          "bg-background data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 grid w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] gap-component-md rounded-lg border p-component-lg shadow-lg duration-normal font-sans sm:max-w-lg",
+          // Modal-specific positioning and animations
+          "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 fixed top-[50%] left-[50%] z-50 w-full max-w-[calc(100%-2rem)] translate-x-[-50%] translate-y-[-50%] duration-normal font-sans sm:max-w-lg",
           className
         )}
+        onClick={handleClick}
         {...props}
       >
-        {children}
+        <Card
+          variant={variant || "outlined"}
+          size={size || "md"}
+          className="rounded-lg"
+        >
+          {children}
+        </Card>
         {showCloseButton && (
           <DialogPrimitive.Close
             data-slot="modal-close"
@@ -81,29 +99,7 @@ function ModalContent({
   )
 }
 
-function ModalHeader({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="modal-header"
-      className={cn("flex flex-col gap-component-sm text-center sm:text-left font-sans", className)}
-      {...props}
-    />
-  )
-}
-
-function ModalFooter({ className, ...props }: React.ComponentProps<"div">) {
-  return (
-    <div
-      data-slot="modal-footer"
-      className={cn(
-        "flex flex-col-reverse gap-component-sm sm:flex-row sm:justify-end",
-        className
-      )}
-      {...props}
-    />
-  )
-}
-
+// ModalTitle and ModalDescription wrap DialogPrimitive for accessibility but use Card styling
 function ModalTitle({
   className,
   ...props
@@ -111,9 +107,11 @@ function ModalTitle({
   return (
     <DialogPrimitive.Title
       data-slot="modal-title"
-      className={cn("text-lg leading-none font-semibold", className)}
+      asChild
       {...props}
-    />
+    >
+      <CardTitle className={className} />
+    </DialogPrimitive.Title>
   )
 }
 
@@ -124,11 +122,17 @@ function ModalDescription({
   return (
     <DialogPrimitive.Description
       data-slot="modal-description"
-      className={cn("text-muted-foreground text-sm", className)}
+      asChild
       {...props}
-    />
+    >
+      <CardDescription className={className} />
+    </DialogPrimitive.Description>
   )
 }
+
+// Export Card components as Modal components for convenience
+const ModalHeader = CardHeader
+const ModalFooter = CardFooter
 
 export {
   Modal,

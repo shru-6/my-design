@@ -1,14 +1,7 @@
 import * as React from "react"
-import {
-  Modal,
-  ModalContent,
-  ModalHeader,
-  ModalFooter,
-  ModalTitle,
-  ModalTrigger,
-} from "./Modal"
+import { TriggerModal } from "./TriggerModal"
 import { Button } from "../atoms/Button"
-import { TextInput } from "../atoms/TextInput"
+// import { TextInput } from "../atoms/TextInput"
 import { Textarea } from "../atoms/Textarea"
 import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from "./Select"
 import { Checkbox } from "../atoms/Checkbox"
@@ -31,10 +24,10 @@ export interface FormFieldConfig {
   name: string
   type: FormFieldType
   label?: string
-  placeholder?: string
+  placeholder?: string | ((formData: Record<string, any>) => string)
   description?: string
   helpText?: string | ((formData: Record<string, any>) => string)
-  required?: boolean
+  required?: boolean | ((formData: Record<string, any>) => boolean)
   active?: boolean | ((values: Record<string, any>) => boolean)
   validation?: (value: any) => string | undefined
   options?: 
@@ -74,6 +67,7 @@ export interface FormModalProps {
   // Uncontrolled API
   triggerLabel?: string
   triggerProps?: React.ComponentProps<typeof Button>
+  icon?: React.ReactNode
   // Common props
   title: string
   variant?: "create" | "edit"
@@ -99,6 +93,7 @@ export function FormModal({
   onOpenChange,
   triggerLabel,
   triggerProps,
+  icon,
   title,
   variant,
   itemType,
@@ -113,6 +108,7 @@ export function FormModal({
   children,
   beforeFields,
   afterFields,
+  ...props
 }: FormModalProps) {
   const [open, setOpen] = React.useState(openProp ?? false)
   const [formData, setFormData] = React.useState<Record<string, any>>({})
@@ -244,14 +240,21 @@ export function FormModal({
     const value = formData[field.name] ?? field.defaultValue
     const error = errors[field.name]
 
+    // Resolve function-based props once per field
+    const resolvedPlaceholder = typeof field.placeholder === "function"
+      ? field.placeholder(formData)
+      : field.placeholder
+    const resolvedRequired = typeof field.required === "function"
+      ? field.required(formData)
+      : field.required
+    const resolvedHelpText = typeof field.helpText === "function"
+      ? field.helpText(formData)
+      : field.helpText
+
     switch (field.type) {
       case "text":
       case "email":
       case "url":
-        const textHelpText = typeof field.helpText === "function" 
-          ? field.helpText(formData) 
-          : field.helpText
-        
         return (
           <div key={field.name} className="space-y-2">
             <FormInput
@@ -259,22 +262,18 @@ export function FormModal({
               description={field.description}
               error={error}
               type={field.type}
-              placeholder={field.placeholder}
+              placeholder={resolvedPlaceholder}
               value={value || ""}
               onChange={(e) => handleChange(field.name, e.target.value, field)}
-              required={field.required}
+              required={resolvedRequired}
             />
-            {textHelpText && (
-              <p className="text-sm text-muted-foreground">{textHelpText}</p>
+            {resolvedHelpText && (
+              <p className="text-sm text-muted-foreground">{resolvedHelpText}</p>
             )}
           </div>
         )
 
       case "number":
-        const numberHelpText = typeof field.helpText === "function" 
-          ? field.helpText(formData) 
-          : field.helpText
-        
         return (
           <div key={field.name} className="space-y-2">
             <FormInput
@@ -282,31 +281,27 @@ export function FormModal({
               description={field.description}
               error={error}
               type="number"
-              placeholder={field.placeholder}
+              placeholder={resolvedPlaceholder}
               value={value || ""}
               onChange={(e) => handleChange(field.name, parseFloat(e.target.value) || 0, field)}
               min={field.min}
               max={field.max}
               step={field.step}
-              required={field.required}
+              required={resolvedRequired}
             />
-            {numberHelpText && (
-              <p className="text-sm text-muted-foreground">{numberHelpText}</p>
+            {resolvedHelpText && (
+              <p className="text-sm text-muted-foreground">{resolvedHelpText}</p>
             )}
           </div>
         )
 
       case "textarea":
-        const helpText = typeof field.helpText === "function" 
-          ? field.helpText(formData) 
-          : field.helpText
-        
         return (
           <div key={field.name} className="space-y-2">
             {field.label && (
               <Label htmlFor={field.name} className={error && "text-destructive"}>
                 {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
+                {resolvedRequired && <span className="text-destructive ml-1">*</span>}
               </Label>
             )}
             {field.description && (
@@ -314,15 +309,15 @@ export function FormModal({
             )}
             <Textarea
               id={field.name}
-              placeholder={field.placeholder}
+              placeholder={resolvedPlaceholder}
               value={value || ""}
               onChange={(e) => handleChange(field.name, e.target.value, field)}
               className={error && "border-destructive"}
-              required={field.required}
+              required={resolvedRequired}
               rows={field.rows}
             />
-            {helpText && (
-              <p className="text-sm text-muted-foreground">{helpText}</p>
+            {resolvedHelpText && (
+              <p className="text-sm text-muted-foreground">{resolvedHelpText}</p>
             )}
             {error && (
               <p className="text-sm text-destructive" role="alert">
@@ -348,16 +343,12 @@ export function FormModal({
           return []
         }, [field.options, formData])
         
-        const selectHelpText = typeof field.helpText === "function" 
-          ? field.helpText(formData) 
-          : field.helpText
-        
         return (
           <div key={field.name} className="space-y-2">
             {field.label && (
               <Label htmlFor={field.name} className={error && "text-destructive"}>
                 {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
+                {resolvedRequired && <span className="text-destructive ml-1">*</span>}
               </Label>
             )}
             {field.description && (
@@ -368,7 +359,7 @@ export function FormModal({
               onValueChange={(val) => handleChange(field.name, val, field)}
             >
               <SelectTrigger id={field.name} className={error && "border-destructive"}>
-                <SelectValue placeholder={field.placeholder || "Select..."} />
+                <SelectValue placeholder={resolvedPlaceholder || "Select..."} />
               </SelectTrigger>
               <SelectContent>
                 {resolvedOptions.map((option) => (
@@ -378,8 +369,8 @@ export function FormModal({
                 ))}
               </SelectContent>
             </Select>
-            {selectHelpText && (
-              <p className="text-sm text-muted-foreground">{selectHelpText}</p>
+            {resolvedHelpText && (
+              <p className="text-sm text-muted-foreground">{resolvedHelpText}</p>
             )}
             {error && (
               <p className="text-sm text-destructive" role="alert">
@@ -390,10 +381,6 @@ export function FormModal({
         )
 
       case "checkbox":
-        const checkboxHelpText = typeof field.helpText === "function" 
-          ? field.helpText(formData) 
-          : field.helpText
-        
         return (
           <div key={field.name} className="space-y-2">
             <div className="flex items-center space-x-2">
@@ -405,15 +392,15 @@ export function FormModal({
               {field.label && (
                 <Label htmlFor={field.name} className="cursor-pointer">
                   {field.label}
-                  {field.required && <span className="text-destructive ml-1">*</span>}
+                  {resolvedRequired && <span className="text-destructive ml-1">*</span>}
                 </Label>
               )}
             </div>
             {field.description && (
               <p className="text-sm text-muted-foreground ml-6">{field.description}</p>
             )}
-            {checkboxHelpText && (
-              <p className="text-sm text-muted-foreground ml-6">{checkboxHelpText}</p>
+            {resolvedHelpText && (
+              <p className="text-sm text-muted-foreground ml-6">{resolvedHelpText}</p>
             )}
             {error && (
               <p className="text-sm text-destructive ml-6" role="alert">
@@ -424,9 +411,6 @@ export function FormModal({
         )
 
       case "upload":
-        const uploadHelpText = typeof field.helpText === "function" 
-          ? field.helpText(formData) 
-          : field.helpText
         
         const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
           const files = e.target.files
@@ -464,7 +448,7 @@ export function FormModal({
             {field.label && (
               <Label htmlFor={field.name} className={error && "text-destructive"}>
                 {field.label}
-                {field.required && <span className="text-destructive ml-1">*</span>}
+                {resolvedRequired && <span className="text-destructive ml-1">*</span>}
               </Label>
             )}
             {field.description && (
@@ -481,8 +465,8 @@ export function FormModal({
                 uploadSizeClasses[field.size || "md"]
               )}
             />
-            {uploadHelpText && (
-              <p className="text-sm text-muted-foreground">{uploadHelpText}</p>
+            {resolvedHelpText && (
+              <p className="text-sm text-muted-foreground">{resolvedHelpText}</p>
             )}
             {error && (
               <p className="text-sm text-destructive" role="alert">
@@ -497,60 +481,55 @@ export function FormModal({
     }
   }
 
-  const modalContent = (
-    <Modal open={isOpen} onOpenChange={setIsOpen}>
-      <ModalContent data-slot="form-modal">
-        <form onSubmit={handleSubmit}>
-          <ModalHeader>
-            <ModalTitle>{title}</ModalTitle>
-          </ModalHeader>
-          <div className="space-y-4 px-6 py-4">
-            {beforeFields}
-            {fields ? (
-              <>
-                {fields.map((field) => renderField(field))}
-              </>
-            ) : (
-              children
-            )}
-            {afterFields}
-          </div>
-          <ModalFooter>
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => setIsOpen?.(false)}
-              disabled={isSubmitting}
-            >
-              {cancelLabel}
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={
-                loading || 
-                (typeof isSubmitDisabled === "function" 
-                  ? isSubmitDisabled(formData) 
-                  : isSubmitDisabled ?? false)
-              }
-            >
-              {loading ? getSubmitLabel() : getSubmitLabel()}
-            </Button>
-          </ModalFooter>
-        </form>
-      </ModalContent>
-    </Modal>
+  const footer = (
+    <>
+      <Button
+        type="button"
+        variant="outline"
+        onClick={() => setIsOpen?.(false)}
+        disabled={isSubmitting}
+      >
+        {cancelLabel}
+      </Button>
+      <Button 
+        type="submit" 
+        disabled={
+          loading || 
+          (typeof isSubmitDisabled === "function" 
+            ? isSubmitDisabled(formData) 
+            : isSubmitDisabled ?? false)
+        }
+      >
+        {loading ? getSubmitLabel() : getSubmitLabel()}
+      </Button>
+    </>
   )
 
-  if (triggerLabel) {
-    return (
-      <Modal open={isOpen} onOpenChange={setIsOpen}>
-        <ModalTrigger asChild>
-          <Button {...triggerProps}>{triggerLabel}</Button>
-        </ModalTrigger>
-        {modalContent}
-      </Modal>
-    )
-  }
-
-  return modalContent
+  return (
+    <TriggerModal
+      open={isOpen}
+      onOpenChange={setIsOpen}
+      triggerLabel={triggerLabel}
+      triggerProps={triggerProps}
+      icon={icon}
+      stopPropagation={true}
+      title={title}
+      showCloseButton={false}
+      footer={footer}
+      className="data-slot-form-modal"
+      {...props}
+    >
+      <form onSubmit={handleSubmit} onClick={(e) => e.stopPropagation()}>
+        {beforeFields}
+        {fields ? (
+          <div className="space-y-4">
+            {fields.map((field) => renderField(field))}
+          </div>
+        ) : (
+          children
+        )}
+        {afterFields}
+      </form>
+    </TriggerModal>
+  )
 }
