@@ -32,7 +32,7 @@ export function InfoBanner({
       data-slot="info-banner"
       className={cn(
         variant === "info" && "bg-primary/10 text-primary border-primary/20 [&>svg]:text-primary",
-        variant === "warning" && "bg-accent/50 text-accent-foreground border-accent/30 [&>svg]:text-accent-foreground",
+        variant === "warning" && "bg-destructive/10 text-destructive border-destructive/20 [&>svg]:text-destructive",
         variant === "success" && "bg-muted/50 text-muted-foreground border-border [&>svg]:text-muted-foreground",
         className
       )}
