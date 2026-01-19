@@ -1127,10 +1127,10 @@ function CardFooter({
   ...props
 }) {
   const sizePadding = {
-    xs: "py-2.5 px-3 [.border-t]:pt-2.5",
-    sm: "py-3 px-4 [.border-t]:pt-3",
-    md: "py-4 px-6 [.border-t]:pt-4",
-    lg: "py-5 px-8 [.border-t]:pt-5"
+    xs: "gap-0.5",
+    sm: "gap-1",
+    md: "gap-2",
+    lg: "gap-3"
   };
   const effectiveSize = size || "md";
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -5873,15 +5873,15 @@ function CollapsiblePanel({
   const getTriggerIcon = () => {
     if (direction === "horizontal") {
       if (position === "left") {
-        return isOpen ? lucideReact.ChevronRight : lucideReact.ChevronLeft;
-      } else {
         return isOpen ? lucideReact.ChevronLeft : lucideReact.ChevronRight;
+      } else {
+        return isOpen ? lucideReact.ChevronRight : lucideReact.ChevronLeft;
       }
     } else {
       if (position === "top") {
-        return isOpen ? lucideReact.ChevronDown : lucideReact.ChevronUp;
-      } else {
         return isOpen ? lucideReact.ChevronUp : lucideReact.ChevronDown;
+      } else {
+        return isOpen ? lucideReact.ChevronDown : lucideReact.ChevronUp;
       }
     }
   };
@@ -5890,13 +5890,13 @@ function CollapsiblePanel({
       if (position === "left") {
         return isOpen ? "absolute -left-3 top-1/2 -translate-y-1/2" : "absolute -left-6 top-1/2 -translate-y-1/2";
       } else {
-        return isOpen ? "absolute -right-3 top-1/2 -translate-y-1/2" : "absolute -right-6 top-1/2 -translate-y-1/2";
+        return isOpen ? "absolute -right-3 top-1/2 -translate-y-1/2" : "absolute -left-6 top-1/2 -translate-y-1/2";
       }
     } else {
       if (position === "top") {
         return isOpen ? "absolute -top-3 left-1/2 -translate-x-1/2" : "absolute -top-6 left-1/2 -translate-x-1/2";
       } else {
-        return isOpen ? "absolute -bottom-3 left-1/2 -translate-x-1/2" : "absolute -bottom-6 left-1/2 -translate-x-1/2";
+        return isOpen ? "absolute -bottom-3 left-1/2 -translate-x-1/2" : "absolute -top-6 left-1/2 -translate-x-1/2";
       }
     }
   };
