@@ -62,20 +62,14 @@ export function CollapsiblePanel({
   const getTriggerIcon = () => {
     if (direction === "horizontal") {
       if (position === "left") {
-        // When open, point left to close; when closed, point right to open
         return isOpen ? ChevronLeft : ChevronRight
       } else {
-        // position === "right"
-        // When open, point right to close; when closed, point left to open
         return isOpen ? ChevronRight : ChevronLeft
       }
     } else {
       if (position === "top") {
-        // When open, point up to close; when closed, point down to open
         return isOpen ? ChevronUp : ChevronDown
       } else {
-        // position === "bottom"
-        // When open, point down to close; when closed, point up to open
         return isOpen ? ChevronDown : ChevronUp
       }
     }
@@ -85,23 +79,21 @@ export function CollapsiblePanel({
     if (direction === "horizontal") {
       if (position === "left") {
         return isOpen
-          ? "absolute -left-3 top-1/2 -translate-y-1/2"
-          : "absolute -left-6 top-1/2 -translate-y-1/2"
-      } else {
-        // position === "right"
-        return isOpen
           ? "absolute -right-3 top-1/2 -translate-y-1/2"
+          : "absolute -right-6 top-1/2 -translate-y-1/2"
+      } else {
+        return isOpen
+          ? "absolute -left-3 top-1/2 -translate-y-1/2"
           : "absolute -left-6 top-1/2 -translate-y-1/2"
       }
     } else {
       if (position === "top") {
         return isOpen
-          ? "absolute -top-3 left-1/2 -translate-x-1/2"
-          : "absolute -top-6 left-1/2 -translate-x-1/2"
-      } else {
-        // position === "bottom"
-        return isOpen
           ? "absolute -bottom-3 left-1/2 -translate-x-1/2"
+          : "absolute -bottom-6 left-1/2 -translate-x-1/2"
+      } else {
+        return isOpen
+          ? "absolute -top-3 left-1/2 -translate-x-1/2"
           : "absolute -top-6 left-1/2 -translate-x-1/2"
       }
     }

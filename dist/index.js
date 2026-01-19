@@ -1097,10 +1097,10 @@ function CardAction({ className, ...props }) {
 }
 function CardContent({ className, size, ...props }) {
   const sizePadding = {
-    xs: "py-2.5 px-3",
-    sm: "py-3 px-4",
-    md: "py-4 px-6",
-    lg: "py-5 px-8"
+    xs: "py-1.5 px-2",
+    sm: "py-2 px-3",
+    md: "py-3 px-4",
+    lg: "py-4 px-6"
   };
   const effectiveSize = size || "md";
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -1127,10 +1127,10 @@ function CardFooter({
   ...props
 }) {
   const sizePadding = {
-    xs: "gap-0.5",
-    sm: "gap-1",
-    md: "gap-2",
-    lg: "gap-3"
+    xs: "gap-0.5 py-1.5 px-2",
+    sm: "gap-1 py-2 px-3",
+    md: "gap-2 py-3 px-4",
+    lg: "gap-3 py-4 px-6"
   };
   const effectiveSize = size || "md";
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -4396,7 +4396,7 @@ function InlineEdit({
     setIsEditing(false);
   };
   if (isEditing) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "inline-edit", className: cn("inline-flex items-center", className), children: /* @__PURE__ */ jsxRuntime.jsx(
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "inline-edit", className: cn("inline-flex items-center m-1", className), children: /* @__PURE__ */ jsxRuntime.jsx(
       TextInput,
       {
         value,
@@ -4416,7 +4416,7 @@ function InlineEdit({
     {
       "data-slot": "inline-edit-display",
       className: cn(
-        "inline-flex items-center h-9 cursor-pointer hover:underline px-3 py-2",
+        "inline-flex items-center h-9 cursor-pointer hover:underline py-2 m-1",
         "border border-transparent rounded-md",
         className
       ),
@@ -4772,14 +4772,15 @@ function TriggerModal({
   footer,
   showCloseButton = true,
   className,
+  message,
   ...props
 }) {
   return /* @__PURE__ */ jsxRuntime.jsxs(Modal, { open, onOpenChange, ...props, children: [
-    (triggerLabel || trigger) && /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: trigger || /* @__PURE__ */ jsxRuntime.jsxs(Button, { ...triggerProps, stopPropagation, children: [
+    (triggerLabel || trigger || icon) && /* @__PURE__ */ jsxRuntime.jsx(ModalTrigger, { asChild: true, children: trigger || /* @__PURE__ */ jsxRuntime.jsxs(Button, { ...triggerProps, stopPropagation, children: [
       icon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "mr-2", children: icon }),
-      triggerLabel
+      triggerLabel && /* @__PURE__ */ jsxRuntime.jsx("span", { children: triggerLabel })
     ] }) }),
-    /* @__PURE__ */ jsxRuntime.jsx(
+    /* @__PURE__ */ jsxRuntime.jsxs(
       ModalContent,
       {
         "data-slot": "trigger-modal",
@@ -4791,7 +4792,10 @@ function TriggerModal({
           description && /* @__PURE__ */ jsxRuntime.jsx(ModalDescription, { children: description })
         ] }),
         footer: footer ? /* @__PURE__ */ jsxRuntime.jsx(ModalFooter, { children: footer }) : void 0,
-        children
+        children: [
+          message && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground mb-4", children: message }),
+          children
+        ]
       }
     )
   ] });
@@ -4806,6 +4810,7 @@ function ConfirmModal({
   text,
   title,
   description,
+  message,
   onConfirm,
   confirmLabel,
   cancelLabel = "Cancel",
@@ -4889,7 +4894,8 @@ function ConfirmModal({
       icon,
       stopPropagation,
       title,
-      description: description || text,
+      description,
+      message: message || text,
       footer,
       showCloseButton: false,
       className: "data-slot-confirm-modal",
@@ -4938,6 +4944,7 @@ function FormModal({
   icon,
   title,
   description,
+  message,
   variant,
   itemType,
   onSubmit,
@@ -5269,6 +5276,7 @@ function FormModal({
       stopPropagation: true,
       title,
       description,
+      message,
       showCloseButton: false,
       footer,
       className: "data-slot-form-modal",
@@ -5888,15 +5896,15 @@ function CollapsiblePanel({
   const getTriggerPosition = () => {
     if (direction === "horizontal") {
       if (position === "left") {
-        return isOpen ? "absolute -left-3 top-1/2 -translate-y-1/2" : "absolute -left-6 top-1/2 -translate-y-1/2";
+        return isOpen ? "absolute -right-3 top-1/2 -translate-y-1/2" : "absolute -right-6 top-1/2 -translate-y-1/2";
       } else {
-        return isOpen ? "absolute -right-3 top-1/2 -translate-y-1/2" : "absolute -left-6 top-1/2 -translate-y-1/2";
+        return isOpen ? "absolute -left-3 top-1/2 -translate-y-1/2" : "absolute -left-6 top-1/2 -translate-y-1/2";
       }
     } else {
       if (position === "top") {
-        return isOpen ? "absolute -top-3 left-1/2 -translate-x-1/2" : "absolute -top-6 left-1/2 -translate-x-1/2";
+        return isOpen ? "absolute -bottom-3 left-1/2 -translate-x-1/2" : "absolute -bottom-6 left-1/2 -translate-x-1/2";
       } else {
-        return isOpen ? "absolute -bottom-3 left-1/2 -translate-x-1/2" : "absolute -top-6 left-1/2 -translate-x-1/2";
+        return isOpen ? "absolute -top-3 left-1/2 -translate-x-1/2" : "absolute -top-6 left-1/2 -translate-x-1/2";
       }
     }
   };

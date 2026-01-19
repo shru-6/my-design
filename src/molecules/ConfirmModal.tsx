@@ -7,7 +7,7 @@ export interface ConfirmModalProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   // Uncontrolled API
-  triggerLabel?: string
+  triggerLabel?: string | React.ReactNode
   triggerProps?: React.ComponentProps<typeof Button>
   stopPropagation?: boolean
   icon?: React.ReactNode
@@ -15,6 +15,7 @@ export interface ConfirmModalProps {
   // Common props
   title: string
   description?: string
+  message?: string
   onConfirm: () => void | Promise<void>
   confirmLabel?: string
   cancelLabel?: string
@@ -35,6 +36,7 @@ export function ConfirmModal({
   text,
   title,
   description,
+  message,
   onConfirm,
   confirmLabel,
   cancelLabel = "Cancel",
@@ -121,7 +123,8 @@ export function ConfirmModal({
       icon={icon}
       stopPropagation={stopPropagation}
       title={title}
-      description={description || text}
+      description={description}
+      message={message || text}
       footer={footer}
       showCloseButton={false}
       className="data-slot-confirm-modal"

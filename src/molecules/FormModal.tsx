@@ -65,12 +65,13 @@ export interface FormModalProps {
   open?: boolean
   onOpenChange?: (open: boolean) => void
   // Uncontrolled API
-  triggerLabel?: string
+  triggerLabel?: string | React.ReactNode
   triggerProps?: React.ComponentProps<typeof Button>
   icon?: React.ReactNode
   // Common props
   title: string
   description?: string
+  message?: string
   variant?: "create" | "edit"
   itemType?: string
   onSubmit: (data: Record<string, any>) => void | Promise<void>
@@ -97,6 +98,7 @@ export function FormModal({
   icon,
   title,
   description,
+  message,
   variant,
   itemType,
   onSubmit,
@@ -536,6 +538,7 @@ export function FormModal({
       stopPropagation={true}
       title={title}
       description={description}
+      message={message}
       showCloseButton={false}
       footer={footer}
       className="data-slot-form-modal"

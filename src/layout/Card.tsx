@@ -192,10 +192,10 @@ function CardAction({ className, ...props }: React.ComponentProps<"div">) {
 
 function CardContent({ className, size, ...props }: React.ComponentProps<"div"> & { size?: "xs" | "sm" | "md" | "lg" | null }) {
   const sizePadding = {
-    xs: "py-2.5 px-3",
-    sm: "py-3 px-4",
-    md: "py-4 px-6",
-    lg: "py-5 px-8",
+    xs: "py-1.5 px-2",
+    sm: "py-2 px-3",
+    md: "py-3 px-4",
+    lg: "py-4 px-6",
   }
   
   const effectiveSize = size || "md"
@@ -228,10 +228,10 @@ function CardFooter({
   right?: React.ReactNode
 }) {
   const sizePadding = {
-    xs: "gap-0.5",
-    sm: "gap-1",
-    md: "gap-2",
-    lg: "gap-3",
+    xs: "gap-0.5 py-1.5 px-2",
+    sm: "gap-1 py-2 px-3",
+    md: "gap-2 py-3 px-4",
+    lg: "gap-3 py-4 px-6"
   }
   
   const effectiveSize = size || "md"

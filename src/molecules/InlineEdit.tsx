@@ -32,7 +32,7 @@ export function InlineEdit({
 
   if (isEditing) {
     return (
-      <div data-slot="inline-edit" className={cn("inline-flex items-center", className)}>
+      <div data-slot="inline-edit" className={cn("inline-flex items-center m-1", className)}>
         <TextInput
           value={value}
           onChange={(e) => setValue(e.target.value)}
@@ -52,7 +52,7 @@ export function InlineEdit({
     <span
       data-slot="inline-edit-display"
       className={cn(
-        "inline-flex items-center h-9 cursor-pointer hover:underline px-3 py-2",
+        "inline-flex items-center h-9 cursor-pointer hover:underline py-2 m-1",
         "border border-transparent rounded-md",
         className
       )}
