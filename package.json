@@ -1,6 +1,6 @@
 {
   "name": "shru-design-system",
-  "version": "0.5.3",
+  "version": "0.5.4",
   "description": "A React component library with atoms and molecules built on Radix UI and Tailwind CSS",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
