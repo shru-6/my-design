@@ -14,6 +14,8 @@ export interface StatusTextProps {
   variant?: "caption" | "body" | "heading" | "badge"
   formatText?: (text: string, count?: number, label?: string) => string
   className?: string
+  // Element type for HTML validation (default: "div", can be "span", "p", etc.)
+  as?: "div" | "span" | "p"
 }
 
 const statusIcons = {
@@ -31,6 +33,7 @@ export function StatusText({
   variant = "body",
   formatText,
   className,
+  as = "div",
 }: StatusTextProps) {
   // Determine display text
   const displayText = React.useMemo(() => {
@@ -83,7 +86,7 @@ export function StatusText({
   // Text variant
   return (
     <Text
-      as="div"
+      as={as}
       data-slot="status-text"
       className={cn(
         "flex items-center gap-2",

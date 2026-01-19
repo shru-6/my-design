@@ -733,9 +733,13 @@ function Text({
   className,
   variant = "default",
   as: Component2 = "p",
+  leftIcon,
+  rightIcon,
+  children,
   ...props
 }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(
+  const hasIcons = leftIcon || rightIcon;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
     Component2,
     {
       "data-slot": "text",
@@ -744,9 +748,15 @@ function Text({
         variant === "muted" && "text-muted-foreground",
         variant === "small" && "text-sm",
         variant === "large" && "text-lg",
+        hasIcons && "flex items-center gap-2",
         className
       ),
-      ...props
+      ...props,
+      children: [
+        leftIcon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0", children: leftIcon }),
+        children,
+        rightIcon && /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0", children: rightIcon })
+      ]
     }
   );
 }
@@ -841,6 +851,12 @@ function Image2({
   ...props
 }) {
   const [hasError, setHasError] = React15__namespace.useState(false);
+  if (!src || src.trim() === "") {
+    if (fallback) {
+      return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fallback });
+    }
+    return null;
+  }
   if (hasError && fallback) {
     return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fallback });
   }
@@ -4219,7 +4235,8 @@ function StatusText({
   label,
   variant = "body",
   formatText,
-  className
+  className,
+  as = "div"
 }) {
   const displayText = React15__namespace.useMemo(() => {
     let baseText = "";
@@ -4264,7 +4281,7 @@ function StatusText({
   return /* @__PURE__ */ jsxRuntime.jsxs(
     Text,
     {
-      as: "div",
+      as,
       "data-slot": "status-text",
       className: cn(
         "flex items-center gap-2",
@@ -4344,7 +4361,7 @@ function InfoBanner({
       "data-slot": "info-banner",
       className: cn(
         variant === "info" && "bg-primary/10 text-primary border-primary/20 [&>svg]:text-primary",
-        variant === "warning" && "bg-accent/50 text-accent-foreground border-accent/30 [&>svg]:text-accent-foreground",
+        variant === "warning" && "bg-destructive/10 text-destructive border-destructive/20 [&>svg]:text-destructive",
         variant === "success" && "bg-muted/50 text-muted-foreground border-border [&>svg]:text-muted-foreground",
         className
       ),
@@ -4920,6 +4937,7 @@ function FormModal({
   triggerProps,
   icon,
   title,
+  description,
   variant,
   itemType,
   onSubmit,
@@ -4965,6 +4983,25 @@ function FormModal({
       setFormData(initialData);
     }
   }, [fields]);
+  const fieldOptions = React15__namespace.useMemo(() => {
+    if (!fields) return {};
+    const optionsMap = {};
+    fields.forEach((field) => {
+      if (field.type === "select" && field.options) {
+        if (Array.isArray(field.options)) {
+          optionsMap[field.name] = field.options;
+        } else if (typeof field.options === "function") {
+          try {
+            optionsMap[field.name] = field.options(formData);
+          } catch (e) {
+            console.error(`Error resolving options for field ${field.name}:`, e);
+            optionsMap[field.name] = [];
+          }
+        }
+      }
+    });
+    return optionsMap;
+  }, [fields, formData]);
   const handleChange = (name, value, field) => {
     const newFormData = { ...formData, [name]: value };
     setFormData(newFormData);
@@ -5103,19 +5140,8 @@ function FormModal({
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
         ] }, field.name);
       case "select":
-        const resolvedOptions = React15__namespace.useMemo(() => {
-          if (!field.options) return [];
-          if (Array.isArray(field.options)) return field.options;
-          if (typeof field.options === "function") {
-            try {
-              return field.options(formData);
-            } catch (e) {
-              console.error(`Error resolving options for field ${field.name}:`, e);
-              return [];
-            }
-          }
-          return [];
-        }, [field.options, formData]);
+        const resolvedOptions = fieldOptions[field.name] || [];
+        const optionsKey = resolvedOptions.map((o) => o.value).join(",");
         return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-2", children: [
           field.label && /* @__PURE__ */ jsxRuntime.jsxs(Label, { htmlFor: field.name, className: error && "text-destructive", children: [
             field.label,
@@ -5129,9 +5155,10 @@ function FormModal({
               onValueChange: (val) => handleChange(field.name, val, field),
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx(SelectTrigger, { id: field.name, className: error && "border-destructive", children: /* @__PURE__ */ jsxRuntime.jsx(SelectValue, { placeholder: resolvedPlaceholder || "Select..." }) }),
-                /* @__PURE__ */ jsxRuntime.jsx(SelectContent, { children: resolvedOptions.map((option) => /* @__PURE__ */ jsxRuntime.jsx(SelectItem, { value: option.value, children: option.label }, option.value)) })
+                /* @__PURE__ */ jsxRuntime.jsx(SelectContent, { children: resolvedOptions.map((option) => /* @__PURE__ */ jsxRuntime.jsx(SelectItem, { value: option.value, children: option.label }, option.value)) }, `select-content-${field.name}-${optionsKey}`)
               ]
-            }
+            },
+            `select-${field.name}-${optionsKey}`
           ),
           resolvedHelpText && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-muted-foreground", children: resolvedHelpText }),
           error && /* @__PURE__ */ jsxRuntime.jsx("p", { className: "text-sm text-destructive", role: "alert", children: error })
@@ -5224,6 +5251,7 @@ function FormModal({
     /* @__PURE__ */ jsxRuntime.jsx(
       Button,
       {
+        className: "ml-2",
         type: "submit",
         disabled: loading || (typeof isSubmitDisabled === "function" ? isSubmitDisabled(formData) : isSubmitDisabled ?? false),
         children: loading ? getSubmitLabel() : getSubmitLabel()
@@ -5240,6 +5268,7 @@ function FormModal({
       icon,
       stopPropagation: true,
       title,
+      description,
       showCloseButton: false,
       footer,
       className: "data-slot-form-modal",

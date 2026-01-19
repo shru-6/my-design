@@ -228,10 +228,10 @@ function CardFooter({
   right?: React.ReactNode
 }) {
   const sizePadding = {
-    xs: "py-2.5 px-3 [.border-t]:pt-2.5",
-    sm: "py-3 px-4 [.border-t]:pt-3",
-    md: "py-4 px-6 [.border-t]:pt-4",
-    lg: "py-5 px-8 [.border-t]:pt-5",
+    xs: "gap-0.5",
+    sm: "gap-1",
+    md: "gap-2",
+    lg: "gap-3",
   }
   
   const effectiveSize = size || "md"

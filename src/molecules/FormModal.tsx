@@ -70,6 +70,7 @@ export interface FormModalProps {
   icon?: React.ReactNode
   // Common props
   title: string
+  description?: string
   variant?: "create" | "edit"
   itemType?: string
   onSubmit: (data: Record<string, any>) => void | Promise<void>
@@ -95,6 +96,7 @@ export function FormModal({
   triggerProps,
   icon,
   title,
+  description,
   variant,
   itemType,
   onSubmit,
@@ -145,6 +147,31 @@ export function FormModal({
       setFormData(initialData)
     }
   }, [fields])
+
+  // Compute all field options at component level to ensure reactivity
+  // This ensures function-based options re-evaluate when formData changes
+  const fieldOptions = React.useMemo(() => {
+    if (!fields) return {}
+    
+    const optionsMap: Record<string, Array<{ label: string; value: string }>> = {}
+    
+    fields.forEach((field) => {
+      if (field.type === "select" && field.options) {
+        if (Array.isArray(field.options)) {
+          optionsMap[field.name] = field.options
+        } else if (typeof field.options === 'function') {
+          try {
+            optionsMap[field.name] = field.options(formData)
+          } catch (e) {
+            console.error(`Error resolving options for field ${field.name}:`, e)
+            optionsMap[field.name] = []
+          }
+        }
+      }
+    })
+    
+    return optionsMap
+  }, [fields, formData])
 
   const handleChange = (name: string, value: any, field?: FormFieldConfig) => {
     const newFormData = { ...formData, [name]: value }
@@ -328,20 +355,12 @@ export function FormModal({
         )
 
       case "select":
-        // Resolve options - support function-based options
-        const resolvedOptions = React.useMemo(() => {
-          if (!field.options) return []
-          if (Array.isArray(field.options)) return field.options
-          if (typeof field.options === 'function') {
-            try {
-              return field.options(formData)
-            } catch (e) {
-              console.error(`Error resolving options for field ${field.name}:`, e)
-              return []
-            }
-          }
-          return []
-        }, [field.options, formData])
+        // Get pre-computed options from component-level memoization
+        // This ensures function-based options re-evaluate when formData changes
+        const resolvedOptions = fieldOptions[field.name] || []
+        
+        // Create a key based on options to force SelectContent re-render when options change
+        const optionsKey = resolvedOptions.map(o => o.value).join(',')
         
         return (
           <div key={field.name} className="space-y-2">
@@ -357,11 +376,12 @@ export function FormModal({
             <Select
               value={value || ""}
               onValueChange={(val) => handleChange(field.name, val, field)}
+              key={`select-${field.name}-${optionsKey}`}
             >
               <SelectTrigger id={field.name} className={error && "border-destructive"}>
                 <SelectValue placeholder={resolvedPlaceholder || "Select..."} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent key={`select-content-${field.name}-${optionsKey}`}>
                 {resolvedOptions.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
@@ -492,6 +512,7 @@ export function FormModal({
         {cancelLabel}
       </Button>
       <Button 
+        className="ml-2"
         type="submit" 
         disabled={
           loading || 
@@ -514,6 +535,7 @@ export function FormModal({
       icon={icon}
       stopPropagation={true}
       title={title}
+      description={description}
       showCloseButton={false}
       footer={footer}
       className="data-slot-form-modal"

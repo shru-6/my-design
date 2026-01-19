@@ -28,6 +28,14 @@ export function Image({
 }: ImageProps) {
   const [hasError, setHasError] = React.useState(false)
 
+  // Handle empty string src - don't render image element
+  if (!src || src.trim() === "") {
+    if (fallback) {
+      return <>{fallback}</>
+    }
+    return null
+  }
+
   if (hasError && fallback) {
     return <>{fallback}</>
   }
