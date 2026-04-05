@@ -18,10 +18,10 @@ export default {
           DEFAULT: "hsl(var(--secondary))",
           foreground: "hsl(var(--secondary-foreground))",
         },
-        destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))",
-        },
+        // destructive: {
+        //   DEFAULT: "hsl(var(--destructive))",
+        //   foreground: "hsl(var(--destructive-foreground))",
+        // },
         muted: {
           DEFAULT: "hsl(var(--muted))",
           foreground: "hsl(var(--muted-foreground))",
@@ -37,6 +37,27 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        skeleton: "hsl(var(--skeleton))",
+        // Semantic status colors – theme can override via --success, --warning, --info
+        success: {
+          DEFAULT: "hsl(var(--success, 142 76% 36%))",
+          foreground: "hsl(var(--success-foreground, 0 0% 100%))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning, 38 92% 50%))",
+          foreground: "hsl(var(--warning-foreground, 0 0% 100%))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info, 199 89% 48%))",
+          foreground: "hsl(var(--info-foreground, 0 0% 100%))",
+        },
+        "surface-muted": "hsl(var(--surface-muted, var(--muted)))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        "surface-1": "hsl(var(--surface-1, var(--card)))",
+        "surface-2": "hsl(var(--surface-2, var(--muted)))",
       },
       borderRadius: {
         lg: "var(--radius)",
@@ -77,4 +98,10 @@ export default {
     },
   },
   plugins: [],
+  safelist: [
+    // Ensure these classes are always generated (used in CVA strings)
+    "bg-skeleton",
+    "bg-card",
+    "text-card-foreground",
+  ],
 }

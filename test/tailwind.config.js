@@ -38,6 +38,26 @@ export default {
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",
         ring: "hsl(var(--ring))",
+        skeleton: "hsl(var(--skeleton))",
+        card: {
+          DEFAULT: "hsl(var(--card))",
+          foreground: "hsl(var(--card-foreground))",
+        },
+        "surface-1": "hsl(var(--surface-1, var(--card)))",
+        "surface-2": "hsl(var(--surface-2, var(--muted)))",
+        success: {
+          DEFAULT: "hsl(var(--success, 142 76% 36%))",
+          foreground: "hsl(var(--success-foreground, 0 0% 100%))",
+        },
+        warning: {
+          DEFAULT: "hsl(var(--warning, 38 92% 50%))",
+          foreground: "hsl(var(--warning-foreground, 0 0% 100%))",
+        },
+        info: {
+          DEFAULT: "hsl(var(--info, 199 89% 48%))",
+          foreground: "hsl(var(--info-foreground, 0 0% 100%))",
+        },
+        "surface-muted": "hsl(var(--surface-muted, var(--muted)))",
       },
       // ⚠️ PRIMARY SOURCE: scripts/init.js - borderRadius config (update there first)
       borderRadius: {
@@ -75,5 +95,11 @@ export default {
     },
   },
   plugins: [],
+  safelist: [
+    // Ensure these classes are always generated (used in CVA strings)
+    "bg-skeleton",
+    "bg-card",
+    "text-card-foreground",
+  ],
 }
 

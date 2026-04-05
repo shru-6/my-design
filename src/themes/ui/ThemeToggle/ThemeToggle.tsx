@@ -6,7 +6,6 @@ import { categoryIcons, positionClasses } from "./themeToggleConfig"
 import { getPositionOnArc } from "./themeToggleUtils"
 import { getArcConfig } from "./themeToggleConfig"
 import { cn } from "../../../utils"
-import { Tooltip, TooltipTrigger, TooltipContent, TooltipProvider } from "../../../molecules/Tooltip"
 import type { ThemeSelection, ThemeMetadata } from "../../useTheme"
 
 export interface ThemeToggleProps {
@@ -70,28 +69,26 @@ export function ThemeToggle({
 
       {/* Radial Menu */}
       {isOpen && (
-        <TooltipProvider delayDuration={300}>
-          <div className="absolute inset-0 pointer-events-none">
-            {!selectedCategory ? (
-              <CategoryRing
-                categories={categories}
-                onCategoryClick={handleCategoryClick}
-                selectedThemes={selectedThemes}
-                position={position}
-              />
-            ) : (
-              <ThemeRingAsync
-                category={selectedCategory}
-                getAvailableThemes={getAvailableThemes}
-                selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
-                onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
-                onBack={handleBack}
-                isLoading={isLoading}
-                position={position}
-              />
-            )}
-          </div>
-        </TooltipProvider>
+        <div className="absolute inset-0 pointer-events-none">
+          {!selectedCategory ? (
+            <CategoryRing
+              categories={categories}
+              onCategoryClick={handleCategoryClick}
+              selectedThemes={selectedThemes}
+              position={position}
+            />
+          ) : (
+            <ThemeRingAsync
+              category={selectedCategory}
+              getAvailableThemes={getAvailableThemes}
+              selectedTheme={selectedThemes[selectedCategory as keyof ThemeSelection]}
+              onThemeSelect={(themeId) => handleThemeSelect(selectedCategory as keyof ThemeSelection, themeId)}
+              onBack={handleBack}
+              isLoading={isLoading}
+              position={position}
+            />
+          )}
+        </div>
       )}
     </div>
   )
@@ -135,39 +132,34 @@ function RadialWheel({
         const pos = getPositionOnArc(angle, radius)
 
         return (
-          <Tooltip key={item.id}>
-            <TooltipTrigger asChild>
-              <button
-                onClick={item.onClick}
-                disabled={item.disabled}
-                className={cn(
-                  "absolute rounded-full",
-                  "bg-background border-2 shadow-lg",
-                  "flex items-center justify-center text-lg",
-                  "pointer-events-auto",
-                  "transition-all duration-200",
-                  "hover:scale-110 active:scale-95",
-                  "disabled:opacity-50 disabled:cursor-not-allowed",
-                  item.isSelected
-                    ? "border-primary bg-primary text-primary-foreground"
-                    : "border-border hover:border-primary/50",
-                  item.className
-                )}
-                style={{
-                  width: `${buttonSize}px`,
-                  height: `${buttonSize}px`,
-                  left: `${pos.x}px`,
-                  top: `${pos.y}px`,
-                }}
-                aria-label={item.label}
-              >
-                {item.content}
-              </button>
-            </TooltipTrigger>
-            <TooltipContent side="right" sideOffset={8}>
-              {item.label}
-            </TooltipContent>
-          </Tooltip>
+          <button
+            key={item.id}
+            onClick={item.onClick}
+            disabled={item.disabled}
+            className={cn(
+              "absolute rounded-full",
+              "bg-background border-2 shadow-lg",
+              "flex items-center justify-center text-lg",
+              "pointer-events-auto",
+              "transition-all duration-200",
+              "hover:scale-110 active:scale-95",
+              "disabled:opacity-50 disabled:cursor-not-allowed",
+              item.isSelected
+                ? "border-primary bg-primary text-primary-foreground"
+                : "border-border hover:border-primary/50",
+              item.className
+            )}
+            style={{
+              width: `${buttonSize}px`,
+              height: `${buttonSize}px`,
+              left: `${pos.x}px`,
+              top: `${pos.y}px`,
+            }}
+            aria-label={item.label}
+            title={item.label}
+          >
+            {item.content}
+          </button>
         )
       })}
     </div>
