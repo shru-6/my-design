@@ -2,13 +2,9 @@ import * as class_variance_authority_types from 'class-variance-authority/types'
 import * as React from 'react';
 import { VariantProps } from 'class-variance-authority';
 import * as react_jsx_runtime from 'react/jsx-runtime';
-import * as SwitchPrimitive from '@radix-ui/react-switch';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { OTPInput } from 'input-otp';
-import * as AspectRatioPrimitive from '@radix-ui/react-aspect-ratio';
 import { PanelGroupProps, ImperativePanelGroupHandle, PanelProps, ImperativePanelHandle, PanelResizeHandleProps } from 'react-resizable-panels';
-import * as ProgressPrimitive from '@radix-ui/react-progress';
-import * as TooltipPrimitive from '@radix-ui/react-tooltip';
 
 declare const buttonVariants: (props?: ({
     variant?: "outline" | "ghost" | "primary" | "secondary" | "destructive" | null | undefined;
@@ -28,6 +24,7 @@ type ButtonProps = ButtonBaseProps & {
     children?: React.ReactNode;
     href?: string;
     label?: string;
+    type?: "button" | "submit" | "reset";
 };
 declare const Button: React.ForwardRefExoticComponent<ButtonBaseProps & {
     variant?: VariantProps<typeof buttonVariants>["variant"];
@@ -41,6 +38,7 @@ declare const Button: React.ForwardRefExoticComponent<ButtonBaseProps & {
     children?: React.ReactNode;
     href?: string;
     label?: string;
+    type?: "button" | "submit" | "reset";
 } & React.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
 declare const fabVariants: (props?: ({
@@ -53,6 +51,85 @@ interface FABProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "
     ariaLabel: string;
 }
 declare const FAB: React.ForwardRefExoticComponent<FABProps & React.RefAttributes<HTMLButtonElement>>;
+
+interface CopyButtonProps extends Omit<ButtonProps, "onClick" | "children" | "onCopy" | "label"> {
+    /** Text or value copied to the clipboard. */
+    value: string;
+    /** Fired after a successful clipboard write. */
+    onValueCopy?: (value: string) => void;
+    onCopyError?: (error: unknown) => void;
+    /** Shown on the button before copy / when reset. */
+    copyLabel?: React.ReactNode;
+    /** Shown on the button briefly after a successful copy. */
+    copiedLabel?: React.ReactNode;
+    /** How long to show `copiedLabel` on the button (ms). */
+    timeout?: number;
+    /** Wraps the button in a `Tooltip` when true. */
+    tooltip?: boolean;
+    /** Tooltip body when idle; defaults to `copyLabel`. */
+    tooltipLabel?: React.ReactNode;
+    /** Tooltip body after copy; defaults to `copiedLabel`. */
+    tooltipCopiedLabel?: React.ReactNode;
+    /** @deprecated Use `tooltipLabel`. */
+    tooltipContent?: React.ReactNode;
+    children?: React.ReactNode;
+}
+declare const CopyButton: React.ForwardRefExoticComponent<CopyButtonProps & React.RefAttributes<HTMLButtonElement>>;
+
+interface DropdownItem {
+    label: React.ReactNode;
+    value?: string;
+    onClick?: () => void;
+    left?: React.ReactNode;
+    disabled?: boolean;
+    separator?: boolean;
+    children?: DropdownItem[];
+}
+interface DropdownProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    items: DropdownItem[];
+    triggerProps?: {
+        label?: React.ReactNode;
+        left?: React.ReactNode;
+        variant?: ButtonProps["variant"];
+        size?: ButtonProps["size"];
+        className?: string;
+    };
+    /** Optional custom trigger (replaces `triggerProps` button). */
+    trigger?: React.ReactNode;
+    contentClassName?: string;
+    align?: "start" | "center" | "end";
+    sideOffset?: number;
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+}
+declare function Dropdown({ items, triggerProps, trigger, contentClassName, align, sideOffset, open: openProp, defaultOpen, onOpenChange, className, ...rest }: DropdownProps): react_jsx_runtime.JSX.Element;
+declare namespace Dropdown {
+    var displayName: string;
+}
+
+type SplitButtonMenuItem = {
+    label: React.ReactNode;
+    onClick?: () => void;
+    left?: React.ReactNode;
+    disabled?: boolean;
+    separator?: boolean;
+};
+interface SplitButtonProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    onClick?: () => void;
+    menuItems: SplitButtonMenuItem[];
+    disabled?: boolean;
+    loading?: boolean;
+    children?: React.ReactNode;
+    variant?: Exclude<ButtonProps["variant"], "destructive">;
+    size?: ButtonProps["size"];
+    buttonProps?: Partial<Omit<ButtonProps, "variant" | "size" | "children" | "iconOnly">>;
+    dropdownProps?: Partial<Omit<DropdownProps, "items" | "trigger">>;
+}
+declare function SplitButton({ onClick, menuItems, disabled, loading, children, variant, size, buttonProps, dropdownProps, className, ...rest }: SplitButtonProps): react_jsx_runtime.JSX.Element;
+declare namespace SplitButton {
+    var displayName: string;
+}
 
 declare const iconVariants: (props?: ({
     size?: "xs" | "sm" | "md" | "lg" | "xl" | null | undefined;
@@ -158,17 +235,22 @@ interface RadioProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
 }
 declare const Radio: React.ForwardRefExoticComponent<RadioProps & React.RefAttributes<HTMLInputElement>>;
 
-declare const switchVariants: (props?: ({
+declare const toggleVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
-interface SwitchProps extends Omit<React.ComponentPropsWithoutRef<typeof SwitchPrimitive.Root>, "onCheckedChange" | "onChange">, VariantProps<typeof switchVariants> {
+declare const toggleThumbVariants: (props?: ({
+    size?: "sm" | "md" | "lg" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface ToggleProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "onChange" | "role" | "size">, VariantProps<typeof toggleVariants> {
     default?: boolean;
     label?: React.ReactNode;
     description?: React.ReactNode;
     errorMessage?: string;
     onChange?: (checked: boolean) => void;
+    checked?: boolean;
+    defaultChecked?: boolean;
 }
-declare const Switch: React.ForwardRefExoticComponent<SwitchProps & React.RefAttributes<HTMLButtonElement>>;
+declare const Toggle: React.ForwardRefExoticComponent<ToggleProps & React.RefAttributes<HTMLButtonElement>>;
 
 declare const sliderVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
@@ -235,10 +317,718 @@ interface SearchInputProps extends Omit<TextInputProps, "onChange" | "left" | "r
 }
 declare const SearchInput: React.ForwardRefExoticComponent<SearchInputProps & React.RefAttributes<HTMLInputElement>>;
 
+type PhoneCountry = {
+    code: string;
+    label: string;
+    dial: string;
+};
+/** Phone field value — `dialCode` is derived via {@link getPhoneDialCode}, not stored on the value. */
+type PhoneValue = {
+    countryCode: string;
+    number: string;
+};
+declare function getPhoneDialCode(countryCode: string, allowed?: PhoneCountry[]): string;
+
+interface PhoneInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+    value?: PhoneValue;
+    defaultValue?: PhoneValue;
+    onChange?: (value: PhoneValue) => void;
+    defaultCountry?: string;
+    allowedCountries?: string[];
+    placeholder?: string;
+    disabled?: boolean;
+    required?: boolean;
+    label?: React.ReactNode;
+    errorMessage?: string;
+    validate?: boolean | ((value: PhoneValue) => string | undefined);
+    onValidate?: (isValid: boolean, error?: string) => void;
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    inputProps?: Partial<TextInputProps>;
+    dropdownProps?: Partial<DropdownProps>;
+    className?: string;
+}
+declare function PhoneInput({ value, defaultValue, onChange, defaultCountry, allowedCountries, placeholder, disabled, required, label, errorMessage, validate, onValidate, size, variant, inputProps, dropdownProps, className, ...rest }: PhoneInputProps): react_jsx_runtime.JSX.Element;
+declare namespace PhoneInput {
+    var displayName: string;
+}
+
+type CommandItem = {
+    label: React.ReactNode;
+    value: string;
+    left?: React.ReactNode;
+    group?: string;
+    disabled?: boolean;
+    keywords?: string[];
+};
+interface CommandProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect"> {
+    items?: CommandItem[];
+    value?: string;
+    defaultValue?: string;
+    onValueChange?: (value: string) => void;
+    inputValue?: string;
+    defaultInputValue?: string;
+    onInputValueChange?: (value: string) => void;
+    onSelect?: (item: CommandItem) => void;
+    placeholder?: string;
+    emptyState?: React.ReactNode;
+    loading?: boolean;
+    disabled?: boolean;
+    loop?: boolean;
+    debounceMs?: number;
+    filterFn?: (item: CommandItem, query: string) => boolean;
+    maxHeight?: string | number;
+    searchInputProps?: Partial<SearchInputProps>;
+    className?: string;
+    children?: React.ReactNode;
+}
+declare function Command({ items, value, defaultValue, onValueChange, inputValue, defaultInputValue, onInputValueChange, onSelect, placeholder, emptyState, loading, disabled, loop, debounceMs, filterFn, maxHeight, searchInputProps, className, children, ...rest }: CommandProps): react_jsx_runtime.JSX.Element;
+declare namespace Command {
+    var displayName: string;
+}
+
+type DateRangeValue = {
+    from: Date | null;
+    to: Date | null;
+};
+
+type CalendarSelectionMode = "single" | "multiple" | "range";
+interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+    value?: Date | Date[] | DateRangeValue | null;
+    defaultValue?: Date | Date[] | DateRangeValue | null;
+    onChange?: (value: Date | Date[] | DateRangeValue | null) => void;
+    minDate?: Date;
+    maxDate?: Date;
+    /** Minimum inclusive span when `selectionMode="range"` (both endpoints count). */
+    minRangeDays?: number;
+    /** Maximum inclusive span when `selectionMode="range"`. */
+    maxRangeDays?: number;
+    disabled?: boolean;
+    selectionMode?: CalendarSelectionMode;
+    showOutsideDays?: boolean;
+    weekStartsOn?: 0 | 1 | 2 | 3 | 4 | 5 | 6;
+    disabledDates?: Date[] | ((date: Date) => boolean);
+    highlightedDates?: Date[];
+    locale?: string;
+    className?: string;
+}
+declare function Calendar({ value, defaultValue, onChange, minDate, maxDate, minRangeDays, maxRangeDays, disabled, selectionMode, showOutsideDays, weekStartsOn, disabledDates, highlightedDates, locale, className, ...rest }: CalendarProps): react_jsx_runtime.JSX.Element;
+declare namespace Calendar {
+    var displayName: string;
+}
+
+interface DatePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+    value?: Date | null;
+    defaultValue?: Date | null;
+    onChange?: (value: Date | null) => void;
+    minDate?: Date;
+    maxDate?: Date;
+    disabled?: boolean;
+    required?: boolean;
+    placeholder?: string;
+    label?: React.ReactNode;
+    errorMessage?: string;
+    format?: string;
+    locale?: string;
+    closeOnSelect?: boolean;
+    clearable?: boolean;
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    inputProps?: Partial<TextInputProps>;
+    calendarProps?: Partial<CalendarProps>;
+    className?: string;
+}
+declare function DatePicker({ value, defaultValue, onChange, minDate, maxDate, disabled, required, placeholder, label, errorMessage, format, locale, closeOnSelect, clearable, size, variant, inputProps, calendarProps, className, ...rest }: DatePickerProps): react_jsx_runtime.JSX.Element;
+declare namespace DatePicker {
+    var displayName: string;
+}
+
+interface TimePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+    value?: Date | null;
+    defaultValue?: Date | null;
+    onChange?: (value: Date | null) => void;
+    minTime?: Date;
+    maxTime?: Date;
+    disabled?: boolean;
+    required?: boolean;
+    placeholder?: string;
+    label?: React.ReactNode;
+    errorMessage?: string;
+    format?: "12h" | "24h";
+    step?: number;
+    closeOnSelect?: boolean;
+    clearable?: boolean;
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    inputProps?: Partial<TextInputProps>;
+    className?: string;
+}
+declare function TimePicker({ value, defaultValue, onChange, disabled, required, placeholder, label, errorMessage, format, step, closeOnSelect, clearable, size, variant, inputProps, className, ...rest }: TimePickerProps): react_jsx_runtime.JSX.Element;
+declare namespace TimePicker {
+    var displayName: string;
+}
+
+type DatePreset = {
+    label: React.ReactNode;
+    value: DateRangeValue;
+};
+interface DateRangePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+    value?: DateRangeValue | null;
+    defaultValue?: DateRangeValue | null;
+    onChange?: (value: DateRangeValue | null) => void;
+    /** Earliest selectable calendar day. */
+    minDate?: Date;
+    /** Latest selectable calendar day. */
+    maxDate?: Date;
+    /** Minimum inclusive span (both endpoints count). */
+    minRangeDays?: number;
+    /** Maximum inclusive span (both endpoints count). */
+    maxRangeDays?: number;
+    disabled?: boolean;
+    required?: boolean;
+    placeholder?: string;
+    label?: React.ReactNode;
+    errorMessage?: string;
+    format?: string;
+    locale?: string;
+    /** Require Apply to commit; shows Apply / Cancel footer. When false, closes on a valid complete range. */
+    showApplyButton?: boolean;
+    applyLabel?: string;
+    cancelLabel?: string;
+    clearable?: boolean;
+    presets?: DatePreset[];
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    inputProps?: Partial<TextInputProps>;
+    calendarProps?: Partial<CalendarProps>;
+    className?: string;
+}
+declare function DateRangePicker({ value, defaultValue, onChange, minDate, maxDate, minRangeDays, maxRangeDays, disabled, required, placeholder, label, errorMessage, format, locale, showApplyButton, applyLabel, cancelLabel, clearable, presets, size, variant, inputProps, calendarProps, className, ...rest }: DateRangePickerProps): react_jsx_runtime.JSX.Element;
+declare namespace DateRangePicker {
+    var displayName: string;
+}
+
+interface UploadProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
+    onUpload: (files: File[]) => void | Promise<void>;
+    onRemove?: (file: File, index: number) => void;
+    value?: File[];
+    defaultValue?: File[];
+    onChange?: (files: File[]) => void;
+    multiple?: boolean;
+    maxFiles?: number;
+    accept?: string;
+    maxSize?: number;
+    disabled?: boolean;
+    loading?: boolean;
+    dragAndDrop?: boolean;
+    preview?: boolean;
+    label?: React.ReactNode;
+    errorMessage?: string;
+    showFileList?: boolean;
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    className?: string;
+    children?: React.ReactNode;
+}
+declare function Upload({ onUpload, onRemove, value, defaultValue, onChange, multiple, maxFiles, accept, maxSize, disabled, loading, dragAndDrop, preview, label, errorMessage, showFileList, size, variant, className, children, ...rest }: UploadProps): react_jsx_runtime.JSX.Element;
+declare namespace Upload {
+    var displayName: string;
+}
+
+interface InlineEditProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
+    value?: string;
+    defaultValue?: string;
+    onSave?: (value: string) => void;
+    onCancel?: () => void;
+    placeholder?: string;
+    disabled?: boolean;
+    required?: boolean;
+    validate?: boolean | ((value: string) => string | undefined);
+    editTrigger?: "click" | "doubleClick";
+    saveOnBlur?: boolean;
+    saveOnEnter?: boolean;
+    className?: string;
+}
+declare function InlineEdit({ value, defaultValue, onSave, onCancel, placeholder, disabled, required, validate, editTrigger, saveOnBlur, saveOnEnter, className, ...rest }: InlineEditProps): react_jsx_runtime.JSX.Element;
+declare namespace InlineEdit {
+    var displayName: string;
+}
+
+interface SelectOption {
+    label: React.ReactNode;
+    value: string;
+    disabled?: boolean;
+    group?: string;
+    /** When this option is selected, replaces the field-level `left` adornment (if set). */
+    left?: React.ReactNode;
+}
+interface SelectProps extends Omit<React.ComponentPropsWithoutRef<"select">, "size"> {
+    items: SelectOption[];
+    /** Leading adornment (same behavior as TextInput `left` — keyword strings resolve via Icon). */
+    left?: React.ReactNode;
+    placeholder?: string;
+    label?: React.ReactNode;
+    errorMessage?: string;
+    required?: boolean;
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    className?: string;
+    /** @deprecated Native select has no separate popover; kept for API compatibility (no-op). */
+    contentClassName?: string;
+    value?: string;
+    defaultValue?: string;
+    onValueChange?: (value: string) => void;
+}
+declare const Select: React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLSelectElement>>;
+
 interface HelperTextProps extends React.HTMLAttributes<HTMLParagraphElement> {
     tone?: "default" | "muted" | "error";
 }
 declare const HelperText: React.ForwardRefExoticComponent<HelperTextProps & React.RefAttributes<HTMLParagraphElement>>;
+
+interface RadioGroupItem {
+    label: React.ReactNode;
+    value: string;
+    description?: React.ReactNode;
+    disabled?: boolean;
+}
+declare const groupVariants$1: (props?: ({
+    orientation?: "horizontal" | "vertical" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface RadioGroupProps extends Omit<React.ComponentPropsWithoutRef<"fieldset">, "onChange"> {
+    items: RadioGroupItem[];
+    value?: string;
+    defaultValue?: string;
+    onChange?: (value: string) => void;
+    name?: string;
+    required?: boolean;
+    disabled?: boolean;
+    orientation?: VariantProps<typeof groupVariants$1>["orientation"];
+    size?: RadioProps["size"];
+    errorMessage?: string;
+    /** Group caption; rendered as `<legend>` for fieldset accessibility. */
+    heading?: React.ReactNode;
+    className?: string;
+}
+declare const RadioGroup: React.ForwardRefExoticComponent<RadioGroupProps & React.RefAttributes<HTMLFieldSetElement>>;
+
+type FormValues = Record<string, unknown>;
+type FormValidateOn$1 = "submit" | "change" | "blur";
+type FormFieldRenderProps = {
+    id: string;
+    name: string;
+    value: string;
+    onChange: (value: string) => void;
+    onBlur: () => void;
+    errorMessage?: string;
+    disabled?: boolean;
+    required?: boolean;
+    placeholder?: string;
+};
+type FormContextValue = {
+    values: FormValues;
+    errors: Record<string, string | undefined>;
+    touched: Record<string, boolean>;
+    submitted: boolean;
+    setValue: (name: string, value: unknown) => void;
+    setError: (name: string, error?: string) => void;
+    setTouched: (name: string, touched: boolean) => void;
+    validateOn: FormValidateOn$1;
+    disabled?: boolean;
+    loading?: boolean;
+};
+declare function useFormContext(): FormContextValue | null;
+
+type FormValidateFn = (values: FormValues) => Record<string, string | undefined> | void;
+type FormValidateOn = "submit" | "change" | "blur";
+type FormLayout = "vertical" | "horizontal" | "grid";
+interface FormProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, "onSubmit" | "onChange"> {
+    onSubmit: (values: FormValues) => void | Promise<void>;
+    onCancel?: () => void;
+    initialValues?: FormValues;
+    values?: FormValues;
+    onValuesChange?: (values: FormValues) => void;
+    validate?: FormValidateFn;
+    errors?: Record<string, string | undefined>;
+    validateOn?: FormValidateOn;
+    /** Controlled submitted flag — errors show after submit when validateOn is "submit". */
+    submitted?: boolean;
+    onSubmittedChange?: (submitted: boolean) => void;
+    /** Auto-clear submitted state after N ms (e.g. reset error display). */
+    resetSubmittedAfterMs?: number;
+    layout?: FormLayout;
+    columns?: 1 | 2 | 3 | 4;
+    submitLabel?: string;
+    cancelLabel?: string;
+    footer?: React.ReactNode;
+    disabled?: boolean;
+    loading?: boolean;
+    submitButtonProps?: Partial<ButtonProps>;
+    cancelButtonProps?: Partial<ButtonProps>;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function Form({ onSubmit, onCancel, initialValues, values: valuesProp, onValuesChange, validate, errors: errorsProp, validateOn, submitted: submittedProp, onSubmittedChange, resetSubmittedAfterMs, layout, columns, submitLabel, cancelLabel, footer, disabled, loading, submitButtonProps, cancelButtonProps, children, className, ...props }: FormProps): react_jsx_runtime.JSX.Element;
+declare namespace Form {
+    var displayName: string;
+}
+
+type FormFieldType = "text" | "email" | "password" | "number" | "url" | "search" | "textarea";
+interface FormFieldProps {
+    name: string;
+    type?: FormFieldType;
+    label?: React.ReactNode;
+    placeholder?: string;
+    required?: boolean;
+    disabled?: boolean;
+    value?: string;
+    defaultValue?: string;
+    onChange?: (value: string) => void;
+    validate?: boolean | ((value: string) => string | undefined);
+    errorMessage?: string;
+    touched?: boolean;
+    showError?: boolean;
+    render?: (props: FormFieldRenderProps) => React.ReactNode;
+    children?: React.ReactNode;
+    className?: string;
+    inputProps?: Partial<TextInputProps>;
+    labelProps?: Record<string, unknown>;
+    helperTextProps?: Record<string, unknown>;
+}
+declare function FormField({ name, type, label, placeholder, required, disabled, value: valueProp, defaultValue, onChange: onChangeProp, validate, errorMessage, touched: touchedProp, showError, render, children, className, inputProps, }: FormFieldProps): react_jsx_runtime.JSX.Element;
+declare namespace FormField {
+    var displayName: string;
+}
+
+interface InputGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    children: React.ReactNode;
+    disabled?: boolean;
+    loading?: boolean;
+    invalid?: boolean;
+    orientation?: "horizontal" | "vertical";
+    /** Merge outer border and radii across direct controls (horizontal only). */
+    attached?: boolean;
+    size?: VariantProps<typeof fieldSurfaceVariants>["size"];
+    variant?: VariantProps<typeof fieldSurfaceVariants>["variant"];
+    /** Leading icon/slot rendered inside `InputGroupInput` (pill shell when set, attached horizontal). */
+    left?: React.ReactNode;
+    /** Default `placeholder` for nested `InputGroupInput` when the input omits one. */
+    placeholder?: string;
+    className?: string;
+}
+declare function InputGroup({ children, disabled, loading, invalid, orientation, attached, size, variant, left, placeholder, className, ...props }: InputGroupProps): react_jsx_runtime.JSX.Element;
+declare namespace InputGroup {
+    var displayName: string;
+}
+interface InputGroupInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">, VariantProps<typeof fieldSurfaceVariants> {
+}
+declare const InputGroupInput: React.ForwardRefExoticComponent<InputGroupInputProps & React.RefAttributes<HTMLInputElement>>;
+interface InputGroupAddonProps extends React.HTMLAttributes<HTMLSpanElement> {
+    children: React.ReactNode;
+}
+declare function InputGroupAddon({ className, children, ...props }: InputGroupAddonProps): react_jsx_runtime.JSX.Element;
+declare namespace InputGroupAddon {
+    var displayName: string;
+}
+type InputGroupButtonProps = ButtonProps;
+/** Outline-style trigger sized for horizontal attached groups. */
+declare const InputGroupButton: React.ForwardRefExoticComponent<{
+    defaultChecked?: boolean | undefined | undefined;
+    defaultValue?: string | number | readonly string[] | undefined;
+    suppressContentEditableWarning?: boolean | undefined | undefined;
+    suppressHydrationWarning?: boolean | undefined | undefined;
+    accessKey?: string | undefined | undefined;
+    autoCapitalize?: "off" | "none" | "on" | "sentences" | "words" | "characters" | undefined | (string & {}) | undefined;
+    autoFocus?: boolean | undefined | undefined;
+    className?: string | undefined | undefined;
+    contentEditable?: (boolean | "true" | "false") | "inherit" | "plaintext-only" | undefined;
+    contextMenu?: string | undefined | undefined;
+    dir?: string | undefined | undefined;
+    draggable?: (boolean | "true" | "false") | undefined;
+    enterKeyHint?: "enter" | "done" | "go" | "next" | "previous" | "search" | "send" | undefined | undefined;
+    hidden?: boolean | undefined | undefined;
+    id?: string | undefined | undefined;
+    lang?: string | undefined | undefined;
+    nonce?: string | undefined | undefined;
+    slot?: string | undefined | undefined;
+    spellCheck?: (boolean | "true" | "false") | undefined;
+    style?: React.CSSProperties | undefined;
+    tabIndex?: number | undefined | undefined;
+    title?: string | undefined | undefined;
+    translate?: "yes" | "no" | undefined | undefined;
+    radioGroup?: string | undefined | undefined;
+    role?: React.AriaRole | undefined;
+    about?: string | undefined | undefined;
+    content?: string | undefined | undefined;
+    datatype?: string | undefined | undefined;
+    inlist?: any;
+    prefix?: string | undefined | undefined;
+    property?: string | undefined | undefined;
+    rel?: string | undefined | undefined;
+    resource?: string | undefined | undefined;
+    rev?: string | undefined | undefined;
+    typeof?: string | undefined | undefined;
+    vocab?: string | undefined | undefined;
+    autoCorrect?: string | undefined | undefined;
+    autoSave?: string | undefined | undefined;
+    color?: string | undefined | undefined;
+    itemProp?: string | undefined | undefined;
+    itemScope?: boolean | undefined | undefined;
+    itemType?: string | undefined | undefined;
+    itemID?: string | undefined | undefined;
+    itemRef?: string | undefined | undefined;
+    results?: number | undefined | undefined;
+    security?: string | undefined | undefined;
+    unselectable?: "on" | "off" | undefined | undefined;
+    inputMode?: "none" | "text" | "tel" | "url" | "email" | "numeric" | "decimal" | "search" | undefined | undefined;
+    is?: string | undefined | undefined;
+    exportparts?: string | undefined | undefined;
+    part?: string | undefined | undefined;
+    "aria-activedescendant"?: string | undefined | undefined;
+    "aria-atomic"?: (boolean | "true" | "false") | undefined;
+    "aria-autocomplete"?: "none" | "inline" | "list" | "both" | undefined | undefined;
+    "aria-braillelabel"?: string | undefined | undefined;
+    "aria-brailleroledescription"?: string | undefined | undefined;
+    "aria-busy"?: (boolean | "true" | "false") | undefined;
+    "aria-checked"?: boolean | "false" | "mixed" | "true" | undefined | undefined;
+    "aria-colcount"?: number | undefined | undefined;
+    "aria-colindex"?: number | undefined | undefined;
+    "aria-colindextext"?: string | undefined | undefined;
+    "aria-colspan"?: number | undefined | undefined;
+    "aria-controls"?: string | undefined | undefined;
+    "aria-current"?: boolean | "false" | "true" | "page" | "step" | "location" | "date" | "time" | undefined | undefined;
+    "aria-describedby"?: string | undefined | undefined;
+    "aria-description"?: string | undefined | undefined;
+    "aria-details"?: string | undefined | undefined;
+    "aria-disabled"?: (boolean | "true" | "false") | undefined;
+    "aria-dropeffect"?: "none" | "copy" | "execute" | "link" | "move" | "popup" | undefined | undefined;
+    "aria-errormessage"?: string | undefined | undefined;
+    "aria-expanded"?: (boolean | "true" | "false") | undefined;
+    "aria-flowto"?: string | undefined | undefined;
+    "aria-grabbed"?: (boolean | "true" | "false") | undefined;
+    "aria-haspopup"?: boolean | "false" | "true" | "menu" | "listbox" | "tree" | "grid" | "dialog" | undefined | undefined;
+    "aria-hidden"?: (boolean | "true" | "false") | undefined;
+    "aria-invalid"?: boolean | "false" | "true" | "grammar" | "spelling" | undefined | undefined;
+    "aria-keyshortcuts"?: string | undefined | undefined;
+    "aria-label"?: string | undefined | undefined;
+    "aria-labelledby"?: string | undefined | undefined;
+    "aria-level"?: number | undefined | undefined;
+    "aria-live"?: "off" | "assertive" | "polite" | undefined | undefined;
+    "aria-modal"?: (boolean | "true" | "false") | undefined;
+    "aria-multiline"?: (boolean | "true" | "false") | undefined;
+    "aria-multiselectable"?: (boolean | "true" | "false") | undefined;
+    "aria-orientation"?: "horizontal" | "vertical" | undefined | undefined;
+    "aria-owns"?: string | undefined | undefined;
+    "aria-placeholder"?: string | undefined | undefined;
+    "aria-posinset"?: number | undefined | undefined;
+    "aria-pressed"?: boolean | "false" | "mixed" | "true" | undefined | undefined;
+    "aria-readonly"?: (boolean | "true" | "false") | undefined;
+    "aria-relevant"?: "additions" | "additions removals" | "additions text" | "all" | "removals" | "removals additions" | "removals text" | "text" | "text additions" | "text removals" | undefined | undefined;
+    "aria-required"?: (boolean | "true" | "false") | undefined;
+    "aria-roledescription"?: string | undefined | undefined;
+    "aria-rowcount"?: number | undefined | undefined;
+    "aria-rowindex"?: number | undefined | undefined;
+    "aria-rowindextext"?: string | undefined | undefined;
+    "aria-rowspan"?: number | undefined | undefined;
+    "aria-selected"?: (boolean | "true" | "false") | undefined;
+    "aria-setsize"?: number | undefined | undefined;
+    "aria-sort"?: "none" | "ascending" | "descending" | "other" | undefined | undefined;
+    "aria-valuemax"?: number | undefined | undefined;
+    "aria-valuemin"?: number | undefined | undefined;
+    "aria-valuenow"?: number | undefined | undefined;
+    "aria-valuetext"?: string | undefined | undefined;
+    dangerouslySetInnerHTML?: {
+        __html: string | TrustedHTML;
+    } | undefined | undefined;
+    onCopy?: React.ClipboardEventHandler<HTMLButtonElement> | undefined;
+    onCopyCapture?: React.ClipboardEventHandler<HTMLButtonElement> | undefined;
+    onCut?: React.ClipboardEventHandler<HTMLButtonElement> | undefined;
+    onCutCapture?: React.ClipboardEventHandler<HTMLButtonElement> | undefined;
+    onPaste?: React.ClipboardEventHandler<HTMLButtonElement> | undefined;
+    onPasteCapture?: React.ClipboardEventHandler<HTMLButtonElement> | undefined;
+    onCompositionEnd?: React.CompositionEventHandler<HTMLButtonElement> | undefined;
+    onCompositionEndCapture?: React.CompositionEventHandler<HTMLButtonElement> | undefined;
+    onCompositionStart?: React.CompositionEventHandler<HTMLButtonElement> | undefined;
+    onCompositionStartCapture?: React.CompositionEventHandler<HTMLButtonElement> | undefined;
+    onCompositionUpdate?: React.CompositionEventHandler<HTMLButtonElement> | undefined;
+    onCompositionUpdateCapture?: React.CompositionEventHandler<HTMLButtonElement> | undefined;
+    onFocus?: React.FocusEventHandler<HTMLButtonElement> | undefined;
+    onFocusCapture?: React.FocusEventHandler<HTMLButtonElement> | undefined;
+    onBlur?: React.FocusEventHandler<HTMLButtonElement> | undefined;
+    onBlurCapture?: React.FocusEventHandler<HTMLButtonElement> | undefined;
+    onChange?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onChangeCapture?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onBeforeInput?: React.InputEventHandler<HTMLButtonElement> | undefined;
+    onBeforeInputCapture?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onInput?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onInputCapture?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onReset?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onResetCapture?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onSubmit?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onSubmitCapture?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onInvalid?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onInvalidCapture?: React.FormEventHandler<HTMLButtonElement> | undefined;
+    onLoad?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onError?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onErrorCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onKeyDown?: React.KeyboardEventHandler<HTMLButtonElement> | undefined;
+    onKeyDownCapture?: React.KeyboardEventHandler<HTMLButtonElement> | undefined;
+    onKeyPress?: React.KeyboardEventHandler<HTMLButtonElement> | undefined;
+    onKeyPressCapture?: React.KeyboardEventHandler<HTMLButtonElement> | undefined;
+    onKeyUp?: React.KeyboardEventHandler<HTMLButtonElement> | undefined;
+    onKeyUpCapture?: React.KeyboardEventHandler<HTMLButtonElement> | undefined;
+    onAbort?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onAbortCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onCanPlay?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onCanPlayCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onCanPlayThrough?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onCanPlayThroughCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onDurationChange?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onDurationChangeCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onEmptied?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onEmptiedCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onEncrypted?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onEncryptedCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onEnded?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onEndedCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadedData?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadedDataCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadedMetadata?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadedMetadataCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadStart?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onLoadStartCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onPause?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onPauseCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onPlay?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onPlayCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onPlaying?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onPlayingCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onProgress?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onProgressCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onRateChange?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onRateChangeCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSeeked?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSeekedCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSeeking?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSeekingCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onStalled?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onStalledCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSuspend?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSuspendCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onTimeUpdate?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onTimeUpdateCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onVolumeChange?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onVolumeChangeCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onWaiting?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onWaitingCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onAuxClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onAuxClickCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onClickCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onContextMenu?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onContextMenuCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onDoubleClick?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onDoubleClickCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onDrag?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragEnd?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragEndCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragEnter?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragEnterCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragExit?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragExitCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragLeave?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragLeaveCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragOver?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragOverCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragStart?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDragStartCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDrop?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onDropCapture?: React.DragEventHandler<HTMLButtonElement> | undefined;
+    onMouseDown?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseDownCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseEnter?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseLeave?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseMove?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseMoveCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseOut?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseOutCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseOver?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseOverCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseUp?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onMouseUpCapture?: React.MouseEventHandler<HTMLButtonElement> | undefined;
+    onSelect?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onSelectCapture?: React.ReactEventHandler<HTMLButtonElement> | undefined;
+    onTouchCancel?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchCancelCapture?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchEnd?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchEndCapture?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchMove?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchMoveCapture?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchStart?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onTouchStartCapture?: React.TouchEventHandler<HTMLButtonElement> | undefined;
+    onPointerDown?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerDownCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerMove?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerMoveCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerUp?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerUpCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerCancel?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerCancelCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerEnter?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerLeave?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerOver?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerOverCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerOut?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onPointerOutCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onGotPointerCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onGotPointerCaptureCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onLostPointerCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onLostPointerCaptureCapture?: React.PointerEventHandler<HTMLButtonElement> | undefined;
+    onScroll?: React.UIEventHandler<HTMLButtonElement> | undefined;
+    onScrollCapture?: React.UIEventHandler<HTMLButtonElement> | undefined;
+    onWheel?: React.WheelEventHandler<HTMLButtonElement> | undefined;
+    onWheelCapture?: React.WheelEventHandler<HTMLButtonElement> | undefined;
+    onAnimationStart?: React.AnimationEventHandler<HTMLButtonElement> | undefined;
+    onAnimationStartCapture?: React.AnimationEventHandler<HTMLButtonElement> | undefined;
+    onAnimationEnd?: React.AnimationEventHandler<HTMLButtonElement> | undefined;
+    onAnimationEndCapture?: React.AnimationEventHandler<HTMLButtonElement> | undefined;
+    onAnimationIteration?: React.AnimationEventHandler<HTMLButtonElement> | undefined;
+    onAnimationIterationCapture?: React.AnimationEventHandler<HTMLButtonElement> | undefined;
+    onTransitionEnd?: React.TransitionEventHandler<HTMLButtonElement> | undefined;
+    onTransitionEndCapture?: React.TransitionEventHandler<HTMLButtonElement> | undefined;
+    form?: string | undefined | undefined;
+    disabled?: boolean | undefined | undefined;
+    formAction?: string | undefined;
+    formEncType?: string | undefined | undefined;
+    formMethod?: string | undefined | undefined;
+    formNoValidate?: boolean | undefined | undefined;
+    formTarget?: string | undefined | undefined;
+    name?: string | undefined | undefined;
+    value?: string | number | readonly string[] | undefined;
+} & {
+    variant?: VariantProps<(props?: ({
+        variant?: "outline" | "ghost" | "primary" | "secondary" | "destructive" | null | undefined;
+        size?: "sm" | "md" | "lg" | null | undefined;
+        iconOnly?: boolean | null | undefined;
+    } & class_variance_authority_types.ClassProp) | undefined) => string>["variant"];
+    size?: VariantProps<(props?: ({
+        variant?: "outline" | "ghost" | "primary" | "secondary" | "destructive" | null | undefined;
+        size?: "sm" | "md" | "lg" | null | undefined;
+        iconOnly?: boolean | null | undefined;
+    } & class_variance_authority_types.ClassProp) | undefined) => string>["size"];
+    left?: React.ReactNode;
+    right?: React.ReactNode;
+    iconOnly?: boolean;
+    ariaLabel?: string;
+    loading?: boolean;
+    className?: string;
+    children?: React.ReactNode;
+    href?: string;
+    label?: string;
+    type?: "button" | "submit" | "reset";
+} & React.RefAttributes<HTMLButtonElement>>;
 
 declare const cardVariants: (props?: ({
     variant?: "transparent" | "surface-1" | "surface-2" | "outlined" | null | undefined;
@@ -319,7 +1109,7 @@ declare const Grid: (<T>(props: GridProps<T> & React.RefAttributes<HTMLElement>)
 
 /** Display string for a width/height ratio (e.g. 16/9 → `16:9`), same idea as PillGroup `{count}`. */
 declare function formatAspectRatioLabel(ratio: number): string;
-interface AspectRatioProps extends Omit<React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>, "ratio"> {
+interface AspectRatioProps extends React.HTMLAttributes<HTMLDivElement> {
     className?: string;
     /** Width ÷ height. Coerced if passed as string from forms. */
     ratio?: number | string;
@@ -339,6 +1129,674 @@ declare namespace ResizableHandle {
     var displayName: string;
 }
 
+interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    /** Primary control label or node. */
+    trigger: React.ReactNode;
+    children: React.ReactNode;
+    disabled?: boolean;
+    /** Optional footer below the collapsible region. */
+    footer?: React.ReactNode;
+    /** Top border above revealed content. */
+    showContentDivider?: boolean;
+    className?: string;
+}
+declare function Collapsible({ open: controlledOpen, defaultOpen, onOpenChange, trigger, children, disabled, footer, showContentDivider, className, ...props }: CollapsibleProps): react_jsx_runtime.JSX.Element;
+declare namespace Collapsible {
+    var displayName: string;
+}
+
+interface AccordionItem {
+    value: string;
+    label: React.ReactNode;
+    content: React.ReactNode;
+    left?: React.ReactNode;
+    disabled?: boolean;
+    loading?: boolean;
+}
+interface AccordionProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "onChange"> {
+    items: AccordionItem[];
+    type?: "single" | "multiple";
+    /** Selected panel value(s). */
+    value?: string | string[];
+    defaultValue?: string | string[];
+    onChange?: (next: string | string[]) => void;
+    className?: string;
+}
+declare function Accordion({ items, type, value, defaultValue, onChange, className, ...props }: AccordionProps): react_jsx_runtime.JSX.Element;
+declare namespace Accordion {
+    var displayName: string;
+}
+
+interface ResizeContainerProps extends React.HTMLAttributes<HTMLDivElement> {
+    direction?: "horizontal" | "vertical" | "both";
+    minScale?: number;
+    maxScale?: number;
+    defaultScale?: number;
+    scale?: number;
+    onScaleChange?: (scale: number) => void;
+    fit?: "contain" | "cover" | "fill";
+    showControls?: boolean;
+    disabled?: boolean;
+    maxWidth?: string | number;
+    maxHeight?: string | number;
+    containerProps?: React.HTMLAttributes<HTMLDivElement>;
+    contentProps?: React.HTMLAttributes<HTMLDivElement>;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function ResizeContainer({ direction: _direction, minScale, maxScale, defaultScale, scale: scaleProp, onScaleChange, fit, showControls, disabled, maxWidth, maxHeight, containerProps, contentProps, children, className, ...rest }: ResizeContainerProps): react_jsx_runtime.JSX.Element;
+declare namespace ResizeContainer {
+    var displayName: string;
+}
+
+interface BreadcrumbItem {
+    label: React.ReactNode;
+    href?: string;
+    /** Marks the current page (renders as Text, not a link). */
+    current?: boolean;
+}
+interface BreadcrumbProps extends Omit<React.ComponentPropsWithoutRef<"nav">, "children"> {
+    items: BreadcrumbItem[];
+    /** Shown between items; default chevron. */
+    separator?: React.ReactNode;
+    /** Collapse middle segments when items.length exceeds this (keeps first + last). */
+    maxItems?: number;
+    className?: string;
+}
+declare const Breadcrumb: React.ForwardRefExoticComponent<BreadcrumbProps & React.RefAttributes<HTMLElement>>;
+
+declare const sidebarVariants: (props?: ({
+    variant?: "default" | "inset" | "floating" | null | undefined;
+    side?: "left" | "right" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type SidebarItem = {
+    label: React.ReactNode;
+    value?: string;
+    href?: string;
+    left?: React.ReactNode;
+    badge?: React.ReactNode;
+    disabled?: boolean;
+    children?: SidebarItem[];
+};
+interface SidebarProps extends Omit<React.HTMLAttributes<HTMLElement>, "children" | "onChange">, VariantProps<typeof sidebarVariants> {
+    items: SidebarItem[];
+    value?: string;
+    defaultValue?: string;
+    onChange?: (value: string) => void;
+    collapsible?: boolean;
+    defaultCollapsed?: boolean;
+    collapsed?: boolean;
+    onCollapsedChange?: (collapsed: boolean) => void;
+    container?: "screen" | "parent";
+    heightMode?: "viewport" | "parent" | "content";
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+    children?: React.ReactNode;
+    width?: string | number;
+    collapsedWidth?: string | number;
+    toggleButtonProps?: Partial<ButtonProps>;
+    itemProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+    className?: string;
+}
+declare function Sidebar({ items, value, defaultValue, onChange, side, variant, collapsible, defaultCollapsed, collapsed: collapsedProp, onCollapsedChange, container, heightMode, header, footer, children, width, collapsedWidth, toggleButtonProps, itemProps, className, ...rest }: SidebarProps): react_jsx_runtime.JSX.Element;
+declare namespace Sidebar {
+    var displayName: string;
+}
+
+type NavMenuItem = {
+    label: React.ReactNode;
+    value?: string;
+    href?: string;
+    left?: React.ReactNode;
+    description?: React.ReactNode;
+    disabled?: boolean;
+    children?: NavMenuItem[];
+};
+interface NavigationMenuProps extends Omit<React.HTMLAttributes<HTMLElement>, "children" | "onChange"> {
+    items: NavMenuItem[];
+    value?: string;
+    defaultValue?: string;
+    onChange?: (value: string) => void;
+    orientation?: "horizontal" | "vertical";
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function NavigationMenu({ items, value, defaultValue, onChange, orientation, children, className, ...rest }: NavigationMenuProps): react_jsx_runtime.JSX.Element;
+declare namespace NavigationMenu {
+    var displayName: string;
+}
+
+type MenubarMenu = {
+    label: React.ReactNode;
+    value?: string;
+    items: DropdownItem[];
+};
+interface MenubarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+    menus: MenubarMenu[];
+    value?: string;
+    defaultValue?: string;
+    onChange?: (value: string) => void;
+    className?: string;
+}
+declare function Menubar({ menus, value, defaultValue, onChange, className, ...rest }: MenubarProps): react_jsx_runtime.JSX.Element;
+declare namespace Menubar {
+    var displayName: string;
+}
+
+interface ContextMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    items: DropdownItem[];
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    children: React.ReactNode;
+    className?: string;
+    contentClassName?: string;
+}
+declare function ContextMenu({ items, open: openProp, defaultOpen, onOpenChange, children, className, contentClassName, ...rest }: ContextMenuProps): react_jsx_runtime.JSX.Element;
+declare namespace ContextMenu {
+    var displayName: string;
+}
+
+declare const linkVariants: (props?: ({
+    variant?: "default" | "muted" | "underline" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface LinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "children">, VariantProps<typeof linkVariants> {
+    href: string;
+    className?: string;
+    children?: React.ReactNode;
+}
+declare const Link: React.ForwardRefExoticComponent<LinkProps & React.RefAttributes<HTMLAnchorElement>>;
+
+declare const navbarVariants: (props?: ({
+    variant?: "default" | "floating" | "bordered" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type NavItem = {
+    label: React.ReactNode;
+    href?: string;
+    left?: React.ReactNode;
+    active?: boolean;
+    disabled?: boolean;
+    children?: NavItem[];
+};
+interface NavbarProps extends Omit<React.HTMLAttributes<HTMLElement>, "children">, VariantProps<typeof navbarVariants> {
+    logo?: React.ReactNode;
+    items?: NavItem[];
+    left?: React.ReactNode;
+    right?: React.ReactNode;
+    sticky?: boolean;
+    separator?: boolean;
+    children?: React.ReactNode;
+    /** Passed to top-level nav links (not submenus). */
+    linkVariant?: React.ComponentProps<typeof Link>["variant"];
+}
+declare function Navbar({ logo, items, left, right, sticky, separator, variant, className, children, linkVariant, ...rest }: NavbarProps): react_jsx_runtime.JSX.Element;
+declare namespace Navbar {
+    var displayName: string;
+}
+
+interface PaginationProps extends Omit<React.ComponentPropsWithoutRef<"nav">, "children" | "onChange"> {
+    /** Total number of records (not pages). */
+    total: number;
+    pageSize?: number;
+    /** 1-based current page. */
+    value?: number;
+    defaultValue?: number;
+    onChange?: (page: number) => void;
+    /** Precomputed page count; if omitted, derived from total / pageSize. */
+    pageCount?: number;
+    siblingCount?: number;
+    showFirstLast?: boolean;
+    disabled?: boolean;
+    className?: string;
+}
+declare const Pagination: React.ForwardRefExoticComponent<PaginationProps & React.RefAttributes<HTMLElement>>;
+
+type StepStatus = "complete" | "current" | "upcoming" | "error";
+interface StepItem {
+    label: React.ReactNode;
+    description?: React.ReactNode;
+    optional?: boolean;
+    status?: StepStatus;
+}
+interface StepperProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+    steps: StepItem[];
+    value?: number;
+    defaultValue?: number;
+    onChange?: (step: number) => void;
+    orientation?: "horizontal" | "vertical";
+    allowBack?: boolean;
+    /**
+     * Horizontal layout only: space between equal-width step columns.
+     * - `none` — no gutter; columns still share width equally (`flex-1`).
+     * - `md` — even gap between columns (`gap-4`).
+     */
+    horizontalGap?: "none" | "md";
+}
+declare const Stepper: React.ForwardRefExoticComponent<StepperProps & React.RefAttributes<HTMLDivElement>>;
+
+declare const tabsListVariants: (props?: ({
+    variant?: "default" | "underline" | "pill" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface TabItem {
+    label: React.ReactNode;
+    value: string;
+    left?: React.ReactNode;
+    badge?: React.ReactNode;
+    disabled?: boolean;
+    /** Panel body (`ReactNode` only — compose `Icon` or other nodes yourself). */
+    content?: React.ReactNode;
+}
+interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "onChange"> {
+    items: TabItem[];
+    value?: string;
+    defaultValue?: string;
+    onValueChange?: (value: string) => void;
+    orientation?: "horizontal" | "vertical";
+    variant?: VariantProps<typeof tabsListVariants>["variant"];
+    className?: string;
+    listClassName?: string;
+}
+declare const Tabs: React.ForwardRefExoticComponent<TabsProps & React.RefAttributes<HTMLDivElement>>;
+
+declare const feedbackVariantOptions: {
+    readonly tone: {
+        readonly neutral: "";
+        readonly info: "";
+        readonly success: "";
+        readonly warning: "";
+        readonly danger: "";
+    };
+    readonly variant: {
+        readonly solid: "";
+        readonly subtle: "bg-muted/40";
+        readonly outline: "bg-background";
+    };
+};
+type FeedbackTone = keyof typeof feedbackVariantOptions.tone;
+type FeedbackVariant = keyof typeof feedbackVariantOptions.variant;
+type FeedbackSurfaceVariantProps = {
+    tone?: FeedbackTone;
+    variant?: FeedbackVariant;
+};
+
+declare const alertVariants: (props?: ({
+    readonly tone?: "danger" | "info" | "neutral" | "success" | "warning" | null | undefined;
+    readonly variant?: "subtle" | "outline" | "solid" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface AlertProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, FeedbackSurfaceVariantProps {
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    left?: React.ReactNode;
+    action?: React.ReactNode;
+    dismissible?: boolean;
+    /** Called after the alert is dismissed (including via the close control). */
+    onClose?: () => void;
+    className?: string;
+    children?: React.ReactNode;
+}
+declare const Alert: React.ForwardRefExoticComponent<AlertProps & React.RefAttributes<HTMLDivElement>>;
+
+declare const toastVariants: (props?: ({
+    readonly tone?: "danger" | "info" | "neutral" | "success" | "warning" | null | undefined;
+    readonly variant?: "subtle" | "outline" | "solid" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type ToastTone = NonNullable<FeedbackSurfaceVariantProps["tone"]>;
+type ToastVariant = NonNullable<FeedbackSurfaceVariantProps["variant"]>;
+type ToastAction = {
+    label: string;
+    onClick?: () => void;
+};
+interface ToastProps extends FeedbackSurfaceVariantProps {
+    id?: string;
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    duration?: number;
+    action?: ToastAction;
+    left?: React.ReactNode;
+    dismissible?: boolean;
+    onClose?: () => void;
+    className?: string;
+}
+declare function Toast({ tone, variant, title, description, action, left, dismissible, onClose, className, }: ToastProps): react_jsx_runtime.JSX.Element;
+declare namespace Toast {
+    var displayName: string;
+}
+
+declare function dismissToast(id: string): void;
+declare function toast(input: Omit<ToastProps, "id">): string;
+declare function clearToasts(): void;
+
+type ToasterPosition = "top-left" | "top-center" | "top-right" | "bottom-left" | "bottom-center" | "bottom-right";
+interface ToasterProps {
+    position?: ToasterPosition;
+    maxVisible?: number;
+    className?: string;
+}
+declare function Toaster({ position, maxVisible, className }: ToasterProps): React.ReactPortal | null;
+declare namespace Toaster {
+    var displayName: string;
+}
+
+type SpinnerSize = "xs" | "sm" | "md" | "lg";
+interface SpinnerProps extends Omit<React.SVGProps<SVGSVGElement>, "children"> {
+    size?: SpinnerSize;
+    className?: string;
+    label?: string;
+}
+declare const Spinner: React.ForwardRefExoticComponent<Omit<SpinnerProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
+
+declare const overlayVariants: (props?: ({
+    blur?: boolean | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+/** Portal mount target for `Overlay`: viewport body, scoped parent from `OverlayPortalScope`, a DOM node, or a ref to one. */
+type OverlayPortalContainer = "body" | "parent" | HTMLElement | React.RefObject<HTMLElement | null>;
+interface OverlayProps extends VariantProps<typeof overlayVariants> {
+    open?: boolean;
+    onClose?: () => void;
+    /**
+     * Portal target. Positioning is `fixed` when the resolved node is `document.body`, otherwise `absolute`.
+     */
+    container?: OverlayPortalContainer | null;
+    /** Renders a corner close control (calls `onClose`). */
+    showCloseButton?: boolean;
+    /** When false, backdrop clicks do not call `onClose` (close button still works if shown). */
+    closeOnBackdropClick?: boolean;
+    className?: string;
+    children?: React.ReactNode;
+}
+/**
+ * Wrap a region where `Overlay` with `container="parent"` should mount (creates a positioned, isolated stacking context).
+ */
+declare function OverlayPortalScope({ children, className, }: {
+    children: React.ReactNode;
+    className?: string;
+}): react_jsx_runtime.JSX.Element;
+declare function Overlay({ open, onClose, container, blur, showCloseButton, closeOnBackdropClick, className, children, }: OverlayProps): React.ReactPortal | null;
+declare namespace Overlay {
+    var displayName: string;
+}
+
+interface LoadingOverlayProps {
+    open: boolean;
+    message?: React.ReactNode;
+    blur?: boolean;
+    className?: string;
+    container?: OverlayProps["container"];
+    /** Spinner size; defaults scale with typical overlay use. */
+    spinnerSize?: React.ComponentProps<typeof Spinner>["size"];
+}
+declare function LoadingOverlay({ open, message, blur, className, container, spinnerSize, }: LoadingOverlayProps): react_jsx_runtime.JSX.Element;
+declare namespace LoadingOverlay {
+    var displayName: string;
+}
+
+declare const emptyStateVariants: (props?: ({
+    variant?: "default" | "error" | "minimal" | "spacious" | null | undefined;
+    size?: "sm" | "md" | "lg" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface EmptyStateAction {
+    label: string;
+    onClick?: () => void;
+    loading?: boolean;
+    disabled?: boolean;
+    variant?: React.ComponentProps<typeof Button>["variant"];
+}
+interface EmptyStateProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, VariantProps<typeof emptyStateVariants> {
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    icon?: React.ReactNode;
+    action?: EmptyStateAction;
+    className?: string;
+}
+declare const EmptyState: React.ForwardRefExoticComponent<EmptyStateProps & React.RefAttributes<HTMLDivElement>>;
+
+declare const pageHeaderVariants: (props?: ({
+    variant?: "default" | "bordered" | "minimal" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface PageHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, VariantProps<typeof pageHeaderVariants> {
+    heading?: React.ReactNode;
+    subheading?: React.ReactNode;
+    description?: React.ReactNode;
+    badge?: React.ReactNode;
+    actions?: React.ReactNode;
+    left?: React.ReactNode;
+    right?: React.ReactNode;
+    sticky?: boolean;
+    separator?: boolean;
+    className?: string;
+    children?: React.ReactNode;
+}
+declare function PageHeader({ heading, subheading, description, badge, actions, left, right, sticky, separator, variant, className, children, ...props }: PageHeaderProps): react_jsx_runtime.JSX.Element;
+declare namespace PageHeader {
+    var displayName: string;
+}
+
+declare const pageFooterVariants: (props?: ({
+    variant?: "default" | "minimal" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface PageFooterProps extends React.HTMLAttributes<HTMLElement>, VariantProps<typeof pageFooterVariants> {
+    left?: React.ReactNode;
+    right?: React.ReactNode;
+    sticky?: boolean;
+    separator?: boolean;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function PageFooter({ left, right, sticky, separator, variant, className, children, ...props }: PageFooterProps): react_jsx_runtime.JSX.Element;
+declare namespace PageFooter {
+    var displayName: string;
+}
+
+declare const heroVariants: (props?: ({
+    variant?: "default" | "split" | "centered" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type HeroActions = {
+    primary?: ButtonProps;
+    secondary?: ButtonProps;
+};
+interface HeroProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">, VariantProps<typeof heroVariants> {
+    title?: React.ReactNode;
+    description?: React.ReactNode;
+    image?: string;
+    badge?: React.ReactNode;
+    actions?: HeroActions;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function Hero({ title, description, image, badge, actions, variant, className, children, ...props }: HeroProps): react_jsx_runtime.JSX.Element;
+declare namespace Hero {
+    var displayName: string;
+}
+
+interface AuthLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
+    title?: React.ReactNode;
+    subtitle?: React.ReactNode;
+    logo?: React.ReactNode;
+    footer?: React.ReactNode;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function AuthLayout({ title, subtitle, logo, footer, children, className, ...props }: AuthLayoutProps): react_jsx_runtime.JSX.Element;
+declare namespace AuthLayout {
+    var displayName: string;
+}
+
+interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
+    sidebar?: React.ReactNode;
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function AppShell({ sidebar, header, footer, children, className, ...props }: AppShellProps): react_jsx_runtime.JSX.Element;
+declare namespace AppShell {
+    var displayName: string;
+}
+
+interface HistoryControlButtonsProps extends React.HTMLAttributes<HTMLDivElement> {
+    canUndo?: boolean;
+    canRedo?: boolean;
+    canReset?: boolean;
+    onUndo?: () => void;
+    onRedo?: () => void;
+    onReset?: () => void;
+    /** When false, hides the undo control (e.g. reset-only toolbar). Default true. */
+    showUndo?: boolean;
+    /** When false, hides the redo control. Default true. */
+    showRedo?: boolean;
+    showLabels?: boolean;
+    undoButtonProps?: Partial<ButtonProps>;
+    redoButtonProps?: Partial<ButtonProps>;
+    resetButtonProps?: Partial<ButtonProps>;
+    className?: string;
+}
+declare function HistoryControlButtons({ canUndo, canRedo, canReset, onUndo, onRedo, onReset, showUndo, showRedo, showLabels, undoButtonProps, redoButtonProps, resetButtonProps, className, ...rest }: HistoryControlButtonsProps): react_jsx_runtime.JSX.Element;
+declare namespace HistoryControlButtons {
+    var displayName: string;
+}
+
+declare const positionVariants: (props?: ({
+    position?: "top-right" | "bottom-right" | "bottom-left" | "top-left" | "left-center" | "right-center" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+declare const slideVariants: (props?: ({
+    slideFrom?: "left" | "right" | "top" | "bottom" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type FixedScreenWidgetPosition = NonNullable<VariantProps<typeof positionVariants>["position"]>;
+type FixedScreenWidgetSlideFrom = NonNullable<VariantProps<typeof slideVariants>["slideFrom"]>;
+interface FixedScreenWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    position?: FixedScreenWidgetPosition;
+    slideFrom?: FixedScreenWidgetSlideFrom;
+    trigger?: React.ReactNode;
+    triggerProps?: Partial<ButtonProps>;
+    panelProps?: Partial<CardProps>;
+    offsetX?: number;
+    offsetY?: number;
+    pointerEvents?: "none" | "auto";
+    closeOnOutsideClick?: boolean;
+    closeOnEscape?: boolean;
+    children?: React.ReactNode;
+    className?: string;
+}
+declare function FixedScreenWidget({ open: openProp, defaultOpen, onOpenChange, position, slideFrom, trigger, triggerProps, panelProps, offsetX, offsetY, pointerEvents, closeOnOutsideClick, closeOnEscape, children, className, ...rest }: FixedScreenWidgetProps): react_jsx_runtime.JSX.Element;
+declare namespace FixedScreenWidget {
+    var displayName: string;
+}
+
+declare const modalSurfaceVariants: (props?: ({
+    size?: "sm" | "md" | "lg" | "xl" | "full" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type ModalSize = NonNullable<VariantProps<typeof modalSurfaceVariants>["size"]>;
+type ModalTriggerProps = {
+    label?: string;
+    left?: React.ReactNode;
+    variant?: ButtonProps["variant"];
+    size?: ButtonProps["size"];
+    className?: string;
+};
+interface ModalProps extends VariantProps<typeof modalSurfaceVariants> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    onClose?: () => void;
+    triggerProps?: ModalTriggerProps;
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+    showClose?: boolean;
+    loading?: boolean;
+    minHeight?: string | number;
+    maxHeight?: string | number;
+    className?: string;
+    cardProps?: Omit<CardProps, "header" | "footer" | "children" | "minHeight" | "maxHeight">;
+    /** Portal target for the backdrop — use `parent` inside `OverlayPortalScope` for scoped previews. */
+    container?: OverlayPortalContainer;
+    children?: React.ReactNode;
+}
+declare const Modal: React.ForwardRefExoticComponent<ModalProps & React.RefAttributes<HTMLDivElement>>;
+
+type TriggerModalProps = ModalProps & {
+    triggerProps?: ModalTriggerProps;
+};
+/** Modal with an optional trigger button — base for ConfirmModal and FormModal. */
+declare function TriggerModal({ triggerProps, showClose, ...modalProps }: TriggerModalProps): react_jsx_runtime.JSX.Element;
+declare namespace TriggerModal {
+    var displayName: string;
+}
+
+type ConfirmModalIntent = "default" | "destructive" | "delete" | "save" | "warning";
+type ConfirmModalConfirmProps = {
+    label: string;
+    onClick?: () => void;
+    loading?: boolean;
+};
+type ConfirmModalCancelProps = {
+    label: string;
+    onClick?: () => void;
+};
+interface ConfirmModalProps extends Omit<TriggerModalProps, "header" | "footer" | "children" | "triggerProps"> {
+    triggerProps?: ModalTriggerProps;
+    heading: React.ReactNode;
+    description?: React.ReactNode;
+    left?: React.ReactNode;
+    intent?: ConfirmModalIntent;
+    confirmProps: ConfirmModalConfirmProps;
+    cancelProps?: ConfirmModalCancelProps;
+    loading?: boolean;
+    container?: OverlayPortalContainer;
+    triggerModalProps?: Partial<TriggerModalProps>;
+    className?: string;
+}
+declare function ConfirmModal({ open: openProp, defaultOpen, onOpenChange, triggerProps, heading, description, left, intent, confirmProps, cancelProps, loading, container, triggerModalProps, className, size, ...rest }: ConfirmModalProps): react_jsx_runtime.JSX.Element;
+declare namespace ConfirmModal {
+    var displayName: string;
+}
+
+type FormModalMode = "create" | "edit";
+type FormFieldSchema = {
+    name: string;
+    type?: FormFieldType;
+    label?: string;
+    placeholder?: string;
+    required?: boolean;
+    disabled?: boolean;
+    validate?: boolean | ((value: string) => string | undefined);
+    errorMessage?: string;
+};
+interface FormModalProps extends Omit<TriggerModalProps, "header" | "footer" | "children" | "triggerProps"> {
+    triggerProps?: ModalTriggerProps;
+    heading: React.ReactNode;
+    subheading?: React.ReactNode;
+    left?: React.ReactNode;
+    mode?: FormModalMode;
+    fields?: FormFieldSchema[];
+    formProps?: Omit<FormProps, "children" | "onSubmit" | "onCancel" | "footer">;
+    onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
+    onSubmitSuccess?: (values: Record<string, unknown>) => void;
+    onSubmitError?: (error: unknown) => void;
+    submitLabel?: string;
+    submittingLabel?: string;
+    cancelLabel?: string;
+    loading?: boolean;
+    submitDisabled?: boolean;
+    onCancel?: () => void;
+    validateOnSubmit?: boolean;
+    container?: OverlayPortalContainer;
+    submitButtonProps?: Partial<ButtonProps>;
+    cancelButtonProps?: Partial<ButtonProps>;
+    triggerModalProps?: Partial<TriggerModalProps>;
+    className?: string;
+    children?: React.ReactNode;
+}
+declare function FormModal({ open: openProp, defaultOpen, onOpenChange, triggerProps, heading, subheading, left, mode, fields, formProps, onSubmit, onSubmitSuccess, onSubmitError, submitLabel, submittingLabel, cancelLabel, loading, submitDisabled, onCancel, validateOnSubmit, container, submitButtonProps, cancelButtonProps, triggerModalProps, className, children, size, ...rest }: FormModalProps): react_jsx_runtime.JSX.Element;
+declare namespace FormModal {
+    var displayName: string;
+}
+
 declare const textVariants: (props?: ({
     size?: "xs" | "sm" | "md" | "lg" | "xl" | "base" | "2xs" | "2xl" | null | undefined;
     variant?: "default" | "muted" | "code" | "subtle" | "danger" | "outline" | null | undefined;
@@ -355,27 +1813,8 @@ interface TextProps extends Omit<React.HTMLAttributes<HTMLElement>, "children">,
 }
 declare const Text: React.ForwardRefExoticComponent<TextProps & React.RefAttributes<HTMLElement>>;
 
-declare const linkVariants: (props?: ({
-    variant?: "default" | "muted" | "underline" | null | undefined;
-} & class_variance_authority_types.ClassProp) | undefined) => string;
-interface LinkProps extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "children">, VariantProps<typeof linkVariants> {
-    href: string;
-    external?: boolean;
-    className?: string;
-    children?: React.ReactNode;
-}
-declare const Link: React.ForwardRefExoticComponent<LinkProps & React.RefAttributes<HTMLAnchorElement>>;
-
-type SpinnerSize = "xs" | "sm" | "md" | "lg";
-interface SpinnerProps extends Omit<React.SVGProps<SVGSVGElement>, "children"> {
-    size?: SpinnerSize;
-    className?: string;
-    label?: string;
-}
-declare const Spinner: React.ForwardRefExoticComponent<Omit<SpinnerProps, "ref"> & React.RefAttributes<SVGSVGElement>>;
-
 declare const skeletonVariants: (props?: ({
-    variant?: "button" | "checkbox" | "radio" | "input" | "text" | "card" | "avatar" | "badge" | null | undefined;
+    variant?: "button" | "checkbox" | "radio" | "input" | "text" | "avatar" | "badge" | "card" | "tableCell" | "tableRow" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof skeletonVariants> {
     width?: string | number;
@@ -385,13 +1824,33 @@ interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement>, VariantPro
     children?: React.ReactNode;
 }
 declare const Skeleton: React.ForwardRefExoticComponent<SkeletonProps & React.RefAttributes<HTMLDivElement>>;
+interface TableSkeletonProps {
+    columns: number;
+    rows?: number;
+    selectable?: boolean;
+    size?: "sm" | "md" | "lg";
+    /** Optional per-column widths (px, rem, %, etc.). */
+    columnWidths?: Array<string | number | undefined>;
+    className?: string;
+}
+/** Column-aware table placeholder — matches Table cell rhythm. */
+declare function TableSkeleton({ columns, rows, selectable, size, columnWidths, className, }: TableSkeletonProps): react_jsx_runtime.JSX.Element;
+declare namespace TableSkeleton {
+    var displayName: string;
+}
 
 declare const pillSurfaceVariants: (props?: ({
     appearance?: "subtle" | "outline" | "ghost" | "solid" | null | undefined;
     size?: "sm" | "md" | null | undefined;
-    tone?: "danger" | "neutral" | "info" | "success" | "warning" | null | undefined;
+    tone?: "danger" | "info" | "neutral" | "success" | "warning" | null | undefined;
     shape?: "rounded" | "pill" | null | undefined;
     selected?: boolean | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+/** Button-like chip surfaces (same palette as the old action Toggle). */
+declare const toggleSurfaceVariants: (props?: ({
+    toggleSurface?: "outline" | "ghost" | "primary" | "secondary" | null | undefined;
+    size?: "sm" | "md" | null | undefined;
+    shape?: "rounded" | "pill" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface PillProps extends Omit<React.HTMLAttributes<HTMLElement>, "children">, VariantProps<typeof pillSurfaceVariants> {
     as?: "span" | "button";
@@ -407,6 +1866,10 @@ interface PillProps extends Omit<React.HTMLAttributes<HTMLElement>, "children">,
     dot?: boolean;
     selected?: boolean;
     disabled?: boolean;
+    /** Button-style surface (`primary` / `secondary` / `outline` / `ghost`); when set, overrides `appearance` + `tone` coloring. `""` ignored (e.g. props panel). */
+    toggleSurface?: VariantProps<typeof toggleSurfaceVariants>["toggleSurface"] | "";
+    /** Shows a spinner and disables interaction. */
+    loading?: boolean;
     children?: React.ReactNode;
 }
 declare const Pill: React.ForwardRefExoticComponent<PillProps & React.RefAttributes<HTMLElement>>;
@@ -431,19 +1894,34 @@ type Status = "online" | "offline" | "away" | "busy";
 interface AvatarProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof avatarVariants> {
     src?: string;
     alt?: string;
+    name?: string;
+    /** Fallback background — semantic token name or any CSS color. */
+    color?: string;
     fallback?: React.ReactNode;
     status?: Status;
 }
 declare const Avatar: React.ForwardRefExoticComponent<AvatarProps & React.RefAttributes<HTMLDivElement>>;
 
+interface AvatarGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    items: Omit<AvatarProps, "size">[];
+    max?: number;
+    size?: AvatarProps["size"];
+}
+declare function AvatarGroup({ items, max, size, className, ...rest }: AvatarGroupProps): react_jsx_runtime.JSX.Element;
+declare namespace AvatarGroup {
+    var displayName: string;
+}
+
 declare const progressVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
-interface ProgressProps extends Omit<React.ComponentPropsWithoutRef<typeof ProgressPrimitive.Root>, "value">, VariantProps<typeof progressVariants> {
-    value?: number;
+interface ProgressProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof progressVariants> {
+    /** Omit or pass `null` for unknown progress (same as `loading`). */
+    value?: number | null;
     max?: number;
     showLabel?: boolean;
-    indeterminate?: boolean;
+    /** Unknown completion (e.g. waiting on server). Same as `value={null}`. */
+    loading?: boolean;
 }
 declare const Progress: React.ForwardRefExoticComponent<ProgressProps & React.RefAttributes<HTMLDivElement>>;
 
@@ -459,13 +1937,17 @@ declare const KbdGroup: React.ForwardRefExoticComponent<KbdGroupProps & React.Re
 
 declare const imageVariants: (props?: ({
     variant?: "default" | "circle" | "square" | "rounded" | null | undefined;
-    fit?: "none" | "fill" | "contain" | "cover" | "scale-down" | null | undefined;
+    fit?: "fill" | "none" | "contain" | "cover" | "scale-down" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface ImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "placeholder">, VariantProps<typeof imageVariants> {
     fallback?: React.ReactNode;
     placeholder?: "blur" | "skeleton" | "none";
     loadingStrategy?: "lazy" | "eager";
     position?: string;
+    /**
+     * When true, shows a control to enter/exit native fullscreen on the image (wrapper element).
+     */
+    allowFullscreen?: boolean;
 }
 declare const Image: React.ForwardRefExoticComponent<ImageProps & React.RefAttributes<HTMLImageElement>>;
 
@@ -477,6 +1959,8 @@ interface PillItem {
     disabled?: boolean;
     left?: React.ReactNode;
     selected?: boolean;
+    dot?: boolean;
+    loading?: boolean;
 }
 declare const groupVariants: (props?: ({
     gap?: "sm" | "md" | "lg" | null | undefined;
@@ -496,10 +1980,17 @@ interface PillGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onC
     overflowLabel?: string;
     children?: React.ReactNode;
     size?: PillProps["size"];
-    /** Maps to Pill `appearance` (solid / subtle / outline / ghost). */
+    /** Maps to Pill `appearance` (solid / subtle / outline / ghost). Ignored when `toggleSurface` is set. */
     variant?: PillProps["appearance"];
+    /** Button-style surface for every pill (`primary` / `secondary` / `outline` / `ghost`). */
+    toggleSurface?: PillProps["toggleSurface"];
+    /** Disables all pills and shows a trailing spinner. */
+    loading?: boolean;
 }
-declare function PillGroup({ items, value, defaultValue, onChange, selectable, onSelect, multiple, removable, onRemove, maxVisible, overflowLabel, children, size, variant, gap, wrap, className, ...props }: PillGroupProps): react_jsx_runtime.JSX.Element;
+declare function PillGroup({ items, value, defaultValue, onChange, selectable, onSelect, multiple, removable, onRemove, maxVisible, overflowLabel, children, size, variant, toggleSurface, loading: groupLoading, gap, wrap, className, ...props }: PillGroupProps): react_jsx_runtime.JSX.Element;
+declare namespace PillGroup {
+    var displayName: string;
+}
 
 interface DescriptionItem {
     label: React.ReactNode;
@@ -530,6 +2021,13 @@ type ListSearchConfig = Omit<Partial<SearchInputProps>, "value" | "defaultValue"
     /** Replace built-in label/description/value matching. */
     filter?: (items: readonly ListItem[], query: string) => readonly ListItem[];
     defaultQuery?: string;
+    /** Controlled query (pairs with `onChange`). */
+    value?: string;
+    onChange?: (value: string) => void;
+    /** Fired when debounced query updates (after `onSearch`). */
+    onDebouncedChange?: (query: string) => void;
+    /** When false, search UI does not filter list items (e.g. filters external data). Default true. */
+    filterItems?: boolean;
 };
 type StackGap = NonNullable<VariantProps<typeof stackVariants>["gap"]>;
 type GridGap = NonNullable<VariantProps<typeof gridSpacingVariants>["gap"]>;
@@ -572,44 +2070,286 @@ interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children
 }
 declare const List: React.ForwardRefExoticComponent<ListProps & React.RefAttributes<HTMLDivElement>>;
 
+declare const tableVariants: (props?: ({
+    variant?: "default" | "bordered" | "striped" | null | undefined;
+    size?: "sm" | "md" | "lg" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type TableColumnAlign = "left" | "center" | "right";
+interface TableColumn<T> {
+    key: string;
+    /** Header cell content (any `ReactNode`; not passed through `Icon`). */
+    header: React.ReactNode;
+    /** Cell content; default renders `row[key]` as a `ReactNode`. */
+    render?: (row: T, rowIndex: number) => React.ReactNode;
+    sortable?: boolean;
+    width?: string | number;
+    align?: TableColumnAlign;
+    /** Pin column while scrolling horizontally. Set `width` on columns used in offset math; unknown widths are omitted (no default). */
+    sticky?: "left" | "right";
+}
+type SortDirection = "asc" | "desc";
+interface TableProps<T> extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">, VariantProps<typeof tableVariants> {
+    data: T[];
+    columns: TableColumn<T>[];
+    /** When true, column headers with `sortable` toggle sort. */
+    sortable?: boolean;
+    /** Uncontrolled default sort column key. */
+    defaultSortKey?: string;
+    defaultSortDirection?: SortDirection;
+    sortKey?: string;
+    sortDirection?: SortDirection;
+    onSortChange?: (key: string, direction: SortDirection) => void;
+    selectable?: boolean;
+    selectedRows?: Array<string | number>;
+    defaultSelectedRows?: Array<string | number>;
+    onSelectionChange?: (selected: Array<string | number>) => void;
+    getRowId?: (row: T, index: number) => string | number;
+    stickyHeader?: boolean;
+    onRowClick?: (row: T, index: number) => void;
+    loading?: boolean;
+    /** Skeleton row count when `loading` (defaults to data length or 5). */
+    loadingRows?: number;
+    emptyState?: React.ReactNode;
+    pagination?: PaginationProps;
+    /** Scroll container max height (number → px, or any CSS length). */
+    maxHeight?: string | number;
+}
+declare function Table<T>({ data, columns, sortable: tableSortable, defaultSortKey, defaultSortDirection, sortKey: sortKeyProp, sortDirection: sortDirectionProp, onSortChange, selectable, selectedRows: selectedRowsProp, defaultSelectedRows, onSelectionChange, getRowId, stickyHeader, onRowClick, loading, loadingRows, emptyState, pagination, maxHeight, variant, size, className, ...props }: TableProps<T>): react_jsx_runtime.JSX.Element;
+declare namespace Table {
+    var displayName: string;
+}
+
 interface VideoProps extends React.VideoHTMLAttributes<HTMLVideoElement> {
     src: string;
 }
 declare const Video: React.ForwardRefExoticComponent<VideoProps & React.RefAttributes<HTMLVideoElement>>;
 
-declare const overlayVariants: (props?: ({
-    blur?: boolean | null | undefined;
-} & class_variance_authority_types.ClassProp) | undefined) => string;
-interface OverlayProps extends VariantProps<typeof overlayVariants> {
-    open?: boolean;
-    onClose?: () => void;
-    container?: HTMLElement | null;
-    /** When false, uses absolute positioning so the overlay can be scoped to a positioned ancestor (e.g. previews). Default: true (fixed, viewport-relative). */
-    fixed?: boolean;
+type TreeMovePosition$1 = "before" | "after" | "inside";
+declare function deleteTreeNode(items: TreeItem[], id: string): TreeItem[];
+declare function addTreeNodeSibling(items: TreeItem[], targetId: string, node: TreeItem): TreeItem[];
+declare function addTreeNodeChild(items: TreeItem[], targetId: string, node: TreeItem): TreeItem[];
+declare function moveTreeNode(items: TreeItem[], draggedId: string, targetId: string, position: TreeMovePosition$1): TreeItem[];
+
+type TreeItemKind = "folder" | "file";
+type TreeItem = {
+    id: string;
+    label: React.ReactNode;
+    left?: React.ReactNode;
+    kind?: TreeItemKind;
+    children?: TreeItem[];
+};
+type TreeAddRelation = "sibling" | "child";
+type TreeMovePosition = "before" | "after" | "inside";
+interface TreeViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect"> {
+    items: TreeItem[];
+    selectedId?: string;
+    defaultSelectedId?: string;
+    onSelect?: (id: string) => void;
+    expandedIds?: string[];
+    defaultExpandedIds?: string[];
+    onExpandedChange?: (ids: string[]) => void;
+    showIndentGuides?: boolean;
+    loading?: boolean;
+    emptyState?: React.ReactNode;
+    indent?: number;
+    draggable?: boolean;
+    onMove?: (payload: {
+        draggedId: string;
+        targetId: string;
+        position: TreeMovePosition;
+    }) => void;
+    allowAddSibling?: boolean;
+    allowAddChild?: boolean;
+    allowDelete?: boolean;
+    onAdd?: (payload: {
+        targetId: string;
+        relation: TreeAddRelation;
+    }) => void;
+    onDelete?: (id: string) => void;
     className?: string;
+}
+declare function TreeView({ items, selectedId, defaultSelectedId, onSelect, expandedIds, defaultExpandedIds, onExpandedChange, showIndentGuides, loading, emptyState, indent, draggable, onMove, allowAddSibling, allowAddChild, allowDelete, onAdd, onDelete, className, ...rest }: TreeViewProps): react_jsx_runtime.JSX.Element;
+declare namespace TreeView {
+    var displayName: string;
+}
+
+type CarouselItem = {
+    image: string;
+    imageAlt?: string;
+    content?: React.ReactNode;
+};
+interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
+    items: CarouselItem[];
+    autoPlay?: boolean;
+    loop?: boolean;
+    interval?: number;
+    showIndicators?: boolean;
+    showArrows?: boolean;
+    orientation?: "horizontal" | "vertical";
+    className?: string;
+}
+declare function Carousel({ items, autoPlay, loop, interval, showIndicators, showArrows, orientation, className, ...rest }: CarouselProps): react_jsx_runtime.JSX.Element | null;
+declare namespace Carousel {
+    var displayName: string;
+}
+
+interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    code: string;
+    language?: string;
+    showLineNumbers?: boolean;
+    showCopy?: boolean;
+    filename?: string;
+}
+declare function CodeBlock({ code, language, showLineNumbers, showCopy, filename, className, ...rest }: CodeBlockProps): react_jsx_runtime.JSX.Element;
+declare namespace CodeBlock {
+    var displayName: string;
+}
+
+declare const alertDialogVariants: (props?: ({
+    variant?: "default" | "destructive" | "warning" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type AlertDialogConfirmProps = {
+    label: string;
+    onClick?: () => void;
+    loading?: boolean;
+};
+type AlertDialogCancelProps = {
+    label: string;
+    onClick?: () => void;
+};
+interface AlertDialogProps extends VariantProps<typeof alertDialogVariants> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    title: string;
+    description?: string;
+    confirmProps: AlertDialogConfirmProps;
+    cancelProps?: AlertDialogCancelProps;
+    loading?: boolean;
+    className?: string;
+    container?: OverlayPortalContainer;
+}
+declare function AlertDialog({ open: openProp, defaultOpen, onOpenChange, title, description, variant, confirmProps, cancelProps, loading, className, container, }: AlertDialogProps): react_jsx_runtime.JSX.Element;
+declare namespace AlertDialog {
+    var displayName: string;
+}
+
+declare const drawerVariants: (props?: ({
+    placement?: "left" | "right" | "top" | "bottom" | null | undefined;
+    size?: "sm" | "md" | "lg" | "xl" | "full" | null | undefined;
+    variant?: "default" | "sheet" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type DrawerPlacement = NonNullable<VariantProps<typeof drawerVariants>["placement"]>;
+type DrawerSize = NonNullable<VariantProps<typeof drawerVariants>["size"]>;
+type DrawerVariant = NonNullable<VariantProps<typeof drawerVariants>["variant"]>;
+interface DrawerProps extends VariantProps<typeof drawerVariants> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    showClose?: boolean;
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+    className?: string;
+    cardProps?: Omit<CardProps, "header" | "footer" | "children">;
+    container?: OverlayPortalContainer;
     children?: React.ReactNode;
 }
-declare function Overlay({ open, onClose, container, blur, fixed, className, children, }: OverlayProps): React.ReactPortal | null;
+declare const Drawer: React.ForwardRefExoticComponent<DrawerProps & React.RefAttributes<HTMLDivElement>>;
+
+type PopoverPlacement = "top" | "bottom" | "left" | "right";
+type PopoverTriggerProps = {
+    label?: React.ReactNode;
+    left?: React.ReactNode;
+    variant?: ButtonProps["variant"];
+    size?: ButtonProps["size"];
+    className?: string;
+};
+interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    triggerProps?: PopoverTriggerProps;
+    trigger?: React.ReactNode;
+    /** When false, trigger click does not toggle (e.g. HoverCard). */
+    openOnClick?: boolean;
+    closeOnOutsideClick?: boolean;
+    placement?: PopoverPlacement;
+    offset?: number;
+    className?: string;
+    cardProps?: Omit<CardProps, "children">;
+    children?: React.ReactNode;
+}
+declare function Popover({ open: openProp, defaultOpen, onOpenChange, triggerProps, trigger, openOnClick, closeOnOutsideClick, placement, offset, className, cardProps, children, ...rest }: PopoverProps): react_jsx_runtime.JSX.Element;
+declare namespace Popover {
+    var displayName: string;
+}
+
+type HoverCardTriggerProps = {
+    label?: React.ReactNode;
+    left?: React.ReactNode;
+    variant?: ButtonProps["variant"];
+    size?: ButtonProps["size"];
+    className?: string;
+};
+interface HoverCardProps extends Omit<PopoverProps, "triggerProps" | "trigger" | "closeOnOutsideClick"> {
+    triggerProps?: HoverCardTriggerProps;
+    trigger?: React.ReactNode;
+    openDelay?: number;
+    closeDelay?: number;
+    placement?: PopoverPlacement;
+}
+declare function HoverCard({ open: openProp, defaultOpen, onOpenChange, triggerProps, trigger, openDelay, closeDelay, placement, offset, className, cardProps, children, ...rest }: HoverCardProps): react_jsx_runtime.JSX.Element;
+declare namespace HoverCard {
+    var displayName: string;
+}
 
 declare const tooltipContentVariants: (props?: ({
     variant?: "default" | "inverted" | "info" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const tooltipArrowVariants: (props?: ({
-    variant?: "default" | "inverted" | "info" | null | undefined;
+    variant?: "default" | "inverted" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type TooltipPlacement = "top" | "bottom" | "left" | "right";
 interface TooltipProps {
     content: React.ReactNode;
-    openDelay?: number;
     disabled?: boolean;
     children: React.ReactNode;
     placement?: TooltipPlacement;
+    /** Opacity fade-in length (ms). */
+    transitionDuration?: number;
     className?: string;
     variant?: VariantProps<typeof tooltipContentVariants>["variant"];
+    /**
+     * When true, you can move onto the tooltip; close is deferred briefly so the pointer can cross the gap.
+     * When false, leaving the trigger closes immediately (`pointer-events-none` on the tooltip).
+     */
+    keepOpenOnContentHover?: boolean;
+    /**
+     * When true, try alternate sides so the tooltip stays inside the viewport (window edges).
+     */
+    autoPlacement?: boolean;
+    /** Extra horizontal offset (px) after placement. */
+    xOffset?: number;
+    /** Extra vertical offset (px) after placement. */
+    yOffset?: number;
+    /** Max width (`number` = px, or CSS length string). Omit for default (~20rem). */
+    maxWidth?: number | string;
+    /** When false, hides the placement arrow. */
+    showArrow?: boolean;
 }
-declare function Tooltip({ content, openDelay, disabled, children, placement, className, variant, }: TooltipProps): react_jsx_runtime.JSX.Element;
-declare const TooltipProvider: React.FC<TooltipPrimitive.TooltipProviderProps>;
-type TooltipProviderProps = React.ComponentProps<typeof TooltipPrimitive.Provider>;
+declare function Tooltip({ content, disabled, children, placement, transitionDuration, className, variant, keepOpenOnContentHover, autoPlacement, xOffset, yOffset, maxWidth, showArrow, }: TooltipProps): react_jsx_runtime.JSX.Element;
+declare namespace Tooltip {
+    var displayName: string;
+}
+declare function TooltipProvider({ children }: {
+    children?: React.ReactNode;
+}): react_jsx_runtime.JSX.Element;
+declare namespace TooltipProvider {
+    var displayName: string;
+}
+type TooltipProviderProps = {
+    children?: React.ReactNode;
+};
 
 interface VisuallyHiddenProps extends React.HTMLAttributes<HTMLSpanElement> {
 }
@@ -625,12 +2365,84 @@ interface ErrorBoundaryState {
     hasError: boolean;
 }
 declare class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+    static displayName: string;
     state: ErrorBoundaryState;
     static getDerivedStateFromError(): {
         hasError: boolean;
     };
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void;
     render(): string | number | boolean | Iterable<React.ReactNode> | react_jsx_runtime.JSX.Element | null | undefined;
+}
+
+type ChartDatum = Record<string, unknown>;
+
+type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "scatter";
+interface ChartProps extends React.SVGAttributes<SVGSVGElement> {
+    type: ChartType;
+    data: ChartDatum[];
+    xKey?: string;
+    yKey?: string;
+    valueKey?: string;
+    labelKey?: string;
+    responsive?: boolean;
+    legend?: boolean;
+    tooltip?: boolean;
+    grid?: boolean;
+    config?: Record<string, {
+        label?: string;
+        color?: string;
+    }>;
+    height?: number | string;
+    width?: number | string;
+    innerRadius?: number;
+    horizontal?: boolean;
+    stacked?: boolean;
+    area?: boolean;
+    showPoints?: boolean;
+    className?: string;
+}
+declare function Chart({ type, data, xKey, yKey, valueKey, labelKey, responsive, legend, grid, height, width, innerRadius, horizontal, area, showPoints, className, ...props }: ChartProps): react_jsx_runtime.JSX.Element;
+declare namespace Chart {
+    var displayName: string;
+}
+
+interface BarChartProps extends Omit<ChartProps, "type" | "data"> {
+    data: ChartDatum[];
+    xKey: string;
+    yKey: string;
+    stacked?: boolean;
+    horizontal?: boolean;
+}
+declare function BarChart({ data, xKey, yKey, stacked, horizontal, ...props }: BarChartProps): react_jsx_runtime.JSX.Element;
+declare namespace BarChart {
+    var displayName: string;
+}
+
+interface LineChartProps extends Omit<ChartProps, "type" | "data"> {
+    data: ChartDatum[];
+    xKey: string;
+    yKey: string;
+    curve?: "linear" | "monotone" | "step";
+    showPoints?: boolean;
+    area?: boolean;
+}
+declare function LineChart({ data, xKey, yKey, curve: _curve, showPoints, area, ...props }: LineChartProps): react_jsx_runtime.JSX.Element;
+declare namespace LineChart {
+    var displayName: string;
+}
+
+interface PieChartProps extends Omit<ChartProps, "type" | "data"> {
+    data: ChartDatum[];
+    valueKey: string;
+    labelKey?: string;
+    innerRadius?: number;
+    padAngle?: number;
+    startAngle?: number;
+    endAngle?: number;
+}
+declare function PieChart({ data, valueKey, labelKey, innerRadius, ...props }: PieChartProps): react_jsx_runtime.JSX.Element;
+declare namespace PieChart {
+    var displayName: string;
 }
 
 interface ThemeToggleProps {
@@ -660,29 +2472,66 @@ declare function useTheme(): {
     selectedThemes: ThemeSelection;
     updateTheme: (category: keyof ThemeSelection, themeId: string | undefined) => Promise<void>;
     resetToDefaults: () => Promise<void>;
+    applyPreset: (preset: Partial<ThemeSelection>) => Promise<void>;
     isLoading: boolean;
     error: string | null;
     getAvailableThemes: (category: string) => Promise<Record<string, ThemeMetadata$1>>;
 };
 
-declare function useThemeToggle(): {
+interface ThemePanelProps {
+    categories: Array<[string, {
+        name: string;
+        themes: Record<string, ThemeMetadata$1>;
+        order?: number;
+    }]>;
+    selectedThemes: ThemeSelection;
+    activeCategory: string;
+    onCategoryChange: (category: string) => void;
+    categoryThemes: Record<string, ThemeMetadata$1>;
+    themesLoading: boolean;
+    isApplying: boolean;
+    onThemeSelect: (category: keyof ThemeSelection, themeId: string) => void;
+    onResetAll: () => void;
+    onClose?: () => void;
+    /** When false, hides the header close control (inline / settings sections). Default true. */
+    showClose?: boolean;
+    className?: string;
+}
+declare function ThemePanel({ categories, selectedThemes, activeCategory, onCategoryChange, categoryThemes, themesLoading, isApplying, onThemeSelect, onResetAll, onClose, showClose, className, }: ThemePanelProps): react_jsx_runtime.JSX.Element;
+
+declare function useThemeToggle(options?: {
+    embedded?: boolean;
+}): {
     selectedThemes: ThemeSelection;
     isLoading: boolean;
-    getAvailableThemes: (category: string) => Promise<Record<string, ThemeMetadata$1>>;
     isOpen: boolean;
-    selectedCategory: string | null;
-    themeCategories: any;
+    activeCategory: string;
+    categoryThemes: Record<string, ThemeMetadata$1>;
+    themesLoading: boolean;
     categories: [string, {
         name: string;
         themes: Record<string, any>;
         order?: number;
     }][];
     menuRef: React.RefObject<HTMLDivElement>;
-    handleCategoryClick: (categoryKey: string) => void;
+    triggerRef: React.RefObject<HTMLButtonElement>;
+    setActiveCategory: React.Dispatch<React.SetStateAction<string>>;
     handleThemeSelect: (category: keyof ThemeSelection, themeId: string) => Promise<void>;
-    handleBack: () => void;
+    handleResetAll: () => Promise<void>;
     toggleMenu: () => void;
+    closeMenu: () => void;
 };
+
+type ThemePreset = Partial<ThemeSelection>;
+/**
+ * Merge a partial theme selection with defaults (or a base) and apply CSS variables.
+ * Persists to localStorage when `persist` is true (default).
+ */
+declare function applyPreset(preset: ThemePreset, options?: {
+    base?: ThemeSelection;
+    persist?: boolean;
+    storageKey?: string;
+}): Promise<ThemeSelection>;
 
 /**
  * Theme Configuration
@@ -790,4 +2639,4 @@ declare function getCurrentCSSVariables(): Record<string, string>;
  */
 declare function applyThemeSync(): void;
 
-export { AspectRatio, type AspectRatioProps, Avatar, type AvatarProps, Badge, type BadgeProps, Button, type ButtonProps, Card, type CardColor, type CardProps, type CardVariant, Checkbox, type CheckboxProps, type DescriptionItem, DescriptionList, type DescriptionListProps, ErrorBoundary, type ErrorBoundaryProps, FAB, type FABProps, FieldLayout, type FieldLayoutProps, type FieldSurfaceProps, Grid, type GridProps, type GridRootTag, HelperText, type HelperTextProps, Icon, type IconProps, Image, type ImageProps, InputOTP, type InputOTPProps, Kbd, KbdGroup, type KbdGroupProps, type KbdProps, Label, type LabelProps, Link, type LinkProps, List, type ListItem, type ListLayout, type ListProps, type ListSearchConfig, Overlay, type OverlayProps, Pill, PillGroup, type PillGroupProps, type PillItem, type PillProps, Progress, type ProgressProps, Radio, type RadioProps, Rating, type RatingPrecision, type RatingProps, ResizableHandle, type ResizableHandleProps, ResizablePanel, ResizablePanelGroup, SearchInput, type SearchInputProps, Separator, type SeparatorProps, Skeleton, type SkeletonProps, Slider, type SliderProps, Spinner, type SpinnerProps, type SpinnerSize, Stack, type StackProps, type StackRootTag, type StringFieldValidateOpts, Switch, type SwitchProps, THEME_CATEGORY_ORDER, Tag, type TagProps, type TagSurfaceVariant, Text, TextInput, type TextInputProps, type TextProps, Textarea, type TextareaProps, type ThemeMetadata$1 as ThemeMetadata, type ThemeSelection, ThemeToggle, type ThemeToggleProps, Tooltip, type TooltipPlacement, type TooltipProps, TooltipProvider, type TooltipProviderProps, Video, type VideoProps, VisuallyHidden, type VisuallyHiddenProps, applyThemeSync, pillSurfaceVariants as badgeVariants, buttonVariants, cardVariants, defaultListItemFilter, descriptionListVariants, disabledControl, enableDebugMode, fieldSurfaceVariants, focusRing, focusRingDestructive, focusRingOffset, formatAspectRatioLabel, getCurrentCSSVariables, getStringFieldValidationError, getTheme, getThemeCategories, getThemeFilePath, getThemesForCategory, gridSpacingVariants as gridVariants, iconVariants, linkVariants, overlayVariants, peerFocusRing, pillSurfaceVariants as pillVariants, ratingVariants, registerTheme, registerThemeFromFile, ringOffsetBackground, stackVariants, textVariants, tooltipArrowVariants, tooltipContentVariants, useTheme, useThemeToggle };
+export { Accordion, type AccordionItem, type AccordionProps, Alert, AlertDialog, type AlertDialogCancelProps, type AlertDialogConfirmProps, type AlertDialogProps, type AlertProps, AppShell, type AppShellProps, AspectRatio, type AspectRatioProps, AuthLayout, type AuthLayoutProps, Avatar, AvatarGroup, type AvatarGroupProps, type AvatarProps, Badge, type BadgeProps, BarChart, type BarChartProps, Breadcrumb, type BreadcrumbItem, type BreadcrumbProps, Button, type ButtonProps, Calendar, type CalendarProps, type CalendarSelectionMode, Card, type CardColor, type CardProps, type CardVariant, Carousel, type CarouselItem, type CarouselProps, Chart, type ChartProps, type ChartType, Checkbox, type CheckboxProps, CodeBlock, type CodeBlockProps, Collapsible, type CollapsibleProps, Command, type CommandItem, type CommandProps, ConfirmModal, type ConfirmModalCancelProps, type ConfirmModalConfirmProps, type ConfirmModalIntent, type ConfirmModalProps, ContextMenu, type ContextMenuProps, CopyButton, type CopyButtonProps, DatePicker, type DatePickerProps, type DatePreset, DateRangePicker, type DateRangePickerProps, type DescriptionItem, DescriptionList, type DescriptionListProps, Drawer, type DrawerPlacement, type DrawerProps, type DrawerSize, type DrawerVariant, Dropdown, type DropdownItem, type DropdownProps, EmptyState, type EmptyStateAction, type EmptyStateProps, ErrorBoundary, type ErrorBoundaryProps, FAB, type FABProps, FieldLayout, type FieldLayoutProps, type FieldSurfaceProps, FixedScreenWidget, type FixedScreenWidgetPosition, type FixedScreenWidgetProps, type FixedScreenWidgetSlideFrom, Form, FormField, type FormFieldProps, type FormFieldRenderProps, type FormFieldSchema, type FormFieldType, FormModal, type FormModalMode, type FormModalProps, type FormProps, type FormValues, Grid, type GridProps, type GridRootTag, HelperText, type HelperTextProps, Hero, type HeroActions, type HeroProps, HistoryControlButtons, type HistoryControlButtonsProps, HoverCard, type HoverCardProps, type HoverCardTriggerProps, Icon, type IconProps, Image, type ImageProps, InlineEdit, type InlineEditProps, InputGroup, InputGroupAddon, type InputGroupAddonProps, InputGroupButton, type InputGroupButtonProps, InputGroupInput, type InputGroupInputProps, type InputGroupProps, InputOTP, type InputOTPProps, Kbd, KbdGroup, type KbdGroupProps, type KbdProps, Label, type LabelProps, LineChart, type LineChartProps, Link, type LinkProps, List, type ListItem, type ListLayout, type ListProps, type ListSearchConfig, LoadingOverlay, type LoadingOverlayProps, Menubar, type MenubarMenu, type MenubarProps, Modal, type ModalProps, type ModalSize, type ModalTriggerProps, type NavItem, type NavMenuItem, Navbar, type NavbarProps, NavigationMenu, type NavigationMenuProps, Overlay, type OverlayPortalContainer, OverlayPortalScope, type OverlayProps, PageFooter, type PageFooterProps, PageHeader, type PageHeaderProps, Pagination, type PaginationProps, PhoneInput, type PhoneInputProps, type PhoneValue, PieChart, type PieChartProps, Pill, PillGroup, type PillGroupProps, type PillItem, type PillProps, Popover, type PopoverPlacement, type PopoverProps, type PopoverTriggerProps, Progress, type ProgressProps, Radio, RadioGroup, type RadioGroupItem, type RadioGroupProps, type RadioProps, Rating, type RatingPrecision, type RatingProps, ResizableHandle, type ResizableHandleProps, ResizablePanel, ResizablePanelGroup, ResizeContainer, type ResizeContainerProps, SearchInput, type SearchInputProps, Select, type SelectOption, type SelectProps, Separator, type SeparatorProps, Sidebar, type SidebarItem, type SidebarProps, Skeleton, type SkeletonProps, Slider, type SliderProps, type SortDirection, Spinner, type SpinnerProps, type SpinnerSize, SplitButton, type SplitButtonMenuItem, type SplitButtonProps, Stack, type StackProps, type StackRootTag, type StepItem, type StepStatus, Stepper, type StepperProps, type StringFieldValidateOpts, THEME_CATEGORY_ORDER, type TabItem, Table, type TableColumn, type TableColumnAlign, type TableProps, TableSkeleton, type TableSkeletonProps, Tabs, type TabsProps, Tag, type TagProps, type TagSurfaceVariant, Text, TextInput, type TextInputProps, type TextProps, Textarea, type TextareaProps, type ThemeMetadata$1 as ThemeMetadata, ThemePanel, type ThemePanelProps, type ThemePreset, type ThemeSelection, ThemeToggle, type ThemeToggleProps, TimePicker, type TimePickerProps, Toast, type ToastAction, type ToastProps, type ToastTone, type ToastVariant, Toaster, type ToasterPosition, type ToasterProps, Toggle, type ToggleProps, Tooltip, type TooltipPlacement, type TooltipProps, TooltipProvider, type TooltipProviderProps, type TreeAddRelation, type TreeItem, type TreeItemKind, type TreeMovePosition, TreeView, type TreeViewProps, TriggerModal, type TriggerModalProps, Upload, type UploadProps, Video, type VideoProps, VisuallyHidden, type VisuallyHiddenProps, addTreeNodeChild, addTreeNodeSibling, alertDialogVariants, alertVariants, applyPreset, applyThemeSync, pillSurfaceVariants as badgeVariants, buttonVariants, cardVariants, clearToasts, defaultListItemFilter, deleteTreeNode, descriptionListVariants, disabledControl, dismissToast, drawerVariants, emptyStateVariants, enableDebugMode, fieldSurfaceVariants, focusRing, focusRingDestructive, focusRingOffset, formatAspectRatioLabel, getCurrentCSSVariables, getPhoneDialCode, getStringFieldValidationError, getTheme, getThemeCategories, getThemeFilePath, getThemesForCategory, gridSpacingVariants as gridVariants, heroVariants, iconVariants, linkVariants, modalSurfaceVariants, moveTreeNode, navbarVariants, overlayVariants, pageFooterVariants, pageHeaderVariants, peerFocusRing, pillSurfaceVariants as pillVariants, ratingVariants, registerTheme, registerThemeFromFile, ringOffsetBackground, sidebarVariants, stackVariants, textVariants, toast, toastVariants, toggleThumbVariants, toggleVariants, tooltipArrowVariants, tooltipContentVariants, useFormContext, useTheme, useThemeToggle };

@@ -1,14 +1,38 @@
 {
   "_createdBy": "shru-design-system library",
+  "name": "Brand",
+  "icon": "🎯",
+  "description": "Purple primary with pink accent on a light surface",
   "color": {
     "primary": "{palette.purple.600}",
     "primary-foreground": "{palette.white}",
+    "background": "{palette.purple.50}",
+    "foreground": "{palette.gray.900}",
+    "card": "{palette.white}",
+    "card-foreground": "{palette.gray.900}",
+    "popover": "{palette.white}",
+    "popover-foreground": "{palette.gray.900}",
+    "secondary": "{palette.purple.100}",
+    "secondary-foreground": "{palette.purple.900}",
+    "muted": "{palette.purple.50}",
+    "muted-foreground": "{palette.purple.700}",
     "accent": "{palette.pink.500}",
-    "accent-foreground": "{palette.white}"
+    "accent-foreground": "{palette.white}",
+    "destructive": "{palette.red.600}",
+    "destructive-foreground": "{palette.white}",
+    "success": "{palette.green.700}",
+    "success-foreground": "{palette.white}",
+    "warning": "{palette.amber.600}",
+    "warning-foreground": "{palette.gray.900}",
+    "info": "{palette.sky.500}",
+    "info-foreground": "{palette.white}",
+    "border": "{palette.purple.200}",
+    "input": "{palette.purple.200}",
+    "ring": "{palette.purple.400}",
+    "skeleton": "{palette.purple.100}"
   },
   "radius": {
     "button": "0.5rem",
     "card": "0.75rem"
   }
 }
-

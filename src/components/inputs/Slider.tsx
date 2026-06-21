@@ -59,7 +59,7 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
     ref
   ) => {
     const normalizeValue = React.useCallback(
-      (nextValue: number | [number, number]) => {
+      (nextValue: number | [number, number]): number | [number, number] => {
         if (Array.isArray(nextValue)) return nextValue
         if (range) return [nextValue, nextValue] as [number, number]
         return nextValue
@@ -81,6 +81,9 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
         ? `${current[0]} - ${current[1]}`
         : current
 
+    const toRadix = (v: number | [number, number]): number[] =>
+      Array.isArray(v) ? [v[0], v[1]] : [v]
+
     return (
       <div className="w-full space-y-1.5">
         {(label || showValue) && (
@@ -95,12 +98,11 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
         )}
         <SliderPrimitive.Root
           ref={ref}
-          value={Array.isArray(current) ? current : [current]}
-          orientation={orientation}
+          value={toRadix(current)}
           onValueChange={(next) => {
             const nextValue = range
               ? ([next[0] ?? 0, next[1] ?? next[0] ?? 0] as [number, number])
-              : next[0] ?? 0
+              : (next[0] ?? 0)
             if (!isControlled) setInternalValue(nextValue)
             onChange?.(nextValue)
           }}

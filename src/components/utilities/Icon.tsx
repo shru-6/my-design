@@ -48,6 +48,14 @@ export interface IconProps
   fallback?: React.ReactNode
 }
 
+/** True when `node` should be ignored so `fallback` can be used (`??` alone misses `""` and whitespace). */
+function isEmptyIconNode(node: React.ReactNode): boolean {
+  if (node == null || node === false) return true
+  if (typeof node === "string") return node.trim().length === 0
+  if (Array.isArray(node)) return node.length === 0 || node.every(isEmptyIconNode)
+  return false
+}
+
 export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
   (
     {
@@ -64,8 +72,9 @@ export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
     },
     ref
   ) => {
-    const resolvedContent = node ?? fallback ?? null
-    if (!resolvedContent) return null
+    const resolvedContent = isEmptyIconNode(node) ? (fallback ?? null) : node
+    if (resolvedContent == null || resolvedContent === false) return null
+    if (typeof resolvedContent === "string" && resolvedContent.trim() === "") return null
 
     return (
       <span

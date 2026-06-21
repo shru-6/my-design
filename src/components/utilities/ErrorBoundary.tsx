@@ -14,6 +14,8 @@ interface ErrorBoundaryState {
 }
 
 export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
+  static displayName = "ErrorBoundary"
+
   state: ErrorBoundaryState = { hasError: false }
 
   static getDerivedStateFromError() {

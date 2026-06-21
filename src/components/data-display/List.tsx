@@ -52,6 +52,13 @@ export type ListSearchConfig = Omit<
   /** Replace built-in label/description/value matching. */
   filter?: (items: readonly ListItem[], query: string) => readonly ListItem[]
   defaultQuery?: string
+  /** Controlled query (pairs with `onChange`). */
+  value?: string
+  onChange?: (value: string) => void
+  /** Fired when debounced query updates (after `onSearch`). */
+  onDebouncedChange?: (query: string) => void
+  /** When false, search UI does not filter list items (e.g. filters external data). Default true. */
+  filterItems?: boolean
 }
 
 type StackGap = NonNullable<VariantProps<typeof stackVariants>["gap"]>
@@ -137,20 +144,42 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
   ) => {
     const searchEnabled = search != null && search !== false
     const searchOptions: ListSearchConfig = typeof search === "object" ? search : {}
-    const { filter: customFilter, defaultQuery, ...searchInputProps } = searchOptions
+    const {
+      filter: customFilter,
+      defaultQuery,
+      value: searchValueProp,
+      onChange: onSearchChangeProp,
+      onDebouncedChange,
+      filterItems = true,
+      ...searchInputProps
+    } = searchOptions
 
-    const [searchQuery, setSearchQuery] = React.useState(() => defaultQuery ?? "")
+    const isSearchControlled = searchValueProp !== undefined
+    const [internalSearchQuery, setInternalSearchQuery] = React.useState(() => defaultQuery ?? "")
+    const searchQuery = isSearchControlled ? searchValueProp : internalSearchQuery
+    const setSearchQuery = React.useCallback(
+      (next: string) => {
+        if (!isSearchControlled) setInternalSearchQuery(next)
+        onSearchChangeProp?.(next)
+      },
+      [isSearchControlled, onSearchChangeProp]
+    )
+
     const [debouncedQuery, setDebouncedQuery] = React.useState(() => defaultQuery ?? "")
+
+    React.useEffect(() => {
+      onDebouncedChange?.(debouncedQuery)
+    }, [debouncedQuery, onDebouncedChange])
 
     const isControlled = selectedValueProp !== undefined
     const [internalSelected, setInternalSelected] = React.useState<string | undefined>(defaultSelectedValue)
     const selectedValue = isControlled ? selectedValueProp : internalSelected
 
     const filteredItems = React.useMemo(() => {
-      if (!searchEnabled) return [...items]
+      if (!searchEnabled || !filterItems) return [...items]
       const run = customFilter ?? defaultListItemFilter
       return [...run(items, debouncedQuery)]
-    }, [items, debouncedQuery, searchEnabled, customFilter])
+    }, [items, debouncedQuery, searchEnabled, filterItems, customFilter])
 
     const select = React.useCallback(
       (item: ListItem) => {
@@ -167,7 +196,6 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
         <div
           className={cn(
             "flex min-w-0 items-start gap-3 rounded-md px-2 py-2",
-            divider && index > 0 && "border-t border-border",
             layout === "grid" && "border border-border",
             selectable && !item.disabled && "cursor-pointer hover:bg-muted/60",
             item.disabled && "cursor-not-allowed opacity-60",
@@ -225,12 +253,12 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
         <Stack
           as={listAs}
           role={selectable ? "listbox" : undefined}
-          className={cn(listChrome)}
+          className={cn(listChrome, divider && "divide-y divide-border")}
           items={filteredItems}
-          getItemKey={(item, i) => item.value ?? i}
+          getItemKey={(item: ListItem, i) => item.value ?? i}
           renderItem={renderWrappedRow}
           direction={direction}
-          gap={gap}
+          gap={divider ? (gap ?? "none") : gap}
           align={align}
           justify={justify}
           wrap={wrap}
@@ -241,7 +269,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
           role={selectable ? "listbox" : undefined}
           className={cn(listChrome)}
           items={filteredItems}
-          getItemKey={(item, i) => item.value ?? i}
+          getItemKey={(item: ListItem, i) => item.value ?? i}
           renderItem={renderWrappedRow}
           columns={resolvedColumns}
           rows={rows}

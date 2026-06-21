@@ -48,6 +48,7 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
       label,
       description,
       errorMessage,
+      disabled,
       ...props
     },
     ref
@@ -61,7 +62,10 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
 
     return (
       <div className="space-y-1">
-        <label htmlFor={radioId} className="flex items-start gap-2">
+        <label
+          htmlFor={radioId}
+          className={cn("flex items-start gap-2", disabled && "cursor-not-allowed opacity-60")}
+        >
           <span className={cn(radioVariants({ size, selected: resolvedChecked }), className)}>
             <input
               ref={ref}
@@ -69,7 +73,7 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
               type="radio"
               className="sr-only"
               checked={isControlled ? checked : undefined}
-              defaultChecked={isControlled ? resolvedDefault : checked ?? resolvedDefault}
+              defaultChecked={isControlled ? undefined : Boolean(checked ?? resolvedDefault)}
               onChange={(event) => {
                 if (!isControlled) {
                   setInternalChecked(event.target.checked)
@@ -77,6 +81,7 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
                 onChange?.(event.target.checked)
               }}
               {...props}
+              disabled={disabled}
             />
             {resolvedChecked ? <span className="h-2 w-2 rounded-full bg-primary" /> : null}
           </span>

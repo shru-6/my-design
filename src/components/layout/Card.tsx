@@ -2,7 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 
-const cardVariants = cva("rounded-lg border text-foreground", {
+const cardVariants = cva("rounded-[var(--radius-card,0.5rem)] border text-foreground", {
   variants: {
     variant: {
       transparent: "border-transparent bg-transparent shadow-none",
@@ -61,7 +61,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {header ? (
           <div
             data-slot="card-header"
-            className={cn("sticky top-0 z-20 shrink-0 border-b border-border bg-inherit", sectionPad[effectiveSize])}
+            className={cn("sticky top-0 shrink-0 border-b border-border bg-inherit", sectionPad[effectiveSize])}
           >
             {header}
           </div>
@@ -72,7 +72,7 @@ export const Card = React.forwardRef<HTMLDivElement, CardProps>(
         {footer ? (
           <div
             data-slot="card-footer"
-            className={cn("sticky bottom-0 z-20 shrink-0 border-t border-border bg-inherit", sectionPad[effectiveSize])}
+            className={cn("sticky bottom-0 shrink-0 border-t border-border bg-inherit", sectionPad[effectiveSize])}
           >
             {footer}
           </div>

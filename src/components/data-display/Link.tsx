@@ -23,22 +23,20 @@ export interface LinkProps
   extends Omit<React.AnchorHTMLAttributes<HTMLAnchorElement>, "children">,
     VariantProps<typeof linkVariants> {
   href: string
-  external?: boolean
   className?: string
   children?: React.ReactNode
 }
 
 export const Link = React.forwardRef<HTMLAnchorElement, LinkProps>(
-  ({ href, target, rel, external, variant, className, children, ...props }, ref) => {
-    const resolvedTarget = target ?? (external ? "_blank" : undefined)
-    const resolvedRel =
-      rel ?? (external || resolvedTarget === "_blank" ? "noopener noreferrer" : undefined)
+  ({ href, target, rel, variant, className, children, ...props }, ref) => {
+    const opensNewTab = typeof target === "string" && target.toLowerCase() === "_blank"
+    const resolvedRel = rel ?? (opensNewTab ? "noopener noreferrer" : undefined)
 
     return (
       <a
         ref={ref}
         href={href}
-        target={resolvedTarget}
+        target={target}
         rel={resolvedRel}
         className={cn(linkVariants({ variant }), focusRing, focusRingOffset, className)}
         {...props}

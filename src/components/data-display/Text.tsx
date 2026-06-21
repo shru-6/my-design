@@ -70,6 +70,7 @@ export const Text = React.forwardRef<HTMLElement, TextProps>(
     const resolvedSize = size ?? "md"
     const iconSize = textIconSizeMap[resolvedSize]
     const clamped = lineClamp != null
+    const isInlineHost = Comp === "span" || Comp === "button"
 
     return (
       <Comp
@@ -77,7 +78,7 @@ export const Text = React.forwardRef<HTMLElement, TextProps>(
         data-slot="text"
         className={cn(
           textVariants({ size, variant, weight }),
-          "inline-flex min-w-0 items-center gap-1.5",
+          isInlineHost ? "inline-flex min-w-0 items-center gap-1.5" : "flex min-w-0 items-center gap-1.5",
           className
         )}
         {...props}

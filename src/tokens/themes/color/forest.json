@@ -1,0 +1,31 @@
+{
+  "_createdBy": "shru-design-system library",
+  "color": {
+    "primary": "{palette.green.600}",
+    "primary-foreground": "{palette.white}",
+    "background": "{palette.green.50}",
+    "foreground": "{palette.gray.900}",
+    "card": "{palette.white}",
+    "card-foreground": "{palette.gray.900}",
+    "popover": "{palette.white}",
+    "popover-foreground": "{palette.gray.900}",
+    "secondary": "{palette.green.100}",
+    "secondary-foreground": "{palette.green.900}",
+    "muted": "{palette.green.50}",
+    "muted-foreground": "{palette.green.700}",
+    "accent": "{palette.green.100}",
+    "accent-foreground": "{palette.green.900}",
+    "destructive": "{palette.red.600}",
+    "destructive-foreground": "{palette.white}",
+    "success": "{palette.teal.700}",
+    "success-foreground": "{palette.white}",
+    "warning": "{palette.amber.600}",
+    "warning-foreground": "{palette.green.900}",
+    "info": "{palette.sky.500}",
+    "info-foreground": "{palette.white}",
+    "border": "{palette.green.200}",
+    "input": "{palette.green.200}",
+    "ring": "{palette.green.400}",
+    "skeleton": "{palette.green.100}"
+  }
+}

@@ -29,6 +29,23 @@ export type ThemeMetadata = {
  * 3. scripts/applyThemeSync.js - STORAGE_KEY constant
  */
 const STORAGE_KEY = 'design-system-theme'
+const THEME_SYNC_EVENT = 'design-system-theme-sync'
+
+function readStoredThemes(): ThemeSelection | null {
+  if (typeof window === 'undefined') return null
+  const stored = localStorage.getItem(STORAGE_KEY)
+  if (!stored) return null
+  try {
+    return JSON.parse(stored) as ThemeSelection
+  } catch {
+    return null
+  }
+}
+
+function broadcastThemeSync(themes: ThemeSelection) {
+  if (typeof window === 'undefined') return
+  window.dispatchEvent(new CustomEvent(THEME_SYNC_EVENT, { detail: themes }))
+}
 
 /**
  * Hook for managing design system theme switching
@@ -87,6 +104,33 @@ export function useTheme() {
     }
   }, [applyTheme]) // Include applyTheme in deps
 
+  // Keep all useTheme() instances in sync (FAB toggle + inline panel, tabs, etc.)
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+
+    const applyExternal = (themes: ThemeSelection) => {
+      setSelectedThemes(themes)
+    }
+
+    const onSync = (event: Event) => {
+      const detail = (event as CustomEvent<ThemeSelection>).detail
+      if (detail) applyExternal(detail)
+    }
+
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return
+      const parsed = readStoredThemes()
+      if (parsed) applyExternal(parsed)
+    }
+
+    window.addEventListener(THEME_SYNC_EVENT, onSync)
+    window.addEventListener('storage', onStorage)
+    return () => {
+      window.removeEventListener(THEME_SYNC_EVENT, onSync)
+      window.removeEventListener('storage', onStorage)
+    }
+  }, [])
+
   const updateTheme = useCallback(async (category: keyof ThemeSelection, themeId: string | undefined) => {
     const newThemes = {
       ...selectedThemes,
@@ -94,14 +138,26 @@ export function useTheme() {
     }
     
     setSelectedThemes(newThemes)
+    broadcastThemeSync(newThemes)
     await applyTheme(newThemes)
   }, [selectedThemes, applyTheme])
 
   const resetToDefaults = useCallback(async () => {
     const defaults = getDefaultThemes()
     setSelectedThemes(defaults)
+    broadcastThemeSync(defaults)
     await applyTheme(defaults)
   }, [applyTheme])
+
+  const applyPresetSelection = useCallback(
+    async (preset: Partial<ThemeSelection>) => {
+      const next = { ...selectedThemes, ...preset }
+      setSelectedThemes(next)
+      broadcastThemeSync(next)
+      await applyTheme(next)
+    },
+    [selectedThemes, applyTheme]
+  )
 
   // Get available themes for a category (with dynamic discovery)
   const getAvailableThemes = useCallback(async (category: string): Promise<Record<string, ThemeMetadata>> => {
@@ -113,6 +169,7 @@ export function useTheme() {
     selectedThemes,
     updateTheme,
     resetToDefaults,
+    applyPreset: applyPresetSelection,
     isLoading,
     error,
     getAvailableThemes

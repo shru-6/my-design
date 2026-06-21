@@ -61,9 +61,13 @@ export function generateComponentCode(
   propDefinitions: PropDefinition[] = []
 ): string {
   const propTypeMap = new Map(propDefinitions.map((prop) => [prop.name, prop.type]))
+  const galleryOnlyKeys = new Set(
+    propDefinitions.filter((p) => p.galleryOnly).map((p) => p.name)
+  )
 
   const propEntries = Object.entries(props)
     .filter(([key, value]) => {
+      if (galleryOnlyKeys.has(key)) return false
       if (value === undefined || value === null) return false
       if (value === "") return false
       if (typeof value === "function") return false

@@ -2,9 +2,11 @@ import * as React from "react"
 import { X } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { focusRing, focusRingOffset, disabledControl } from "../inputs/fieldPieces"
+import { Spinner } from "./Spinner"
 import { Text, type TextProps, textVariants } from "./Text"
 
-const pillSurfaceVariants = cva("", {
+const pillSurfaceVariants = cva("inline-flex w-fit max-w-full items-center", {
   variants: {
     appearance: {
       solid: "",
@@ -63,6 +65,34 @@ const pillSurfaceVariants = cva("", {
   },
 })
 
+/** Button-like chip surfaces (same palette as the old action Toggle). */
+const toggleSurfaceVariants = cva(
+  cn("inline-flex w-fit max-w-full items-center font-medium transition-colors", focusRing, focusRingOffset, disabledControl),
+  {
+    variants: {
+      toggleSurface: {
+        primary: "border-transparent bg-primary text-primary-foreground hover:bg-primary/90",
+        secondary: "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/90",
+        outline: "border border-border bg-background text-foreground hover:bg-muted",
+        ghost: "border-transparent bg-transparent text-foreground hover:bg-muted",
+      },
+      size: {
+        sm: "h-5 px-2",
+        md: "h-6 px-2.5",
+      },
+      shape: {
+        rounded: "rounded-md",
+        pill: "rounded-full",
+      },
+    },
+    defaultVariants: {
+      toggleSurface: "secondary",
+      size: "md",
+      shape: "pill",
+    },
+  }
+)
+
 const pillTextSize: Record<NonNullable<VariantProps<typeof pillSurfaceVariants>["size"]>, TextProps["size"]> = {
   sm: "xs",
   md: "sm",
@@ -84,6 +114,10 @@ export interface PillProps
   dot?: boolean
   selected?: boolean
   disabled?: boolean
+  /** Button-style surface (`primary` / `secondary` / `outline` / `ghost`); when set, overrides `appearance` + `tone` coloring. `""` ignored (e.g. props panel). */
+  toggleSurface?: VariantProps<typeof toggleSurfaceVariants>["toggleSurface"] | ""
+  /** Shows a spinner and disables interaction. */
+  loading?: boolean
   children?: React.ReactNode
 }
 
@@ -102,6 +136,8 @@ export const Pill = React.forwardRef<HTMLElement, PillProps>(
       onRemove,
       dot,
       disabled,
+      toggleSurface,
+      loading,
       className,
       children,
       ...props
@@ -109,8 +145,12 @@ export const Pill = React.forwardRef<HTMLElement, PillProps>(
     ref
   ) => {
     const resolvedSize = size ?? "md"
+    const resolvedToggleSurface =
+      toggleSurface != null && toggleSurface !== "" ? toggleSurface : undefined
+    const busy = Boolean(loading)
+    const isDisabled = disabled || busy
     const removeBtn =
-      onRemove && !disabled ? (
+      onRemove && !isDisabled ? (
         <button
           type="button"
           onClick={(e) => {
@@ -128,32 +168,43 @@ export const Pill = React.forwardRef<HTMLElement, PillProps>(
         </button>
       ) : undefined
 
+    const spinnerSize = resolvedSize === "sm" ? "xs" : "sm"
     const mergedRight =
-      removeBtn != null || right != null ? (
+      busy || removeBtn != null || right != null ? (
         <>
-          {right}
-          {removeBtn}
+          {busy ? <Spinner size={spinnerSize} /> : right}
+          {!busy ? removeBtn : null}
         </>
       ) : undefined
+
+    const shellClass =
+      resolvedToggleSurface != null
+        ? cn(
+            toggleSurfaceVariants({ toggleSurface: resolvedToggleSurface, size, shape }),
+            selected && "ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
+          )
+        : pillSurfaceVariants({ appearance, size, tone, shape, selected })
 
     return (
       <Text
         ref={ref as React.ForwardedRef<HTMLElement>}
         as={as}
-        className={cn(
-          pillSurfaceVariants({ appearance, size, tone, shape, selected }),
-          onRemove && !disabled && "pr-1",
-          className
-        )}
-        variant={variant ?? "default"}
+        className={cn(shellClass, onRemove && !isDisabled && "pr-1", className)}
+        variant={resolvedToggleSurface != null ? "default" : (variant ?? "default")}
         size={pillTextSize[resolvedSize]}
         weight="medium"
         left={left}
         right={mergedRight}
-        disabled={disabled}
+        disabled={isDisabled}
+        aria-busy={busy || undefined}
         {...props}
       >
-        {dot ? <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-current" /> : null}
+        {dot ? (
+          <span
+            className="mr-1.5 inline-block h-1.5 w-1.5 shrink-0 align-middle rounded-full bg-current"
+            aria-hidden
+          />
+        ) : null}
         {children}
       </Text>
     )

@@ -1,6 +1,8 @@
 // Component metadata (reset baseline)
 // Old category inventory removed; we'll rebuild from scratch.
 
+import { applyEnrichedPropSchemas } from "./metadata/propSchemas"
+
 export type ComponentCategory =
   | "inputs"
   | "actions"
@@ -31,6 +33,12 @@ export interface PropDefinition {
   options?: string[]
   defaultValue?: any
   description?: string
+  /** `own` = root component API; `slot` = forwarded to a sub-component or slot object */
+  scope?: "own" | "slot"
+  /** When `scope` is `slot`, names the target (e.g. Button, Card, triggerProps) */
+  slotTarget?: string
+  /** Test app only — excluded from generated usage snippets */
+  galleryOnly?: boolean
 }
 
 export interface ComponentMetadata {
@@ -48,7 +56,7 @@ const subComponentsMap: Record<string, string[]> = {
   Textarea: ["Label", "HelperText"],
   Checkbox: ["Text", "HelperText"],
   Radio: ["Text", "HelperText"],
-  Switch: ["Text", "HelperText"],
+  Toggle: ["Text", "HelperText"],
   Slider: ["Label", "HelperText"],
   Label: ["Text"],
   HelperText: ["Text"],
@@ -97,7 +105,7 @@ export function getAllSubComponents(): string[] {
   return Array.from(allSubComponents).sort()
 }
 
-export const componentMetadata: ComponentMetadata[] = [
+const rawComponentMetadata: ComponentMetadata[] = [
   {
     name: "TextInput",
     category: "inputs",
@@ -204,22 +212,6 @@ export const componentMetadata: ComponentMetadata[] = [
       { name: "className", type: "string" },
     ],
     subComponents: getSubComponents("Radio"),
-  },
-  {
-    name: "Switch",
-    category: "inputs",
-    props: [
-      { name: "checked", type: "boolean" },
-      { name: "default", type: "boolean", defaultValue: true },
-      { name: "label", type: "string" },
-      { name: "description", type: "string" },
-      { name: "disabled", type: "boolean", defaultValue: false },
-      { name: "required", type: "boolean", defaultValue: false },
-      { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
-      { name: "errorMessage", type: "string" },
-      { name: "className", type: "string" },
-    ],
-    subComponents: getSubComponents("Switch"),
   },
   {
     name: "Slider",
@@ -431,7 +423,7 @@ export const componentMetadata: ComponentMetadata[] = [
       { name: "value", type: "number", defaultValue: 45 },
       { name: "max", type: "number", defaultValue: 100 },
       { name: "showLabel", type: "boolean", defaultValue: false },
-      { name: "indeterminate", type: "boolean", defaultValue: false },
+      { name: "loading", type: "boolean", defaultValue: false },
       { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
       { name: "className", type: "string" },
     ],
@@ -549,8 +541,8 @@ export const componentMetadata: ComponentMetadata[] = [
       },
       { name: "listType", type: "select", options: ["unordered", "ordered", "none"], defaultValue: "unordered" },
       { name: "layout", type: "select", options: ["list", "grid"], defaultValue: "list" },
-      { name: "search", type: "boolean", defaultValue: true, description: "Built-in SearchInput + default filter; pass false to hide" },
-      { name: "header", type: "reactNode", description: "Above search and list" },
+      { name: "search", type: "boolean", defaultValue: true, description: "true = built-in SearchInput + filter. Object: ListSearchConfig { placeholder?, value?, onChange?, filterItems?, filter?, debounceMs? } — use filterItems: false when filtering external data (gallery toolbar)." },
+      { name: "header", type: "reactNode", description: "Prepended above search and list body (e.g. PageHeader)" },
       {
         name: "gap",
         type: "select",
@@ -614,7 +606,13 @@ export const componentMetadata: ComponentMetadata[] = [
       { name: "open", type: "boolean", defaultValue: true },
       { name: "onClose", type: "callback", description: "() => void (backdrop click)" },
       { name: "blur", type: "boolean", defaultValue: false },
-      { name: "fixed", type: "boolean", defaultValue: true, description: "false = absolute (e.g. scoped overlay)" },
+      {
+        name: "container",
+        type: "select",
+        options: ["parent", "body"],
+        defaultValue: "parent",
+        description: "parent = scoped to nearest OverlayPortalScope",
+      },
       { name: "className", type: "string" },
       {
         name: "children",
@@ -695,7 +693,6 @@ export const componentMetadata: ComponentMetadata[] = [
       { name: "href", type: "string", defaultValue: "#" },
       { name: "children", type: "reactNode", defaultValue: "Link text" },
       { name: "variant", type: "variant", options: ["default", "muted", "underline"], defaultValue: "default" },
-      { name: "external", type: "boolean", defaultValue: false },
       { name: "target", type: "select", options: ["_self", "_blank"] },
       { name: "className", type: "string" },
     ],
@@ -811,7 +808,526 @@ export const componentMetadata: ComponentMetadata[] = [
     ],
     subComponents: getSubComponents("ResizableHandle"),
   },
+  {
+    name: "PhoneInput",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TextInput","Dropdown"]
+  },
+  {
+    name: "InputGroup",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["InputGroupInput","InputGroupAddon","InputGroupButton","Button"]
+  },
+  {
+    name: "Command",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["SearchInput","Spinner","Icon"]
+  },
+  {
+    name: "RadioGroup",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Radio"]
+  },
+  {
+    name: "Toggle",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Text","HelperText"]
+  },
+  {
+    name: "Select",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Label","HelperText","Icon"]
+  },
+  {
+    name: "Calendar",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Text"]
+  },
+  {
+    name: "DatePicker",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TextInput","Calendar"]
+  },
+  {
+    name: "TimePicker",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TextInput"]
+  },
+  {
+    name: "DateRangePicker",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TextInput","Calendar","Button"]
+  },
+  {
+    name: "Upload",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Text","Image","Spinner"]
+  },
+  {
+    name: "FormField",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Label","HelperText","TextInput"]
+  },
+  {
+    name: "Form",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["FormField","Button"]
+  },
+  {
+    name: "SplitButton",
+    category: "actions",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Dropdown"]
+  },
+  {
+    name: "CopyButton",
+    category: "actions",
+    props: [
+      { name: "variant", type: "variant", options: ["default", "outline", "ghost", "destructive"], defaultValue: "default" },
+      { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
+      { name: "children", type: "reactNode", defaultValue: "Button" },
+      { name: "disabled", type: "boolean", defaultValue: false }
+    ],
+    subComponents: ["Button","Tooltip"]
+  },
+  {
+    name: "Sidebar",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Link","Text","Separator","Collapsible"]
+  },
+  {
+    name: "Navbar",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Link","Dropdown","Separator"]
+  },
+  {
+    name: "NavigationMenu",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Button","Link","Text","Icon","Popover"]
+  },
+  {
+    name: "Dropdown",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Button","Icon"]
+  },
+  {
+    name: "ContextMenu",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Dropdown","Icon"]
+  },
+  {
+    name: "Menubar",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Button","Dropdown"]
+  },
+  {
+    name: "Tabs",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Text","Icon","Button"]
+  },
+  {
+    name: "Breadcrumb",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Link","Text"]
+  },
+  {
+    name: "Pagination",
+    category: "navigation",
+    props: [
+      { name: "total", type: "number", defaultValue: 50 },
+      { name: "pageSize", type: "number", defaultValue: 10 },
+      { name: "defaultValue", type: "number", defaultValue: 1 },
+      { name: "className", type: "string" },
+    ],
+    subComponents: ["Button","Text"]
+  },
+  {
+    name: "Stepper",
+    category: "navigation",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Button","Text","Icon"]
+  },
+  {
+    name: "Badge",
+    category: "utilities",
+    props: [
+      { name: "className", type: "string" }
+    ]
+  },
+  {
+    name: "Tag",
+    category: "utilities",
+    props: [
+      { name: "className", type: "string" }
+    ]
+  },
+  {
+    name: "AvatarGroup",
+    category: "data-display",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Avatar"]
+  },
+  {
+    name: "Table",
+    category: "data-display",
+    props: [
+      { name: "className", type: "string" },
+      { name: "items", type: "array", defaultValue: [{ label: "Item A", value: "a" }, { label: "Item B", value: "b" }] }
+    ],
+    subComponents: ["Checkbox","Button","Text","Skeleton","Pagination","EmptyState"]
+  },
+  {
+    name: "TreeView",
+    category: "data-display",
+    props: [
+      { name: "className", type: "string" },
+      { name: "draggable", type: "boolean", defaultValue: false },
+      { name: "allowAddSibling", type: "boolean", defaultValue: false },
+      { name: "allowAddChild", type: "boolean", defaultValue: false },
+      { name: "allowDelete", type: "boolean", defaultValue: false },
+      {
+        name: "items",
+        type: "array",
+        defaultValue: [
+          {
+            id: "root",
+            label: "Documents",
+            kind: "folder",
+            children: [{ id: "drafts", label: "Drafts", kind: "file" }],
+          },
+        ],
+      },
+    ],
+    subComponents: ["Text","Icon","Spinner"]
+  },
+  {
+    name: "CodeBlock",
+    category: "data-display",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["CopyButton","Text"]
+  },
+  {
+    name: "Carousel",
+    category: "data-display",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Image","Button","Text"]
+  },
+  {
+    name: "Alert",
+    category: "feedback",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Text","Button","Icon"]
+  },
+  {
+    name: "Toast",
+    category: "feedback",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Text","Button","Icon"]
+  },
+  {
+    name: "Toaster",
+    category: "feedback",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Toast"]
+  },
+  {
+    name: "LoadingOverlay",
+    category: "feedback",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Overlay","Spinner"]
+  },
+  {
+    name: "Modal",
+    category: "overlays",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Overlay","Card","Button"]
+  },
+  {
+    name: "AlertDialog",
+    category: "overlays",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Overlay","Text","Button"]
+  },
+  {
+    name: "Drawer",
+    category: "overlays",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Overlay","Card","Button"]
+  },
+  {
+    name: "Popover",
+    category: "overlays",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Card","Button"]
+  },
+  {
+    name: "HoverCard",
+    category: "overlays",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Popover"]
+  },
+  {
+    name: "Collapsible",
+    category: "layout",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button"]
+  },
+  {
+    name: "Accordion",
+    category: "layout",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Collapsible","Spinner","Icon"]
+  },
+  {
+    name: "Chart",
+    category: "data-viz",
+    props: [
+      { name: "data", type: "array", defaultValue: [{ label: "A", value: 40 }, { label: "B", value: 65 }] },
+      { name: "height", type: "number", defaultValue: 200 }
+    ]
+  },
+  {
+    name: "BarChart",
+    category: "data-viz",
+    props: [
+      { name: "data", type: "array", defaultValue: [{ label: "A", value: 40 }, { label: "B", value: 65 }] },
+      { name: "height", type: "number", defaultValue: 200 }
+    ],
+    subComponents: ["Chart"]
+  },
+  {
+    name: "LineChart",
+    category: "data-viz",
+    props: [
+      { name: "data", type: "array", defaultValue: [{ label: "A", value: 40 }, { label: "B", value: 65 }] },
+      { name: "height", type: "number", defaultValue: 200 }
+    ],
+    subComponents: ["Chart"]
+  },
+  {
+    name: "PieChart",
+    category: "data-viz",
+    props: [
+      { name: "data", type: "array", defaultValue: [{ label: "A", value: 40 }, { label: "B", value: 65 }] },
+      { name: "height", type: "number", defaultValue: 200 }
+    ],
+    subComponents: ["Chart"]
+  },
+  {
+    name: "TriggerModal",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Modal","Button"]
+  },
+  {
+    name: "FormModal",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TriggerModal","Form","FormField","PageHeader","Button","Icon"]
+  },
+  {
+    name: "ConfirmModal",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TriggerModal","PageHeader","Button","Icon"]
+  },
+  {
+    name: "AppShell",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Sidebar","Navbar","PageFooter"]
+  },
+  {
+    name: "PageHeader",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Text","Pill","Separator","Icon"]
+  },
+  {
+    name: "PageFooter",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" },
+      { name: "children", type: "reactNode", defaultValue: "Content" }
+    ],
+    subComponents: ["Text","Separator"]
+  },
+  {
+    name: "Hero",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" },
+      { name: "children", type: "reactNode", defaultValue: "Content" }
+    ],
+    subComponents: ["Text","Button","Image","Pill"]
+  },
+  {
+    name: "AuthLayout",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" },
+      { name: "children", type: "reactNode", defaultValue: "Content" }
+    ],
+    subComponents: ["Card","Text"]
+  },
+  {
+    name: "EmptyState",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Text","Button","Icon"]
+  },
+  {
+    name: "InlineEdit",
+    category: "inputs",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["TextInput","Text","Button"]
+  },
+  {
+    name: "HistoryControlButtons",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Tooltip"]
+  },
+  {
+    name: "FixedScreenWidget",
+    category: "patterns",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["Button","Card"]
+  },
+  {
+    name: "ResizeContainer",
+    category: "layout",
+    props: [
+      { name: "className", type: "string" }
+    ],
+    subComponents: ["ResizablePanelGroup","ResizablePanel","ResizableHandle"]
+  }
 ]
+
+export const componentMetadata = applyEnrichedPropSchemas(rawComponentMetadata)
 
 export function getComponentMetadata(name: string): ComponentMetadata | undefined {
   return componentMetadata.find((c) => c.name === name)

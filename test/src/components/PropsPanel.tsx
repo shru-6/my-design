@@ -1,5 +1,6 @@
 import { useState } from "react"
-import { ComponentMetadata, PropDefinition } from '../utils/componentMetadata'
+import { Button, Checkbox, Text } from "shru-design-system"
+import { ComponentMetadata, PropDefinition } from "../utils/componentMetadata"
 
 interface PropsPanelProps {
   metadata: ComponentMetadata
@@ -26,7 +27,6 @@ export function PropsPanel({ metadata, props, onPropsChange }: PropsPanelProps) 
     }
 
     try {
-      // Allow JS-like arrays e.g. [{ label: 'A', value: 'a' }]
       const parsed = Function(`"use strict"; return (${trimmed});`)()
       if (Array.isArray(parsed)) return parsed
     } catch {
@@ -36,24 +36,24 @@ export function PropsPanel({ metadata, props, onPropsChange }: PropsPanelProps) 
     return null
   }
 
+  const controlClassName =
+    "w-full rounded-md border border-border bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground"
+
   const renderPropControl = (prop: PropDefinition) => {
     const value = props[prop.name] ?? metadata.defaultProps?.[prop.name] ?? prop.defaultValue
-    const numericValue = typeof value === 'number' ? value : Number(value ?? 0)
-
-    const controlClassName =
-      'w-full rounded-md border border-border bg-background px-3 py-2 text-foreground placeholder:text-muted-foreground'
+    const numericValue = typeof value === "number" ? value : Number(value ?? 0)
 
     switch (prop.type) {
-      case 'variant':
-      case 'size':
-      case 'select':
+      case "variant":
+      case "size":
+      case "select":
         return (
           <select
             className={controlClassName}
-            value={value || ''}
+            value={value || ""}
             onChange={(e) => updateProp(prop.name, e.target.value)}
           >
-            <option value="" disabled>{`Select ${prop.name}...`}</option>
+            <option value="" disabled>{`Select ${prop.name}…`}</option>
             {prop.options?.map((option) => (
               <option key={option} value={option}>
                 {option}
@@ -62,85 +62,96 @@ export function PropsPanel({ metadata, props, onPropsChange }: PropsPanelProps) 
           </select>
         )
 
-      case 'boolean':
+      case "boolean":
         return (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }} className="text-foreground">
-            <input type="checkbox" checked={!!value} onChange={(e) => updateProp(prop.name, e.target.checked)} />
-            <label>{prop.name}</label>
-          </div>
+          <Checkbox
+            id={`prop-${metadata.name}-${prop.name}`}
+            checked={Boolean(value)}
+            onChange={(checked) => updateProp(prop.name, checked)}
+            label={prop.name}
+          />
         )
 
-      case 'string':
+      case "string":
         return (
           <input
             className={controlClassName}
             type="text"
-            value={value || ''}
+            value={value || ""}
             onChange={(e) => updateProp(prop.name, e.target.value)}
-            placeholder={prop.description || `Enter ${prop.name}...`}
+            placeholder={prop.description || `Enter ${prop.name}…`}
           />
         )
 
-      case 'expression':
+      case "expression":
         return (
           <textarea
             className={controlClassName}
             rows={4}
-            value={typeof value === 'string' ? value : ''}
+            value={typeof value === "string" ? value : ""}
             onChange={(e) => updateProp(prop.name, e.target.value)}
-            placeholder={prop.description || `Expression for ${prop.name}={...}`}
+            placeholder={prop.description || `Expression for ${prop.name}={…}`}
             spellCheck={false}
           />
         )
 
-      case 'number':
+      case "number":
         return (
           <input
             className={controlClassName}
             type="number"
-            value={value ?? ''}
+            value={value ?? ""}
             onChange={(e) => updateProp(prop.name, e.target.value ? Number(e.target.value) : undefined)}
-            placeholder={prop.description || `Enter ${prop.name}...`}
+            placeholder={prop.description || `Enter ${prop.name}…`}
           />
         )
 
-      case 'counter':
+      case "counter":
         return (
           <div className="flex items-center gap-2">
-            <button
-              className="rounded-md border border-border bg-background px-3 py-1 text-foreground"
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
               onClick={() => updateProp(prop.name, Math.max(0, numericValue - 1))}
             >
-              -
-            </button>
+              −
+            </Button>
             <input
               className={controlClassName}
               type="number"
               value={Number.isNaN(numericValue) ? 0 : numericValue}
-              onChange={(e) => updateProp(prop.name, e.target.value ? Math.max(0, Number(e.target.value)) : 0)}
-              placeholder={prop.description || `Enter ${prop.name}...`}
+              onChange={(e) =>
+                updateProp(prop.name, e.target.value ? Math.max(0, Number(e.target.value)) : 0)
+              }
+              placeholder={prop.description || `Enter ${prop.name}…`}
             />
-            <button
-              className="rounded-md border border-border bg-background px-3 py-1 text-foreground"
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
               onClick={() => updateProp(prop.name, Math.max(0, numericValue + 1))}
             >
               +
-            </button>
+            </Button>
           </div>
         )
 
-      case 'reactNode':
+      case "reactNode":
         return (
           <input
             className={controlClassName}
             type="text"
-            value={value || ''}
+            value={value || ""}
             onChange={(e) => updateProp(prop.name, e.target.value)}
-            placeholder={prop.description || 'Keyword symbol (search, plus, check, x, star...)'}
+            placeholder={
+              prop.description ||
+              "Icon keyword (search, home, folder, file, mail, calendar, trash…)"
+            }
           />
         )
 
-      case 'array': {
+      case "array": {
         const prettyValue = JSON.stringify(Array.isArray(value) ? value : [], null, 2)
         const draftValue = arrayDrafts[prop.name] ?? prettyValue
         return (
@@ -164,13 +175,13 @@ export function PropsPanel({ metadata, props, onPropsChange }: PropsPanelProps) 
                 })
               }
             }}
-            placeholder={prop.description || 'Enter a JSON array'}
+            placeholder={prop.description || "Enter a JSON array"}
             rows={3}
           />
         )
       }
 
-      case 'object': {
+      case "object": {
         const prettyValue = JSON.stringify(
           value && typeof value === "object" && !Array.isArray(value) ? value : {},
           null,
@@ -190,16 +201,16 @@ export function PropsPanel({ metadata, props, onPropsChange }: PropsPanelProps) 
                 // Ignore invalid JSON while typing.
               }
             }}
-            placeholder={prop.description || 'Enter a JSON object'}
+            placeholder={prop.description || "Enter a JSON object"}
             rows={3}
           />
         )
       }
 
-      case 'callback':
+      case "callback":
         return (
           <div className="rounded-md border border-dashed border-border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
-            Callback prop. Configure in code usage.
+            Callback prop — configure in code usage.
           </div>
         )
 
@@ -209,17 +220,22 @@ export function PropsPanel({ metadata, props, onPropsChange }: PropsPanelProps) 
   }
 
   return (
-    <div className="flex flex-wrap gap-4">
-      {metadata.props.map(prop => (
-        <div key={prop.name}>
-          <label style={{ display: 'block', marginBottom: '0.5rem', fontSize: '0.875rem', fontWeight: '500' }}>
+    <div className="grid gap-4 sm:grid-cols-2">
+      {metadata.props.map((prop) => (
+        <div key={prop.name} className="min-w-0 space-y-1.5">
+          <Text as="label" size="sm" weight="medium" className="block">
             {prop.name}
-            {prop.description && (
-              <span style={{ fontWeight: 'normal', color: 'hsl(var(--muted-foreground))', marginLeft: '0.5rem' }}>
+            {prop.scope === "slot" && prop.slotTarget ? (
+              <Text as="span" size="xs" variant="muted" className="ml-1.5 font-normal">
+                → {prop.slotTarget}
+              </Text>
+            ) : null}
+            {prop.description ? (
+              <Text as="span" size="xs" variant="muted" className="ml-1.5 font-normal">
                 ({prop.description})
-              </span>
-            )}
-          </label>
+              </Text>
+            ) : null}
+          </Text>
           {renderPropControl(prop)}
         </div>
       ))}

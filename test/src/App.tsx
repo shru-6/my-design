@@ -1,40 +1,24 @@
-import { ThemeToggle } from 'shru-design-system'
-import { componentMetadata } from './utils/componentMetadata'
-import { ComponentCard } from './components/ComponentCard'
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom"
+import { Toaster } from "shru-design-system"
+import { AppNav } from "./components/AppNav"
+import { GalleryPage } from "./pages/GalleryPage"
+import { ShowcasePage } from "./pages/ShowcasePage"
 
 function App() {
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: 'hsl(var(--background))' }}>
-      <ThemeToggle position="bottom-right" />
-
-      <div style={{ display: 'flex', minHeight: '100vh' }}>
-        <main style={{ 
-          flex: 1, 
-          padding: '2rem',
-          maxWidth: '1400px',
-          margin: '0 auto',
-          width: '100%',
-        }}>
-          {componentMetadata?.length === 0 ? (
-            <div style={{ 
-              textAlign: 'center', 
-              padding: '3rem',
-              color: 'hsl(var(--muted-foreground))',
-            }}>
-              <p>No components found matching your filters.</p>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', flexDirection: 'row', flexWrap: 'wrap', gap: '1rem' }}>
-              {componentMetadata?.map(metadata => (
-                <div key={metadata.name} className="flex flex-col gap-4 w-[430px] h-[450px]">
-                  <ComponentCard metadata={metadata} />
-                </div>
-              ))}
-            </div>
-          )}
+    <BrowserRouter>
+      <div className="flex h-dvh min-h-0 flex-col bg-background">
+        <AppNav />
+        <main className="flex min-h-0 flex-1 flex-col overflow-hidden">
+          <Routes>
+            <Route path="/" element={<Navigate to="/gallery" replace />} />
+            <Route path="/gallery" element={<GalleryPage />} />
+            <Route path="/showcase" element={<ShowcasePage />} />
+          </Routes>
         </main>
+        <Toaster position="bottom-right" />
       </div>
-    </div>
+    </BrowserRouter>
   )
 }
 

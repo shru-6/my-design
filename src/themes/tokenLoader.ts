@@ -17,6 +17,10 @@ import paletteTokens from "../tokens/palettes.json"
 
 import colorDark from "../tokens/themes/color/dark.json"
 import colorWhite from "../tokens/themes/color/white.json"
+import colorOcean from "../tokens/themes/color/ocean.json"
+import colorForest from "../tokens/themes/color/forest.json"
+import colorRose from "../tokens/themes/color/rose.json"
+import colorMidnight from "../tokens/themes/color/midnight.json"
 import typographySans from "../tokens/themes/typography/sans.json"
 import typographySerif from "../tokens/themes/typography/serif.json"
 import shapeSmooth from "../tokens/themes/shape/smooth.json"
@@ -37,6 +41,10 @@ export const EMBEDDED_TOKENS: Record<string, any> = {
   "palettes.json": paletteTokens,
   "themes/color/dark.json": colorDark,
   "themes/color/white.json": colorWhite,
+  "themes/color/ocean.json": colorOcean,
+  "themes/color/forest.json": colorForest,
+  "themes/color/rose.json": colorRose,
+  "themes/color/midnight.json": colorMidnight,
   "themes/typography/sans.json": typographySans,
   "themes/typography/serif.json": typographySerif,
   "themes/shape/smooth.json": shapeSmooth,

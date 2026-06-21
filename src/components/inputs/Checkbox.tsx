@@ -67,34 +67,36 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
     return (
       <div className="space-y-1">
         <div className="flex items-start gap-2">
-          <input
-            ref={inputRef}
-            id={checkboxId}
-            type="checkbox"
-            className="peer sr-only"
-            checked={isControlled ? Boolean(checked) : undefined}
-            defaultChecked={isControlled ? undefined : resolvedDefault}
-            onChange={(event) => {
-              if (!isControlled) {
-                setInternalChecked(event.target.checked)
-              }
-              onChange?.(event.target.checked)
-            }}
-            {...props}
-          />
-          <span
-            aria-hidden="true"
-            className={cn(
-              checkboxVariants({ size }),
-              peerFocusRing,
-              resolvedChecked && "border-primary bg-primary text-primary-foreground",
-              className
-            )}
-          >
-            {indeterminate || resolvedChecked ? (
-              <span className="text-[11px] leading-none">{indeterminate ? "−" : "✓"}</span>
-            ) : null}
-          </span>
+          <label htmlFor={checkboxId} className="inline-flex shrink-0 cursor-pointer">
+            <input
+              ref={inputRef}
+              id={checkboxId}
+              type="checkbox"
+              className="peer sr-only"
+              checked={isControlled ? Boolean(checked) : undefined}
+              defaultChecked={isControlled ? undefined : resolvedDefault}
+              onChange={(event) => {
+                if (!isControlled) {
+                  setInternalChecked(event.target.checked)
+                }
+                onChange?.(event.target.checked)
+              }}
+              {...props}
+            />
+            <span
+              aria-hidden="true"
+              className={cn(
+                checkboxVariants({ size }),
+                peerFocusRing,
+                resolvedChecked && "border-primary bg-primary text-primary-foreground",
+                className
+              )}
+            >
+              {indeterminate || resolvedChecked ? (
+                <span className="text-[11px] leading-none">{indeterminate ? "−" : "✓"}</span>
+              ) : null}
+            </span>
+          </label>
           <ControlLabelStack as="label" htmlFor={checkboxId} label={label} description={description} />
         </div>
         <ControlErrorMessage message={errorMessage} />

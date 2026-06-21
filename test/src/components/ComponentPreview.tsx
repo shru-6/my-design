@@ -1,74 +1,75 @@
-import React from 'react'
-import * as Components from 'shru-design-system'
-import { Search, Plus, Check, X, Star, Heart, User, Settings, Info, AlertTriangle, Loader2, Bell } from 'lucide-react'
-import { getComponentMetadata } from '../utils/componentMetadata'
+import React, { useMemo, useState } from "react"
+import * as Components from "shru-design-system"
+import { getComponentMetadata } from "../utils/componentMetadata"
+import { mergePreviewProps } from "../utils/previewDefaults"
+import { resolveKeywordIcon } from "../utils/iconKeywords"
+import { getPreviewWrapper } from "../utils/previewConfig"
+import { renderPreviewWrapper } from "../utils/previewRenderers"
+import { applyInteractivePreviewProps } from "../utils/interactivePreview"
+import { resolveGallerySlotProps } from "../utils/gallerySlotProps"
 
 interface ComponentPreviewProps {
   componentName: string
   props: Record<string, any>
-}
-
-const keywordIconMap: Record<string, React.ComponentType<{ className?: string }>> = {
-  search: Search,
-  plus: Plus,
-  check: Check,
-  x: X,
-  star: Star,
-  heart: Heart,
-  user: User,
-  settings: Settings,
-  info: Info,
-  warning: AlertTriangle,
-  loader: Loader2,
-  bell: Bell,
+  onPropsChange?: (patch: Record<string, unknown>) => void
 }
 
 function toReactNode(value: unknown): React.ReactNode {
-  if (typeof value !== 'string') return value as React.ReactNode
+  if (typeof value !== "string") return value as React.ReactNode
   const trimmed = value.trim()
-  const IconComp = keywordIconMap[trimmed.toLowerCase()]
+  const IconComp = resolveKeywordIcon(trimmed)
   if (!IconComp) return value
   return <IconComp className="h-4 w-4" />
 }
 
 function toRenderableNode(value: unknown): React.ReactNode {
-  if (typeof value !== 'string') {
-    return value as React.ReactNode
-  }
-
+  if (typeof value !== "string") return value as React.ReactNode
   const trimmed = value.trim()
   if (!trimmed) return value
-
-  // Icon keyword support first
   const iconNode = toReactNode(trimmed)
   if (iconNode !== trimmed) return iconNode
-
-  // JSX-like snippets typed in metadata panel should render in preview
-  if (trimmed.startsWith('<') && trimmed.endsWith('>')) {
+  if (trimmed.startsWith("<") && trimmed.endsWith(">")) {
     return <span dangerouslySetInnerHTML={{ __html: trimmed }} />
   }
-
   return value
 }
 
-export function ComponentPreview({ componentName, props }: ComponentPreviewProps) {
-  const [overlayHost, setOverlayHost] = React.useState<HTMLDivElement | null>(null)
-  const ComponentsAny = Components as any
-  const Component = ComponentsAny[componentName] as React.ComponentType<any>
+export function ComponentPreview({ componentName, props, onPropsChange }: ComponentPreviewProps) {
+  const [liveProps, setLiveProps] = useState<Record<string, unknown>>({})
+  const ComponentsAny = Components as unknown as Record<string, React.ComponentType<any>>
+  const Component = ComponentsAny[componentName]
+  const metadata = getComponentMetadata(componentName)
+
+  const { children, ...restProps } = props
+  const merged = mergePreviewProps(componentName, metadata?.defaultProps, restProps)
+  const allowedPropNames = metadata ? new Set(metadata.props.map((p) => p.name)) : null
+  const filtered = allowedPropNames
+    ? Object.fromEntries(Object.entries(merged).filter(([key]) => allowedPropNames.has(key)))
+    : merged
+  const resolvedProps = useMemo(
+    () => resolveGallerySlotProps(metadata, filtered),
+    [metadata, filtered]
+  )
+  const finalProps = useMemo(() => {
+    const interactive = applyInteractivePreviewProps(
+      componentName,
+      resolvedProps,
+      liveProps,
+      setLiveProps,
+      onPropsChange
+    )
+    if (componentName === "Toast" && interactive.dismissible !== false && typeof interactive.onClose !== "function") {
+      return { ...interactive, onClose: () => {} }
+    }
+    return interactive
+  }, [componentName, resolvedProps, liveProps, onPropsChange])
 
   if (!Component) {
-    return <div style={{ color: 'hsl(var(--destructive))' }}>Component {componentName} not found</div>
+    return <div className="text-sm text-destructive">Component {componentName} not found</div>
   }
 
-  const metadata = getComponentMetadata(componentName)
-  // Process props: merge metadata defaultProps for any missing keys
-  const { children, ...restProps } = props
-  const defaultProps = metadata?.defaultProps ?? {}
-  const finalProps: Record<string, any> = { ...defaultProps, ...restProps }
-
-  // Convert configured reactNode keyword props into actual React nodes.
   metadata?.props
-    .filter((prop) => prop.type === 'reactNode')
+    .filter((prop) => prop.type === "reactNode")
     .forEach((prop) => {
       if (finalProps[prop.name] != null) {
         finalProps[prop.name] = toRenderableNode(finalProps[prop.name])
@@ -77,163 +78,44 @@ export function ComponentPreview({ componentName, props }: ComponentPreviewProps
 
   const resolvedChildren = children != null ? toRenderableNode(children) : undefined
 
-  // Sidebar requires SidebarProvider for useSidebar context
-  if (componentName === 'Sidebar') {
-    const SidebarProvider = ComponentsAny.SidebarProvider
-    if (SidebarProvider) {
-      return (
-        <SidebarProvider>
-          <Component {...finalProps} />
-        </SidebarProvider>
-      )
+  const wrapper = getPreviewWrapper(componentName)
+  if (wrapper) {
+    const skipPortal =
+      (wrapper === "parent-portal" || wrapper === "parent-portal-loading") &&
+      finalProps.container === "body"
+
+    const useWrapper =
+      wrapper === "parent-portal-dialog" ||
+      wrapper === "form-demo" ||
+      wrapper === "form-modal-demo" ||
+      wrapper === "toaster-demo" ||
+      wrapper === "context-menu-demo" ||
+      wrapper === "fixed-widget-relative" ||
+      wrapper === "tree-view-interactive" ||
+      wrapper === "modal-interactive" ||
+      wrapper === "input-group" ||
+      wrapper === "stack-grid" ||
+      wrapper === "fab-relative" ||
+      wrapper.startsWith("resizable") ||
+      wrapper === "sidebar-parent" ||
+      wrapper === "app-shell-parent" ||
+      wrapper === "auth-layout-compact" ||
+      !skipPortal
+
+    if (useWrapper) {
+      const wrapped = renderPreviewWrapper(wrapper, {
+        componentName,
+        Component,
+        Components: ComponentsAny,
+        finalProps,
+        resolvedChildren,
+        toRenderableNode,
+        onPropsChange,
+      })
+      if (wrapped != null) return wrapped
     }
   }
 
-  // ChartContainer: without config and children, Recharts throws. Show placeholder.
-  if (componentName === 'ChartContainer') {
-    const hasConfig = finalProps.config != null && typeof finalProps.config === 'object' && Object.keys(finalProps.config).length > 0
-    const hasChildren = finalProps.children != null && (Array.isArray(finalProps.children) ? finalProps.children.length > 0 : true)
-    if (!hasConfig || !hasChildren) {
-      return (
-        <div
-          style={{
-            minWidth: 200,
-            minHeight: 200,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'hsl(var(--muted))',
-            borderRadius: '0.5rem',
-            color: 'hsl(var(--muted-foreground))',
-            fontSize: '0.875rem',
-          }}
-        >
-          Chart requires config and chart components
-        </div>
-      )
-    }
-  }
-
-  if (componentName === "Stack" || componentName === "Grid") {
-    const { items: itemsProp, renderItem: renderItemProp, children: _ch, ...layoutRest } = finalProps
-    const items = Array.isArray(itemsProp) ? itemsProp : ["A", "B", "C"]
-    const renderItem =
-      typeof renderItemProp === "function"
-        ? renderItemProp
-        : (item: unknown, _i: number) => (
-            <div className="rounded border border-border bg-background p-2 text-center text-sm tabular-nums">
-              {String(item)}
-            </div>
-          )
-    return <Component {...layoutRest} items={items} renderItem={renderItem} />
-  }
-
-  // FAB uses fixed positioning by design; force in-card positioning for preview.
-  if (componentName === "FAB") {
-    const previewFabProps = {
-      ...finalProps,
-      className: `${finalProps.className ?? ""} absolute bottom-2 right-2 z-10`,
-    }
-    return (
-      <div className="relative h-20 w-full">
-        <Component {...previewFabProps} />
-      </div>
-    )
-  }
-
-  if (componentName === "Overlay") {
-    const overlayBody =
-      resolvedChildren ?? (
-        <div className="mx-auto mt-10 max-w-[220px] rounded-lg border border-border bg-background p-3 text-center text-sm shadow-md">
-          Overlay content
-        </div>
-      )
-    return (
-      <div
-        ref={setOverlayHost}
-        className="relative isolate h-44 w-full overflow-hidden rounded-md border border-border bg-muted/20"
-      >
-        <p className="pointer-events-none p-2 text-[10px] text-muted-foreground">
-          Scoped preview (portal into this box, absolute inset)
-        </p>
-        {overlayHost ? (
-          <Component
-            {...finalProps}
-            fixed={false}
-            container={overlayHost}
-            open={finalProps.open !== false}
-            onClose={finalProps.onClose ?? (() => {})}
-          >
-            {overlayBody}
-          </Component>
-        ) : null}
-      </div>
-    )
-  }
-
-  if (componentName === "ResizablePanelGroup") {
-    const Group = ComponentsAny.ResizablePanelGroup
-    const Panel = ComponentsAny.ResizablePanel
-    const Handle = ComponentsAny.ResizableHandle
-    const { className: groupClass, ...groupRest } = finalProps
-    return (
-      <Group
-        {...groupRest}
-        className={`min-h-[104px] w-full max-w-full rounded-md border border-border ${groupClass ?? ""}`}
-      >
-        <Panel defaultSize={33} minSize={10} className="flex items-center justify-center bg-muted/25 text-xs text-muted-foreground">
-          A
-        </Panel>
-        <Handle withHandle />
-        <Panel defaultSize={67} minSize={10} className="flex items-center justify-center bg-muted/40 text-xs text-muted-foreground">
-          B
-        </Panel>
-      </Group>
-    )
-  }
-
-  if (componentName === "ResizablePanel") {
-    const Group = ComponentsAny.ResizablePanelGroup
-    const Panel = ComponentsAny.ResizablePanel
-    const Handle = ComponentsAny.ResizableHandle
-    return (
-      <Group
-        direction="horizontal"
-        className="min-h-[104px] w-full max-w-full rounded-md border border-border"
-      >
-        <Component
-          {...finalProps}
-          defaultSize={finalProps.defaultSize ?? 40}
-          minSize={finalProps.minSize ?? 10}
-          className={`flex items-center justify-center bg-muted/25 text-xs ${finalProps.className ?? ""}`}
-        >
-          {resolvedChildren ?? "Panel"}
-        </Component>
-        <Handle withHandle />
-        <Panel defaultSize={60} minSize={10} className="flex items-center justify-center bg-muted/40 text-xs text-muted-foreground">
-          B
-        </Panel>
-      </Group>
-    )
-  }
-
-  if (componentName === "ResizableHandle") {
-    const Group = ComponentsAny.ResizablePanelGroup
-    const Panel = ComponentsAny.ResizablePanel
-    return (
-      <Group direction="horizontal" className="min-h-[104px] w-full max-w-full rounded-md border border-border">
-        <Panel defaultSize={40} minSize={10} className="flex items-center justify-center bg-muted/25 text-xs text-muted-foreground">
-          A
-        </Panel>
-        <Component {...finalProps} withHandle={finalProps.withHandle !== false} />
-        <Panel defaultSize={60} minSize={10} className="flex items-center justify-center bg-muted/40 text-xs text-muted-foreground">
-          B
-        </Panel>
-      </Group>
-    )
-  }
-
-  // Render component
   return resolvedChildren != null ? (
     <Component {...finalProps}>{resolvedChildren}</Component>
   ) : (

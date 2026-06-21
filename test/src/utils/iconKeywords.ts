@@ -1,0 +1,58 @@
+import {
+  AlertTriangle,
+  Bell,
+  Calendar,
+  Check,
+  ChevronDown,
+  Clock,
+  Copy,
+  CreditCard,
+  File,
+  Folder,
+  Heart,
+  Home,
+  Info,
+  Loader2,
+  Mail,
+  Menu,
+  Plus,
+  Search,
+  Settings,
+  Star,
+  Trash2,
+  User,
+  X,
+  type LucideIcon,
+} from "lucide-react"
+
+/** Gallery + string `left`/`icon` props — keyword → lucide icon */
+export const keywordIconMap: Record<string, LucideIcon> = {
+  search: Search,
+  plus: Plus,
+  check: Check,
+  x: X,
+  star: Star,
+  heart: Heart,
+  user: User,
+  settings: Settings,
+  info: Info,
+  warning: AlertTriangle,
+  loader: Loader2,
+  bell: Bell,
+  home: Home,
+  folder: Folder,
+  file: File,
+  menu: Menu,
+  mail: Mail,
+  calendar: Calendar,
+  clock: Clock,
+  copy: Copy,
+  trash: Trash2,
+  delete: Trash2,
+  "credit-card": CreditCard,
+  chevron: ChevronDown,
+}
+
+export function resolveKeywordIcon(keyword: string): LucideIcon | undefined {
+  return keywordIconMap[keyword.trim().toLowerCase()]
+}

@@ -131,12 +131,36 @@ export const fieldSurfaceVariants = cva(fieldSurfaceBase, {
     },
   },
   compoundVariants: [
-    { control: "input", size: "sm", class: "h-8 text-sm px-2.5" },
-    { control: "input", size: "md", class: "h-10 text-sm px-3" },
-    { control: "input", size: "lg", class: "h-11 text-base px-3.5" },
-    { control: "textarea", size: "sm", class: "text-sm px-2.5 py-2" },
-    { control: "textarea", size: "md", class: "text-sm px-3 py-2.5" },
-    { control: "textarea", size: "lg", class: "text-base px-3.5 py-3" },
+    {
+      control: "input",
+      size: "sm",
+      class: "h-[var(--control-height-sm,2rem)] text-sm px-[var(--control-padding-sm,0.625rem)]",
+    },
+    {
+      control: "input",
+      size: "md",
+      class: "h-[var(--control-height-md,2.5rem)] text-sm px-[var(--control-padding-md,0.75rem)]",
+    },
+    {
+      control: "input",
+      size: "lg",
+      class: "h-[var(--control-height-lg,2.75rem)] text-base px-[var(--control-padding-lg,0.875rem)]",
+    },
+    {
+      control: "textarea",
+      size: "sm",
+      class: "text-sm px-[var(--control-padding-sm,0.625rem)] py-2",
+    },
+    {
+      control: "textarea",
+      size: "md",
+      class: "text-sm px-[var(--control-padding-md,0.75rem)] py-2.5",
+    },
+    {
+      control: "textarea",
+      size: "lg",
+      class: "text-base px-[var(--control-padding-lg,0.875rem)] py-3",
+    },
   ],
   defaultVariants: {
     control: "input",

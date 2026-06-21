@@ -35,6 +35,30 @@ export const baseThemeCategories = {
                 file: 'color/dark.json',
                 icon: '🌙',
                 description: 'Dark theme with dark background'
+            },
+            ocean: {
+                name: 'Ocean',
+                file: 'color/ocean.json',
+                icon: '🌊',
+                description: 'Teal accent on a light aqua surface'
+            },
+            forest: {
+                name: 'Forest',
+                file: 'color/forest.json',
+                icon: '🌲',
+                description: 'Green accent on a soft natural background'
+            },
+            rose: {
+                name: 'Rose',
+                file: 'color/rose.json',
+                icon: '🌹',
+                description: 'Rose accent with warm pink surfaces'
+            },
+            midnight: {
+                name: 'Midnight',
+                file: 'color/midnight.json',
+                icon: '🌌',
+                description: 'Deep indigo dark theme'
             }
         }
     },

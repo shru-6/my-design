@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { Spinner } from "./Spinner"
 import { Pill, type PillProps } from "./Pill"
 
 type PillTone = "neutral" | "info" | "success" | "warning" | "danger"
@@ -12,6 +13,8 @@ export interface PillItem {
   disabled?: boolean
   left?: React.ReactNode
   selected?: boolean
+  dot?: boolean
+  loading?: boolean
 }
 
 const groupVariants = cva("flex", {
@@ -48,8 +51,12 @@ export interface PillGroupProps
   overflowLabel?: string
   children?: React.ReactNode
   size?: PillProps["size"]
-  /** Maps to Pill `appearance` (solid / subtle / outline / ghost). */
+  /** Maps to Pill `appearance` (solid / subtle / outline / ghost). Ignored when `toggleSurface` is set. */
   variant?: PillProps["appearance"]
+  /** Button-style surface for every pill (`primary` / `secondary` / `outline` / `ghost`). */
+  toggleSurface?: PillProps["toggleSurface"]
+  /** Disables all pills and shows a trailing spinner. */
+  loading?: boolean
 }
 
 export function PillGroup({
@@ -67,11 +74,16 @@ export function PillGroup({
   children,
   size,
   variant,
+  toggleSurface,
+  loading: groupLoading,
   gap,
   wrap,
   className,
   ...props
 }: PillGroupProps) {
+  const groupBusy = Boolean(groupLoading)
+  const resolvedToggleSurface =
+    toggleSurface != null && toggleSurface !== "" ? toggleSurface : undefined
   const initialSelectedValues = React.useMemo(() => {
     if (defaultValue) return defaultValue
     return items.filter((item) => item.selected).map((item) => item.value)
@@ -94,7 +106,7 @@ export function PillGroup({
     typeof maxVisible === "number" && maxVisible >= 0 ? Math.max(0, internalItems.length - maxVisible) : 0
 
   const handleToggle = (item: PillItem) => {
-    if (item.disabled || !selectable) return
+    if (groupBusy || item.disabled || !selectable) return
 
     const isSelected = selectedValues.includes(item.value)
     const next = multiple
@@ -113,7 +125,7 @@ export function PillGroup({
   }
 
   const handleRemove = (item: PillItem) => {
-    if (!removable || item.disabled) return
+    if (groupBusy || !removable || item.disabled) return
 
     setInternalItems((prev) => prev.filter((pill) => pill.value !== item.value))
 
@@ -135,8 +147,8 @@ export function PillGroup({
           ? selectedValues.includes(item.value)
           : Boolean(item.selected)
         const badgeClassName = cn(
-          isInteractive && "cursor-pointer hover:opacity-90",
-          item.disabled && "opacity-60 cursor-not-allowed"
+          isInteractive && !groupBusy && "cursor-pointer hover:opacity-90",
+          (item.disabled || groupBusy) && "cursor-not-allowed opacity-60"
         )
         const removeNode =
           removable && !item.disabled ? (
@@ -168,27 +180,34 @@ export function PillGroup({
               <Pill
                 as="button"
                 onClick={() => handleToggle(item)}
-                disabled={item.disabled}
+                disabled={item.disabled || groupBusy}
                 aria-pressed={selectable ? selected : undefined}
                 size={size}
-                appearance={variant}
+                appearance={resolvedToggleSurface != null ? undefined : variant}
                 tone={item.tone ?? "neutral"}
+                toggleSurface={resolvedToggleSurface}
                 selected={selected}
                 left={item.left}
                 right={removeNode}
                 className={badgeClassName}
+                dot={item.dot}
+                loading={!groupBusy && Boolean(item.loading)}
               >
                 {item.label}
               </Pill>
             ) : (
               <Pill
                 size={size}
-                appearance={variant}
+                appearance={resolvedToggleSurface != null ? undefined : variant}
                 tone={item.tone ?? "neutral"}
+                toggleSurface={resolvedToggleSurface}
                 selected={selected}
                 left={item.left}
                 right={removeNode}
                 className={badgeClassName}
+                dot={item.dot}
+                loading={!groupBusy && Boolean(item.loading)}
+                disabled={item.disabled || groupBusy}
               >
                 {item.label}
               </Pill>
@@ -197,11 +216,18 @@ export function PillGroup({
         )
       })}
       {overflowCount > 0 && (
-        <Pill size={size} appearance="outline" tone="neutral">
+        <Pill size={size} appearance="outline" tone="neutral" disabled={groupBusy}>
           {overflowLabel.replace("{count}", String(overflowCount))}
         </Pill>
       )}
+      {groupBusy ? (
+        <span className="inline-flex items-center self-center pl-1" aria-busy>
+          <Spinner size="sm" />
+        </span>
+      ) : null}
       {children}
     </div>
   )
 }
+
+PillGroup.displayName = "PillGroup"

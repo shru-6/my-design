@@ -1,5 +1,4 @@
 import * as React from "react"
-import * as AspectRatioPrimitive from "@radix-ui/react-aspect-ratio"
 import { cn } from "../../utils"
 
 const DEFAULT_RATIO = 16 / 9
@@ -35,8 +34,7 @@ function sizeToCss(value: number | string | undefined): string | undefined {
   return typeof value === "number" ? `${value}px` : value
 }
 
-export interface AspectRatioProps
-  extends Omit<React.ComponentPropsWithoutRef<typeof AspectRatioPrimitive.Root>, "ratio"> {
+export interface AspectRatioProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string
   /** Width ÷ height. Coerced if passed as string from forms. */
   ratio?: number | string
@@ -44,32 +42,26 @@ export interface AspectRatioProps
   maxWidth?: number | string
 }
 
-export const AspectRatio = React.forwardRef<
-  React.ElementRef<typeof AspectRatioPrimitive.Root>,
-  AspectRatioProps
->(({ className, ratio: ratioProp = DEFAULT_RATIO, children, minWidth, maxWidth, style, ...props }, ref) => {
-  const ratio = toRatioNumber(ratioProp, DEFAULT_RATIO)
-  const ratioLabel = formatAspectRatioLabel(ratio)
-  const resolvedChildren =
-    typeof children === "string" ? children.replace(/\{ratio\}/g, ratioLabel) : children
+export const AspectRatio = React.forwardRef<HTMLDivElement, AspectRatioProps>(
+  ({ className, ratio: ratioProp = DEFAULT_RATIO, children, minWidth, maxWidth, style, ...props }, ref) => {
+    const ratio = toRatioNumber(ratioProp, DEFAULT_RATIO)
+    const ratioLabel = formatAspectRatioLabel(ratio)
+    const resolvedChildren =
+      typeof children === "string" ? children.replace(/\{ratio\}/g, ratioLabel) : children
 
-  const mergedStyle: React.CSSProperties = {
-    ...style,
-    ...(minWidth != null && { minWidth: sizeToCss(minWidth) }),
-    ...(maxWidth != null && { maxWidth: sizeToCss(maxWidth) }),
+    const mergedStyle: React.CSSProperties = {
+      ...style,
+      aspectRatio: ratio,
+      ...(minWidth != null && { minWidth: sizeToCss(minWidth) }),
+      ...(maxWidth != null && { maxWidth: sizeToCss(maxWidth) }),
+    }
+
+    return (
+      <div ref={ref} className={cn("w-full overflow-hidden", className)} style={mergedStyle} {...props}>
+        {resolvedChildren}
+      </div>
+    )
   }
-
-  return (
-    <AspectRatioPrimitive.Root
-      ref={ref}
-      ratio={ratio}
-      className={cn("overflow-hidden", className)}
-      style={mergedStyle}
-      {...props}
-    >
-      {resolvedChildren}
-    </AspectRatioPrimitive.Root>
-  )
-})
+)
 
 AspectRatio.displayName = "AspectRatio"

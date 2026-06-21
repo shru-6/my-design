@@ -1,17 +1,55 @@
 {
   "_createdBy": "shru-design-system library",
+  "name": "Minimal",
+  "icon": "⚪",
+  "description": "Neutral gray palette with tighter component spacing",
   "color": {
     "primary": "{palette.gray.700}",
     "primary-foreground": "{palette.white}",
     "background": "{palette.white}",
-    "foreground": "{palette.gray.900}"
+    "foreground": "{palette.gray.900}",
+    "card": "{palette.white}",
+    "card-foreground": "{palette.gray.900}",
+    "popover": "{palette.white}",
+    "popover-foreground": "{palette.gray.900}",
+    "secondary": "{palette.gray.100}",
+    "secondary-foreground": "{palette.gray.900}",
+    "muted": "{palette.gray.50}",
+    "muted-foreground": "{palette.gray.500}",
+    "accent": "{palette.gray.100}",
+    "accent-foreground": "{palette.gray.900}",
+    "destructive": "{palette.red.600}",
+    "destructive-foreground": "{palette.white}",
+    "success": "{palette.green.700}",
+    "success-foreground": "{palette.white}",
+    "warning": "{palette.amber.600}",
+    "warning-foreground": "{palette.gray.900}",
+    "info": "{palette.sky.500}",
+    "info-foreground": "{palette.white}",
+    "border": "{palette.gray.200}",
+    "input": "{palette.gray.200}",
+    "ring": "{palette.gray.400}",
+    "skeleton": "{palette.gray.200}"
   },
   "spacing": {
     "component": {
       "xs": "0.375rem",
       "sm": "0.5rem",
-      "md": "0.75rem"
+      "md": "0.75rem",
+      "lg": "1rem",
+      "xl": "1.25rem"
+    }
+  },
+  "control": {
+    "height": {
+      "sm": "1.875rem",
+      "md": "2.125rem",
+      "lg": "2.375rem"
+    },
+    "padding": {
+      "sm": "0.5rem",
+      "md": "0.625rem",
+      "lg": "0.75rem"
     }
   }
 }
-

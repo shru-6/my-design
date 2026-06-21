@@ -5,7 +5,7 @@ import { disabledControl, focusRing } from "../inputs/fieldPieces"
 import { Icon } from "../utilities/Icon"
 
 const fabVariants = cva(
-  `fixed z-30 inline-flex items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${focusRing} ${disabledControl}`,
+  `fixed z-sticky inline-flex items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${focusRing} ${disabledControl}`,
   {
     variants: {
       variant: {
@@ -39,11 +39,13 @@ export interface FABProps
 }
 
 export const FAB = React.forwardRef<HTMLButtonElement, FABProps>(
-  ({ left, ariaLabel, variant, size, position, className, ...props }, ref) => (
+  ({ left, ariaLabel, variant, size, position, className, onClick, type = "button", ...props }, ref) => (
     <button
       ref={ref}
+      type={type}
       aria-label={ariaLabel}
       className={cn(fabVariants({ variant, size, position }), className)}
+      onClick={onClick}
       {...props}
     >
       <Icon node={left} size={size === "lg" ? "lg" : "md"} />

@@ -6,7 +6,7 @@ import { Spinner } from "../data-display/Spinner"
 import { Icon } from "../utilities/Icon"
 
 const buttonVariants = cva(
-  `inline-flex items-center justify-center gap-2 rounded-md font-medium transition-colors ${focusRing} ${focusRingOffset} ${disabledControl}`,
+  `inline-flex items-center justify-center gap-2 rounded-[var(--radius-button,0.375rem)] font-medium transition-colors ${focusRing} ${focusRingOffset} ${disabledControl}`,
   {
     variants: {
       variant: {
@@ -17,9 +17,9 @@ const buttonVariants = cva(
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
       size: {
-        sm: "h-8 px-3 text-sm",
-        md: "h-9 px-4 text-sm",
-        lg: "h-11 px-6 text-base",
+        sm: "h-[var(--control-height-sm,2rem)] px-[var(--control-padding-sm,0.625rem)] text-sm",
+        md: "h-[var(--control-height-md,2.5rem)] px-[var(--control-padding-md,0.75rem)] text-sm",
+        lg: "h-[var(--control-height-lg,2.75rem)] px-[var(--control-padding-lg,0.875rem)] text-base",
       },
       iconOnly: {
         true: "aspect-square p-0",
@@ -27,9 +27,9 @@ const buttonVariants = cva(
       },
     },
     compoundVariants: [
-      { iconOnly: true, size: "sm", class: "w-8" },
-      { iconOnly: true, size: "md", class: "w-9" },
-      { iconOnly: true, size: "lg", class: "w-11" },
+      { iconOnly: true, size: "sm", class: "w-[var(--control-height-sm,2rem)]" },
+      { iconOnly: true, size: "md", class: "w-[var(--control-height-md,2.5rem)]" },
+      { iconOnly: true, size: "lg", class: "w-[var(--control-height-lg,2.75rem)]" },
     ],
     defaultVariants: {
       variant: "primary",
@@ -53,6 +53,7 @@ export type ButtonProps = ButtonBaseProps & {
   children?: React.ReactNode
   href?: string
   label?: string
+  type?: "button" | "submit" | "reset"
 }
 
 export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, ButtonProps>((props, ref) => {
@@ -68,6 +69,7 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
     children,
     href,
     label,
+    type = "button",
     disabled,
     ...domProps
   } = props
@@ -102,7 +104,7 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
   return (
     <button
       ref={ref as React.ForwardedRef<HTMLButtonElement>}
-      type="button"
+      type={type}
       aria-label={ariaLabel}
       aria-busy={busy || undefined}
       disabled={disabled || busy}
