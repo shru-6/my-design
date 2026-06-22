@@ -306,7 +306,7 @@ _____ _____ ___________
   Button      Button
   Link        Link
   Text        Dropdown
-  Collapsible Separator
+  Collapsible CollapsiblePanel Separator
   Separator
 
 
@@ -569,6 +569,7 @@ One-level nesting from `subComponentsMap.ts`.
 | Checkbox | Text, HelperText |
 | CodeBlock | CopyButton, Text |
 | Collapsible | Button |
+| CollapsiblePanel | Button |
 | Command | SearchInput, Spinner, Icon |
 | ConfirmModal | TriggerModal, PageHeader, Button, Icon |
 | ContextMenu | Dropdown, Icon |

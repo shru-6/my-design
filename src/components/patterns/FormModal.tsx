@@ -1,8 +1,10 @@
 import * as React from "react"
 import { Button, type ButtonProps } from "../actions/Button"
 import { Form, type FormProps } from "../inputs/Form"
-import { FormField, type FormFieldType } from "../inputs/FormField"
-import { type ModalTriggerProps } from "../overlays/Modal"
+import { FormField, type FormFieldProps, type FormFieldType } from "../inputs/FormField"
+import { useFormContext, type FormFieldRenderProps } from "../inputs/formContext"
+import { type SelectOption } from "../inputs/Select"
+import { type ModalTriggerProps } from "./TriggerModal"
 import { type OverlayPortalContainer } from "../overlays/Overlay"
 import { PageHeader } from "./PageHeader"
 import { TriggerModal, type TriggerModalProps } from "./TriggerModal"
@@ -10,15 +12,53 @@ import { useControllableOpen } from "../overlays/useControllableOpen"
 
 export type FormModalMode = "create" | "edit"
 
+export type FormFieldChangeHelpers = {
+  values: Record<string, unknown>
+  setValue: (name: string, value: unknown) => void
+}
+
+/** Passed to `FormFieldSchema.render` / `renderAfter` — form helpers plus field metadata. */
+export type FormFieldSchemaRenderHelpers = FormFieldChangeHelpers & {
+  name: string
+  field: FormFieldRenderProps
+  errorMessage?: string
+  disabled?: boolean
+}
+
 export type FormFieldSchema = {
   name: string
   type?: FormFieldType
-  label?: string
-  placeholder?: string
+  label?: React.ReactNode
+  placeholder?: string | ((values: Record<string, unknown>) => string)
   required?: boolean
   disabled?: boolean
   validate?: boolean | ((value: string) => string | undefined)
-  errorMessage?: string
+  errorMessage?: string | ((values: Record<string, unknown>) => string | undefined)
+  /** Select options — static array or derived from current form values. */
+  items?: SelectOption[] | ((values: Record<string, unknown>) => SelectOption[])
+  /** Hide the field unless this returns true. */
+  showWhen?: (values: Record<string, unknown>) => boolean
+  /** Side effects after value change (e.g. reset dependent fields). */
+  onValueChange?: (value: string, helpers: FormFieldChangeHelpers) => void
+  rows?: number
+  /** Upload field options when `type="upload"`. */
+  accept?: string
+  dragAndDrop?: boolean
+  multiple?: boolean
+  maxSize?: number
+  maxFiles?: number
+  loading?: boolean
+  onUpload?: (files: File[], helpers: FormFieldChangeHelpers) => void | Promise<void>
+  /**
+   * Full custom field UI — replaces auto-render for this schema row.
+   * Receives form helpers and the resolved field control props.
+   */
+  render?: (helpers: FormFieldSchemaRenderHelpers) => React.ReactNode
+  /**
+   * Renders below the auto-rendered control (e.g. VariablePills under a textarea).
+   * Ignored when `render` is set.
+   */
+  renderAfter?: (helpers: FormFieldSchemaRenderHelpers) => React.ReactNode
 }
 
 export interface FormModalProps extends Omit<TriggerModalProps, "header" | "footer" | "children" | "triggerProps"> {
@@ -45,6 +85,134 @@ export interface FormModalProps extends Omit<TriggerModalProps, "header" | "foot
   triggerModalProps?: Partial<TriggerModalProps>
   className?: string
   children?: React.ReactNode
+}
+
+function resolvePlaceholder(
+  placeholder: FormFieldSchema["placeholder"],
+  values: Record<string, unknown>
+): string | undefined {
+  if (placeholder == null) return undefined
+  return typeof placeholder === "function" ? placeholder(values) : placeholder
+}
+
+function resolveErrorMessage(
+  errorMessage: FormFieldSchema["errorMessage"],
+  values: Record<string, unknown>
+): string | undefined {
+  if (errorMessage == null) return undefined
+  return typeof errorMessage === "function" ? errorMessage(values) : errorMessage
+}
+
+function SchemaFieldRow({
+  field,
+  busy,
+}: {
+  field: FormFieldSchema
+  busy: boolean
+}) {
+  const form = useFormContext()
+  const values = form?.values ?? {}
+
+  if (field.showWhen && !field.showWhen(values)) return null
+
+  const items = typeof field.items === "function" ? field.items(values) : field.items
+  const placeholder = resolvePlaceholder(field.placeholder, values)
+  const resolvedError = resolveErrorMessage(field.errorMessage, values)
+  const disabled = field.disabled ?? busy
+
+  const {
+    showWhen: _showWhen,
+    onValueChange,
+    onUpload,
+    placeholder: _placeholder,
+    items: _items,
+    errorMessage: _errorMessage,
+    render,
+    renderAfter,
+    ...fieldProps
+  } = field
+
+  const changeHelpers: FormFieldChangeHelpers = {
+    values: form?.values ?? values,
+    setValue: form?.setValue.bind(form) ?? (() => {}),
+  }
+
+  if (render) {
+    return (
+      <FormField
+        name={field.name}
+        label={field.label}
+        disabled={disabled}
+        errorMessage={resolvedError}
+        render={(fieldControl) =>
+          render({
+            ...changeHelpers,
+            name: field.name,
+            field: fieldControl,
+            errorMessage: resolvedError,
+            disabled,
+          })
+        }
+      />
+    )
+  }
+
+  const props: FormFieldProps = {
+    ...fieldProps,
+    placeholder,
+    items,
+    disabled,
+    errorMessage: resolvedError,
+    onValueChange: onValueChange
+      ? (value) => onValueChange(value, changeHelpers)
+      : undefined,
+    onUpload: onUpload
+      ? (files) => onUpload(files, changeHelpers)
+      : undefined,
+  }
+
+  const row = <FormField {...props} />
+
+  if (!renderAfter) return row
+
+  const fieldControl: FormFieldRenderProps = {
+    id: `${field.name}-field`,
+    name: field.name,
+    value: String(form?.values[field.name] ?? ""),
+    disabled,
+    errorMessage: resolvedError,
+    onChange: (value) => form?.setValue(field.name, value),
+    onBlur: () => form?.setTouched(field.name, true),
+  }
+
+  return (
+    <React.Fragment key={field.name}>
+      {row}
+      {renderAfter({
+        ...changeHelpers,
+        name: field.name,
+        field: fieldControl,
+        errorMessage: resolvedError,
+        disabled,
+      })}
+    </React.Fragment>
+  )
+}
+
+function FormModalFields({
+  fields,
+  busy,
+}: {
+  fields: FormFieldSchema[]
+  busy: boolean
+}) {
+  return (
+    <>
+      {fields.map((field) => (
+        <SchemaFieldRow key={field.name} field={field} busy={busy} />
+      ))}
+    </>
+  )
 }
 
 export function FormModal({
@@ -110,7 +278,9 @@ export function FormModal({
     if (formProps?.initialValues) return formProps.initialValues
     if (!fields) return {}
     return fields.reduce<Record<string, unknown>>((acc, field) => {
-      acc[field.name] = ""
+      if (field.type === "checkbox") acc[field.name] = "false"
+      else if (field.type === "upload") acc[field.name] = ""
+      else acc[field.name] = ""
       return acc
     }, {})
   }, [fields, formProps?.initialValues])
@@ -150,10 +320,8 @@ export function FormModal({
         submitButtonProps={submitButtonProps}
         cancelButtonProps={cancelButtonProps}
       >
-        {children ??
-          fields?.map((field) => (
-            <FormField key={field.name} {...field} disabled={field.disabled ?? busy} />
-          ))}
+        {fields?.length ? <FormModalFields fields={fields} busy={busy} /> : null}
+        {children}
       </Form>
     </TriggerModal>
   )

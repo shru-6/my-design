@@ -4,7 +4,6 @@ import { cn } from "../../utils"
 import { Text } from "../data-display/Text"
 import { Pill } from "../data-display/Pill"
 import { Separator } from "../layout/Separator"
-import { Icon } from "../utilities/Icon"
 
 const pageHeaderVariants = cva("w-full", {
   variants: {
@@ -64,11 +63,7 @@ export function PageHeader({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="flex min-w-0 flex-1 items-start gap-3">
-          {left ? (
-            <span className="shrink-0 pt-0.5 text-muted-foreground">
-              <Icon node={left} size="md" />
-            </span>
-          ) : null}
+          {left ? <span className="shrink-0 pt-0.5">{left}</span> : null}
           <div className="min-w-0 flex flex-col gap-1">
             <div className="flex flex-wrap items-center gap-2">
               {heading ? (

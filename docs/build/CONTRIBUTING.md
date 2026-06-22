@@ -8,7 +8,7 @@ Onboard to the repository before changing code. For gallery internals see [GALLE
 
 | Path | Purpose |
 |------|---------|
-| `src/components/{category}/` | Shipped React components (98) |
+| `src/components/{category}/` | Shipped React components (99) |
 | `src/themes/` | Theme engine, `useTheme`, `ThemeToggle`, `tokenLoader` |
 | `src/index.ts` | Public exports — must match [reference/COMPONENTS.md](../reference/COMPONENTS.md) |
 | `scripts/tokens/` | **Source of truth** for theme JSON |

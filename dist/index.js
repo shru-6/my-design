@@ -5,8 +5,8 @@ var classVarianceAuthority = require('class-variance-authority');
 var clsx = require('clsx');
 var tailwindMerge = require('tailwind-merge');
 var jsxRuntime = require('react/jsx-runtime');
-var reactDom = require('react-dom');
 var lucideReact = require('lucide-react');
+var reactDom = require('react-dom');
 var SliderPrimitive = require('@radix-ui/react-slider');
 var inputOtp = require('input-otp');
 var reactResizablePanels = require('react-resizable-panels');
@@ -887,13 +887,17 @@ function TooltipProvider({ children }) {
   return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children });
 }
 TooltipProvider.displayName = "TooltipProvider";
+var defaultCopyIcon = /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Copy, { className: "h-4 w-4" });
+var defaultCopiedIcon = /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-4 w-4" });
 var CopyButton = React9__namespace.forwardRef(
   ({
     value,
     onValueCopy,
     onCopyError,
-    copyLabel = "Copy",
+    copyLabel,
     copiedLabel = "Copied!",
+    copyIcon = defaultCopyIcon,
+    copiedIcon = defaultCopiedIcon,
     timeout = 2e3,
     tooltip = true,
     tooltipLabel,
@@ -901,6 +905,9 @@ var CopyButton = React9__namespace.forwardRef(
     tooltipContent,
     children,
     disabled,
+    left,
+    iconOnly,
+    ariaLabel,
     ...buttonProps
   }, ref) => {
     const [copied, setCopied] = React9__namespace.useState(false);
@@ -918,9 +925,27 @@ var CopyButton = React9__namespace.forwardRef(
         onCopyError?.(e);
       }
     };
-    const button = /* @__PURE__ */ jsxRuntime.jsx(Button, { ref, onClick: handleCopy, disabled, ...buttonProps, children: children ?? (copied ? copiedLabel : copyLabel) });
+    const hasCustomBody = children != null;
+    const hasLabel = copyLabel != null;
+    const useIcon = !hasCustomBody && !hasLabel;
+    const resolvedLeft = useIcon ? copied ? copiedIcon : copyIcon : left;
+    const resolvedIconOnly = useIcon || iconOnly;
+    const resolvedAriaLabel = ariaLabel ?? (resolvedIconOnly ? copied ? "Copied" : "Copy" : void 0);
+    const button = /* @__PURE__ */ jsxRuntime.jsx(
+      Button,
+      {
+        ref,
+        onClick: handleCopy,
+        disabled,
+        left: resolvedLeft,
+        iconOnly: resolvedIconOnly,
+        ariaLabel: resolvedAriaLabel,
+        ...buttonProps,
+        children: hasCustomBody ? children : hasLabel ? copied ? copiedLabel : copyLabel : null
+      }
+    );
     if (!tooltip) return button;
-    const idleTooltip = tooltipLabel ?? tooltipContent ?? copyLabel;
+    const idleTooltip = tooltipLabel ?? tooltipContent ?? copyLabel ?? "Copy";
     const copiedTooltip = tooltipCopiedLabel ?? copiedLabel;
     const content = copied ? copiedTooltip : idleTooltip;
     return /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content, disabled, children: button });
@@ -3525,7 +3550,8 @@ var inlineInputClass = cn(
   "m-0 min-w-[4ch] max-w-full rounded-sm border-0 border-b border-transparent bg-transparent p-0 text-sm leading-5 text-foreground shadow-none outline-none",
   "transition-colors placeholder:text-muted-foreground",
   "hover:border-border/60 focus:border-border focus:bg-muted/30",
-  focusRing
+  focusRing,
+  disabledControl
 );
 function fieldWidthChars(value, placeholder, min = 4) {
   return Math.min(40, Math.max(min, value.length || placeholder.length || min));
@@ -3543,39 +3569,58 @@ function InlineEdit({
   onCancel,
   placeholder = "Click to edit",
   disabled,
+  loading,
   required,
   validate,
   editTrigger = "click",
   saveOnBlur = false,
   saveOnEnter = true,
+  saveButtonProps,
+  cancelButtonProps,
   className,
   ...rest
 }) {
   const [editing, setEditing] = React9__namespace.useState(false);
   const [internal, setInternal] = React9__namespace.useState(defaultValue);
   const [draft, setDraft] = React9__namespace.useState(defaultValue);
+  const [saving, setSaving] = React9__namespace.useState(false);
   const inputRef = React9__namespace.useRef(null);
   const isControlled = value !== void 0;
   const displayValue = isControlled ? value : internal;
+  const busy = Boolean(loading || saving);
+  const locked = Boolean(disabled || busy);
   React9__namespace.useEffect(() => {
     if (!editing) setDraft(displayValue);
   }, [displayValue, editing]);
   const startEdit = () => {
-    if (disabled) return;
+    if (locked) return;
     setDraft(displayValue);
     setEditing(true);
   };
   const cancel = () => {
+    if (busy) return;
     setDraft(displayValue);
     setEditing(false);
     onCancel?.();
   };
-  const save = () => {
+  const save = React9__namespace.useCallback(async () => {
+    if (busy) return;
     if (!validateDraft(draft, validate, required)) return;
+    const result = onSave?.(draft);
+    if (result != null && typeof result.then === "function") {
+      setSaving(true);
+      try {
+        await result;
+        if (!isControlled) setInternal(draft);
+        setEditing(false);
+      } finally {
+        setSaving(false);
+      }
+      return;
+    }
     if (!isControlled) setInternal(draft);
-    onSave?.(draft);
     setEditing(false);
-  };
+  }, [busy, draft, isControlled, onSave, required, validate]);
   if (editing) {
     return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: cn("inline-flex max-w-full items-center gap-0.5", className), ...rest, children: [
       /* @__PURE__ */ jsxRuntime.jsx(
@@ -3587,14 +3632,17 @@ function InlineEdit({
           required,
           placeholder,
           autoFocus: true,
+          disabled: busy,
+          "aria-busy": busy || void 0,
           className: inlineInputClass,
           style: { width: `${fieldWidthChars(draft, placeholder)}ch` },
           onChange: (e) => setDraft(e.target.value),
-          onBlur: saveOnBlur ? save : void 0,
+          onBlur: saveOnBlur && !busy ? () => void save() : void 0,
           onKeyDown: (e) => {
+            if (busy) return;
             if (saveOnEnter && e.key === "Enter") {
               e.preventDefault();
-              save();
+              void save();
             }
             if (e.key === "Escape") {
               e.preventDefault();
@@ -3604,23 +3652,31 @@ function InlineEdit({
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
+        Button,
         {
           type: "button",
-          "aria-label": "Save",
-          className: "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-primary hover:bg-muted",
-          onClick: save,
-          children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-3.5 w-3.5" })
+          variant: "ghost",
+          size: "sm",
+          iconOnly: true,
+          ariaLabel: "Save",
+          loading: busy,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-3.5 w-3.5" }),
+          onClick: () => void save(),
+          ...saveButtonProps
         }
       ),
       /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
+        Button,
         {
           type: "button",
-          "aria-label": "Cancel",
-          className: "inline-flex h-5 w-5 shrink-0 items-center justify-center rounded text-muted-foreground hover:bg-muted",
+          variant: "ghost",
+          size: "sm",
+          iconOnly: true,
+          ariaLabel: "Cancel",
+          disabled: busy,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-3.5 w-3.5" }),
           onClick: cancel,
-          children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-3.5 w-3.5" })
+          ...cancelButtonProps
         }
       )
     ] });
@@ -3629,16 +3685,17 @@ function InlineEdit({
     "button",
     {
       type: "button",
-      disabled,
+      disabled: locked,
+      "aria-busy": busy || void 0,
       className: cn(
         "group inline-flex max-w-full items-center gap-1 rounded-sm px-0.5 py-0 text-left leading-5 transition-colors hover:bg-muted/50",
-        disabled && "pointer-events-none opacity-50"
+        locked && "pointer-events-none opacity-50"
       ),
       onClick: editTrigger === "click" ? startEdit : void 0,
       onDoubleClick: editTrigger === "doubleClick" ? startEdit : void 0,
       children: [
         /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "span", size: "sm", className: "truncate leading-5", children: displayValue || /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: placeholder }) }),
-        !disabled ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Pencil, { className: "h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-70" }) : null
+        !locked ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Pencil, { className: "h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-70" }) : null
       ]
     }
   ) });
@@ -3982,7 +4039,17 @@ function FormField({
   render,
   children,
   className,
-  inputProps
+  inputProps,
+  onValueChange,
+  items,
+  rows,
+  accept,
+  dragAndDrop,
+  multiple,
+  maxSize,
+  maxFiles,
+  loading,
+  onUpload
 }) {
   const form = useFormContext();
   const fieldId = React9__namespace.useId();
@@ -3995,6 +4062,7 @@ function FormField({
   const setValue = (next) => {
     onChangeProp?.(next);
     form?.setValue(name, next);
+    onValueChange?.(next);
     if (form && validate) {
       const err = resolveFieldError(next, validate, required, errorMessage);
       if (form.validateOn === "change" || form.submitted) {
@@ -4045,6 +4113,59 @@ function FormField({
       });
     }) });
   }
+  if (type === "select") {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      Select,
+      {
+        id: fieldId,
+        name,
+        label,
+        value,
+        placeholder,
+        required,
+        disabled: shared.disabled,
+        errorMessage: displayError,
+        items: items ?? [],
+        className,
+        onValueChange: setValue
+      }
+    );
+  }
+  if (type === "checkbox") {
+    const checked = value === "true";
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      Checkbox,
+      {
+        id: fieldId,
+        name,
+        label,
+        checked,
+        disabled: shared.disabled,
+        errorMessage: displayError,
+        className,
+        onChange: (next) => setValue(String(next))
+      }
+    );
+  }
+  if (type === "upload") {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      Upload,
+      {
+        label,
+        accept,
+        dragAndDrop,
+        multiple,
+        maxSize,
+        maxFiles,
+        disabled: shared.disabled,
+        loading,
+        errorMessage: displayError,
+        className,
+        onUpload: onUpload ?? (async () => {
+        })
+      }
+    );
+  }
   if (type === "textarea") {
     return /* @__PURE__ */ jsxRuntime.jsx(
       Textarea,
@@ -4059,6 +4180,7 @@ function FormField({
         validate: form?.validateOn === "submit" ? void 0 : validate,
         errorMessage: displayError,
         className,
+        rows,
         onChange: (e) => setValue(e.target.value),
         onBlur: handleBlur,
         ...inputProps
@@ -4638,31 +4760,257 @@ function Collapsible({
     onOpenChange?.(next);
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("w-full", className), ...props, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(
+    /* @__PURE__ */ jsxRuntime.jsx(
       Button,
       {
         variant: "ghost",
         disabled,
         "aria-expanded": open,
-        className: "h-auto w-full justify-between gap-2 px-2 py-2 text-left font-medium",
+        className: "h-auto w-full gap-2 px-2 py-2 text-left font-medium",
         onClick: () => setOpen(!open),
-        children: [
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0 flex-1", children: trigger }),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            lucideReact.ChevronDown,
-            {
-              className: cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", open && "rotate-180"),
-              "aria-hidden": true
-            }
-          )
-        ]
+        right: /* @__PURE__ */ jsxRuntime.jsx(
+          lucideReact.ChevronRight,
+          {
+            className: cn(
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+              open && "rotate-90"
+            ),
+            "aria-hidden": true
+          }
+        ),
+        children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0 flex-1 truncate text-left", children: trigger })
       }
     ),
-    open ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("text-sm px-2 py-2", showContentDivider && "border-t border-border"), children }) : null,
+    open ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("px-2 py-2 text-sm", showContentDivider && "border-t border-border"), children }) : null,
     footer ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: footer }) : null
   ] });
 }
 Collapsible.displayName = "Collapsible";
+function useControllableOpen({
+  open: openProp,
+  defaultOpen = false,
+  onOpenChange
+}) {
+  const [uncontrolled, setUncontrolled] = React9__namespace.useState(defaultOpen);
+  const isControlled = openProp !== void 0;
+  const open = isControlled ? openProp : uncontrolled;
+  const setOpen = React9__namespace.useCallback(
+    (next) => {
+      if (!isControlled) setUncontrolled(next);
+      onOpenChange?.(next);
+    },
+    [isControlled, onOpenChange]
+  );
+  return [open, setOpen];
+}
+var ICON_RAIL_WIDTH = {
+  sm: "var(--control-height-sm, 2rem)",
+  md: "var(--control-height-md, 2.5rem)",
+  lg: "var(--control-height-lg, 2.75rem)"
+};
+var collapsiblePanelRootVariants = classVarianceAuthority.cva("relative shrink-0 transition-[width,height] duration-200 ease-in-out", {
+  variants: {
+    closeDirection: {
+      left: "",
+      right: "",
+      top: "w-full min-w-0",
+      bottom: "w-full min-w-0"
+    },
+    crossAxis: {
+      full: "",
+      parent: "",
+      viewport: ""
+    }
+  },
+  compoundVariants: [
+    { closeDirection: ["left", "right"], crossAxis: "full", class: "h-full min-h-0" },
+    { closeDirection: ["left", "right"], crossAxis: "parent", class: "h-full min-h-0" },
+    { closeDirection: ["left", "right"], crossAxis: "viewport", class: "min-h-screen" },
+    { closeDirection: ["top", "bottom"], crossAxis: "full", class: "w-full" },
+    { closeDirection: ["top", "bottom"], crossAxis: "parent", class: "w-full min-w-0" }
+  ],
+  defaultVariants: {
+    closeDirection: "left",
+    crossAxis: "parent"
+  }
+});
+var collapsiblePanelSurfaceVariants = classVarianceAuthority.cva("flex h-full w-full overflow-hidden border-border bg-background", {
+  variants: {
+    closeDirection: {
+      left: "flex-col border-r",
+      right: "flex-col border-l border-r-0",
+      top: "flex-col border-b",
+      bottom: "flex-col border-t"
+    },
+    variant: {
+      default: "bg-background",
+      inset: "bg-muted/30"
+    }
+  },
+  defaultVariants: {
+    closeDirection: "left",
+    variant: "default"
+  }
+});
+var floaterTriggerVariants = classVarianceAuthority.cva("absolute z-10", {
+  variants: {
+    closeDirection: {
+      left: "left-full top-1/2 -translate-x-1/2 -translate-y-1/2",
+      right: "right-full top-1/2 translate-x-1/2 -translate-y-1/2",
+      top: "top-full left-1/2 -translate-x-1/2 -translate-y-1/2",
+      bottom: "bottom-full left-1/2 -translate-x-1/2 translate-y-1/2"
+    }
+  },
+  defaultVariants: {
+    closeDirection: "left"
+  }
+});
+function toCssSize(value, fallback) {
+  return typeof value === "number" ? `${value}px` : value;
+}
+function isHorizontalClose(closeDirection) {
+  return closeDirection === "left" || closeDirection === "right";
+}
+function isCollapsedSizeZero(resolved) {
+  const trimmed = resolved.trim();
+  if (trimmed === "0" || trimmed === "0px") return true;
+  const parsed = Number.parseFloat(trimmed);
+  return Number.isFinite(parsed) && parsed === 0;
+}
+function resolveCollapsedSize(collapsedSize, triggerPlacement, toggleButtonProps) {
+  if (collapsedSize !== void 0) {
+    return typeof collapsedSize === "number" ? `${collapsedSize}px` : collapsedSize;
+  }
+  if (triggerPlacement === "header") {
+    const buttonSize = toggleButtonProps?.size ?? "sm";
+    return ICON_RAIL_WIDTH[buttonSize];
+  }
+  return "0px";
+}
+function defaultToggleIcon(closeDirection, open) {
+  switch (closeDirection) {
+    case "left":
+      return open ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelLeftClose, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelLeftOpen, { className: "h-4 w-4" });
+    case "right":
+      return open ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelRightClose, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelRightOpen, { className: "h-4 w-4" });
+    case "top":
+      return open ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronUp, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4" });
+    case "bottom":
+      return open ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronUp, { className: "h-4 w-4" });
+  }
+}
+function mergeTrigger(trigger, onToggle, closeDirection, open, triggerVariant = "default", toggleButtonProps) {
+  if (trigger != null) {
+    if (React9__namespace.isValidElement(trigger)) {
+      return React9__namespace.cloneElement(trigger, {
+        onClick: (event) => {
+          trigger.props.onClick?.(event);
+          onToggle();
+        }
+      });
+    }
+    return trigger;
+  }
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    Button,
+    {
+      variant: "ghost",
+      size: "sm",
+      iconOnly: true,
+      ariaLabel: open ? "Collapse panel" : "Expand panel",
+      left: defaultToggleIcon(closeDirection, open),
+      onClick: onToggle,
+      ...toggleButtonProps,
+      className: cn(
+        triggerVariant === "pill" && "h-6 w-6 rounded-full border border-border bg-muted text-foreground shadow-md hover:bg-accent",
+        toggleButtonProps?.className
+      )
+    }
+  );
+}
+var CollapsiblePanel = React9__namespace.forwardRef(function CollapsiblePanel2({
+  open: openProp,
+  defaultOpen = true,
+  onOpenChange,
+  closeDirection = "left",
+  size = "16rem",
+  collapsedSize,
+  crossAxis = "parent",
+  trigger,
+  triggerPlacement = "none",
+  triggerVariant = "default",
+  toggleButtonProps,
+  header,
+  footer,
+  scrollable = true,
+  variant = "default",
+  className,
+  surfaceClassName,
+  contentClassName,
+  headerClassName,
+  footerClassName,
+  children,
+  style,
+  ...props
+}, ref) {
+  const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+  const horizontalClose = isHorizontalClose(closeDirection);
+  const resolvedCollapsed = resolveCollapsedSize(collapsedSize, triggerPlacement, toggleButtonProps);
+  const axisSize = open ? toCssSize(size) : resolvedCollapsed;
+  const collapsedToZero = isCollapsedSizeZero(resolvedCollapsed);
+  const showHeaderTrigger = triggerPlacement === "header";
+  const showFloaterTrigger = triggerPlacement === "floater";
+  const showHeaderRow = Boolean(header || showHeaderTrigger) && (open || showHeaderTrigger || !collapsedToZero);
+  const hideContent = !open && (collapsedToZero || showHeaderTrigger);
+  const toggle = () => setOpen(!open);
+  const triggerNode = mergeTrigger(trigger, toggle, closeDirection, open, triggerVariant, toggleButtonProps);
+  const axisStyle = horizontalClose ? { width: axisSize } : { height: axisSize };
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      ref,
+      "data-state": open ? "open" : "closed",
+      "data-close-direction": closeDirection,
+      className: cn(collapsiblePanelRootVariants({ closeDirection, crossAxis }), className),
+      style: { ...axisStyle, ...style },
+      ...props,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn(collapsiblePanelSurfaceVariants({ closeDirection, variant }), surfaceClassName), children: [
+          showHeaderRow ? /* @__PURE__ */ jsxRuntime.jsxs(
+            "div",
+            {
+              className: cn(
+                "flex shrink-0 items-center gap-2 border-b border-border px-2 py-2",
+                !open && showHeaderTrigger && "justify-center px-1",
+                headerClassName
+              ),
+              children: [
+                open && header ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1 truncate", children: header }) : null,
+                showHeaderTrigger ? triggerNode : null
+              ]
+            }
+          ) : null,
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: cn(
+                "min-h-0 min-w-0 flex-1",
+                scrollable && "overflow-auto",
+                hideContent && "pointer-events-none opacity-0",
+                contentClassName
+              ),
+              "aria-hidden": hideContent || void 0,
+              children
+            }
+          ),
+          footer && open ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("shrink-0 border-t border-border px-2 py-2 text-sm text-muted-foreground", footerClassName), children: footer }) : null
+        ] }),
+        showFloaterTrigger ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: floaterTriggerVariants({ closeDirection }), children: triggerNode }) : null
+      ]
+    }
+  );
+});
+CollapsiblePanel.displayName = "CollapsiblePanel";
 function asArray(multiple, v) {
   if (v == null) return [];
   if (multiple) return Array.isArray(v) ? v : typeof v === "string" && v ? [v] : [];
@@ -4881,23 +5229,6 @@ var Breadcrumb = React9__namespace.forwardRef(
   }
 );
 Breadcrumb.displayName = "Breadcrumb";
-function useControllableOpen({
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange
-}) {
-  const [uncontrolled, setUncontrolled] = React9__namespace.useState(defaultOpen);
-  const isControlled = openProp !== void 0;
-  const open = isControlled ? openProp : uncontrolled;
-  const setOpen = React9__namespace.useCallback(
-    (next) => {
-      if (!isControlled) setUncontrolled(next);
-      onOpenChange?.(next);
-    },
-    [isControlled, onOpenChange]
-  );
-  return [open, setOpen];
-}
 var sidebarVariants = classVarianceAuthority.cva("flex flex-col border-border bg-background transition-[width] duration-200", {
   variants: {
     variant: {
@@ -4915,7 +5246,7 @@ var sidebarVariants = classVarianceAuthority.cva("flex flex-col border-border bg
     side: "left"
   }
 });
-function toCssSize(value, fallback) {
+function toCssSize2(value, fallback) {
   if (value == null) return fallback;
   return typeof value === "number" ? `${value}px` : value;
 }
@@ -5034,7 +5365,7 @@ function Sidebar({
     onOpenChange: onCollapsedChange
   });
   const isCollapsed = collapsible ? collapsed : false;
-  const resolvedWidth = isCollapsed ? toCssSize(collapsedWidth, "3.5rem") : toCssSize(width, "16rem");
+  const resolvedWidth = isCollapsed ? toCssSize2(collapsedWidth, "3.5rem") : toCssSize2(width, "16rem");
   const handleSelect = (next) => {
     if (!isValueControlled) setInternalValue(next);
     onChange?.(next);
@@ -5882,6 +6213,8 @@ var Tabs = React9__namespace.forwardRef(
     variant = "default",
     className,
     listClassName,
+    panelClassName,
+    contentClassName,
     value,
     defaultValue,
     onValueChange,
@@ -5965,18 +6298,19 @@ var Tabs = React9__namespace.forwardRef(
           ),
           items.map((item) => {
             const selected = active === item.value;
+            if (!selected) return null;
             return /* @__PURE__ */ jsxRuntime.jsx(
               "div",
               {
                 role: "tabpanel",
                 id: `${tabIds}-panel-${item.value}`,
                 "aria-labelledby": `${tabIds}-tab-${item.value}`,
-                hidden: !selected,
                 className: cn(
-                  "mt-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                  orientation === "vertical" && "mt-0 flex-1"
+                  "mt-3 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  orientation === "vertical" && "mt-0 flex-1",
+                  panelClassName
                 ),
-                children: item.content != null ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm leading-relaxed text-foreground", children: item.content }) : null
+                children: item.content != null ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("text-sm leading-relaxed text-foreground", contentClassName), children: item.content }) : null
               },
               item.value
             );
@@ -6627,7 +6961,7 @@ function PageHeader({
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-start justify-between gap-3", children: [
           /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-w-0 flex-1 items-start gap-3", children: [
-            left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 pt-0.5 text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "md" }) }) : null,
+            left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 pt-0.5", children: left }) : null,
             /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex flex-col gap-1", children: [
               /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap items-center gap-2", children: [
                 heading ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "lg", weight: "semibold", children: heading }) : null,
@@ -6766,6 +7100,10 @@ function AppShell({ sidebar, header, footer, children, className, ...props }) {
   ] });
 }
 AppShell.displayName = "AppShell";
+function wrapWithTooltip(show, content, node) {
+  if (!show) return node;
+  return /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content, children: node });
+}
 function HistoryControlButtons({
   canUndo = true,
   canRedo = true,
@@ -6776,6 +7114,7 @@ function HistoryControlButtons({
   showUndo = true,
   showRedo = true,
   showLabels = false,
+  showTooltips = false,
   undoButtonProps,
   redoButtonProps,
   resetButtonProps,
@@ -6783,48 +7122,60 @@ function HistoryControlButtons({
   ...rest
 }) {
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("inline-flex items-center gap-1", className), ...rest, children: [
-    showUndo ? /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content: "Undo", children: /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        disabled: !canUndo,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Undo2, { className: "h-4 w-4" }),
-        label: showLabels ? "Undo" : void 0,
-        iconOnly: !showLabels,
-        "aria-label": "Undo",
-        onClick: onUndo,
-        ...undoButtonProps
-      }
-    ) }) : null,
-    showRedo ? /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content: "Redo", children: /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        variant: "outline",
-        size: "sm",
-        disabled: !canRedo,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Redo2, { className: "h-4 w-4" }),
-        label: showLabels ? "Redo" : void 0,
-        iconOnly: !showLabels,
-        "aria-label": "Redo",
-        onClick: onRedo,
-        ...redoButtonProps
-      }
-    ) }) : null,
-    onReset ? /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content: "Reset", children: /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        variant: "ghost",
-        size: "sm",
-        disabled: !canReset,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcw, { className: "h-4 w-4" }),
-        label: showLabels ? "Reset" : void 0,
-        iconOnly: !showLabels,
-        "aria-label": "Reset",
-        onClick: onReset,
-        ...resetButtonProps
-      }
-    ) }) : null
+    showUndo ? wrapWithTooltip(
+      showTooltips,
+      "Undo",
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          variant: "outline",
+          size: "sm",
+          disabled: !canUndo,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Undo2, { className: "h-4 w-4" }),
+          label: showLabels ? "Undo" : void 0,
+          iconOnly: !showLabels,
+          ariaLabel: "Undo",
+          onClick: onUndo,
+          ...undoButtonProps
+        }
+      )
+    ) : null,
+    showRedo ? wrapWithTooltip(
+      showTooltips,
+      "Redo",
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          variant: "outline",
+          size: "sm",
+          disabled: !canRedo,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Redo2, { className: "h-4 w-4" }),
+          label: showLabels ? "Redo" : void 0,
+          iconOnly: !showLabels,
+          ariaLabel: "Redo",
+          onClick: onRedo,
+          ...redoButtonProps
+        }
+      )
+    ) : null,
+    onReset ? wrapWithTooltip(
+      showTooltips,
+      "Reset",
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          variant: "ghost",
+          size: "sm",
+          disabled: !canReset,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcw, { className: "h-4 w-4" }),
+          label: showLabels ? "Reset" : void 0,
+          iconOnly: !showLabels,
+          ariaLabel: "Reset",
+          onClick: onReset,
+          ...resetButtonProps
+        }
+      )
+    ) : null
   ] });
 }
 HistoryControlButtons.displayName = "HistoryControlButtons";
@@ -6949,20 +7300,32 @@ var modalSurfaceVariants = classVarianceAuthority.cva("relative w-full shadow-lg
     size: "md"
   }
 });
+var modalOverlayLayout = classVarianceAuthority.cva("flex justify-center p-4", {
+  variants: {
+    align: {
+      center: "items-center",
+      top: "items-start pt-16"
+    }
+  },
+  defaultVariants: {
+    align: "center"
+  }
+});
 var Modal = React9__namespace.forwardRef(function Modal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
   onClose,
-  triggerProps,
   header,
   footer,
   showClose = true,
   loading,
   size,
+  align,
   minHeight,
   maxHeight,
   className,
+  overlayClassName,
   cardProps,
   container,
   children
@@ -6972,8 +7335,7 @@ var Modal = React9__namespace.forwardRef(function Modal2({
     setOpen(false);
     onClose?.();
   }, [setOpen, onClose]);
-  const resolvedFooter = footer ?? (loading ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex justify-end", children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) }) : null);
-  const dialog = /* @__PURE__ */ jsxRuntime.jsx(
+  return /* @__PURE__ */ jsxRuntime.jsx(
     Overlay,
     {
       open,
@@ -6982,18 +7344,16 @@ var Modal = React9__namespace.forwardRef(function Modal2({
       blur: true,
       showCloseButton: showClose,
       closeOnBackdropClick: !loading,
-      className: "flex items-center justify-center p-4",
+      className: cn(modalOverlayLayout({ align }), overlayClassName),
       children: /* @__PURE__ */ jsxRuntime.jsx(
         Card,
         {
           ref,
           "data-slot": "modal",
           header,
-          footer: resolvedFooter,
+          footer,
           minHeight,
           maxHeight,
-          variant: "surface-1",
-          size: "md",
           ...cardProps,
           className: cn(modalSurfaceVariants({ size }), className, cardProps?.className),
           children
@@ -7001,29 +7361,36 @@ var Modal = React9__namespace.forwardRef(function Modal2({
       )
     }
   );
-  if (!triggerProps) return dialog;
-  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        variant: triggerProps.variant ?? "primary",
-        size: triggerProps.size,
-        left: triggerProps.left,
-        className: triggerProps.className,
-        label: triggerProps.label ?? "Open",
-        onClick: () => setOpen(true)
-      }
-    ),
-    dialog
-  ] });
 });
 Modal.displayName = "Modal";
 function TriggerModal({
+  trigger,
   triggerProps,
   showClose = true,
+  open: openProp,
+  defaultOpen,
+  onOpenChange,
   ...modalProps
 }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(Modal, { triggerProps, showClose, ...modalProps });
+  const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+  const triggerNode = trigger ?? (triggerProps ? /* @__PURE__ */ jsxRuntime.jsx(
+    Button,
+    {
+      variant: triggerProps.variant,
+      size: triggerProps.size,
+      left: triggerProps.left,
+      className: triggerProps.className,
+      label: triggerProps.label,
+      iconOnly: triggerProps.iconOnly ?? (!triggerProps.label && Boolean(triggerProps.left)),
+      disabled: triggerProps.disabled,
+      ariaLabel: triggerProps.ariaLabel,
+      onClick: () => setOpen(true)
+    }
+  ) : null);
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    triggerNode,
+    /* @__PURE__ */ jsxRuntime.jsx(Modal, { open, onOpenChange: setOpen, showClose, ...modalProps })
+  ] });
 }
 TriggerModal.displayName = "TriggerModal";
 var intentButtonVariant = {
@@ -7113,6 +7480,96 @@ function ConfirmModal({
   );
 }
 ConfirmModal.displayName = "ConfirmModal";
+function resolvePlaceholder(placeholder, values) {
+  if (placeholder == null) return void 0;
+  return typeof placeholder === "function" ? placeholder(values) : placeholder;
+}
+function resolveErrorMessage(errorMessage, values) {
+  if (errorMessage == null) return void 0;
+  return typeof errorMessage === "function" ? errorMessage(values) : errorMessage;
+}
+function SchemaFieldRow({
+  field,
+  busy
+}) {
+  const form = useFormContext();
+  const values = form?.values ?? {};
+  if (field.showWhen && !field.showWhen(values)) return null;
+  const items = typeof field.items === "function" ? field.items(values) : field.items;
+  const placeholder = resolvePlaceholder(field.placeholder, values);
+  const resolvedError = resolveErrorMessage(field.errorMessage, values);
+  const disabled = field.disabled ?? busy;
+  const {
+    showWhen: _showWhen,
+    onValueChange,
+    onUpload,
+    placeholder: _placeholder,
+    items: _items,
+    errorMessage: _errorMessage,
+    render,
+    renderAfter,
+    ...fieldProps
+  } = field;
+  const changeHelpers = {
+    values: form?.values ?? values,
+    setValue: form?.setValue.bind(form) ?? (() => {
+    })
+  };
+  if (render) {
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      FormField,
+      {
+        name: field.name,
+        label: field.label,
+        disabled,
+        errorMessage: resolvedError,
+        render: (fieldControl2) => render({
+          ...changeHelpers,
+          name: field.name,
+          field: fieldControl2,
+          errorMessage: resolvedError,
+          disabled
+        })
+      }
+    );
+  }
+  const props = {
+    ...fieldProps,
+    placeholder,
+    items,
+    disabled,
+    errorMessage: resolvedError,
+    onValueChange: onValueChange ? (value) => onValueChange(value, changeHelpers) : void 0,
+    onUpload: onUpload ? (files) => onUpload(files, changeHelpers) : void 0
+  };
+  const row = /* @__PURE__ */ jsxRuntime.jsx(FormField, { ...props });
+  if (!renderAfter) return row;
+  const fieldControl = {
+    id: `${field.name}-field`,
+    name: field.name,
+    value: String(form?.values[field.name] ?? ""),
+    disabled,
+    errorMessage: resolvedError,
+    onChange: (value) => form?.setValue(field.name, value),
+    onBlur: () => form?.setTouched(field.name, true)
+  };
+  return /* @__PURE__ */ jsxRuntime.jsxs(React9__namespace.Fragment, { children: [
+    row,
+    renderAfter({
+      ...changeHelpers,
+      name: field.name,
+      field: fieldControl,
+      errorMessage: resolvedError,
+      disabled
+    })
+  ] }, field.name);
+}
+function FormModalFields({
+  fields,
+  busy
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fields.map((field) => /* @__PURE__ */ jsxRuntime.jsx(SchemaFieldRow, { field, busy }, field.name)) });
+}
 function FormModal({
   open: openProp,
   defaultOpen,
@@ -7171,7 +7628,9 @@ function FormModal({
     if (formProps?.initialValues) return formProps.initialValues;
     if (!fields) return {};
     return fields.reduce((acc, field) => {
-      acc[field.name] = "";
+      if (field.type === "checkbox") acc[field.name] = "false";
+      else if (field.type === "upload") acc[field.name] = "";
+      else acc[field.name] = "";
       return acc;
     }, {});
   }, [fields, formProps?.initialValues]);
@@ -7198,7 +7657,7 @@ function FormModal({
       footer: null,
       ...triggerModalProps,
       ...rest,
-      children: /* @__PURE__ */ jsxRuntime.jsx(
+      children: /* @__PURE__ */ jsxRuntime.jsxs(
         Form,
         {
           ...formProps,
@@ -7212,7 +7671,10 @@ function FormModal({
           disabled: submitDisabled || formProps?.disabled,
           submitButtonProps,
           cancelButtonProps,
-          children: children ?? fields?.map((field) => /* @__PURE__ */ jsxRuntime.jsx(FormField, { ...field, disabled: field.disabled ?? busy }, field.name))
+          children: [
+            fields?.length ? /* @__PURE__ */ jsxRuntime.jsx(FormModalFields, { fields, busy }) : null,
+            children
+          ]
         }
       )
     }
@@ -7626,6 +8088,14 @@ function defaultListItemFilter(items, query) {
     return label.includes(q) || desc.includes(q) || val.includes(q);
   });
 }
+function defaultListChipFilter(items, selected) {
+  if (selected.length === 0) return [...items];
+  return items.filter((item) => {
+    const keys = item.filterKeys;
+    if (!keys?.length) return true;
+    return keys.some((key) => selected.includes(key));
+  });
+}
 var List = React9__namespace.forwardRef(
   ({
     className,
@@ -7654,6 +8124,10 @@ var List = React9__namespace.forwardRef(
     emptyState,
     noResultsState,
     loading,
+    loadingState,
+    errorState,
+    filterChips,
+    renderItem,
     children,
     header,
     search,
@@ -7670,6 +8144,28 @@ var List = React9__namespace.forwardRef(
       filterItems = true,
       ...searchInputProps
     } = searchOptions;
+    const filterChipsEnabled = filterChips != null;
+    const {
+      items: chipItems = [],
+      value: chipValueProp,
+      defaultValue: chipDefaultValue,
+      onChange: onChipChangeProp,
+      filter: customChipFilter,
+      filterItems: chipFilterItems = true,
+      ...pillGroupProps
+    } = filterChips ?? {};
+    const isChipControlled = chipValueProp !== void 0;
+    const [internalChipSelection, setInternalChipSelection] = React9__namespace.useState(
+      () => chipDefaultValue ?? []
+    );
+    const chipSelection = isChipControlled ? chipValueProp : internalChipSelection;
+    const setChipSelection = React9__namespace.useCallback(
+      (next) => {
+        if (!isChipControlled) setInternalChipSelection(next);
+        onChipChangeProp?.(next);
+      },
+      [isChipControlled, onChipChangeProp]
+    );
     const isSearchControlled = searchValueProp !== void 0;
     const [internalSearchQuery, setInternalSearchQuery] = React9__namespace.useState(() => defaultQuery ?? "");
     const searchQuery = isSearchControlled ? searchValueProp : internalSearchQuery;
@@ -7688,10 +8184,27 @@ var List = React9__namespace.forwardRef(
     const [internalSelected, setInternalSelected] = React9__namespace.useState(defaultSelectedValue);
     const selectedValue = isControlled ? selectedValueProp : internalSelected;
     const filteredItems = React9__namespace.useMemo(() => {
-      if (!searchEnabled || !filterItems) return [...items];
-      const run = customFilter ?? defaultListItemFilter;
-      return [...run(items, debouncedQuery)];
-    }, [items, debouncedQuery, searchEnabled, filterItems, customFilter]);
+      let next = [...items];
+      if (filterChipsEnabled && chipFilterItems) {
+        const runChip = customChipFilter ?? defaultListChipFilter;
+        next = [...runChip(next, chipSelection)];
+      }
+      if (searchEnabled && filterItems) {
+        const runSearch = customFilter ?? defaultListItemFilter;
+        next = [...runSearch(next, debouncedQuery)];
+      }
+      return next;
+    }, [
+      items,
+      debouncedQuery,
+      searchEnabled,
+      filterItems,
+      customFilter,
+      filterChipsEnabled,
+      chipFilterItems,
+      customChipFilter,
+      chipSelection
+    ]);
     const select = React9__namespace.useCallback(
       (item) => {
         if (!selectable || item.disabled || item.value == null) return;
@@ -7701,6 +8214,33 @@ var List = React9__namespace.forwardRef(
       [selectable, isControlled, onSelect]
     );
     const renderRow = (item, index) => {
+      if (renderItem) return renderItem(item, index);
+      if (item.custom) {
+        const selected2 = selectable && item.value != null && selectedValue === item.value;
+        return /* @__PURE__ */ jsxRuntime.jsx(
+          "div",
+          {
+            className: cn(
+              "min-w-0",
+              layout === "grid" && "h-full",
+              selectable && !item.disabled && "cursor-pointer",
+              item.disabled && "cursor-not-allowed opacity-60",
+              selected2 && layout === "grid" && "ring-2 ring-ring ring-offset-2 ring-offset-background rounded-lg"
+            ),
+            role: selectable ? "option" : void 0,
+            "aria-selected": selectable ? selected2 : void 0,
+            onClick: () => select(item),
+            onKeyDown: selectable ? (e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                select(item);
+              }
+            } : void 0,
+            tabIndex: selectable && !item.disabled ? 0 : void 0,
+            children: item.label
+          }
+        );
+      }
       const selected = selectable && item.value != null && selectedValue === item.value;
       return /* @__PURE__ */ jsxRuntime.jsxs(
         "div",
@@ -7735,7 +8275,7 @@ var List = React9__namespace.forwardRef(
     };
     const listAs = listType === "none" ? "div" : listType === "ordered" ? "ol" : "ul";
     const renderWrappedRow = (item, index) => {
-      const row = renderRow(item);
+      const row = renderRow(item, index);
       if (listType === "none") {
         return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0", children: row });
       }
@@ -7794,7 +8334,18 @@ var List = React9__namespace.forwardRef(
           ...searchInputProps
         }
       ) : null,
-      loading ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: "Loading\u2026" }) : emptyItems ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: emptyState ?? "Nothing to show." }) : emptyFilter ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: noResultsState ?? "No matches." }) : body,
+      filterChipsEnabled ? /* @__PURE__ */ jsxRuntime.jsx(
+        PillGroup,
+        {
+          items: chipItems,
+          value: chipSelection,
+          onChange: setChipSelection,
+          selectable: true,
+          multiple: true,
+          ...pillGroupProps
+        }
+      ) : null,
+      loading ? loadingState ?? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: "Loading\u2026" }) : errorState ? errorState : emptyItems ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: emptyState ?? "Nothing to show." }) : emptyFilter ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: noResultsState ?? "No matches." }) : body,
       children
     ] });
   }
@@ -8702,7 +9253,7 @@ function CodeBlock({
       children: [
         filename != null || showCopy ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-h-10 items-center justify-between gap-2 border-b border-border px-4 py-2", children: [
           filename != null ? /* @__PURE__ */ jsxRuntime.jsx(Text, { variant: "muted", className: "min-w-0 font-mono text-xs", children: filename }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0", "aria-hidden": true }),
-          showCopy ? /* @__PURE__ */ jsxRuntime.jsx(CopyButton, { value: code, variant: "ghost", size: "sm", tooltip: false, copyLabel: "Copy" }) : null
+          showCopy ? /* @__PURE__ */ jsxRuntime.jsx(CopyButton, { value: code, variant: "ghost", size: "sm", tooltip: false }) : null
         ] }) : null,
         /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "overflow-x-auto p-4 text-sm leading-relaxed", children: showLineNumbers ? /* @__PURE__ */ jsxRuntime.jsx("code", { className: "grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 font-mono text-foreground", children: lines.map((line, i) => /* @__PURE__ */ jsxRuntime.jsxs(React9__namespace.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsx("span", { className: "select-none text-right tabular-nums text-muted-foreground", children: i + 1 }),
@@ -11207,6 +11758,7 @@ exports.Chart = Chart;
 exports.Checkbox = Checkbox;
 exports.CodeBlock = CodeBlock;
 exports.Collapsible = Collapsible;
+exports.CollapsiblePanel = CollapsiblePanel;
 exports.Command = Command;
 exports.ConfirmModal = ConfirmModal;
 exports.ContextMenu = ContextMenu;
@@ -11307,6 +11859,9 @@ exports.badgeVariants = pillSurfaceVariants;
 exports.buttonVariants = buttonVariants;
 exports.cardVariants = cardVariants;
 exports.clearToasts = clearToasts;
+exports.collapsiblePanelRootVariants = collapsiblePanelRootVariants;
+exports.collapsiblePanelSurfaceVariants = collapsiblePanelSurfaceVariants;
+exports.defaultListChipFilter = defaultListChipFilter;
 exports.defaultListItemFilter = defaultListItemFilter;
 exports.deleteTreeNode = deleteTreeNode;
 exports.descriptionListVariants = descriptionListVariants;
@@ -11316,6 +11871,7 @@ exports.drawerVariants = drawerVariants;
 exports.emptyStateVariants = emptyStateVariants;
 exports.enableDebugMode = enableDebugMode;
 exports.fieldSurfaceVariants = fieldSurfaceVariants;
+exports.floaterTriggerVariants = floaterTriggerVariants;
 exports.focusRing = focusRing;
 exports.focusRingDestructive = focusRingDestructive;
 exports.focusRingOffset = focusRingOffset;
@@ -11331,6 +11887,7 @@ exports.gridVariants = gridSpacingVariants;
 exports.heroVariants = heroVariants;
 exports.iconVariants = iconVariants;
 exports.linkVariants = linkVariants;
+exports.modalOverlayLayout = modalOverlayLayout;
 exports.modalSurfaceVariants = modalSurfaceVariants;
 exports.moveTreeNode = moveTreeNode;
 exports.navbarVariants = navbarVariants;

@@ -1,10 +1,23 @@
 import * as React from "react"
 import { getStringFieldValidationError, FieldLayout, type StringFieldValidateOpts } from "./fieldPieces"
+import { Checkbox } from "./Checkbox"
+import { Select, type SelectOption } from "./Select"
 import { TextInput, type TextInputProps } from "./TextInput"
 import { Textarea, type TextareaProps } from "./Textarea"
+import { Upload } from "./Upload"
 import { useFormContext, type FormFieldRenderProps } from "./formContext"
 
-export type FormFieldType = "text" | "email" | "password" | "number" | "url" | "search" | "textarea"
+export type FormFieldType =
+  | "text"
+  | "email"
+  | "password"
+  | "number"
+  | "url"
+  | "search"
+  | "textarea"
+  | "select"
+  | "checkbox"
+  | "upload"
 
 export interface FormFieldProps {
   name: string
@@ -16,10 +29,23 @@ export interface FormFieldProps {
   value?: string
   defaultValue?: string
   onChange?: (value: string) => void
+  /** Called after the field value updates (select, checkbox, and text inputs). */
+  onValueChange?: (value: string) => void
   validate?: boolean | ((value: string) => string | undefined)
   errorMessage?: string
   touched?: boolean
   showError?: boolean
+  /** Select options when `type="select"`. */
+  items?: SelectOption[]
+  rows?: number
+  /** Upload options when `type="upload"`. */
+  accept?: string
+  dragAndDrop?: boolean
+  multiple?: boolean
+  maxSize?: number
+  maxFiles?: number
+  loading?: boolean
+  onUpload?: (files: File[]) => void | Promise<void>
   render?: (props: FormFieldRenderProps) => React.ReactNode
   children?: React.ReactNode
   className?: string
@@ -57,6 +83,16 @@ export function FormField({
   children,
   className,
   inputProps,
+  onValueChange,
+  items,
+  rows,
+  accept,
+  dragAndDrop,
+  multiple,
+  maxSize,
+  maxFiles,
+  loading,
+  onUpload,
 }: FormFieldProps) {
   const form = useFormContext()
   const fieldId = React.useId()
@@ -83,6 +119,7 @@ export function FormField({
   const setValue = (next: string) => {
     onChangeProp?.(next)
     form?.setValue(name, next)
+    onValueChange?.(next)
     if (form && validate) {
       const err = resolveFieldError(next, validate, required, errorMessage)
       if (form.validateOn === "change" || form.submitted) {
@@ -146,6 +183,58 @@ export function FormField({
     )
   }
 
+  if (type === "select") {
+    return (
+      <Select
+        id={fieldId}
+        name={name}
+        label={label}
+        value={value}
+        placeholder={placeholder}
+        required={required}
+        disabled={shared.disabled}
+        errorMessage={displayError}
+        items={items ?? []}
+        className={className}
+        onValueChange={setValue}
+      />
+    )
+  }
+
+  if (type === "checkbox") {
+    const checked = value === "true"
+    return (
+      <Checkbox
+        id={fieldId}
+        name={name}
+        label={label}
+        checked={checked}
+        disabled={shared.disabled}
+        errorMessage={displayError}
+        className={className}
+        onChange={(next) => setValue(String(next))}
+      />
+    )
+  }
+
+  if (type === "upload") {
+    return (
+      <Upload
+        label={label}
+        accept={accept}
+        dragAndDrop={dragAndDrop}
+        multiple={multiple}
+        maxSize={maxSize}
+        maxFiles={maxFiles}
+        disabled={shared.disabled}
+        loading={loading}
+        errorMessage={displayError}
+        className={className}
+        onUpload={onUpload ?? (async () => {})}
+      />
+    )
+  }
+
   if (type === "textarea") {
     return (
       <Textarea
@@ -159,6 +248,7 @@ export function FormField({
         validate={form?.validateOn === "submit" ? undefined : validate}
         errorMessage={displayError}
         className={className}
+        rows={rows}
         onChange={(e) => setValue(e.target.value)}
         onBlur={handleBlur as TextareaProps["onBlur"]}
         {...(inputProps as TextareaProps)}

@@ -55,6 +55,9 @@ export interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
   variant?: VariantProps<typeof tabsListVariants>["variant"]
   className?: string
   listClassName?: string
+  /** Applied to the active tab panel wrapper — use `flex min-h-0 flex-1 flex-col` for editor layouts. */
+  panelClassName?: string
+  contentClassName?: string
 }
 
 function firstEnabledValue(items: TabItem[]): string | undefined {
@@ -69,6 +72,8 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
       variant = "default",
       className,
       listClassName,
+      panelClassName,
+      contentClassName,
       value,
       defaultValue,
       onValueChange,
@@ -161,20 +166,23 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
         </div>
         {items.map((item) => {
           const selected = active === item.value
+          if (!selected) return null
           return (
             <div
               key={item.value}
               role="tabpanel"
               id={`${tabIds}-panel-${item.value}`}
               aria-labelledby={`${tabIds}-tab-${item.value}`}
-              hidden={!selected}
               className={cn(
-                "mt-3 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                orientation === "vertical" && "mt-0 flex-1"
+                "mt-3 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                orientation === "vertical" && "mt-0 flex-1",
+                panelClassName
               )}
             >
               {item.content != null ? (
-                <div className="text-sm leading-relaxed text-foreground">{item.content}</div>
+                <div className={cn("text-sm leading-relaxed text-foreground", contentClassName)}>
+                  {item.content}
+                </div>
               ) : null}
             </div>
           )

@@ -15,6 +15,7 @@ import {
   Checkbox,
   CodeBlock,
   Collapsible,
+  CollapsiblePanel,
   Command,
   ContextMenu,
   CopyButton,
@@ -391,6 +392,25 @@ export function ExploreView() {
             />
           </DemoCard>
           <DemoCard title="Collapse">
+            <div className="flex h-48 overflow-visible rounded-md border border-border bg-muted/10">
+              <CollapsiblePanel
+                closeDirection="left"
+                size="10rem"
+                triggerPlacement="floater"
+                header="Tools"
+                defaultOpen
+              >
+                <Text size="sm">Docked panel — floater toggle on the seam.</Text>
+                <Text size="sm" variant="muted">
+                  Scrolls when content overflows.
+                </Text>
+              </CollapsiblePanel>
+              <div className="min-w-0 flex-1 p-3">
+                <Text size="sm" variant="muted">
+                  Main layout area
+                </Text>
+              </div>
+            </div>
             <Collapsible trigger="Release notes" defaultOpen>
               <Text size="sm">June release — gallery sync, phone object API, explore view.</Text>
             </Collapsible>

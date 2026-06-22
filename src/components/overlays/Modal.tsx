@@ -1,8 +1,6 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
-import { Button, type ButtonProps } from "../actions/Button"
-import { Spinner } from "../data-display/Spinner"
 import { Card, type CardProps } from "../layout/Card"
 import { Overlay, type OverlayPortalContainer } from "./Overlay"
 import { useControllableOpen } from "./useControllableOpen"
@@ -22,29 +20,37 @@ const modalSurfaceVariants = cva("relative w-full shadow-lg", {
   },
 })
 
+const modalOverlayLayout = cva("flex justify-center p-4", {
+  variants: {
+    align: {
+      center: "items-center",
+      top: "items-start pt-16",
+    },
+  },
+  defaultVariants: {
+    align: "center",
+  },
+})
+
 export type ModalSize = NonNullable<VariantProps<typeof modalSurfaceVariants>["size"]>
+export type ModalAlign = NonNullable<VariantProps<typeof modalOverlayLayout>["align"]>
 
-export type ModalTriggerProps = {
-  label?: string
-  left?: React.ReactNode
-  variant?: ButtonProps["variant"]
-  size?: ButtonProps["size"]
-  className?: string
-}
-
-export interface ModalProps extends VariantProps<typeof modalSurfaceVariants> {
+export interface ModalProps
+  extends VariantProps<typeof modalSurfaceVariants>,
+    VariantProps<typeof modalOverlayLayout> {
   open?: boolean
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
   onClose?: () => void
-  triggerProps?: ModalTriggerProps
   header?: React.ReactNode
   footer?: React.ReactNode
   showClose?: boolean
+  /** When true, backdrop clicks do not close the dialog. */
   loading?: boolean
   minHeight?: string | number
   maxHeight?: string | number
   className?: string
+  overlayClassName?: string
   cardProps?: Omit<CardProps, "header" | "footer" | "children" | "minHeight" | "maxHeight">
   /** Portal target for the backdrop — use `parent` inside `OverlayPortalScope` for scoped previews. */
   container?: OverlayPortalContainer
@@ -57,15 +63,16 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     defaultOpen,
     onOpenChange,
     onClose,
-    triggerProps,
     header,
     footer,
     showClose = true,
     loading,
     size,
+    align,
     minHeight,
     maxHeight,
     className,
+    overlayClassName,
     cardProps,
     container,
     children,
@@ -79,15 +86,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     onClose?.()
   }, [setOpen, onClose])
 
-  const resolvedFooter =
-    footer ??
-    (loading ? (
-      <div className="flex justify-end">
-        <Spinner size="sm" />
-      </div>
-    ) : null)
-
-  const dialog = (
+  return (
     <Overlay
       open={open}
       onClose={handleClose}
@@ -95,17 +94,15 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       blur
       showCloseButton={showClose}
       closeOnBackdropClick={!loading}
-      className="flex items-center justify-center p-4"
+      className={cn(modalOverlayLayout({ align }), overlayClassName)}
     >
       <Card
         ref={ref}
         data-slot="modal"
         header={header}
-        footer={resolvedFooter}
+        footer={footer}
         minHeight={minHeight}
         maxHeight={maxHeight}
-        variant="surface-1"
-        size="md"
         {...cardProps}
         className={cn(modalSurfaceVariants({ size }), className, cardProps?.className)}
       >
@@ -113,24 +110,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       </Card>
     </Overlay>
   )
-
-  if (!triggerProps) return dialog
-
-  return (
-    <>
-      <Button
-        variant={triggerProps.variant ?? "primary"}
-        size={triggerProps.size}
-        left={triggerProps.left}
-        className={triggerProps.className}
-        label={triggerProps.label ?? "Open"}
-        onClick={() => setOpen(true)}
-      />
-      {dialog}
-    </>
-  )
 })
 
 Modal.displayName = "Modal"
 
-export { modalSurfaceVariants }
+export { modalSurfaceVariants, modalOverlayLayout }

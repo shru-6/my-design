@@ -98,6 +98,7 @@ export function ComponentPreview({ componentName, props, onPropsChange }: Compon
       wrapper === "fab-relative" ||
       wrapper.startsWith("resizable") ||
       wrapper === "sidebar-parent" ||
+      wrapper === "collapsible-panel-parent" ||
       wrapper === "app-shell-parent" ||
       wrapper === "auth-layout-compact" ||
       !skipPortal

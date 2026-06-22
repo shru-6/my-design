@@ -227,8 +227,9 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Sub-components: Icon
 
 - ✓ CopyButton
-  - Props: `value`, `onValueCopy?`, `onCopyError?`, `copyLabel?` (ReactNode), `copiedLabel?` (ReactNode), `timeout?`, `tooltip?`, `tooltipLabel?` (ReactNode, idle tooltip; default `copyLabel`), `tooltipCopiedLabel?` (ReactNode; default `copiedLabel`), `disabled?`, `loading?`, `children?` (button body override)
+  - Props: `value`, `onValueCopy?`, `onCopyError?`, `copyLabel?` (ReactNode), `copiedLabel?` (ReactNode), `copyIcon?`, `copiedIcon?`, `timeout?`, `tooltip?`, `tooltipLabel?` (ReactNode, idle tooltip), `tooltipCopiedLabel?` (ReactNode), `disabled?`, `loading?`, `children?` (button body override)
   - StyleProps: `variant? enum: primary|secondary|outline|ghost|destructive`, `size? enum: sm|md|lg`, `className?`
+  - Note: Icon-only when `copyLabel` and `children` are omitted (`copyIcon` / `copiedIcon` default to Copy / Check).
   - Sub-components: Button, Tooltip
 
 ---
@@ -353,13 +354,13 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Sub-components: Text, Button, Icon, Skeleton, Pagination
 
 - ✓ List
-  - Props: `items ListItem[]`, `layout? enum: list|grid`, `listType? enum: unordered|ordered|none`, `header?`, `search? boolean | ListSearchConfig` (`filter?`, `defaultQuery?`, plus SearchInput props except wired handlers), `divider?`, `selectable?`, `selectedValue?`, `defaultSelectedValue?`, `onSelect?`, `emptyState?`, `noResultsState?`, `loading?`, `children?`
+  - Props: `items ListItem[]`, `layout? enum: list|grid`, `listType? enum: unordered|ordered|none`, `header?`, `search? boolean | ListSearchConfig` (`filter?`, `defaultQuery?`, plus SearchInput props except wired handlers), `filterChips? ListFilterChipsConfig` (PillGroup props + `filter?`, `filterItems?`; matches `ListItem.filterKeys`), `divider?`, `selectable?`, `selectedValue?`, `defaultSelectedValue?`, `onSelect?`, `emptyState?`, `noResultsState?`, `errorState?`, `loading?`, `loadingState?`, `renderItem?`, `children?`
   - When `layout=list`: forwards **Stack** props — `direction?`, `gap? enum: none|sm|md|lg`, `align?`, `justify?`, `wrap?`
   - When `layout=grid`: forwards **Grid** props — `columns?`, `rows?`, `minChildWidth?`, `gridGap?`, `gap?` (if `gridGap` omitted), `columnGap?`, `rowGap?`, `autoFlow?`, `alignItems?`, `justifyItems?`
   - StyleProps: `className?` (root); inner layout uses Stack/Grid tokens above
-  - `ListItem: { label, value?, left?, description?, action?, disabled?, selected? }`
-  - Sub-components: Stack, Grid, SearchInput, Text, Icon
-  - Built-in default filter: `defaultListItemFilter` (label/description/value substring, case-insensitive). For virtualised lists compose with a scroll container.
+  - `ListItem: { label, value?, left?, description?, action?, disabled?, selected?, filterKeys?, custom? }`
+  - Sub-components: Stack, Grid, SearchInput, Text, Icon, PillGroup
+  - Built-in filters: `defaultListItemFilter` (label/description/value substring); `defaultListChipFilter` (OR on `filterKeys`). For virtualised lists compose with a scroll container.
 
 - ✓ DescriptionList
   - Props: `items DescriptionItem[]`, `layout? enum: horizontal|vertical`
@@ -451,11 +452,11 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - StyleProps: `blur?`, `className?`
 
 - ✓ Modal
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `onClose?`, `triggerProps?`, `header?`, `footer?`, `showClose?`, `loading?`, `initialFocus?`, `children?`
-  - StyleProps: `size? enum: sm|md|lg|xl|full`, `minHeight?`, `maxHeight?`, `className?`
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `onClose?`, `header?`, `footer?`, `showClose?`, `loading?`, `children?`
+  - StyleProps: `size? enum: sm|md|lg|xl|full`, `align? enum: center|top`, `minHeight?`, `maxHeight?`, `className?`, `overlayClassName?`
   - SlotProps: `cardProps?`
-  - `triggerProps: { label?, left?, variant?, className? }`
-  - Sub-components: Overlay, Card, Button
+  - Sub-components: Overlay, Card
+  - Note: No built-in trigger — compose `Button` + controlled `open`, or use `TriggerModal`.
 
 - ✓ AlertDialog
   - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `title`, `description?`, `variant? enum: default|destructive|warning`, `confirmProps`, `cancelProps?`, `loading?`
@@ -513,8 +514,15 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Note: Header and footer stay pinned while only body content scrolls.
 
 - ✓ Collapsible
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `trigger?`, `disabled?`, `header?`, `footer?`, `children?`
-  - StyleProps: `direction? enum: vertical|horizontal`, `className?`
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `trigger`, `disabled?`, `footer?`, `showContentDivider?`, `children`
+  - StyleProps: `className?`
+  - Note: Accordion-style section expand/collapse — not an edge panel. Use `CollapsiblePanel` for sidebars and docked surfaces.
+  - Sub-components: Button
+
+- ✓ CollapsiblePanel
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `closeDirection? enum: left|right|top|bottom`, `size?`, `collapsedSize?`, `crossAxis? enum: full|parent|viewport`, `trigger?`, `triggerPlacement? enum: none|header|floater`, `toggleButtonProps?`, `header?`, `footer?`, `scrollable?`, `children?`
+  - StyleProps: `variant? enum: default|inset`, `className?`, `surfaceClassName?`, `contentClassName?`, `headerClassName?`, `footerClassName?`
+  - Note: `closeDirection` is the side the panel shrinks toward. `collapsedSize` omitted + `triggerPlacement="header"` auto-sizes to the icon toggle rail. Floater placement is derived from `closeDirection`.
   - Sub-components: Button
 
 - ✓ Accordion
@@ -583,10 +591,11 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
 #### Modal Patterns
 
 - ✓ TriggerModal
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `triggerProps?`, `header?`, `footer?`, `showClose?`, `loading?`, `children?`
-  - StyleProps: `minHeight?`, `maxHeight?`, `className?`
-  - `triggerProps: { label?, left?, variant?, className? }`
-  - Sub-components: Modal, Button, Text, Icon
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `trigger?`, `triggerProps?`, `header?`, `footer?`, `showClose?`, `loading?`, `children?`
+  - StyleProps: `size?`, `align?`, `minHeight?`, `maxHeight?`, `className?`, `overlayClassName?`
+  - SlotProps: `cardProps?`
+  - `triggerProps: { label, left?, variant?, size?, className? }` — or pass `trigger` for a custom node
+  - Sub-components: Modal, Button
 
 - ✓ FormModal
   - Props: `open?`, `onOpenChange?`, `triggerProps?`, `heading`, `subheading?`, `left?`, `mode? enum: create|edit`, `fields? FormFieldSchema[]`, `formProps?`, `onSubmit`, `onSubmitSuccess?`, `onSubmitError?`, `submitLabel?`, `submittingLabel?`, `cancelLabel?`, `loading?`, `submitDisabled?`, `onCancel?`, `validateOnSubmit?`, `children?`
@@ -643,13 +652,14 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
 #### Interaction Patterns
 
 - ✓ InlineEdit
-  - Props: `value?`, `defaultValue?`, `onSave?`, `onCancel?`, `placeholder?`, `disabled?`, `required?`, `validate?`, `onValidate?`, `editTrigger? enum: click|doubleClick`, `saveOnBlur?`, `saveOnEnter?`
-  - StyleProps: `size? enum: sm|md|lg`, `className?`
-  - SlotProps: `textInputProps?`, `saveButtonProps?`, `cancelButtonProps?`
-  - Sub-components: TextInput, Text, Button
+  - Props: `value?`, `defaultValue?`, `onSave?`, `onCancel?`, `placeholder?`, `disabled?`, `loading?`, `required?`, `validate?`, `editTrigger? enum: click|doubleClick`, `saveOnBlur?`, `saveOnEnter?`
+  - StyleProps: `className?`
+  - SlotProps: `saveButtonProps?`, `cancelButtonProps?`
+  - Note: `loading` or async `onSave` locks input and actions until save completes.
+  - Sub-components: Text, Button
 
 - ✓ HistoryControlButtons
-  - Props: `canUndo?`, `canRedo?`, `onUndo?`, `onRedo?`, `onReset?`, `showLabels?`
+  - Props: `canUndo?`, `canRedo?`, `canReset?`, `onUndo?`, `onRedo?`, `onReset?`, `showUndo?`, `showRedo?`, `showLabels?`, `showTooltips?`
   - StyleProps: `className?`
   - SlotProps: `undoButtonProps?`, `redoButtonProps?`, `resetButtonProps?`
   - Sub-components: Button, Tooltip

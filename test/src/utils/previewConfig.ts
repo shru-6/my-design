@@ -17,6 +17,7 @@ export type PreviewWrapper =
   | "context-menu-demo"
   | "fixed-widget-relative"
   | "sidebar-parent"
+  | "collapsible-panel-parent"
   | "app-shell-parent"
   | "auth-layout-compact"
   | "resize-container-demo"
@@ -40,6 +41,7 @@ export const previewWrapperByComponent: Record<string, PreviewWrapper> = {
   FormModal: "form-modal-demo",
   Form: "form-demo",
   Sidebar: "sidebar-parent",
+  CollapsiblePanel: "collapsible-panel-parent",
   AppShell: "app-shell-parent",
   AuthLayout: "auth-layout-compact",
   Toaster: "toaster-demo",
@@ -57,6 +59,7 @@ const PREVIEW_MIN_HEIGHT: Record<string, string> = {
   AppShell: "280px",
   HoverCard: "140px",
   Collapsible: "140px",
+  CollapsiblePanel: "180px",
   Popover: "140px",
   ContextMenu: "160px",
   Toaster: "140px",

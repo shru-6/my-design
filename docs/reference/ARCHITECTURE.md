@@ -10,7 +10,7 @@ Repository structure and how the pieces connect. For composition nesting see [CO
 npm install shru-design-system
         ↓
 dist/
-  ├── index.js / index.mjs / index.d.ts   ← 98 components + themes + utilities
+  ├── index.js / index.mjs / index.d.ts   ← 99 components + themes + utilities
   ├── styles.css                          ← CSS variables + base styles
 scripts/ (via package)
   ├── init.js                             ← npx shru-design-system-init
@@ -145,6 +145,6 @@ Detail: [TOKENS.md](./TOKENS.md). Consumer usage: [use/THEMING.md](../use/THEMIN
 ## Related
 
 - [COMPONENT_GRAPH.md](./COMPONENT_GRAPH.md) — nesting flowcharts
-- [COMPONENTS.md](./COMPONENTS.md) — full 98-component spec
+- [COMPONENTS.md](./COMPONENTS.md) — full 99-component spec
 - [build/GALLERY.md](../build/GALLERY.md) — preview pipeline
 - [build/RELEASE.md](../build/RELEASE.md) — publish checklist

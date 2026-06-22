@@ -43,7 +43,7 @@ ComponentPreview → renders shru-design-system component
 
 | Layer | File | Role |
 |-------|------|------|
-| Base | `componentMetadata.ts` | All 98 components; default props, categories |
+| Base | `componentMetadata.ts` | All 99 components; default props, categories |
 | Enriched | `metadata/propSchemas.ts` | Own vs slot props, corrected API names |
 | Extended | `metadata/extendedPropSchemas.ts` | Additional components not in propSchemas |
 | Preview tier | `metadata/galleryPreviewProps.ts` | ~170 curated preview props — **not** full API parity |

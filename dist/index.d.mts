@@ -58,17 +58,21 @@ interface CopyButtonProps extends Omit<ButtonProps, "onClick" | "children" | "on
     /** Fired after a successful clipboard write. */
     onValueCopy?: (value: string) => void;
     onCopyError?: (error: unknown) => void;
-    /** Shown on the button before copy / when reset. */
+    /** Shown on the button before copy / when reset. Omit for icon-only (uses `copyIcon`). */
     copyLabel?: React.ReactNode;
-    /** Shown on the button briefly after a successful copy. */
+    /** Shown on the button briefly after a successful copy (label mode). */
     copiedLabel?: React.ReactNode;
-    /** How long to show `copiedLabel` on the button (ms). */
+    /** Icon before copy / when reset (icon-only mode). */
+    copyIcon?: React.ReactNode;
+    /** Icon briefly after a successful copy (icon-only mode). */
+    copiedIcon?: React.ReactNode;
+    /** How long to show the copied state on the button (ms). */
     timeout?: number;
     /** Wraps the button in a `Tooltip` when true. */
     tooltip?: boolean;
-    /** Tooltip body when idle; defaults to `copyLabel`. */
+    /** Tooltip body when idle; defaults to `copyLabel` or `"Copy"`. */
     tooltipLabel?: React.ReactNode;
-    /** Tooltip body after copy; defaults to `copiedLabel`. */
+    /** Tooltip body after copy; defaults to `copiedLabel` or `"Copied!"`. */
     tooltipCopiedLabel?: React.ReactNode;
     /** @deprecated Use `tooltipLabel`. */
     tooltipContent?: React.ReactNode;
@@ -538,18 +542,22 @@ declare namespace Upload {
 interface InlineEditProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
     value?: string;
     defaultValue?: string;
-    onSave?: (value: string) => void;
+    onSave?: (value: string) => void | Promise<void>;
     onCancel?: () => void;
     placeholder?: string;
     disabled?: boolean;
+    /** Disables editing controls while a save is in progress (use with async `onSave` or control externally). */
+    loading?: boolean;
     required?: boolean;
     validate?: boolean | ((value: string) => string | undefined);
     editTrigger?: "click" | "doubleClick";
     saveOnBlur?: boolean;
     saveOnEnter?: boolean;
+    saveButtonProps?: Partial<ButtonProps>;
+    cancelButtonProps?: Partial<ButtonProps>;
     className?: string;
 }
-declare function InlineEdit({ value, defaultValue, onSave, onCancel, placeholder, disabled, required, validate, editTrigger, saveOnBlur, saveOnEnter, className, ...rest }: InlineEditProps): react_jsx_runtime.JSX.Element;
+declare function InlineEdit({ value, defaultValue, onSave, onCancel, placeholder, disabled, loading, required, validate, editTrigger, saveOnBlur, saveOnEnter, saveButtonProps, cancelButtonProps, className, ...rest }: InlineEditProps): react_jsx_runtime.JSX.Element;
 declare namespace InlineEdit {
     var displayName: string;
 }
@@ -673,7 +681,7 @@ declare namespace Form {
     var displayName: string;
 }
 
-type FormFieldType = "text" | "email" | "password" | "number" | "url" | "search" | "textarea";
+type FormFieldType = "text" | "email" | "password" | "number" | "url" | "search" | "textarea" | "select" | "checkbox" | "upload";
 interface FormFieldProps {
     name: string;
     type?: FormFieldType;
@@ -684,10 +692,23 @@ interface FormFieldProps {
     value?: string;
     defaultValue?: string;
     onChange?: (value: string) => void;
+    /** Called after the field value updates (select, checkbox, and text inputs). */
+    onValueChange?: (value: string) => void;
     validate?: boolean | ((value: string) => string | undefined);
     errorMessage?: string;
     touched?: boolean;
     showError?: boolean;
+    /** Select options when `type="select"`. */
+    items?: SelectOption[];
+    rows?: number;
+    /** Upload options when `type="upload"`. */
+    accept?: string;
+    dragAndDrop?: boolean;
+    multiple?: boolean;
+    maxSize?: number;
+    maxFiles?: number;
+    loading?: boolean;
+    onUpload?: (files: File[]) => void | Promise<void>;
     render?: (props: FormFieldRenderProps) => React.ReactNode;
     children?: React.ReactNode;
     className?: string;
@@ -695,7 +716,7 @@ interface FormFieldProps {
     labelProps?: Record<string, unknown>;
     helperTextProps?: Record<string, unknown>;
 }
-declare function FormField({ name, type, label, placeholder, required, disabled, value: valueProp, defaultValue, onChange: onChangeProp, validate, errorMessage, touched: touchedProp, showError, render, children, className, inputProps, }: FormFieldProps): react_jsx_runtime.JSX.Element;
+declare function FormField({ name, type, label, placeholder, required, disabled, value: valueProp, defaultValue, onChange: onChangeProp, validate, errorMessage, touched: touchedProp, showError, render, children, className, inputProps, onValueChange, items, rows, accept, dragAndDrop, multiple, maxSize, maxFiles, loading, onUpload, }: FormFieldProps): react_jsx_runtime.JSX.Element;
 declare namespace FormField {
     var displayName: string;
 }
@@ -1148,6 +1169,56 @@ declare namespace Collapsible {
     var displayName: string;
 }
 
+/** Side the panel shrinks toward when closed. */
+type CollapsiblePanelCloseDirection = "left" | "right" | "top" | "bottom";
+type CollapsiblePanelCrossAxis = "full" | "parent" | "viewport";
+type CollapsiblePanelVariant = "default" | "inset";
+type CollapsiblePanelTriggerPlacement = "none" | "header" | "floater";
+type CollapsiblePanelTriggerVariant = "default" | "pill";
+declare const collapsiblePanelRootVariants: (props?: ({
+    closeDirection?: "left" | "right" | "top" | "bottom" | null | undefined;
+    crossAxis?: "full" | "parent" | "viewport" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+declare const collapsiblePanelSurfaceVariants: (props?: ({
+    closeDirection?: "left" | "right" | "top" | "bottom" | null | undefined;
+    variant?: "default" | "inset" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+/** Seam-adjacent floater — derived from close direction + cross-axis centering. */
+declare const floaterTriggerVariants: (props?: ({
+    closeDirection?: "left" | "right" | "top" | "bottom" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface CollapsiblePanelProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+    open?: boolean;
+    defaultOpen?: boolean;
+    onOpenChange?: (open: boolean) => void;
+    /** Side the panel collapses toward — width shrinks for `left`/`right`, height for `top`/`bottom`. */
+    closeDirection?: CollapsiblePanelCloseDirection;
+    /** Expanded size on the collapse axis. */
+    size?: string | number;
+    /**
+     * Collapsed size on the collapse axis.
+     * Default when omitted: `0` for `triggerPlacement` `none` / `floater`; icon-rail width for `header`.
+     */
+    collapsedSize?: string | number;
+    /** Cross-axis sizing — height when collapsing horizontally, width when collapsing vertically. */
+    crossAxis?: CollapsiblePanelCrossAxis;
+    trigger?: React.ReactNode;
+    triggerPlacement?: CollapsiblePanelTriggerPlacement;
+    /** Floater toggle surface — `pill` matches compact seam handles in editor layouts. */
+    triggerVariant?: CollapsiblePanelTriggerVariant;
+    toggleButtonProps?: Partial<ButtonProps>;
+    header?: React.ReactNode;
+    footer?: React.ReactNode;
+    scrollable?: boolean;
+    variant?: CollapsiblePanelVariant;
+    surfaceClassName?: string;
+    contentClassName?: string;
+    headerClassName?: string;
+    footerClassName?: string;
+    children?: React.ReactNode;
+}
+declare const CollapsiblePanel: React.ForwardRefExoticComponent<CollapsiblePanelProps & React.RefAttributes<HTMLDivElement>>;
+
 interface AccordionItem {
     value: string;
     label: React.ReactNode;
@@ -1398,6 +1469,9 @@ interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children
     variant?: VariantProps<typeof tabsListVariants>["variant"];
     className?: string;
     listClassName?: string;
+    /** Applied to the active tab panel wrapper — use `flex min-h-0 flex-1 flex-col` for editor layouts. */
+    panelClassName?: string;
+    contentClassName?: string;
 }
 declare const Tabs: React.ForwardRefExoticComponent<TabsProps & React.RefAttributes<HTMLDivElement>>;
 
@@ -1648,12 +1722,14 @@ interface HistoryControlButtonsProps extends React.HTMLAttributes<HTMLDivElement
     /** When false, hides the redo control. Default true. */
     showRedo?: boolean;
     showLabels?: boolean;
+    /** When false, icon-only buttons render without hover tooltips. Default true. */
+    showTooltips?: boolean;
     undoButtonProps?: Partial<ButtonProps>;
     redoButtonProps?: Partial<ButtonProps>;
     resetButtonProps?: Partial<ButtonProps>;
     className?: string;
 }
-declare function HistoryControlButtons({ canUndo, canRedo, canReset, onUndo, onRedo, onReset, showUndo, showRedo, showLabels, undoButtonProps, redoButtonProps, resetButtonProps, className, ...rest }: HistoryControlButtonsProps): react_jsx_runtime.JSX.Element;
+declare function HistoryControlButtons({ canUndo, canRedo, canReset, onUndo, onRedo, onReset, showUndo, showRedo, showLabels, showTooltips, undoButtonProps, redoButtonProps, resetButtonProps, className, ...rest }: HistoryControlButtonsProps): react_jsx_runtime.JSX.Element;
 declare namespace HistoryControlButtons {
     var displayName: string;
 }
@@ -1691,27 +1767,25 @@ declare namespace FixedScreenWidget {
 declare const modalSurfaceVariants: (props?: ({
     size?: "sm" | "md" | "lg" | "xl" | "full" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
+declare const modalOverlayLayout: (props?: ({
+    align?: "center" | "top" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
 type ModalSize = NonNullable<VariantProps<typeof modalSurfaceVariants>["size"]>;
-type ModalTriggerProps = {
-    label?: string;
-    left?: React.ReactNode;
-    variant?: ButtonProps["variant"];
-    size?: ButtonProps["size"];
-    className?: string;
-};
-interface ModalProps extends VariantProps<typeof modalSurfaceVariants> {
+type ModalAlign = NonNullable<VariantProps<typeof modalOverlayLayout>["align"]>;
+interface ModalProps extends VariantProps<typeof modalSurfaceVariants>, VariantProps<typeof modalOverlayLayout> {
     open?: boolean;
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
     onClose?: () => void;
-    triggerProps?: ModalTriggerProps;
     header?: React.ReactNode;
     footer?: React.ReactNode;
     showClose?: boolean;
+    /** When true, backdrop clicks do not close the dialog. */
     loading?: boolean;
     minHeight?: string | number;
     maxHeight?: string | number;
     className?: string;
+    overlayClassName?: string;
     cardProps?: Omit<CardProps, "header" | "footer" | "children" | "minHeight" | "maxHeight">;
     /** Portal target for the backdrop — use `parent` inside `OverlayPortalScope` for scoped previews. */
     container?: OverlayPortalContainer;
@@ -1719,11 +1793,17 @@ interface ModalProps extends VariantProps<typeof modalSurfaceVariants> {
 }
 declare const Modal: React.ForwardRefExoticComponent<ModalProps & React.RefAttributes<HTMLDivElement>>;
 
-type TriggerModalProps = ModalProps & {
-    triggerProps?: ModalTriggerProps;
+type ModalTriggerProps = Pick<ButtonProps, "variant" | "size" | "className" | "disabled" | "iconOnly" | "ariaLabel"> & {
+    label?: string;
+    left?: React.ReactNode;
 };
-/** Modal with an optional trigger button — base for ConfirmModal and FormModal. */
-declare function TriggerModal({ triggerProps, showClose, ...modalProps }: TriggerModalProps): react_jsx_runtime.JSX.Element;
+interface TriggerModalProps extends ModalProps {
+    /** Custom trigger node — use instead of `triggerProps` for full control. */
+    trigger?: React.ReactNode;
+    triggerProps?: ModalTriggerProps;
+}
+/** Modal with an optional trigger — base for ConfirmModal and FormModal. */
+declare function TriggerModal({ trigger, triggerProps, showClose, open: openProp, defaultOpen, onOpenChange, ...modalProps }: TriggerModalProps): react_jsx_runtime.JSX.Element;
 declare namespace TriggerModal {
     var displayName: string;
 }
@@ -1757,15 +1837,51 @@ declare namespace ConfirmModal {
 }
 
 type FormModalMode = "create" | "edit";
+type FormFieldChangeHelpers = {
+    values: Record<string, unknown>;
+    setValue: (name: string, value: unknown) => void;
+};
+/** Passed to `FormFieldSchema.render` / `renderAfter` — form helpers plus field metadata. */
+type FormFieldSchemaRenderHelpers = FormFieldChangeHelpers & {
+    name: string;
+    field: FormFieldRenderProps;
+    errorMessage?: string;
+    disabled?: boolean;
+};
 type FormFieldSchema = {
     name: string;
     type?: FormFieldType;
-    label?: string;
-    placeholder?: string;
+    label?: React.ReactNode;
+    placeholder?: string | ((values: Record<string, unknown>) => string);
     required?: boolean;
     disabled?: boolean;
     validate?: boolean | ((value: string) => string | undefined);
-    errorMessage?: string;
+    errorMessage?: string | ((values: Record<string, unknown>) => string | undefined);
+    /** Select options — static array or derived from current form values. */
+    items?: SelectOption[] | ((values: Record<string, unknown>) => SelectOption[]);
+    /** Hide the field unless this returns true. */
+    showWhen?: (values: Record<string, unknown>) => boolean;
+    /** Side effects after value change (e.g. reset dependent fields). */
+    onValueChange?: (value: string, helpers: FormFieldChangeHelpers) => void;
+    rows?: number;
+    /** Upload field options when `type="upload"`. */
+    accept?: string;
+    dragAndDrop?: boolean;
+    multiple?: boolean;
+    maxSize?: number;
+    maxFiles?: number;
+    loading?: boolean;
+    onUpload?: (files: File[], helpers: FormFieldChangeHelpers) => void | Promise<void>;
+    /**
+     * Full custom field UI — replaces auto-render for this schema row.
+     * Receives form helpers and the resolved field control props.
+     */
+    render?: (helpers: FormFieldSchemaRenderHelpers) => React.ReactNode;
+    /**
+     * Renders below the auto-rendered control (e.g. VariablePills under a textarea).
+     * Ignored when `render` is set.
+     */
+    renderAfter?: (helpers: FormFieldSchemaRenderHelpers) => React.ReactNode;
 };
 interface FormModalProps extends Omit<TriggerModalProps, "header" | "footer" | "children" | "triggerProps"> {
     triggerProps?: ModalTriggerProps;
@@ -2013,10 +2129,26 @@ interface ListItem {
     action?: React.ReactNode;
     disabled?: boolean;
     selected?: boolean;
+    /** Matched against selected filter chip values (`filterChips`). */
+    filterKeys?: string[];
+    /** Render `label` as-is without default row chrome (grid cards, etc.). */
+    custom?: boolean;
 }
 type ListLayout = "list" | "grid";
 /** Default filter: case-insensitive match on `label`, `description`, and `value`. */
 declare function defaultListItemFilter(items: readonly ListItem[], query: string): ListItem[];
+/** Default chip filter: OR match on `item.filterKeys`; items without keys always pass. */
+declare function defaultListChipFilter(items: readonly ListItem[], selected: readonly string[]): ListItem[];
+type ListFilterChipsConfig = Omit<PillGroupProps, "items" | "value" | "defaultValue" | "onChange" | "selectable"> & {
+    items: PillItem[];
+    value?: string[];
+    defaultValue?: string[];
+    onChange?: (next: string[]) => void;
+    /** Replace built-in OR match on `item.filterKeys`. */
+    filter?: (items: readonly ListItem[], selected: readonly string[]) => readonly ListItem[];
+    /** When false, chips render but do not filter rows. Default true. */
+    filterItems?: boolean;
+};
 type ListSearchConfig = Omit<Partial<SearchInputProps>, "value" | "defaultValue" | "onChange" | "onSearch" | "onClear"> & {
     /** Replace built-in label/description/value matching. */
     filter?: (items: readonly ListItem[], query: string) => readonly ListItem[];
@@ -2047,6 +2179,14 @@ interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children
     /** Shown when search is active and nothing matches. */
     noResultsState?: React.ReactNode;
     loading?: boolean;
+    /** Replaces default loading copy when `loading` is true. */
+    loadingState?: React.ReactNode;
+    /** Replaces list body (search/chips chrome still render). */
+    errorState?: React.ReactNode;
+    /** Optional filter chips above the list body — pairs with `ListItem.filterKeys`. */
+    filterChips?: ListFilterChipsConfig;
+    /** Override default row rendering. */
+    renderItem?: (item: ListItem, index: number) => React.ReactNode;
     children?: React.ReactNode;
     /** Prepended above search (if any) and the list body. */
     header?: React.ReactNode;
@@ -2639,4 +2779,4 @@ declare function getCurrentCSSVariables(): Record<string, string>;
  */
 declare function applyThemeSync(): void;
 
-export { Accordion, type AccordionItem, type AccordionProps, Alert, AlertDialog, type AlertDialogCancelProps, type AlertDialogConfirmProps, type AlertDialogProps, type AlertProps, AppShell, type AppShellProps, AspectRatio, type AspectRatioProps, AuthLayout, type AuthLayoutProps, Avatar, AvatarGroup, type AvatarGroupProps, type AvatarProps, Badge, type BadgeProps, BarChart, type BarChartProps, Breadcrumb, type BreadcrumbItem, type BreadcrumbProps, Button, type ButtonProps, Calendar, type CalendarProps, type CalendarSelectionMode, Card, type CardColor, type CardProps, type CardVariant, Carousel, type CarouselItem, type CarouselProps, Chart, type ChartProps, type ChartType, Checkbox, type CheckboxProps, CodeBlock, type CodeBlockProps, Collapsible, type CollapsibleProps, Command, type CommandItem, type CommandProps, ConfirmModal, type ConfirmModalCancelProps, type ConfirmModalConfirmProps, type ConfirmModalIntent, type ConfirmModalProps, ContextMenu, type ContextMenuProps, CopyButton, type CopyButtonProps, DatePicker, type DatePickerProps, type DatePreset, DateRangePicker, type DateRangePickerProps, type DescriptionItem, DescriptionList, type DescriptionListProps, Drawer, type DrawerPlacement, type DrawerProps, type DrawerSize, type DrawerVariant, Dropdown, type DropdownItem, type DropdownProps, EmptyState, type EmptyStateAction, type EmptyStateProps, ErrorBoundary, type ErrorBoundaryProps, FAB, type FABProps, FieldLayout, type FieldLayoutProps, type FieldSurfaceProps, FixedScreenWidget, type FixedScreenWidgetPosition, type FixedScreenWidgetProps, type FixedScreenWidgetSlideFrom, Form, FormField, type FormFieldProps, type FormFieldRenderProps, type FormFieldSchema, type FormFieldType, FormModal, type FormModalMode, type FormModalProps, type FormProps, type FormValues, Grid, type GridProps, type GridRootTag, HelperText, type HelperTextProps, Hero, type HeroActions, type HeroProps, HistoryControlButtons, type HistoryControlButtonsProps, HoverCard, type HoverCardProps, type HoverCardTriggerProps, Icon, type IconProps, Image, type ImageProps, InlineEdit, type InlineEditProps, InputGroup, InputGroupAddon, type InputGroupAddonProps, InputGroupButton, type InputGroupButtonProps, InputGroupInput, type InputGroupInputProps, type InputGroupProps, InputOTP, type InputOTPProps, Kbd, KbdGroup, type KbdGroupProps, type KbdProps, Label, type LabelProps, LineChart, type LineChartProps, Link, type LinkProps, List, type ListItem, type ListLayout, type ListProps, type ListSearchConfig, LoadingOverlay, type LoadingOverlayProps, Menubar, type MenubarMenu, type MenubarProps, Modal, type ModalProps, type ModalSize, type ModalTriggerProps, type NavItem, type NavMenuItem, Navbar, type NavbarProps, NavigationMenu, type NavigationMenuProps, Overlay, type OverlayPortalContainer, OverlayPortalScope, type OverlayProps, PageFooter, type PageFooterProps, PageHeader, type PageHeaderProps, Pagination, type PaginationProps, PhoneInput, type PhoneInputProps, type PhoneValue, PieChart, type PieChartProps, Pill, PillGroup, type PillGroupProps, type PillItem, type PillProps, Popover, type PopoverPlacement, type PopoverProps, type PopoverTriggerProps, Progress, type ProgressProps, Radio, RadioGroup, type RadioGroupItem, type RadioGroupProps, type RadioProps, Rating, type RatingPrecision, type RatingProps, ResizableHandle, type ResizableHandleProps, ResizablePanel, ResizablePanelGroup, ResizeContainer, type ResizeContainerProps, SearchInput, type SearchInputProps, Select, type SelectOption, type SelectProps, Separator, type SeparatorProps, Sidebar, type SidebarItem, type SidebarProps, Skeleton, type SkeletonProps, Slider, type SliderProps, type SortDirection, Spinner, type SpinnerProps, type SpinnerSize, SplitButton, type SplitButtonMenuItem, type SplitButtonProps, Stack, type StackProps, type StackRootTag, type StepItem, type StepStatus, Stepper, type StepperProps, type StringFieldValidateOpts, THEME_CATEGORY_ORDER, type TabItem, Table, type TableColumn, type TableColumnAlign, type TableProps, TableSkeleton, type TableSkeletonProps, Tabs, type TabsProps, Tag, type TagProps, type TagSurfaceVariant, Text, TextInput, type TextInputProps, type TextProps, Textarea, type TextareaProps, type ThemeMetadata$1 as ThemeMetadata, ThemePanel, type ThemePanelProps, type ThemePreset, type ThemeSelection, ThemeToggle, type ThemeToggleProps, TimePicker, type TimePickerProps, Toast, type ToastAction, type ToastProps, type ToastTone, type ToastVariant, Toaster, type ToasterPosition, type ToasterProps, Toggle, type ToggleProps, Tooltip, type TooltipPlacement, type TooltipProps, TooltipProvider, type TooltipProviderProps, type TreeAddRelation, type TreeItem, type TreeItemKind, type TreeMovePosition, TreeView, type TreeViewProps, TriggerModal, type TriggerModalProps, Upload, type UploadProps, Video, type VideoProps, VisuallyHidden, type VisuallyHiddenProps, addTreeNodeChild, addTreeNodeSibling, alertDialogVariants, alertVariants, applyPreset, applyThemeSync, pillSurfaceVariants as badgeVariants, buttonVariants, cardVariants, clearToasts, defaultListItemFilter, deleteTreeNode, descriptionListVariants, disabledControl, dismissToast, drawerVariants, emptyStateVariants, enableDebugMode, fieldSurfaceVariants, focusRing, focusRingDestructive, focusRingOffset, formatAspectRatioLabel, getCurrentCSSVariables, getPhoneDialCode, getStringFieldValidationError, getTheme, getThemeCategories, getThemeFilePath, getThemesForCategory, gridSpacingVariants as gridVariants, heroVariants, iconVariants, linkVariants, modalSurfaceVariants, moveTreeNode, navbarVariants, overlayVariants, pageFooterVariants, pageHeaderVariants, peerFocusRing, pillSurfaceVariants as pillVariants, ratingVariants, registerTheme, registerThemeFromFile, ringOffsetBackground, sidebarVariants, stackVariants, textVariants, toast, toastVariants, toggleThumbVariants, toggleVariants, tooltipArrowVariants, tooltipContentVariants, useFormContext, useTheme, useThemeToggle };
+export { Accordion, type AccordionItem, type AccordionProps, Alert, AlertDialog, type AlertDialogCancelProps, type AlertDialogConfirmProps, type AlertDialogProps, type AlertProps, AppShell, type AppShellProps, AspectRatio, type AspectRatioProps, AuthLayout, type AuthLayoutProps, Avatar, AvatarGroup, type AvatarGroupProps, type AvatarProps, Badge, type BadgeProps, BarChart, type BarChartProps, Breadcrumb, type BreadcrumbItem, type BreadcrumbProps, Button, type ButtonProps, Calendar, type CalendarProps, type CalendarSelectionMode, Card, type CardColor, type CardProps, type CardVariant, Carousel, type CarouselItem, type CarouselProps, Chart, type ChartProps, type ChartType, Checkbox, type CheckboxProps, CodeBlock, type CodeBlockProps, Collapsible, CollapsiblePanel, type CollapsiblePanelCloseDirection, type CollapsiblePanelCrossAxis, type CollapsiblePanelProps, type CollapsiblePanelTriggerPlacement, type CollapsiblePanelTriggerVariant, type CollapsiblePanelVariant, type CollapsibleProps, Command, type CommandItem, type CommandProps, ConfirmModal, type ConfirmModalCancelProps, type ConfirmModalConfirmProps, type ConfirmModalIntent, type ConfirmModalProps, ContextMenu, type ContextMenuProps, CopyButton, type CopyButtonProps, DatePicker, type DatePickerProps, type DatePreset, DateRangePicker, type DateRangePickerProps, type DescriptionItem, DescriptionList, type DescriptionListProps, Drawer, type DrawerPlacement, type DrawerProps, type DrawerSize, type DrawerVariant, Dropdown, type DropdownItem, type DropdownProps, EmptyState, type EmptyStateAction, type EmptyStateProps, ErrorBoundary, type ErrorBoundaryProps, FAB, type FABProps, FieldLayout, type FieldLayoutProps, type FieldSurfaceProps, FixedScreenWidget, type FixedScreenWidgetPosition, type FixedScreenWidgetProps, type FixedScreenWidgetSlideFrom, Form, FormField, type FormFieldChangeHelpers, type FormFieldProps, type FormFieldRenderProps, type FormFieldSchema, type FormFieldSchemaRenderHelpers, type FormFieldType, FormModal, type FormModalMode, type FormModalProps, type FormProps, type FormValues, Grid, type GridProps, type GridRootTag, HelperText, type HelperTextProps, Hero, type HeroActions, type HeroProps, HistoryControlButtons, type HistoryControlButtonsProps, HoverCard, type HoverCardProps, type HoverCardTriggerProps, Icon, type IconProps, Image, type ImageProps, InlineEdit, type InlineEditProps, InputGroup, InputGroupAddon, type InputGroupAddonProps, InputGroupButton, type InputGroupButtonProps, InputGroupInput, type InputGroupInputProps, type InputGroupProps, InputOTP, type InputOTPProps, Kbd, KbdGroup, type KbdGroupProps, type KbdProps, Label, type LabelProps, LineChart, type LineChartProps, Link, type LinkProps, List, type ListFilterChipsConfig, type ListItem, type ListLayout, type ListProps, type ListSearchConfig, LoadingOverlay, type LoadingOverlayProps, Menubar, type MenubarMenu, type MenubarProps, Modal, type ModalAlign, type ModalProps, type ModalSize, type ModalTriggerProps, type NavItem, type NavMenuItem, Navbar, type NavbarProps, NavigationMenu, type NavigationMenuProps, Overlay, type OverlayPortalContainer, OverlayPortalScope, type OverlayProps, PageFooter, type PageFooterProps, PageHeader, type PageHeaderProps, Pagination, type PaginationProps, PhoneInput, type PhoneInputProps, type PhoneValue, PieChart, type PieChartProps, Pill, PillGroup, type PillGroupProps, type PillItem, type PillProps, Popover, type PopoverPlacement, type PopoverProps, type PopoverTriggerProps, Progress, type ProgressProps, Radio, RadioGroup, type RadioGroupItem, type RadioGroupProps, type RadioProps, Rating, type RatingPrecision, type RatingProps, ResizableHandle, type ResizableHandleProps, ResizablePanel, ResizablePanelGroup, ResizeContainer, type ResizeContainerProps, SearchInput, type SearchInputProps, Select, type SelectOption, type SelectProps, Separator, type SeparatorProps, Sidebar, type SidebarItem, type SidebarProps, Skeleton, type SkeletonProps, Slider, type SliderProps, type SortDirection, Spinner, type SpinnerProps, type SpinnerSize, SplitButton, type SplitButtonMenuItem, type SplitButtonProps, Stack, type StackProps, type StackRootTag, type StepItem, type StepStatus, Stepper, type StepperProps, type StringFieldValidateOpts, THEME_CATEGORY_ORDER, type TabItem, Table, type TableColumn, type TableColumnAlign, type TableProps, TableSkeleton, type TableSkeletonProps, Tabs, type TabsProps, Tag, type TagProps, type TagSurfaceVariant, Text, TextInput, type TextInputProps, type TextProps, Textarea, type TextareaProps, type ThemeMetadata$1 as ThemeMetadata, ThemePanel, type ThemePanelProps, type ThemePreset, type ThemeSelection, ThemeToggle, type ThemeToggleProps, TimePicker, type TimePickerProps, Toast, type ToastAction, type ToastProps, type ToastTone, type ToastVariant, Toaster, type ToasterPosition, type ToasterProps, Toggle, type ToggleProps, Tooltip, type TooltipPlacement, type TooltipProps, TooltipProvider, type TooltipProviderProps, type TreeAddRelation, type TreeItem, type TreeItemKind, type TreeMovePosition, TreeView, type TreeViewProps, TriggerModal, type TriggerModalProps, Upload, type UploadProps, Video, type VideoProps, VisuallyHidden, type VisuallyHiddenProps, addTreeNodeChild, addTreeNodeSibling, alertDialogVariants, alertVariants, applyPreset, applyThemeSync, pillSurfaceVariants as badgeVariants, buttonVariants, cardVariants, clearToasts, collapsiblePanelRootVariants, collapsiblePanelSurfaceVariants, defaultListChipFilter, defaultListItemFilter, deleteTreeNode, descriptionListVariants, disabledControl, dismissToast, drawerVariants, emptyStateVariants, enableDebugMode, fieldSurfaceVariants, floaterTriggerVariants, focusRing, focusRingDestructive, focusRingOffset, formatAspectRatioLabel, getCurrentCSSVariables, getPhoneDialCode, getStringFieldValidationError, getTheme, getThemeCategories, getThemeFilePath, getThemesForCategory, gridSpacingVariants as gridVariants, heroVariants, iconVariants, linkVariants, modalOverlayLayout, modalSurfaceVariants, moveTreeNode, navbarVariants, overlayVariants, pageFooterVariants, pageHeaderVariants, peerFocusRing, pillSurfaceVariants as pillVariants, ratingVariants, registerTheme, registerThemeFromFile, ringOffsetBackground, sidebarVariants, stackVariants, textVariants, toast, toastVariants, toggleThumbVariants, toggleVariants, tooltipArrowVariants, tooltipContentVariants, useFormContext, useTheme, useThemeToggle };

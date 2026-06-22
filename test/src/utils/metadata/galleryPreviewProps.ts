@@ -97,6 +97,14 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
     { name: "showContentDivider", type: "boolean", defaultValue: true }
   ),
 
+  CollapsiblePanel: own(
+    { name: "open", type: "boolean", defaultValue: true },
+    { name: "collapsedSize", type: "string", description: "Omit: 0 or icon rail" },
+    { name: "triggerVariant", type: "select", options: ["default", "pill"], defaultValue: "default" },
+    { name: "scrollable", type: "boolean", defaultValue: true },
+    { name: "variant", type: "variant", options: ["default", "inset"], defaultValue: "default" }
+  ),
+
   Command: own(
     { name: "loading", type: "boolean", defaultValue: false },
     { name: "emptyState", type: "reactNode", defaultValue: "No results" },
@@ -185,7 +193,10 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
     { name: "variant", type: "select", options: ["default", "centered", "split"], defaultValue: "default" }
   ),
 
-  HistoryControlButtons: own({ name: "showLabels", type: "boolean", defaultValue: false }),
+  HistoryControlButtons: own(
+    { name: "showLabels", type: "boolean", defaultValue: false },
+    { name: "showTooltips", type: "boolean", defaultValue: true }
+  ),
 
   HoverCard: own(
     { name: "placement", type: "select", options: ["top", "bottom", "left", "right"], defaultValue: "bottom" },
@@ -206,6 +217,7 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
   InlineEdit: own(
     { name: "value", type: "string", defaultValue: "" },
     { name: "disabled", type: "boolean", defaultValue: false },
+    { name: "loading", type: "boolean", defaultValue: false },
     { name: "required", type: "boolean", defaultValue: false },
     { name: "validate", type: "boolean", defaultValue: false },
     { name: "editTrigger", type: "select", options: ["click", "doubleClick"], defaultValue: "click" },
@@ -235,7 +247,8 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
   List: own(
     { name: "layout", type: "select", options: ["list", "grid"], defaultValue: "list" },
     { name: "loading", type: "boolean", defaultValue: false },
-    { name: "divider", type: "boolean", defaultValue: false }
+    { name: "divider", type: "boolean", defaultValue: false },
+    { name: "filterChips", type: "object", galleryOnly: true }
   ),
 
   LoadingOverlay: own(

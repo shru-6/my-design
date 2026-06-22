@@ -5,7 +5,7 @@ import type { Dispatch, SetStateAction } from "react"
 
 const BINDINGS: Record<string, Record<string, string>> = {
   Toggle: { checked: "onChange" },
-  Checkbox: { checked: "onChange" },
+  Checkbox: { default: "onChange" },
   Radio: { checked: "onChange" },
   Slider: { value: "onChange" },
   Select: { value: "onValueChange" },
@@ -20,6 +20,7 @@ const BINDINGS: Record<string, Record<string, string>> = {
   TimePicker: { value: "onChange" },
   DateRangePicker: { value: "onChange" },
   Collapsible: { open: "onOpenChange" },
+  CollapsiblePanel: { open: "onOpenChange" },
   Accordion: { value: "onChange" },
   Drawer: { open: "onOpenChange" },
   Modal: { open: "onOpenChange" },

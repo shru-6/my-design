@@ -69,6 +69,18 @@ export {
   type ResizableHandleProps,
 } from "./components/layout/Resizable"
 export { Collapsible, type CollapsibleProps } from "./components/layout/Collapsible"
+export {
+  CollapsiblePanel,
+  collapsiblePanelRootVariants,
+  collapsiblePanelSurfaceVariants,
+  floaterTriggerVariants,
+  type CollapsiblePanelProps,
+  type CollapsiblePanelCloseDirection,
+  type CollapsiblePanelCrossAxis,
+  type CollapsiblePanelVariant,
+  type CollapsiblePanelTriggerPlacement,
+  type CollapsiblePanelTriggerVariant,
+} from "./components/layout/CollapsiblePanel"
 export { Accordion, type AccordionProps, type AccordionItem } from "./components/layout/Accordion"
 export { ResizeContainer, type ResizeContainerProps } from "./components/layout/ResizeContainer"
 export { Breadcrumb, type BreadcrumbProps, type BreadcrumbItem } from "./components/navigation/Breadcrumb"
@@ -105,7 +117,7 @@ export {
   type FixedScreenWidgetPosition,
   type FixedScreenWidgetSlideFrom,
 } from "./components/patterns/FixedScreenWidget"
-export { TriggerModal, type TriggerModalProps } from "./components/patterns/TriggerModal"
+export { TriggerModal, type TriggerModalProps, type ModalTriggerProps } from "./components/patterns/TriggerModal"
 export {
   ConfirmModal,
   type ConfirmModalProps,
@@ -118,6 +130,8 @@ export {
   type FormModalProps,
   type FormModalMode,
   type FormFieldSchema,
+  type FormFieldChangeHelpers,
+  type FormFieldSchemaRenderHelpers,
 } from "./components/patterns/FormModal"
 export { Text, textVariants, type TextProps } from "./components/data-display/Text"
 export { Link, linkVariants, type LinkProps } from "./components/data-display/Link"
@@ -149,10 +163,12 @@ export {
 export {
   List,
   defaultListItemFilter,
+  defaultListChipFilter,
   type ListProps,
   type ListItem,
   type ListLayout,
   type ListSearchConfig,
+  type ListFilterChipsConfig,
 } from "./components/data-display/List"
 export {
   Table,
@@ -183,7 +199,7 @@ export {
   type OverlayProps,
   type OverlayPortalContainer,
 } from "./components/overlays/Overlay"
-export { Modal, modalSurfaceVariants, type ModalProps, type ModalSize, type ModalTriggerProps } from "./components/overlays/Modal"
+export { Modal, modalSurfaceVariants, modalOverlayLayout, type ModalProps, type ModalSize, type ModalAlign } from "./components/overlays/Modal"
 export {
   AlertDialog,
   alertDialogVariants,

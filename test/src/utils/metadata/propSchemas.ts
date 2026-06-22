@@ -62,12 +62,15 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     },
     { name: "value", type: "string", defaultValue: "a" },
     { name: "defaultValue", type: "string", defaultValue: "a" },
+    { name: "onValueChange", type: "callback", description: "(value: string) => void" },
     { name: "placeholder", type: "string", defaultValue: "Select…" },
     { name: "label", type: "string", defaultValue: "Choose" },
+    { name: "left", type: "reactNode" },
     { name: "required", type: "boolean", defaultValue: false },
     { name: "disabled", type: "boolean", defaultValue: false },
     { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
     { name: "variant", type: "variant", options: ["outline", "filled", "ghost", "underline"], defaultValue: "outline" },
+    { name: "contentClassName", type: "string" },
     { name: "className", type: "string" }
   ),
 
@@ -143,20 +146,58 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
   ),
 
   Upload: own(
+    { name: "onUpload", type: "callback", description: "(files: File[]) => void | Promise<void>" },
+    { name: "onRemove", type: "callback" },
+    { name: "value", type: "array" },
+    { name: "defaultValue", type: "array" },
+    { name: "onChange", type: "callback" },
     { name: "label", type: "string", defaultValue: "Upload file" },
     { name: "accept", type: "string" },
     { name: "multiple", type: "boolean", defaultValue: false },
+    { name: "maxFiles", type: "number" },
+    { name: "maxSize", type: "number" },
     { name: "disabled", type: "boolean", defaultValue: false },
+    { name: "loading", type: "boolean", defaultValue: false },
+    { name: "dragAndDrop", type: "boolean", defaultValue: false },
+    { name: "preview", type: "boolean", defaultValue: false },
+    { name: "errorMessage", type: "string" },
+    { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
+    { name: "variant", type: "variant", options: ["outline", "filled", "ghost", "underline"], defaultValue: "outline" },
     { name: "className", type: "string" }
   ),
 
   FormField: own(
     { name: "name", type: "string", defaultValue: "email" },
     { name: "label", type: "string", defaultValue: "Email" },
-    { name: "type", type: "select", options: ["text", "email", "password", "number", "url", "search", "textarea"], defaultValue: "email" },
+    {
+      name: "type",
+      type: "select",
+      options: ["text", "email", "password", "number", "url", "search", "textarea", "select", "checkbox", "upload"],
+      defaultValue: "email",
+    },
     { name: "placeholder", type: "string", defaultValue: "you@example.com" },
     { name: "required", type: "boolean", defaultValue: true },
+    { name: "disabled", type: "boolean", defaultValue: false },
+    { name: "value", type: "string" },
+    { name: "defaultValue", type: "string" },
+    { name: "touched", type: "boolean", defaultValue: false },
+    { name: "showError", type: "boolean", defaultValue: true },
     { name: "validate", type: "boolean", defaultValue: true },
+    { name: "errorMessage", type: "string" },
+    { name: "items", type: "array", description: "SelectOption[] when type=select" },
+    { name: "onValueChange", type: "callback", description: "(value: string) => void" },
+    { name: "rows", type: "number", description: "Textarea rows" },
+    { name: "accept", type: "string", description: "Upload accept filter when type=upload" },
+    { name: "dragAndDrop", type: "boolean", description: "Upload drag-and-drop when type=upload" },
+    { name: "multiple", type: "boolean", description: "Upload multiple files when type=upload" },
+    { name: "maxSize", type: "number", description: "Upload max file size (bytes)" },
+    { name: "maxFiles", type: "number", description: "Upload max file count" },
+    { name: "loading", type: "boolean", description: "Upload loading state" },
+    { name: "onUpload", type: "callback", description: "(files: File[]) => void | Promise<void>" },
+    { name: "render", type: "callback", description: "(field) => ReactNode" },
+    { name: "inputProps", type: "object" },
+    { name: "labelProps", type: "object" },
+    { name: "helperTextProps", type: "object" },
     { name: "className", type: "string" }
   ),
 
@@ -219,8 +260,15 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
 
   Tabs: own(
     { name: "items", type: "array", defaultValue: [{ label: "Tab A", value: "a", content: "Panel A" }] },
+    { name: "value", type: "string", defaultValue: "a" },
     { name: "defaultValue", type: "string", defaultValue: "a" },
-    { name: "className", type: "string" }
+    { name: "orientation", type: "select", options: ["horizontal", "vertical"], defaultValue: "horizontal" },
+    { name: "variant", type: "variant", options: ["default", "underline", "pill"], defaultValue: "default" },
+    { name: "className", type: "string" },
+    { name: "listClassName", type: "string" },
+    { name: "panelClassName", type: "string" },
+    { name: "contentClassName", type: "string" },
+    { name: "onValueChange", type: "callback", description: "(value: string) => void" }
   ),
 
   Breadcrumb: own(
@@ -305,11 +353,23 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
         },
       ],
     },
+    { name: "selectedId", type: "string" },
     { name: "defaultSelectedId", type: "string", defaultValue: "root" },
+    { name: "onSelect", type: "callback", description: "(id: string) => void" },
+    { name: "expandedIds", type: "array" },
+    { name: "defaultExpandedIds", type: "array" },
+    { name: "onExpandedChange", type: "callback", description: "(ids: string[]) => void" },
+    { name: "showIndentGuides", type: "boolean", defaultValue: false },
+    { name: "loading", type: "boolean", defaultValue: false },
+    { name: "emptyState", type: "reactNode" },
+    { name: "indent", type: "number" },
     { name: "draggable", type: "boolean", defaultValue: false },
+    { name: "onMove", type: "callback", description: "({ draggedId, targetId, position }) => void" },
     { name: "allowAddSibling", type: "boolean", defaultValue: false },
     { name: "allowAddChild", type: "boolean", defaultValue: false },
     { name: "allowDelete", type: "boolean", defaultValue: false },
+    { name: "onAdd", type: "callback", description: "({ targetId, relation }) => void" },
+    { name: "onDelete", type: "callback", description: "(id: string) => void" },
     { name: "className", type: "string" }
   ),
 
@@ -335,7 +395,10 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "description", type: "string", defaultValue: "Something needs your attention." },
     { name: "tone", type: "select", options: ["neutral", "info", "success", "warning", "danger"], defaultValue: "neutral" },
     { name: "variant", type: "select", options: ["solid", "subtle", "outline"], defaultValue: "subtle" },
+    { name: "left", type: "reactNode" },
+    { name: "action", type: "reactNode" },
     { name: "dismissible", type: "boolean", defaultValue: false },
+    { name: "onClose", type: "callback", description: "() => void" },
     { name: "className", type: "string" }
   ),
 
@@ -370,7 +433,10 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "children", type: "reactNode", defaultValue: "Dialog body." },
     { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
     { name: "size", type: "size", options: ["sm", "md", "lg", "xl", "full"], defaultValue: "md" },
+    { name: "align", type: "select", options: ["center", "top"], defaultValue: "center" },
     { name: "showClose", type: "boolean", defaultValue: true },
+    { name: "loading", type: "boolean", defaultValue: false },
+    { name: "overlayClassName", type: "string" },
     { name: "className", type: "string" }
   ),
 
@@ -418,6 +484,34 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "className", type: "string" }
   ),
 
+  CollapsiblePanel: own(
+    { name: "open", type: "boolean", defaultValue: true },
+    { name: "defaultOpen", type: "boolean", defaultValue: true },
+    { name: "onOpenChange", type: "callback", description: "(open: boolean) => void" },
+    { name: "closeDirection", type: "select", options: ["left", "right", "top", "bottom"], defaultValue: "left" },
+    { name: "size", type: "string", defaultValue: "12rem" },
+    {
+      name: "collapsedSize",
+      type: "string",
+      description: "Omit: 0 for none/floater; icon rail for header. Pass 0 to fully collapse.",
+    },
+    { name: "crossAxis", type: "select", options: ["full", "parent", "viewport"], defaultValue: "parent", galleryOnly: true },
+    { name: "triggerPlacement", type: "select", options: ["none", "header", "floater"], defaultValue: "floater" },
+    { name: "triggerVariant", type: "select", options: ["default", "pill"], defaultValue: "default" },
+    { name: "trigger", type: "reactNode" },
+    { name: "toggleButtonProps", type: "object" },
+    { name: "header", type: "reactNode", defaultValue: "Panel" },
+    { name: "footer", type: "reactNode" },
+    { name: "children", type: "reactNode", defaultValue: "Scrollable panel body." },
+    { name: "scrollable", type: "boolean", defaultValue: true },
+    { name: "variant", type: "variant", options: ["default", "inset"], defaultValue: "default" },
+    { name: "surfaceClassName", type: "string" },
+    { name: "contentClassName", type: "string" },
+    { name: "headerClassName", type: "string" },
+    { name: "footerClassName", type: "string" },
+    { name: "className", type: "string" }
+  ),
+
   Accordion: own(
     { name: "items", type: "array", defaultValue: [{ value: "one", label: "Section one", content: "Content one" }] },
     { name: "type", type: "select", options: ["single", "multiple"], defaultValue: "single" },
@@ -425,31 +519,103 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "className", type: "string" }
   ),
 
-  TriggerModal: own(
-    { name: "open", type: "boolean", defaultValue: false },
-    { name: "header", type: "reactNode", defaultValue: "Modal title" },
-    { name: "children", type: "reactNode", defaultValue: "Modal body." },
-    { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
-    { name: "className", type: "string" }
-  ),
+  TriggerModal: [
+    ...own(
+      { name: "open", type: "boolean", defaultValue: false },
+      { name: "defaultOpen", type: "boolean", defaultValue: false },
+      { name: "onOpenChange", type: "callback", description: "(open: boolean) => void" },
+      { name: "trigger", type: "reactNode" },
+      { name: "triggerProps", type: "object", description: "ModalTriggerProps" },
+      { name: "header", type: "reactNode", defaultValue: "Modal title" },
+      { name: "children", type: "reactNode", defaultValue: "Modal body." },
+      { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
+      { name: "className", type: "string" }
+    ),
+    ...slot("Button", { name: "label", type: "reactNode", defaultValue: "Open modal", description: "triggerProps.label" }),
+    ...slot("Button", {
+      name: "variant",
+      type: "variant",
+      options: ["primary", "outline", "ghost"],
+      defaultValue: "primary",
+      description: "triggerProps.variant",
+    }),
+    ...slot("Button", { name: "disabled", type: "boolean", defaultValue: false, description: "triggerProps.disabled" }),
+    ...slot("Button", { name: "iconOnly", type: "boolean", defaultValue: false, description: "triggerProps.iconOnly" }),
+    ...slot("Button", { name: "ariaLabel", type: "string", description: "triggerProps.ariaLabel" }),
+  ],
 
-  FormModal: own(
-    { name: "open", type: "boolean", defaultValue: false },
-    { name: "heading", type: "string", defaultValue: "Create item" },
-    { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
-    { name: "className", type: "string" }
-  ),
+  FormModal: [
+    ...own(
+      { name: "open", type: "boolean", defaultValue: false },
+      { name: "defaultOpen", type: "boolean", defaultValue: false },
+      { name: "onOpenChange", type: "callback", description: "(open: boolean) => void" },
+      { name: "onClose", type: "callback" },
+      { name: "header", type: "reactNode" },
+      { name: "footer", type: "reactNode" },
+      { name: "showClose", type: "boolean", defaultValue: true },
+      { name: "trigger", type: "reactNode" },
+      { name: "cardProps", type: "object" },
+      { name: "maxHeight", type: "string" },
+      { name: "minHeight", type: "string" },
+      { name: "overlayClassName", type: "string" },
+      { name: "heading", type: "string", defaultValue: "Create item" },
+      { name: "subheading", type: "reactNode" },
+      { name: "left", type: "reactNode" },
+      { name: "mode", type: "select", options: ["create", "edit"], defaultValue: "create" },
+      { name: "fields", type: "array", description: "FormFieldSchema[] — showWhen, items, onValueChange, render, renderAfter, upload" },
+      { name: "formProps", type: "object" },
+      { name: "onSubmit", type: "callback", description: "(values) => void | Promise<void>" },
+      { name: "onSubmitSuccess", type: "callback" },
+      { name: "onSubmitError", type: "callback" },
+      { name: "submitLabel", type: "string" },
+      { name: "submittingLabel", type: "string" },
+      { name: "cancelLabel", type: "string", defaultValue: "Cancel" },
+      { name: "loading", type: "boolean", defaultValue: false },
+      { name: "submitDisabled", type: "boolean", defaultValue: false },
+      { name: "onCancel", type: "callback" },
+      { name: "validateOnSubmit", type: "boolean", defaultValue: true },
+      { name: "submitButtonProps", type: "object" },
+      { name: "cancelButtonProps", type: "object" },
+      { name: "triggerModalProps", type: "object" },
+      { name: "triggerProps", type: "object", description: "ModalTriggerProps" },
+      { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
+      { name: "className", type: "string" },
+      { name: "children", type: "reactNode", description: "Extra custom UI below fields (prefer field.render / renderAfter)" }
+    ),
+    ...slot("Button", { name: "label", type: "reactNode", defaultValue: "Open", description: "triggerProps.label" }),
+  ],
 
-  ConfirmModal: own(
-    { name: "open", type: "boolean", defaultValue: true },
-    { name: "heading", type: "string", defaultValue: "Confirm" },
-    { name: "description", type: "string", defaultValue: "Are you sure?" },
-    { name: "intent", type: "select", options: ["default", "destructive", "delete", "save", "warning"], defaultValue: "default" },
-    { name: "confirmProps", type: "object", defaultValue: { label: "Confirm" } },
-    { name: "cancelProps", type: "object", defaultValue: { label: "Cancel" } },
-    { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
-    { name: "className", type: "string" }
-  ),
+  ConfirmModal: [
+    ...own(
+      { name: "open", type: "boolean", defaultValue: true },
+      { name: "defaultOpen", type: "boolean", defaultValue: false },
+      { name: "onOpenChange", type: "callback", description: "(open: boolean) => void" },
+      { name: "onClose", type: "callback" },
+      { name: "header", type: "reactNode" },
+      { name: "footer", type: "reactNode" },
+      { name: "showClose", type: "boolean", defaultValue: false },
+      { name: "trigger", type: "reactNode" },
+      { name: "cardProps", type: "object" },
+      { name: "maxHeight", type: "string" },
+      { name: "minHeight", type: "string" },
+      { name: "overlayClassName", type: "string" },
+      { name: "heading", type: "string", defaultValue: "Confirm" },
+      { name: "description", type: "string", defaultValue: "Are you sure?" },
+      { name: "left", type: "reactNode" },
+      { name: "intent", type: "select", options: ["default", "destructive", "delete", "save", "warning"], defaultValue: "default" },
+      { name: "confirmProps", type: "object", defaultValue: { label: "Confirm" } },
+      { name: "cancelProps", type: "object", defaultValue: { label: "Cancel" } },
+      { name: "loading", type: "boolean", defaultValue: false },
+      { name: "triggerModalProps", type: "object" },
+      { name: "triggerProps", type: "object", description: "ModalTriggerProps" },
+      { name: "container", type: "select", options: ["parent", "body"], defaultValue: "parent", galleryOnly: true },
+      { name: "className", type: "string" }
+    ),
+    ...slot("Button", { name: "label", type: "reactNode", defaultValue: "Open", description: "triggerProps.label" }),
+    ...slot("Button", { name: "disabled", type: "boolean", defaultValue: false, description: "triggerProps.disabled" }),
+    ...slot("Button", { name: "iconOnly", type: "boolean", defaultValue: false, description: "triggerProps.iconOnly" }),
+    ...slot("Button", { name: "ariaLabel", type: "string", description: "triggerProps.ariaLabel" }),
+  ],
 
   AppShell: own(
     { name: "sidebar", type: "reactNode", description: "Sidebar slot" },
@@ -460,9 +626,16 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
 
   PageHeader: own(
     { name: "heading", type: "reactNode", defaultValue: "Page title" },
+    { name: "subheading", type: "reactNode" },
     { name: "description", type: "reactNode", defaultValue: "Supporting text" },
+    { name: "badge", type: "reactNode" },
+    { name: "left", type: "reactNode" },
+    { name: "right", type: "reactNode" },
     { name: "actions", type: "reactNode" },
+    { name: "variant", type: "select", options: ["default", "bordered", "minimal"], defaultValue: "default" },
+    { name: "sticky", type: "boolean", defaultValue: false },
     { name: "separator", type: "boolean", defaultValue: false },
+    { name: "children", type: "reactNode" },
     { name: "className", type: "string" }
   ),
 
@@ -488,14 +661,27 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
   EmptyState: own(
     { name: "title", type: "string", defaultValue: "No results" },
     { name: "description", type: "string", defaultValue: "Try adjusting filters." },
+    { name: "icon", type: "reactNode" },
+    { name: "action", type: "object", description: "EmptyStateAction { label, onClick, ... }" },
     { name: "variant", type: "select", options: ["default", "minimal", "spacious", "error"], defaultValue: "default" },
     { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
     { name: "className", type: "string" }
   ),
 
   InlineEdit: own(
+    { name: "value", type: "string" },
     { name: "defaultValue", type: "string", defaultValue: "Editable text" },
     { name: "placeholder", type: "string", defaultValue: "Click to edit" },
+    { name: "disabled", type: "boolean", defaultValue: false },
+    { name: "loading", type: "boolean", defaultValue: false },
+    { name: "required", type: "boolean", defaultValue: false },
+    { name: "editTrigger", type: "select", options: ["click", "doubleClick"], defaultValue: "click" },
+    { name: "saveOnBlur", type: "boolean", defaultValue: true },
+    { name: "saveOnEnter", type: "boolean", defaultValue: true },
+    { name: "saveButtonProps", type: "object" },
+    { name: "cancelButtonProps", type: "object" },
+    { name: "onSave", type: "callback", description: "(value: string) => void | Promise<void>" },
+    { name: "onCancel", type: "callback", description: "() => void" },
     { name: "className", type: "string" }
   ),
 
@@ -506,6 +692,10 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "showUndo", type: "boolean", defaultValue: true },
     { name: "showRedo", type: "boolean", defaultValue: true },
     { name: "showLabels", type: "boolean", defaultValue: false },
+    { name: "showTooltips", type: "boolean", defaultValue: true },
+    { name: "undoButtonProps", type: "object" },
+    { name: "redoButtonProps", type: "object" },
+    { name: "resetButtonProps", type: "object" },
     { name: "onUndo", type: "callback", description: "() => void" },
     { name: "onRedo", type: "callback", description: "() => void" },
     { name: "onReset", type: "callback", description: "() => void" },
@@ -538,9 +728,17 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
 
   ResizeContainer: own(
     { name: "defaultScale", type: "number", defaultValue: 1 },
+    { name: "scale", type: "number" },
+    { name: "onScaleChange", type: "callback", description: "(scale: number) => void" },
     { name: "minScale", type: "number", defaultValue: 0.5 },
     { name: "maxScale", type: "number", defaultValue: 2 },
     { name: "showControls", type: "boolean", defaultValue: true },
+    { name: "disabled", type: "boolean", defaultValue: false },
+    { name: "fit", type: "select", options: ["contain", "cover", "fill"], defaultValue: "contain" },
+    { name: "maxWidth", type: "string" },
+    { name: "maxHeight", type: "string" },
+    { name: "containerProps", type: "object" },
+    { name: "contentProps", type: "object" },
     { name: "direction", type: "select", options: ["horizontal", "vertical", "both"], defaultValue: "both" },
     { name: "className", type: "string" }
   ),

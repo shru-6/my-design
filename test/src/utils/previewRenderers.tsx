@@ -58,6 +58,33 @@ function renderSidebarParent(ctx: PreviewRenderContext) {
   )
 }
 
+function renderCollapsiblePanelParent(ctx: PreviewRenderContext) {
+  const { Component, Components, finalProps, resolvedChildren } = ctx
+  const Text = Components.Text
+  return (
+    <div className="flex h-56 w-full overflow-visible rounded-md border border-border bg-muted/20">
+      <Component {...finalProps} crossAxis="parent">
+        {resolvedChildren ?? finalProps.children ?? (
+          Text ? (
+            <>
+              <Text size="sm">Line one in the panel.</Text>
+              <Text size="sm">Line two — scrolls when content overflows.</Text>
+              <Text size="sm">Line three.</Text>
+            </>
+          ) : null
+        )}
+      </Component>
+      <div className="min-w-0 flex-1 p-3">
+        {Text ? (
+          <Text size="sm" variant="muted">
+            Main content beside the panel.
+          </Text>
+        ) : null}
+      </div>
+    </div>
+  )
+}
+
 function renderAppShellParent(ctx: PreviewRenderContext) {
   const { Component, Components, finalProps } = ctx
   const Text = Components.Text
@@ -592,6 +619,7 @@ const RENDERERS: Record<PreviewWrapper, (ctx: PreviewRenderContext) => React.Rea
   "tree-view-interactive": renderTreeViewInteractive,
   "resize-container-demo": renderResizeContainerDemo,
   "sidebar-parent": renderSidebarParent,
+  "collapsible-panel-parent": renderCollapsiblePanelParent,
   "app-shell-parent": renderAppShellParent,
   "auth-layout-compact": renderAuthLayoutCompact,
 }

@@ -537,11 +537,12 @@ const rawComponentMetadata: ComponentMetadata[] = [
           { label: "Drafts", value: "drafts" },
           { label: "Sent", value: "sent" },
         ],
-        description: "ListItem[] { label, value?, left?, description?, action?, disabled?, selected? }",
+        description: "ListItem[] { label, value?, left?, description?, action?, disabled?, selected?, filterKeys?, custom? }",
       },
       { name: "listType", type: "select", options: ["unordered", "ordered", "none"], defaultValue: "unordered" },
       { name: "layout", type: "select", options: ["list", "grid"], defaultValue: "list" },
       { name: "search", type: "boolean", defaultValue: true, description: "true = built-in SearchInput + filter. Object: ListSearchConfig { placeholder?, value?, onChange?, filterItems?, filter?, debounceMs? } — use filterItems: false when filtering external data (gallery toolbar)." },
+      { name: "filterChips", type: "object", description: "ListFilterChipsConfig — PillGroup + optional filter; matches ListItem.filterKeys" },
       { name: "header", type: "reactNode", description: "Prepended above search and list body (e.g. PageHeader)" },
       {
         name: "gap",
@@ -573,7 +574,10 @@ const rawComponentMetadata: ComponentMetadata[] = [
       { name: "onSelect", type: "callback", description: "(value, item) => void" },
       { name: "emptyState", type: "reactNode" },
       { name: "noResultsState", type: "reactNode", description: "When search filters to zero rows" },
+      { name: "errorState", type: "reactNode", description: "Replaces list body on fetch/load failure" },
       { name: "loading", type: "boolean", defaultValue: false },
+      { name: "loadingState", type: "reactNode", description: "Custom skeleton when loading" },
+      { name: "renderItem", type: "callback", description: "(item, index) => ReactNode" },
       { name: "children", type: "reactNode" },
       { name: "className", type: "string" },
     ],
@@ -1133,7 +1137,7 @@ const rawComponentMetadata: ComponentMetadata[] = [
     props: [
       { name: "className", type: "string" }
     ],
-    subComponents: ["Overlay","Card","Button"]
+    subComponents: ["Overlay","Card"]
   },
   {
     name: "AlertDialog",
@@ -1174,6 +1178,31 @@ const rawComponentMetadata: ComponentMetadata[] = [
       { name: "className", type: "string" }
     ],
     subComponents: ["Button"]
+  },
+  {
+    name: "CollapsiblePanel",
+    category: "layout",
+    props: [
+      { name: "open", type: "boolean", defaultValue: true },
+      { name: "defaultOpen", type: "boolean", defaultValue: true },
+      { name: "closeDirection", type: "select", options: ["left", "right", "top", "bottom"], defaultValue: "left" },
+      { name: "size", type: "string", defaultValue: "12rem" },
+      {
+        name: "collapsedSize",
+        type: "string",
+        description: "Omit: 0 for none/floater; icon rail for header",
+      },
+      { name: "crossAxis", type: "select", options: ["full", "parent", "viewport"], defaultValue: "parent" },
+      { name: "triggerPlacement", type: "select", options: ["none", "header", "floater"], defaultValue: "floater" },
+      { name: "triggerVariant", type: "select", options: ["default", "pill"], defaultValue: "default" },
+      { name: "header", type: "reactNode", defaultValue: "Panel" },
+      { name: "footer", type: "reactNode" },
+      { name: "children", type: "reactNode", defaultValue: "Scrollable panel body." },
+      { name: "scrollable", type: "boolean", defaultValue: true },
+      { name: "variant", type: "variant", options: ["default", "inset"], defaultValue: "default" },
+      { name: "className", type: "string" }
+    ],
+    subComponents: getSubComponents("CollapsiblePanel"),
   },
   {
     name: "Accordion",

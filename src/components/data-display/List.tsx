@@ -6,6 +6,7 @@ import { Grid, gridVariants } from "../layout/Grid"
 import { SearchInput, type SearchInputProps } from "../inputs/SearchInput"
 import { Text } from "./Text"
 import { Icon } from "../utilities/Icon"
+import { PillGroup, type PillGroupProps, type PillItem } from "./PillGroup"
 
 export interface ListItem {
   label: React.ReactNode
@@ -15,6 +16,10 @@ export interface ListItem {
   action?: React.ReactNode
   disabled?: boolean
   selected?: boolean
+  /** Matched against selected filter chip values (`filterChips`). */
+  filterKeys?: string[]
+  /** Render `label` as-is without default row chrome (grid cards, etc.). */
+  custom?: boolean
 }
 
 export type ListLayout = "list" | "grid"
@@ -43,6 +48,33 @@ export function defaultListItemFilter(
     const val = item.value?.toLowerCase() ?? ""
     return label.includes(q) || desc.includes(q) || val.includes(q)
   })
+}
+
+/** Default chip filter: OR match on `item.filterKeys`; items without keys always pass. */
+export function defaultListChipFilter(
+  items: readonly ListItem[],
+  selected: readonly string[]
+): ListItem[] {
+  if (selected.length === 0) return [...items]
+  return items.filter((item) => {
+    const keys = item.filterKeys
+    if (!keys?.length) return true
+    return keys.some((key) => selected.includes(key))
+  })
+}
+
+export type ListFilterChipsConfig = Omit<
+  PillGroupProps,
+  "items" | "value" | "defaultValue" | "onChange" | "selectable"
+> & {
+  items: PillItem[]
+  value?: string[]
+  defaultValue?: string[]
+  onChange?: (next: string[]) => void
+  /** Replace built-in OR match on `item.filterKeys`. */
+  filter?: (items: readonly ListItem[], selected: readonly string[]) => readonly ListItem[]
+  /** When false, chips render but do not filter rows. Default true. */
+  filterItems?: boolean
 }
 
 export type ListSearchConfig = Omit<
@@ -80,6 +112,14 @@ export interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
   /** Shown when search is active and nothing matches. */
   noResultsState?: React.ReactNode
   loading?: boolean
+  /** Replaces default loading copy when `loading` is true. */
+  loadingState?: React.ReactNode
+  /** Replaces list body (search/chips chrome still render). */
+  errorState?: React.ReactNode
+  /** Optional filter chips above the list body — pairs with `ListItem.filterKeys`. */
+  filterChips?: ListFilterChipsConfig
+  /** Override default row rendering. */
+  renderItem?: (item: ListItem, index: number) => React.ReactNode
   children?: React.ReactNode
   /** Prepended above search (if any) and the list body. */
   header?: React.ReactNode
@@ -135,6 +175,10 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
       emptyState,
       noResultsState,
       loading,
+      loadingState,
+      errorState,
+      filterChips,
+      renderItem,
       children,
       header,
       search,
@@ -153,6 +197,30 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
       filterItems = true,
       ...searchInputProps
     } = searchOptions
+
+    const filterChipsEnabled = filterChips != null
+    const {
+      items: chipItems = [],
+      value: chipValueProp,
+      defaultValue: chipDefaultValue,
+      onChange: onChipChangeProp,
+      filter: customChipFilter,
+      filterItems: chipFilterItems = true,
+      ...pillGroupProps
+    } = filterChips ?? {}
+
+    const isChipControlled = chipValueProp !== undefined
+    const [internalChipSelection, setInternalChipSelection] = React.useState<string[]>(
+      () => chipDefaultValue ?? []
+    )
+    const chipSelection = isChipControlled ? chipValueProp : internalChipSelection
+    const setChipSelection = React.useCallback(
+      (next: string[]) => {
+        if (!isChipControlled) setInternalChipSelection(next)
+        onChipChangeProp?.(next)
+      },
+      [isChipControlled, onChipChangeProp]
+    )
 
     const isSearchControlled = searchValueProp !== undefined
     const [internalSearchQuery, setInternalSearchQuery] = React.useState(() => defaultQuery ?? "")
@@ -176,10 +244,27 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
     const selectedValue = isControlled ? selectedValueProp : internalSelected
 
     const filteredItems = React.useMemo(() => {
-      if (!searchEnabled || !filterItems) return [...items]
-      const run = customFilter ?? defaultListItemFilter
-      return [...run(items, debouncedQuery)]
-    }, [items, debouncedQuery, searchEnabled, filterItems, customFilter])
+      let next = [...items]
+      if (filterChipsEnabled && chipFilterItems) {
+        const runChip = customChipFilter ?? defaultListChipFilter
+        next = [...runChip(next, chipSelection)]
+      }
+      if (searchEnabled && filterItems) {
+        const runSearch = customFilter ?? defaultListItemFilter
+        next = [...runSearch(next, debouncedQuery)]
+      }
+      return next
+    }, [
+      items,
+      debouncedQuery,
+      searchEnabled,
+      filterItems,
+      customFilter,
+      filterChipsEnabled,
+      chipFilterItems,
+      customChipFilter,
+      chipSelection,
+    ])
 
     const select = React.useCallback(
       (item: ListItem) => {
@@ -191,6 +276,39 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
     )
 
     const renderRow = (item: ListItem, index: number) => {
+      if (renderItem) return renderItem(item, index)
+
+      if (item.custom) {
+        const selected = selectable && item.value != null && selectedValue === item.value
+        return (
+          <div
+            className={cn(
+              "min-w-0",
+              layout === "grid" && "h-full",
+              selectable && !item.disabled && "cursor-pointer",
+              item.disabled && "cursor-not-allowed opacity-60",
+              selected && layout === "grid" && "ring-2 ring-ring ring-offset-2 ring-offset-background rounded-lg"
+            )}
+            role={selectable ? "option" : undefined}
+            aria-selected={selectable ? selected : undefined}
+            onClick={() => select(item)}
+            onKeyDown={
+              selectable
+                ? (e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault()
+                      select(item)
+                    }
+                  }
+                : undefined
+            }
+            tabIndex={selectable && !item.disabled ? 0 : undefined}
+          >
+            {item.label}
+          </div>
+        )
+      }
+
       const selected = selectable && item.value != null && selectedValue === item.value
       return (
         <div
@@ -298,8 +416,20 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
             {...searchInputProps}
           />
         ) : null}
+        {filterChipsEnabled ? (
+          <PillGroup
+            items={chipItems}
+            value={chipSelection}
+            onChange={setChipSelection}
+            selectable
+            multiple
+            {...pillGroupProps}
+          />
+        ) : null}
         {loading ? (
-          <div className="text-sm text-muted-foreground">Loading…</div>
+          loadingState ?? <div className="text-sm text-muted-foreground">Loading…</div>
+        ) : errorState ? (
+          errorState
         ) : emptyItems ? (
           <div className="text-sm text-muted-foreground">{emptyState ?? "Nothing to show."}</div>
         ) : emptyFilter ? (

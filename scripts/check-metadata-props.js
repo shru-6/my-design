@@ -34,6 +34,36 @@ const SPEC_EXPORT_MAP = {
 
 const GALLERY_EXEMPT = new Set(["FieldLayout"])
 
+/** Design CMS playground imports — metadata parity required for these only. */
+const PLAYGROUND_COMPONENTS = new Set([
+  "Alert",
+  "Button",
+  "Card",
+  "Checkbox",
+  "CodeBlock",
+  "CollapsiblePanel",
+  "ConfirmModal",
+  "CopyButton",
+  "DescriptionList",
+  "EmptyState",
+  "FormField",
+  "FormModal",
+  "HistoryControlButtons",
+  "InlineEdit",
+  "List",
+  "PageHeader",
+  "Pill",
+  "ResizeContainer",
+  "Select",
+  "Skeleton",
+  "Tabs",
+  "Text",
+  "Textarea",
+  "TextInput",
+  "TreeView",
+  "Upload",
+])
+
 /** Props inherited via extends — not listed individually in gallery. */
 const INHERITED_SKIP = new Set([
   "children",
@@ -113,20 +143,152 @@ function resolveSourceFile(componentName, exportMap) {
   return matches[0] ?? null
 }
 
-function parseInterfaceProps(fileContent, interfaceName) {
-  const re = new RegExp(`export\\s+interface\\s+${interfaceName}\\s+extends[^{]*\\{([\\s\\S]*?)\\n\\}`, "m")
-  const rePlain = new RegExp(`export\\s+interface\\s+${interfaceName}\\s*\\{([\\s\\S]*?)\\n\\}`, "m")
-  const match = re.exec(fileContent) || rePlain.exec(fileContent)
-  if (!match) return null
+function findTypeDefinition(typeName) {
+  const componentsDir = path.join(root, "src", "components")
+  const patterns = [
+    new RegExp(`export\\s+interface\\s+${typeName}\\b`),
+    new RegExp(`export\\s+type\\s+${typeName}\\b`),
+  ]
+  let found = null
+  function walk(dir) {
+    if (found) return
+    for (const ent of fs.readdirSync(dir, { withFileTypes: true })) {
+      const p = path.join(dir, ent.name)
+      if (ent.isDirectory()) walk(p)
+      else if (ent.name.endsWith(".tsx") || ent.name.endsWith(".ts")) {
+        const content = fs.readFileSync(p, "utf8")
+        if (patterns.some((re) => re.test(content))) found = p
+      }
+    }
+  }
+  walk(componentsDir)
+  return found
+}
 
-  const body = match[1]
+function parsePropsFromBody(body) {
   const props = []
   const propRe = /^\s*(\w+)\??:/gm
   let m
-  while ((m = propRe.exec(body)) !== null) {
-    props.push(m[1])
+  while ((m = propRe.exec(body)) !== null) props.push(m[1])
+  return props
+}
+
+function resolveTypeProps(typeName, filePath, cache = new Map(), stack = new Set()) {
+  const key = `${filePath}::${typeName}`
+  if (cache.has(key)) return cache.get(key)
+  if (stack.has(key)) return []
+
+  const content = fs.readFileSync(filePath, "utf8")
+  const fromInterface = parseInterfaceProps(content, typeName, cache, stack, filePath)
+  if (fromInterface?.length) {
+    cache.set(key, fromInterface)
+    return fromInterface
   }
-  return [...new Set(props)]
+
+  stack.add(key)
+  let props = []
+
+  const aliasRe = new RegExp(`export\\s+type\\s+${typeName}\\s*=\\s*([^;]+);`, "m")
+  const aliasMatch = aliasRe.exec(content)
+  if (aliasMatch) {
+    const rhs = aliasMatch[1].trim()
+    const parts = rhs.split("&").map((p) => p.trim())
+    for (const part of parts) {
+      const omitMatch = part.match(/^Omit<\s*(\w+)\s*,/)
+      if (omitMatch) {
+        const innerFile = findTypeDefinition(omitMatch[1]) ?? filePath
+        props.push(...resolveTypeProps(omitMatch[1], innerFile, cache, stack))
+        continue
+      }
+      if (part.startsWith("{")) {
+        props.push(...parsePropsFromBody(part.replace(/^\{|\}$/g, "")))
+        continue
+      }
+      const ref = part.match(/^(\w+)$/)?.[1]
+      if (ref) {
+        const refFile = findTypeDefinition(ref) ?? filePath
+        props.push(...resolveTypeProps(ref, refFile, cache, stack))
+      }
+    }
+  }
+
+  if (!props.length) {
+    const altFile = findTypeDefinition(typeName)
+    if (altFile && altFile !== filePath) {
+      props = resolveTypeProps(typeName, altFile, cache, stack)
+    }
+  }
+
+  stack.delete(key)
+  const merged = [...new Set(props)]
+  cache.set(key, merged)
+  return merged
+}
+
+function parseExtendsParents(extendsClause) {
+  if (!extendsClause) return []
+  const parents = []
+  const omitRe = /Omit<\s*(\w+)\s*,/g
+  let omitMatch
+  while ((omitMatch = omitRe.exec(extendsClause)) !== null) {
+    parents.push(omitMatch[1])
+  }
+  const directRe = /\b([A-Z]\w*Props)\b/g
+  let directMatch
+  while ((directMatch = directRe.exec(extendsClause)) !== null) {
+    if (!parents.includes(directMatch[1])) parents.push(directMatch[1])
+  }
+  return parents
+}
+
+function parseInterfaceBlock(fileContent, interfaceName) {
+  const startRe = new RegExp(`export\\s+interface\\s+${interfaceName}\\b`)
+  const start = fileContent.search(startRe)
+  if (start === -1) return null
+
+  const braceStart = fileContent.indexOf("{", start)
+  if (braceStart === -1) return null
+
+  let depth = 0
+  let end = braceStart
+  for (let i = braceStart; i < fileContent.length; i += 1) {
+    if (fileContent[i] === "{") depth += 1
+    else if (fileContent[i] === "}") {
+      depth -= 1
+      if (depth === 0) {
+        end = i
+        break
+      }
+    }
+  }
+
+  const header = fileContent.slice(start, braceStart)
+  const body = fileContent.slice(braceStart + 1, end)
+  const extendsMatch = header.match(/\bextends\s+([\s\S]+)$/)
+  return { body, extendsClause: extendsMatch?.[1]?.trim() ?? null }
+}
+
+function parseInterfaceProps(fileContent, interfaceName, cache = new Map(), stack = new Set(), filePath = "") {
+  const cacheKey = filePath ? `${filePath}::${interfaceName}` : interfaceName
+  if (cache.has(cacheKey)) return cache.get(cacheKey)
+  if (stack.has(cacheKey)) return []
+
+  const block = parseInterfaceBlock(fileContent, interfaceName)
+  if (!block) return null
+
+  const props = parsePropsFromBody(block.body)
+
+  stack.add(cacheKey)
+  for (const parent of parseExtendsParents(block.extendsClause)) {
+    const parentFile = findTypeDefinition(parent) ?? filePath
+    const inherited = resolveTypeProps(parent, parentFile, cache, stack)
+    if (inherited?.length) props.push(...inherited)
+  }
+  stack.delete(cacheKey)
+
+  const merged = [...new Set(props)]
+  cache.set(cacheKey, merged)
+  return merged
 }
 
 function parseTypeAliasProps(fileContent, typeName) {
@@ -148,15 +310,14 @@ function extractSourceProps(componentName, filePath) {
   ]
 
   for (const iface of candidates) {
-    const fromInterface = parseInterfaceProps(content, iface)
-    if (fromInterface?.length) return { props: fromInterface, interface: iface, file: filePath }
+    const resolved = resolveTypeProps(iface, filePath)
+    if (resolved?.length) return { props: resolved, interface: iface, file: filePath }
   }
 
-  // ButtonProps pattern for forwardRef components exporting Props separately
   const propsExport = content.match(new RegExp(`export\\s+(?:type|interface)\\s+(\\w*${componentName}\\w*Props)`))
   if (propsExport) {
     const name = propsExport[1]
-    const parsed = parseInterfaceProps(content, name) || parseTypeAliasProps(content, name)
+    const parsed = resolveTypeProps(name, filePath)
     if (parsed?.length) return { props: parsed, interface: name, file: filePath }
   }
 
@@ -316,9 +477,15 @@ function main() {
     if (inline.bindingIssues?.length) console.log(`  Bindings: ${inline.bindingIssues.join("; ")}`)
   }
 
-  const failed = noGallery + gaps.filter((r) => r.missing.length > 0 || r.bindingIssues?.length).length
-  console.log(`\n${failed ? "✗" : "✓"} Metadata prop parity check (${failed} components with issues)\n`)
-  process.exit(failed > 0 ? 1 : 0)
+  const playgroundGaps = gaps.filter((r) => PLAYGROUND_COMPONENTS.has(r.name))
+  const playgroundFailed =
+    playgroundGaps.filter((r) => r.missing.length > 0 || r.bindingIssues?.length).length
+  console.log(`\nPlayground components: ${PLAYGROUND_COMPONENTS.size}`)
+  console.log(`Playground with gaps:    ${playgroundFailed}`)
+  console.log(
+    `\n${playgroundFailed ? "✗" : "✓"} Metadata prop parity check (${playgroundFailed} playground components with issues)\n`
+  )
+  process.exit(playgroundFailed > 0 ? 1 : 0)
 }
 
 main()

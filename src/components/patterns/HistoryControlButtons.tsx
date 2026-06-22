@@ -16,10 +16,17 @@ export interface HistoryControlButtonsProps extends React.HTMLAttributes<HTMLDiv
   /** When false, hides the redo control. Default true. */
   showRedo?: boolean
   showLabels?: boolean
+  /** When false, icon-only buttons render without hover tooltips. Default true. */
+  showTooltips?: boolean
   undoButtonProps?: Partial<ButtonProps>
   redoButtonProps?: Partial<ButtonProps>
   resetButtonProps?: Partial<ButtonProps>
   className?: string
+}
+
+function wrapWithTooltip(show: boolean, content: string, node: React.ReactElement) {
+  if (!show) return node
+  return <Tooltip content={content}>{node}</Tooltip>
 }
 
 export function HistoryControlButtons({
@@ -32,6 +39,7 @@ export function HistoryControlButtons({
   showUndo = true,
   showRedo = true,
   showLabels = false,
+  showTooltips = false,
   undoButtonProps,
   redoButtonProps,
   resetButtonProps,
@@ -40,51 +48,57 @@ export function HistoryControlButtons({
 }: HistoryControlButtonsProps) {
   return (
     <div className={cn("inline-flex items-center gap-1", className)} {...rest}>
-      {showUndo ? (
-        <Tooltip content="Undo">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!canUndo}
-            left={<Undo2 className="h-4 w-4" />}
-            label={showLabels ? "Undo" : undefined}
-            iconOnly={!showLabels}
-            aria-label="Undo"
-            onClick={onUndo}
-            {...undoButtonProps}
-          />
-        </Tooltip>
-      ) : null}
-      {showRedo ? (
-        <Tooltip content="Redo">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={!canRedo}
-            left={<Redo2 className="h-4 w-4" />}
-            label={showLabels ? "Redo" : undefined}
-            iconOnly={!showLabels}
-            aria-label="Redo"
-            onClick={onRedo}
-            {...redoButtonProps}
-          />
-        </Tooltip>
-      ) : null}
-      {onReset ? (
-        <Tooltip content="Reset">
-          <Button
-            variant="ghost"
-            size="sm"
-            disabled={!canReset}
-            left={<RotateCcw className="h-4 w-4" />}
-            label={showLabels ? "Reset" : undefined}
-            iconOnly={!showLabels}
-            aria-label="Reset"
-            onClick={onReset}
-            {...resetButtonProps}
-          />
-        </Tooltip>
-      ) : null}
+      {showUndo
+        ? wrapWithTooltip(
+            showTooltips,
+            "Undo",
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!canUndo}
+              left={<Undo2 className="h-4 w-4" />}
+              label={showLabels ? "Undo" : undefined}
+              iconOnly={!showLabels}
+              ariaLabel="Undo"
+              onClick={onUndo}
+              {...undoButtonProps}
+            />
+          )
+        : null}
+      {showRedo
+        ? wrapWithTooltip(
+            showTooltips,
+            "Redo",
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={!canRedo}
+              left={<Redo2 className="h-4 w-4" />}
+              label={showLabels ? "Redo" : undefined}
+              iconOnly={!showLabels}
+              ariaLabel="Redo"
+              onClick={onRedo}
+              {...redoButtonProps}
+            />
+          )
+        : null}
+      {onReset
+        ? wrapWithTooltip(
+            showTooltips,
+            "Reset",
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={!canReset}
+              left={<RotateCcw className="h-4 w-4" />}
+              label={showLabels ? "Reset" : undefined}
+              iconOnly={!showLabels}
+              ariaLabel="Reset"
+              onClick={onReset}
+              {...resetButtonProps}
+            />
+          )
+        : null}
     </div>
   )
 }

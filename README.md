@@ -1,6 +1,6 @@
 # shru-design-system
 
-React component library — **98 components**, multi-axis token themes, Tailwind + CVA.
+React component library — **99 components**, multi-axis token themes, Tailwind + CVA.
 
 ```bash
 npm install shru-design-system
@@ -44,7 +44,7 @@ Published: `dist/` components, `styles.css`, Tailwind preset.
 | Doc | Covers |
 |-----|--------|
 | [Architecture](./docs/reference/ARCHITECTURE.md) | Repo map, build pipeline, check gates |
-| [Components](./docs/reference/COMPONENTS.md) | 98 shipped spec |
+| [Components](./docs/reference/COMPONENTS.md) | 99 shipped spec |
 | [Component graph](./docs/reference/COMPONENT_GRAPH.md) | Composition flowcharts |
 | [Tokens](./docs/reference/TOKENS.md) | Token JSON layout, pipeline |
 

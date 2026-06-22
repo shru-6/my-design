@@ -1,6 +1,6 @@
 import * as React from "react"
 import { Button, type ButtonProps } from "../actions/Button"
-import { type ModalTriggerProps } from "../overlays/Modal"
+import { type ModalTriggerProps } from "./TriggerModal"
 import { type OverlayPortalContainer } from "../overlays/Overlay"
 import { PageHeader } from "./PageHeader"
 import { TriggerModal, type TriggerModalProps } from "./TriggerModal"

@@ -37,7 +37,7 @@ export function CodeBlock({
             <span className="min-w-0" aria-hidden />
           )}
           {showCopy ? (
-            <CopyButton value={code} variant="ghost" size="sm" tooltip={false} copyLabel="Copy" />
+            <CopyButton value={code} variant="ghost" size="sm" tooltip={false} />
           ) : null}
         </div>
       ) : null}

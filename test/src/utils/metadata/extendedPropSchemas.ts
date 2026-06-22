@@ -19,6 +19,10 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "loading", type: "boolean", defaultValue: false },
     { name: "disabled", type: "boolean", defaultValue: false },
     { name: "iconOnly", type: "boolean", defaultValue: false },
+    { name: "ariaLabel", type: "string" },
+    { name: "href", type: "string" },
+    { name: "left", type: "reactNode" },
+    { name: "right", type: "reactNode" },
     { name: "className", type: "string" }
   ),
 
@@ -28,7 +32,10 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "variant", type: "variant", options: ["default", "muted", "subtle", "code", "danger", "outline"], defaultValue: "default" },
     { name: "weight", type: "select", options: ["normal", "medium", "semibold", "bold", "extrabold"], defaultValue: "normal" },
     { name: "as", type: "select", options: ["span", "div", "p", "label", "button"], defaultValue: "span" },
+    { name: "left", type: "reactNode" },
+    { name: "right", type: "reactNode" },
     { name: "truncate", type: "boolean", defaultValue: false },
+    { name: "lineClamp", type: "number" },
     { name: "className", type: "string" }
   ),
 
@@ -37,9 +44,14 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "placeholder", type: "string", defaultValue: "you@example.com" },
     { name: "value", type: "string", defaultValue: "" },
     { name: "type", type: "select", options: ["text", "email", "password", "number", "url", "search"], defaultValue: "email" },
+    { name: "left", type: "reactNode" },
+    { name: "right", type: "reactNode" },
+    { name: "rightInteractive", type: "boolean", defaultValue: false },
     { name: "required", type: "boolean", defaultValue: false },
     { name: "disabled", type: "boolean", defaultValue: false },
     { name: "errorMessage", type: "string" },
+    { name: "validate", type: "boolean", defaultValue: false },
+    { name: "onValidate", type: "callback" },
     { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
     { name: "variant", type: "variant", options: ["outline", "filled", "ghost", "underline"], defaultValue: "outline" },
     { name: "className", type: "string" }
@@ -51,6 +63,8 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "rows", type: "number", defaultValue: 3 },
     { name: "required", type: "boolean", defaultValue: false },
     { name: "disabled", type: "boolean", defaultValue: false },
+    { name: "validate", type: "boolean", defaultValue: false },
+    { name: "onValidate", type: "callback" },
     { name: "className", type: "string" }
   ),
 
@@ -116,7 +130,14 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
 
   Pill: own(
     { name: "children", type: "reactNode", defaultValue: "Active" },
+    { name: "as", type: "select", options: ["span", "button"], defaultValue: "span" },
+    { name: "variant", type: "variant", options: ["default", "muted", "subtle", "code", "danger", "outline"], defaultValue: "default" },
     { name: "tone", type: "select", options: ["neutral", "primary", "success", "warning", "info", "destructive"], defaultValue: "neutral" },
+    { name: "left", type: "reactNode" },
+    { name: "right", type: "reactNode" },
+    { name: "dot", type: "boolean", defaultValue: false },
+    { name: "onRemove", type: "callback" },
+    { name: "toggleSurface", type: "select", options: ["primary", "secondary", "outline", "ghost"] },
     { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "md" },
     { name: "className", type: "string" }
   ),
@@ -164,7 +185,39 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
 
   List: own(
     { name: "items", type: "array", defaultValue: [{ label: "Inbox" }, { label: "Sent" }] },
+    { name: "layout", type: "select", options: ["list", "grid"], defaultValue: "list" },
+    { name: "listType", type: "select", options: ["unordered", "ordered", "none"], defaultValue: "unordered" },
+    { name: "search", type: "boolean", defaultValue: false },
+    {
+      name: "filterChips",
+      type: "object",
+      description: "PillGroup config + filterItems; matches ListItem.filterKeys",
+    },
+    { name: "emptyState", type: "reactNode" },
+    { name: "noResultsState", type: "reactNode" },
+    { name: "errorState", type: "reactNode" },
+    { name: "loadingState", type: "reactNode" },
+    { name: "loading", type: "boolean", defaultValue: false },
     { name: "selectable", type: "boolean", defaultValue: false },
+    { name: "selectedValue", type: "string" },
+    { name: "defaultSelectedValue", type: "string" },
+    { name: "onSelect", type: "callback", description: "(value, item) => void" },
+    { name: "renderItem", type: "callback" },
+    { name: "header", type: "reactNode" },
+    { name: "direction", type: "select", options: ["row", "column"], defaultValue: "column" },
+    { name: "gap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"], defaultValue: "md" },
+    { name: "align", type: "select", options: ["start", "center", "end", "stretch", "baseline"] },
+    { name: "justify", type: "select", options: ["start", "center", "end", "between", "around", "evenly"] },
+    { name: "wrap", type: "select", options: ["nowrap", "wrap", "wrap-reverse"] },
+    { name: "columns", type: "number" },
+    { name: "rows", type: "number" },
+    { name: "minChildWidth", type: "string" },
+    { name: "columnGap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"] },
+    { name: "rowGap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"] },
+    { name: "autoFlow", type: "select", options: ["row", "column", "dense", "row-dense", "column-dense"] },
+    { name: "alignItems", type: "select", options: ["start", "center", "end", "stretch", "baseline"] },
+    { name: "justifyItems", type: "select", options: ["start", "center", "end", "stretch"] },
+    { name: "gridGap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"] },
     { name: "className", type: "string" }
   ),
 
@@ -242,7 +295,17 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
 
   CopyButton: own(
     { name: "value", type: "string", defaultValue: "copied-text" },
-    { name: "copyLabel", type: "string", defaultValue: "Copy" },
+    { name: "copyLabel", type: "string", description: "Omit for icon-only" },
+    { name: "copiedLabel", type: "string", defaultValue: "Copied!" },
+    { name: "copyIcon", type: "reactNode" },
+    { name: "copiedIcon", type: "reactNode" },
+    { name: "onValueCopy", type: "callback" },
+    { name: "onCopyError", type: "callback" },
+    { name: "timeout", type: "number", defaultValue: 2000 },
+    { name: "tooltip", type: "boolean", defaultValue: true },
+    { name: "tooltipLabel", type: "reactNode" },
+    { name: "tooltipCopiedLabel", type: "reactNode" },
+    { name: "tooltipContent", type: "reactNode", description: "Deprecated — use tooltipLabel" },
     { name: "size", type: "size", options: ["sm", "md", "lg"], defaultValue: "sm" },
     { name: "variant", type: "variant", options: ["primary", "outline", "ghost"], defaultValue: "outline" },
     { name: "className", type: "string" }
