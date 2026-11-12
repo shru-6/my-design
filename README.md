@@ -37,6 +37,7 @@ Published: `dist/` components, `styles.css`, Tailwind preset.
 | [Contributing](./docs/build/CONTRIBUTING.md) | Layout, conventions, tokens, checks |
 | [Components](./docs/build/COMPONENTS.md) | Add / update component checklist |
 | [Gallery](./docs/build/GALLERY.md) | Metadata pipeline, wrappers |
+| [Testing](./docs/build/TESTING.md) | `npm run test`, vitest conventions, behavior suites |
 | [Release](./docs/build/RELEASE.md) | `npm run check`, build, publish |
 
 ### Architecture — `docs/reference/`

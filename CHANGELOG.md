@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.7.0
+
+### Added
+- **Testing** — vitest + React Testing Library + jsdom. A colocated smoke test (`renders without crashing`) for all 99 shipped components, plus dedicated behavior suites for `PillGroup.onRemove`, `Table.onRowClick` true-index behavior, `List` `stackProps`/`gridProps` wiring, and async `registerTheme()`. `npm run test` / `npm run test:watch`. See `docs/build/TESTING.md`.
+- **Release** — `postversion` script pushes commits + tags to GitHub automatically on `npm version`, so the tagged release on GitHub never lags behind what's published to npm.
+- **CI** — `.github/workflows/ci.yml` runs `lint` → `test` → `check` on every push to `main` and every PR.
+
+## 0.6.3
+
+### Fixed
+- **ThemeToggle** — `useCallback` missing `triggerRef` dependency (lint-only, no behavior change)
+
+### Note
+- Breaking changes from the theme-engine refactor (batches tracked in `BREAKING-FOR-DESIGN-CMS.md`) ship in this release. Kept as a patch bump per project decision — treat 0.6.3 as breaking when upgrading.
+
 ## 0.6.2
 
 ### Added

@@ -1,21 +1,29 @@
 {
   "name": "shru-design-system",
-  "version": "0.6.2",
+  "version": "0.7.0",
   "description": "A React component library built with Tailwind CSS",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "files": [
     "dist",
-    "scripts"
+    "scripts/init.js",
+    "scripts/copy-tokens.js",
+    "scripts/tailwind.preset.cjs",
+    "scripts/tokens",
+    "scripts/lib"
   ],
   "scripts": {
     "dev": "npm run dev --prefix ./test",
-    "build": "node scripts/copy-tokens.js && tsup src/index.ts --dts --format esm,cjs && node scripts/copy-styles.js",
-    "check": "node scripts/check.js",
-    "check:metadata": "node scripts/check-metadata-props.js",
+    "build": "node scripts/copy-tokens.js && rm -rf dist && tsup && node scripts/dev/copy-styles.js",
+    "check": "node scripts/dev/check.js",
+    "check:metadata": "node scripts/dev/check-metadata-props.js",
+    "lint": "eslint src",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run check",
-    "postinstall": "node scripts/init.js || true"
+    "postinstall": "node scripts/init.js || true",
+    "postversion": "git push && git push --tags"
   },
   "bin": {
     "shru-design-system-init": "./scripts/init.js"
@@ -27,7 +35,8 @@
       "require": "./dist/index.js"
     },
     "./styles.css": "./dist/styles.css",
-    "./tailwind-preset": "./scripts/tailwind.preset.cjs"
+    "./tailwind-preset": "./scripts/tailwind.preset.cjs",
+    "./scripts/lib/rawColorPattern.cjs": "./scripts/lib/rawColorPattern.cjs"
   },
   "peerDependencies": {
     "@radix-ui/react-slider": "^1.0.0",
@@ -42,12 +51,19 @@
   },
   "devDependencies": {
     "@radix-ui/react-slider": "^1.2.2",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.3",
     "@types/react": "^18.2.65",
     "@types/react-dom": "^18.2.22",
+    "@typescript-eslint/parser": "^8.19.0",
+    "@vitejs/plugin-react": "^6.3.0",
     "autoprefixer": "^10.4.23",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
+    "eslint": "^9.17.0",
+    "eslint-plugin-react-hooks": "^7.1.1",
     "input-otp": "^1.4.2",
+    "jsdom": "^27.0.1",
     "lucide-react": "^0.400.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -55,7 +71,8 @@
     "tailwind-merge": "^2.2.0",
     "tailwindcss": "^3.4.19",
     "tsup": "^8.5.1",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.3",
+    "vitest": "^3.2.7"
   },
   "license": "MIT",
   "keywords": [
