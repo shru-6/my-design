@@ -1,6 +1,6 @@
 {
   "name": "shru-design-system",
-  "version": "0.7.0",
+  "version": "0.6.3",
   "description": "A React component library built with Tailwind CSS",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -24,8 +24,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "npm run check",
-    "postinstall": "node scripts/init.js || true",
-    "postversion": "git push && git push --tags"
+    "postinstall": "node scripts/init.js || true"
   },
   "bin": {
     "shru-design-system-init": "./scripts/init.js"

@@ -1,8 +1,6 @@
 # Changelog
 
-## 0.7.0
-
-Renamed from 0.6.3 — this is the "bump to 0.7.0 later if you want strict semver" the 0.6.2 entry below already flagged. `package.json` is at 0.7.0; this heading now matches it.
+## 0.6.3
 
 ### Added
 - **Testing** — vitest + React Testing Library + jsdom. A colocated smoke test (`renders without crashing`) for all 99 shipped components, plus dedicated behavior suites for `PillGroup.onRemove`, `Table.onRowClick` true-index behavior, `List` `stackProps`/`gridProps` wiring, and async `registerTheme()`. `npm run test` / `npm run test:watch`. See `docs/build/TESTING.md`.
@@ -10,7 +8,6 @@ Renamed from 0.6.3 — this is the "bump to 0.7.0 later if you want strict semve
 - **SSR** — `src/ssr.test.tsx` renders `Button`, `Modal`, `Tooltip`, `ThemeToggle`, and `useTheme` with `react-dom/server` under a real no-`window`/no-`document` environment, proving every `typeof window === "undefined"` guard actually holds.
 - **check:unused-props** — informational script (`npm run check:unused-props`) that flags a component prop destructured but never read in the body — the bug class behind the pre-refactor `BarChart.stacked` / `Chart.tooltip` / `LineChart.curve` issues. Not a gate; a prompt to go look.
 - **CI** — `.github/workflows/ci.yml` runs `lint` → `test` → `check` on every push to `main` and every PR.
-- **Release** — `postversion` pushes commits + tags to GitHub automatically on `npm version`.
 - **Packaging** — `sideEffects: false` in `package.json`, so bundlers can tree-shake per-component imports instead of pulling in all 99.
 - **docs/use/UPGRADE.md** — durable, consumer-facing migration guide by version (the `BREAKING-FOR-DESIGN-CMS.md` content, generalized past one consumer).
 - **LICENSE** — the MIT text `package.json` already declared was missing from the repo; added.
