@@ -9,6 +9,15 @@ const STEP_VERTICAL_ITEM_PAD = "pb-5 last:pb-0"
 /** Label line ↔ description line (both orientations). */
 const STEP_LABEL_GAP = "gap-2"
 
+/**
+ * Circle diameter, published to the subtree as `--step-circle` so the
+ * connector rails can center themselves off it. The two rails used to carry a
+ * hand-computed `1.125rem` — half of the circle — that silently misaligned the
+ * moment the circle changed size.
+ */
+const STEP_CIRCLE_SIZE = "2.25rem"
+const STEP_CIRCLE_CLASS = "h-[var(--step-circle)] w-[var(--step-circle)]"
+
 export type StepStatus = "complete" | "current" | "upcoming" | "error"
 
 export interface StepItem {
@@ -76,7 +85,8 @@ function StepCircle({
         variant="ghost"
         size="sm"
         className={cn(
-          "h-9 w-9 shrink-0 rounded-full border-2 p-0",
+          STEP_CIRCLE_CLASS,
+          "shrink-0 rounded-pill border-2 p-0",
           circleClass,
           !canClick && "pointer-events-none cursor-default hover:bg-transparent"
         )}
@@ -91,7 +101,8 @@ function StepCircle({
   return (
     <div
       className={cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold tabular-nums",
+        STEP_CIRCLE_CLASS,
+        "flex shrink-0 items-center justify-center rounded-pill border-2 text-sm font-semibold tabular-nums",
         circleClass
       )}
       aria-current={status === "current" ? "step" : undefined}
@@ -112,6 +123,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
       allowBack = true,
       horizontalGap = "none",
       className,
+      style,
       ...props
     },
     ref
@@ -128,12 +140,19 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
     const stepChange = onChange ? (i: number) => setStep(i) : undefined
 
     return (
-      <div ref={ref} role="navigation" aria-label="Progress" className={cn("w-full", className)} {...props}>
+      <div
+        ref={ref}
+        role="navigation"
+        aria-label="Progress"
+        className={cn("w-full", className)}
+        style={{ ["--step-circle" as string]: STEP_CIRCLE_SIZE, ...style }}
+        {...props}
+      >
         {orientation === "vertical" ? (
           <ol className="relative flex list-none flex-col">
             {steps.length > 1 ? (
               <div
-                className="pointer-events-none absolute bottom-5 left-[1.125rem] top-[1.125rem] w-px -translate-x-1/2 bg-border"
+                className="pointer-events-none absolute bottom-5 left-[calc(var(--step-circle)/2)] top-[calc(var(--step-circle)/2)] w-px -translate-x-1/2 bg-border"
                 aria-hidden
               />
             ) : null}
@@ -170,7 +189,7 @@ export const Stepper = React.forwardRef<HTMLDivElement, StepperProps>(
           <ol className="relative flex w-full list-none flex-row items-start gap-0">
             {steps.length > 1 ? (
               <div
-                className="pointer-events-none absolute inset-x-0 top-[1.125rem] h-0.5 -translate-y-1/2 bg-border"
+                className="pointer-events-none absolute inset-x-0 top-[calc(var(--step-circle)/2)] h-0.5 -translate-y-1/2 bg-border"
                 style={{
                   left: `${100 / steps.length / 2}%`,
                   right: `${100 / steps.length / 2}%`,

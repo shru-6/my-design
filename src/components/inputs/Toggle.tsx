@@ -1,11 +1,12 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { disabledControl } from "./fieldPieces"
 import { ControlErrorMessage, ControlLabelStack } from "./fieldPieces"
 
 export const toggleVariants = cva(
-  `peer inline-flex shrink-0 cursor-pointer items-center rounded-full border transition-colors ${disabledControl} data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=unchecked]:border-border`,
+  `peer inline-flex shrink-0 cursor-pointer items-center rounded-pill border transition-colors ${disabledControl} data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=unchecked]:border-border`,
   {
     variants: {
       size: {
@@ -21,7 +22,7 @@ export const toggleVariants = cva(
 )
 
 export const toggleThumbVariants = cva(
-  "pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0.5",
+  "pointer-events-none block rounded-pill bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0.5",
   {
     variants: {
       size: {
@@ -69,11 +70,11 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
   ) => {
     const generatedId = React.useId()
     const toggleId = id ?? generatedId
-    const resolvedDefault = defaultState ?? defaultChecked ?? false
-    const isControlled = checked !== undefined
-    const [internalChecked, setInternalChecked] = React.useState(() => Boolean(resolvedDefault))
-    const on = isControlled ? Boolean(checked) : internalChecked
-    const readOnly = isControlled && !onChange
+    const [on, setOn] = useControllableValue<boolean>({
+      value: checked === undefined ? undefined : Boolean(checked),
+      defaultValue: Boolean(defaultState ?? defaultChecked ?? false),
+      onChange,
+    })
 
     return (
       <div className="space-y-1">
@@ -89,10 +90,8 @@ export const Toggle = React.forwardRef<HTMLButtonElement, ToggleProps>(
             className={cn(toggleVariants({ size }), className)}
             onClick={(e) => {
               onClick?.(e)
-              if (readOnly || disabled) return
-              const next = !on
-              if (!isControlled) setInternalChecked(next)
-              onChange?.(next)
+              if (disabled) return
+              setOn(!on)
             }}
             {...props}
           >

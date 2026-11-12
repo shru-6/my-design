@@ -1,5 +1,5 @@
 import * as React from "react"
-import { Button, type ButtonProps } from "../actions/Button"
+import { type ButtonProps } from "../actions/Button"
 import { Form, type FormProps } from "../inputs/Form"
 import { FormField, type FormFieldProps, type FormFieldType } from "../inputs/FormField"
 import { useFormContext, type FormFieldRenderProps } from "../inputs/formContext"
@@ -163,7 +163,7 @@ function SchemaFieldRow({
     items,
     disabled,
     errorMessage: resolvedError,
-    onValueChange: onValueChange
+    onChange: onValueChange
       ? (value) => onValueChange(value, changeHelpers)
       : undefined,
     onUpload: onUpload
@@ -215,36 +215,39 @@ function FormModalFields({
   )
 }
 
-export function FormModal({
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  triggerProps,
-  heading,
-  subheading,
-  left,
-  mode = "create",
-  fields,
-  formProps,
-  onSubmit,
-  onSubmitSuccess,
-  onSubmitError,
-  submitLabel,
-  submittingLabel,
-  cancelLabel = "Cancel",
-  loading,
-  submitDisabled,
-  onCancel,
-  validateOnSubmit = true,
-  container,
-  submitButtonProps,
-  cancelButtonProps,
-  triggerModalProps,
-  className,
-  children,
-  size = "md",
-  ...rest
-}: FormModalProps) {
+export const FormModal = React.forwardRef<HTMLDivElement, FormModalProps>(function FormModal(
+  {
+    open: openProp,
+    defaultOpen,
+    onOpenChange,
+    triggerProps,
+    heading,
+    subheading,
+    left,
+    mode = "create",
+    fields,
+    formProps,
+    onSubmit,
+    onSubmitSuccess,
+    onSubmitError,
+    submitLabel,
+    submittingLabel,
+    cancelLabel = "Cancel",
+    loading,
+    submitDisabled,
+    onCancel,
+    validateOnSubmit = true,
+    container,
+    submitButtonProps,
+    cancelButtonProps,
+    triggerModalProps,
+    className,
+    children,
+    size = "md",
+    ...rest
+  },
+  ref
+) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
   const [submitting, setSubmitting] = React.useState(false)
 
@@ -287,6 +290,7 @@ export function FormModal({
 
   return (
     <TriggerModal
+      ref={ref}
       open={open}
       onOpenChange={setOpen}
       triggerProps={triggerProps}
@@ -325,6 +329,6 @@ export function FormModal({
       </Form>
     </TriggerModal>
   )
-}
+})
 
 FormModal.displayName = "FormModal"

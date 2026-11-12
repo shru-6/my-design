@@ -20,6 +20,29 @@ export const peerFocusRing =
 /** Unified disabled: no pointer, dimmed, not-allowed cursor (fields, buttons, thumbs). */
 export const disabledControl =
   "disabled:cursor-not-allowed disabled:opacity-60 disabled:pointer-events-none"
+
+/** The visual half of a disabled state, with no selector attached. */
+const disabledLook = "cursor-not-allowed opacity-60 pointer-events-none"
+
+/**
+ * `disabledControl`'s sibling for things that are NOT real form controls —
+ * rows, list items, panels, chips, wrappers. A `<div>` has no `:disabled`
+ * pseudo-class, so this keys off the accessible/state attributes instead:
+ * set `data-disabled="true"` and/or `aria-disabled="true"` on the same element.
+ * Use `disabledSurfaceStyles` when the call site already branches in JS.
+ */
+export const disabledSurface = [
+  "data-[disabled=true]:cursor-not-allowed",
+  "data-[disabled=true]:opacity-60",
+  "data-[disabled=true]:pointer-events-none",
+  "aria-disabled:cursor-not-allowed",
+  "aria-disabled:opacity-60",
+  "aria-disabled:pointer-events-none",
+].join(" ")
+
+/** Same look as `disabledSurface`, applied unconditionally — for `cond && …`. */
+export const disabledSurfaceStyles = disabledLook
+
 export const ringOffsetBackground = "ring-offset-background"
 
 // --- String field validation (TextInput / Textarea) ---
@@ -106,7 +129,32 @@ export function fieldControlBlurHandler<E extends HTMLInputElement | HTMLTextAre
 
 // --- Shared TextInput / Textarea chrome ---
 
-const fieldSurfaceBase = `w-full rounded-md border bg-background text-foreground transition-colors placeholder:text-muted-foreground ${focusRing} ${disabledControl}`
+const fieldSurfaceBase = `w-full rounded-control-md border bg-background text-foreground transition-colors placeholder:text-muted-foreground ${focusRing} ${disabledControl}`
+
+/**
+ * The one height source for anything that has to line up with a field: reads the
+ * same `--control-height-*` custom properties `fieldSurfaceVariants` uses, so a
+ * density theme moves buttons, addons and inputs together instead of one of them.
+ */
+export const controlHeightClass: Record<"sm" | "md" | "lg", string> = {
+  sm: "h-[var(--control-height-sm,2rem)]",
+  md: "h-[var(--control-height-md,2.5rem)]",
+  lg: "h-[var(--control-height-lg,2.75rem)]",
+}
+
+/** Radius rides the size tier, the same way `Button`'s size variant does. */
+export const controlRadiusClass: Record<"sm" | "md" | "lg", string> = {
+  sm: "rounded-control-sm",
+  md: "rounded-control-md",
+  lg: "rounded-control-lg",
+}
+
+/** Sibling of `controlHeightClass` for the matching horizontal padding. */
+export const controlPaddingClass: Record<"sm" | "md" | "lg", string> = {
+  sm: "px-[var(--control-padding-sm,0.625rem)]",
+  md: "px-[var(--control-padding-md,0.75rem)]",
+  lg: "px-[var(--control-padding-lg,0.875rem)]",
+}
 
 export const fieldSurfaceVariants = cva(fieldSurfaceBase, {
   variants: {
@@ -123,7 +171,10 @@ export const fieldSurfaceVariants = cva(fieldSurfaceBase, {
       outline: "border-border",
       filled: "border-transparent bg-muted",
       ghost: "border-transparent bg-transparent",
-      underline: "rounded-none border-0 border-b border-border px-0",
+      // Arbitrary zero rather than the flat Tailwind scale's zero utility:
+      // that scale is banned, and an underline field is an explicit "no
+      // shape" anyway, not a themeable radius.
+      underline: "rounded-[0] border-0 border-b border-border px-0",
     },
     invalid: {
       true: `border-destructive ${focusRingDestructive}`,
@@ -134,32 +185,32 @@ export const fieldSurfaceVariants = cva(fieldSurfaceBase, {
     {
       control: "input",
       size: "sm",
-      class: "h-[var(--control-height-sm,2rem)] text-sm px-[var(--control-padding-sm,0.625rem)]",
+      class: `${controlHeightClass.sm} text-sm ${controlPaddingClass.sm}`,
     },
     {
       control: "input",
       size: "md",
-      class: "h-[var(--control-height-md,2.5rem)] text-sm px-[var(--control-padding-md,0.75rem)]",
+      class: `${controlHeightClass.md} text-sm ${controlPaddingClass.md}`,
     },
     {
       control: "input",
       size: "lg",
-      class: "h-[var(--control-height-lg,2.75rem)] text-base px-[var(--control-padding-lg,0.875rem)]",
+      class: `${controlHeightClass.lg} text-base ${controlPaddingClass.lg}`,
     },
     {
       control: "textarea",
       size: "sm",
-      class: "text-sm px-[var(--control-padding-sm,0.625rem)] py-2",
+      class: `text-sm ${controlPaddingClass.sm} py-2`,
     },
     {
       control: "textarea",
       size: "md",
-      class: "text-sm px-[var(--control-padding-md,0.75rem)] py-2.5",
+      class: `text-sm ${controlPaddingClass.md} py-2.5`,
     },
     {
       control: "textarea",
       size: "lg",
-      class: "text-base px-[var(--control-padding-lg,0.875rem)] py-3",
+      class: `text-base ${controlPaddingClass.lg} py-3`,
     },
   ],
   defaultVariants: {

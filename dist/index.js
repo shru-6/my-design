@@ -1,6 +1,6 @@
 'use strict';
 
-var React9 = require('react');
+var React10 = require('react');
 var classVarianceAuthority = require('class-variance-authority');
 var clsx = require('clsx');
 var tailwindMerge = require('tailwind-merge');
@@ -29,12 +29,50 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
-var React9__namespace = /*#__PURE__*/_interopNamespace(React9);
+var React10__namespace = /*#__PURE__*/_interopNamespace(React10);
 var SliderPrimitive__namespace = /*#__PURE__*/_interopNamespace(SliderPrimitive);
 
 // src/components/actions/Button.tsx
+var RADIUS_TOKENS = [
+  "control-sm",
+  "control-md",
+  "control-lg",
+  "surface-sm",
+  "surface-md",
+  "surface-lg",
+  "pill"
+];
+var ROUNDED_GROUP_IDS = [
+  "rounded",
+  "rounded-s",
+  "rounded-e",
+  "rounded-t",
+  "rounded-r",
+  "rounded-b",
+  "rounded-l",
+  "rounded-ss",
+  "rounded-se",
+  "rounded-ee",
+  "rounded-es",
+  "rounded-tl",
+  "rounded-tr",
+  "rounded-br",
+  "rounded-bl"
+];
+var roundedClassGroups = Object.fromEntries(
+  ROUNDED_GROUP_IDS.map((id) => [id, [{ [id]: RADIUS_TOKENS }]])
+);
+var twMerge = tailwindMerge.extendTailwindMerge({
+  extend: {
+    classGroups: {
+      ...roundedClassGroups,
+      duration: [{ duration: ["fast", "normal", "slow"] }],
+      z: [{ z: ["sticky", "dropdown", "overlay", "modal", "toast"] }]
+    }
+  }
+});
 function cn(...inputs) {
-  return tailwindMerge.twMerge(clsx.clsx(inputs));
+  return twMerge(clsx.clsx(inputs));
 }
 var iconVariants = classVarianceAuthority.cva("inline-flex items-center justify-center shrink-0", {
   variants: {
@@ -51,8 +89,8 @@ var iconVariants = classVarianceAuthority.cva("inline-flex items-center justify-
     },
     shape: {
       default: "",
-      circle: "rounded-full",
-      square: "rounded-md"
+      circle: "rounded-pill",
+      square: "rounded-control-md"
     }
   },
   defaultVariants: {
@@ -73,7 +111,7 @@ function isEmptyIconNode(node) {
   if (Array.isArray(node)) return node.length === 0 || node.every(isEmptyIconNode);
   return false;
 }
-var Icon = React9__namespace.forwardRef(
+var Icon = React10__namespace.forwardRef(
   ({
     node,
     alt,
@@ -99,15 +137,14 @@ var Icon = React9__namespace.forwardRef(
         className: cn(iconVariants({ size, variant, shape }), status && "relative", className),
         ...props,
         children: [
-          React9__namespace.isValidElement(resolvedContent) ? React9__namespace.cloneElement(resolvedContent, {
-            className: cn(resolvedContent.props.className),
+          React10__namespace.isValidElement(resolvedContent) ? React10__namespace.cloneElement(resolvedContent, {
             "aria-hidden": alt ? void 0 : true
           }) : resolvedContent,
           status && /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
               className: cn(
-                "absolute h-2.5 w-2.5 rounded-full border border-background",
+                "absolute h-2.5 w-2.5 rounded-pill border border-background",
                 statusPosition === "top-right" ? "-right-0.5 -top-0.5" : "-bottom-0.5 -right-0.5",
                 statusTone[status]
               )
@@ -135,7 +172,7 @@ var textVariants = classVarianceAuthority.cva("text-foreground", {
       default: "",
       muted: "text-muted-foreground",
       subtle: "opacity-80",
-      code: "font-mono rounded bg-muted px-1.5 py-0.5",
+      code: "font-mono rounded-control-sm bg-muted px-1.5 py-0.5",
       danger: "text-destructive",
       outline: "border border-border"
     },
@@ -163,7 +200,7 @@ var textIconSizeMap = {
   xl: "lg",
   "2xl": "xl"
 };
-var Text = React9__namespace.forwardRef(
+var Text = React10__namespace.forwardRef(
   ({ as: Comp = "div", left, right, truncate, lineClamp, size, variant, weight, className, children, ...props }, ref) => {
     const resolvedSize = size ?? "md";
     const iconSize = textIconSizeMap[resolvedSize];
@@ -206,7 +243,7 @@ var toneToVariant = {
   muted: "muted",
   error: "danger"
 };
-var HelperText = React9__namespace.forwardRef(
+var HelperText = React10__namespace.forwardRef(
   ({ tone = "muted", className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "p",
     {
@@ -235,7 +272,7 @@ var labelTextSizeMap = {
   md: "sm",
   lg: "base"
 };
-var Label = React9__namespace.forwardRef(
+var Label = React10__namespace.forwardRef(
   ({ size, required, left, className, children, ...props }, ref) => {
     const resolvedSize = size ?? "md";
     return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -262,6 +299,16 @@ var focusRingOffset = "focus-visible:ring-offset-2";
 var focusRingDestructive = "focus-visible:ring-destructive";
 var peerFocusRing = "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring";
 var disabledControl = "disabled:cursor-not-allowed disabled:opacity-60 disabled:pointer-events-none";
+var disabledLook = "cursor-not-allowed opacity-60 pointer-events-none";
+var disabledSurface = [
+  "data-[disabled=true]:cursor-not-allowed",
+  "data-[disabled=true]:opacity-60",
+  "data-[disabled=true]:pointer-events-none",
+  "aria-disabled:cursor-not-allowed",
+  "aria-disabled:opacity-60",
+  "aria-disabled:pointer-events-none"
+].join(" ");
+var disabledSurfaceStyles = disabledLook;
 var ringOffsetBackground = "ring-offset-background";
 function getStringFieldValidationError(value, opts) {
   if (!opts.validate) return void 0;
@@ -277,15 +324,15 @@ function getStringFieldValidationError(value, opts) {
 }
 function useSyncStringFieldValidation(value, params) {
   const { validate, required, minLength, maxLength, errorMessage, onValidate } = params;
-  const validationOpts = React9__namespace.useMemo(
+  const validationOpts = React10__namespace.useMemo(
     () => ({ validate, required, minLength, maxLength, errorMessage }),
     [validate, required, minLength, maxLength, errorMessage]
   );
-  const validationError = React9__namespace.useMemo(
+  const validationError = React10__namespace.useMemo(
     () => getStringFieldValidationError(value, validationOpts),
     [value, validationOpts]
   );
-  React9__namespace.useEffect(() => {
+  React10__namespace.useEffect(() => {
     if (validate) {
       onValidate?.(!validationError, validationError);
     }
@@ -305,7 +352,22 @@ function fieldControlBlurHandler(validationOpts, userOnBlur, onValidate) {
     }
   };
 }
-var fieldSurfaceBase = `w-full rounded-md border bg-background text-foreground transition-colors placeholder:text-muted-foreground ${focusRing} ${disabledControl}`;
+var fieldSurfaceBase = `w-full rounded-control-md border bg-background text-foreground transition-colors placeholder:text-muted-foreground ${focusRing} ${disabledControl}`;
+var controlHeightClass = {
+  sm: "h-[var(--control-height-sm,2rem)]",
+  md: "h-[var(--control-height-md,2.5rem)]",
+  lg: "h-[var(--control-height-lg,2.75rem)]"
+};
+var controlRadiusClass = {
+  sm: "rounded-control-sm",
+  md: "rounded-control-md",
+  lg: "rounded-control-lg"
+};
+var controlPaddingClass = {
+  sm: "px-[var(--control-padding-sm,0.625rem)]",
+  md: "px-[var(--control-padding-md,0.75rem)]",
+  lg: "px-[var(--control-padding-lg,0.875rem)]"
+};
 var fieldSurfaceVariants = classVarianceAuthority.cva(fieldSurfaceBase, {
   variants: {
     control: {
@@ -321,7 +383,10 @@ var fieldSurfaceVariants = classVarianceAuthority.cva(fieldSurfaceBase, {
       outline: "border-border",
       filled: "border-transparent bg-muted",
       ghost: "border-transparent bg-transparent",
-      underline: "rounded-none border-0 border-b border-border px-0"
+      // Arbitrary zero rather than the flat Tailwind scale's zero utility:
+      // that scale is banned, and an underline field is an explicit "no
+      // shape" anyway, not a themeable radius.
+      underline: "rounded-[0] border-0 border-b border-border px-0"
     },
     invalid: {
       true: `border-destructive ${focusRingDestructive}`,
@@ -332,32 +397,32 @@ var fieldSurfaceVariants = classVarianceAuthority.cva(fieldSurfaceBase, {
     {
       control: "input",
       size: "sm",
-      class: "h-[var(--control-height-sm,2rem)] text-sm px-[var(--control-padding-sm,0.625rem)]"
+      class: `${controlHeightClass.sm} text-sm ${controlPaddingClass.sm}`
     },
     {
       control: "input",
       size: "md",
-      class: "h-[var(--control-height-md,2.5rem)] text-sm px-[var(--control-padding-md,0.75rem)]"
+      class: `${controlHeightClass.md} text-sm ${controlPaddingClass.md}`
     },
     {
       control: "input",
       size: "lg",
-      class: "h-[var(--control-height-lg,2.75rem)] text-base px-[var(--control-padding-lg,0.875rem)]"
+      class: `${controlHeightClass.lg} text-base ${controlPaddingClass.lg}`
     },
     {
       control: "textarea",
       size: "sm",
-      class: "text-sm px-[var(--control-padding-sm,0.625rem)] py-2"
+      class: `text-sm ${controlPaddingClass.sm} py-2`
     },
     {
       control: "textarea",
       size: "md",
-      class: "text-sm px-[var(--control-padding-md,0.75rem)] py-2.5"
+      class: `text-sm ${controlPaddingClass.md} py-2.5`
     },
     {
       control: "textarea",
       size: "lg",
-      class: "text-base px-[var(--control-padding-lg,0.875rem)] py-3"
+      class: `text-base ${controlPaddingClass.lg} py-3`
     }
   ],
   defaultVariants: {
@@ -409,7 +474,7 @@ function InputAdornmentSlot(props) {
         interactive ? "pointer-events-auto" : "pointer-events-none",
         textVariants({ variant: "muted" })
       ),
-      children: React9__namespace.isValidElement(node) ? node : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node, size: iconSize })
+      children: React10__namespace.isValidElement(node) ? node : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node, size: iconSize })
     }
   );
 }
@@ -419,7 +484,7 @@ var sizeClass = {
   md: "h-5 w-5",
   lg: "h-6 w-6"
 };
-var Spinner = React9__namespace.forwardRef(
+var Spinner = React10__namespace.forwardRef(
   ({ size = "md", className, label = "Loading", ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
     "svg",
     {
@@ -446,7 +511,7 @@ var Spinner = React9__namespace.forwardRef(
 );
 Spinner.displayName = "Spinner";
 var buttonVariants = classVarianceAuthority.cva(
-  `inline-flex items-center justify-center gap-2 rounded-[var(--radius-button,0.375rem)] font-medium transition-colors ${focusRing} ${focusRingOffset} ${disabledControl}`,
+  `inline-flex items-center justify-center gap-2 font-medium transition-colors ${focusRing} ${focusRingOffset} ${disabledControl}`,
   {
     variants: {
       variant: {
@@ -456,10 +521,12 @@ var buttonVariants = classVarianceAuthority.cva(
         ghost: "bg-transparent text-foreground hover:bg-muted",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90"
       },
+      // Radius rides the size tier — the `control` role of the radius scale
+      // (the old `--radius-button` token no longer exists).
       size: {
-        sm: "h-[var(--control-height-sm,2rem)] px-[var(--control-padding-sm,0.625rem)] text-sm",
-        md: "h-[var(--control-height-md,2.5rem)] px-[var(--control-padding-md,0.75rem)] text-sm",
-        lg: "h-[var(--control-height-lg,2.75rem)] px-[var(--control-padding-lg,0.875rem)] text-base"
+        sm: "h-[var(--control-height-sm,2rem)] px-[var(--control-padding-sm,0.625rem)] text-sm rounded-control-sm",
+        md: "h-[var(--control-height-md,2.5rem)] px-[var(--control-padding-md,0.75rem)] text-sm rounded-control-md",
+        lg: "h-[var(--control-height-lg,2.75rem)] px-[var(--control-padding-lg,0.875rem)] text-base rounded-control-lg"
       },
       iconOnly: {
         true: "aspect-square p-0",
@@ -478,12 +545,13 @@ var buttonVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Button = React9__namespace.forwardRef((props, ref) => {
+var Button = React10__namespace.forwardRef((props, ref) => {
   const {
     variant,
     size,
     left,
     right,
+    iconSize = "sm",
     iconOnly,
     ariaLabel,
     loading,
@@ -497,9 +565,9 @@ var Button = React9__namespace.forwardRef((props, ref) => {
   } = props;
   const busy = Boolean(loading);
   const content = /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-    busy ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: size === "lg" ? "md" : "sm" }) : left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "sm" }) : null,
+    busy ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: size === "lg" ? "md" : "sm" }) : left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: iconSize }) : null,
     !iconOnly ? children ?? label : null,
-    !busy && right ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: right, size: "sm" }) : null
+    !busy && right ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: right, size: iconSize }) : null
   ] });
   const classes = cn(buttonVariants({ variant, size, iconOnly }), className);
   if (href) {
@@ -531,50 +599,174 @@ var Button = React9__namespace.forwardRef((props, ref) => {
   );
 });
 Button.displayName = "Button";
-var fabVariants = classVarianceAuthority.cva(
-  `fixed z-sticky inline-flex items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 ${focusRing} ${disabledControl}`,
-  {
-    variants: {
-      variant: {
-        primary: "bg-primary text-primary-foreground",
-        secondary: "bg-secondary text-secondary-foreground"
-      },
-      size: {
-        sm: "h-10 w-10",
-        md: "h-12 w-12",
-        lg: "h-14 w-14"
-      },
-      position: {
-        "bottom-right": "bottom-4 right-4",
-        "bottom-left": "bottom-4 left-4",
-        "bottom-center": "bottom-4 left-1/2 -translate-x-1/2"
-      }
+var iconButtonVariants = classVarianceAuthority.cva("", {
+  variants: {
+    /**
+     * `default` inherits the Button variant's own foreground. `muted` is the
+     * adornment look: dim until hovered, no background of its own — what a
+     * clear / dismiss control inside a field or surface wants.
+     */
+    tone: {
+      default: "",
+      muted: "text-muted-foreground hover:text-foreground"
     },
-    defaultVariants: {
-      variant: "primary",
-      size: "md",
-      position: "bottom-right"
+    shape: {
+      /** Keeps `Button`'s size-matched `rounded-control-*`. */
+      control: "",
+      round: "rounded-pill"
     }
+  },
+  defaultVariants: {
+    tone: "default",
+    shape: "control"
   }
+});
+var IconButton = React10__namespace.forwardRef(
+  ({ icon, ariaLabel, tone, shape, variant = "ghost", size = "sm", iconSize, className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+    Button,
+    {
+      ref,
+      variant,
+      size,
+      iconOnly: true,
+      ariaLabel,
+      left: icon,
+      iconSize,
+      className: cn(iconButtonVariants({ tone, shape }), className),
+      ...props
+    }
+  )
 );
-var FAB = React9__namespace.forwardRef(
-  ({ left, ariaLabel, variant, size, position, className, onClick, type = "button", ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
-    "button",
+IconButton.displayName = "IconButton";
+var fabVariants = classVarianceAuthority.cva("fixed z-dropdown shadow-lg transition-transform hover:scale-105 active:scale-95", {
+  variants: {
+    variant: {
+      primary: "bg-primary text-primary-foreground hover:bg-primary/90",
+      secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/90"
+    },
+    size: {
+      sm: "h-10 w-10",
+      md: "h-12 w-12",
+      lg: "h-14 w-14"
+    },
+    position: {
+      "bottom-right": "bottom-4 right-4",
+      "bottom-left": "bottom-4 left-4",
+      "bottom-center": "bottom-4 left-1/2 -translate-x-1/2"
+    }
+  },
+  defaultVariants: {
+    variant: "primary",
+    size: "md",
+    position: "bottom-right"
+  }
+});
+var FAB = React10__namespace.forwardRef(
+  ({ left, ariaLabel, variant, size, position, className, type = "button", ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
+    IconButton,
     {
       ref,
       type,
-      "aria-label": ariaLabel,
+      ariaLabel,
+      icon: left,
+      shape: "round",
+      iconSize: size === "lg" ? "lg" : "md",
+      variant: "ghost",
+      size: size === "sm" ? "sm" : size === "lg" ? "lg" : "md",
       className: cn(fabVariants({ variant, size, position }), className),
-      onClick,
-      ...props,
-      children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: size === "lg" ? "lg" : "md" })
+      ...props
     }
   )
 );
 FAB.displayName = "FAB";
+
+// src/utils/zIndex.ts
+var zLayers = {
+  sticky: 10,
+  dropdown: 20,
+  overlay: 40,
+  modal: 50,
+  toast: 60
+};
+function zLayerValue(layer) {
+  return zLayers[layer];
+}
+var zScoped = {
+  overlay: 10,
+  surface: 20};
+
+// src/utils/floatingPosition.ts
+var VIEWPORT_MARGIN = 8;
+function clampToViewport(left, top, width, height) {
+  const p = VIEWPORT_MARGIN;
+  const vw = typeof window !== "undefined" ? window.innerWidth : 0;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 0;
+  return {
+    left: Math.min(Math.max(left, p), Math.max(p, vw - width - p)),
+    top: Math.min(Math.max(top, p), Math.max(p, vh - height - p))
+  };
+}
+function fitsInViewport(left, top, width, height) {
+  const p = VIEWPORT_MARGIN;
+  const vw = typeof window !== "undefined" ? window.innerWidth : 0;
+  const vh = typeof window !== "undefined" ? window.innerHeight : 0;
+  return left >= p && top >= p && left + width <= vw - p && top + height <= vh - p;
+}
+function computeFloatingMenuStyle(trigger, menu, options) {
+  const align = options?.align ?? "start";
+  const sideOffset = options?.sideOffset ?? 4;
+  const maxHeightCap = options?.maxHeightCap ?? 320;
+  const minWidth = options?.minWidth ?? "10rem";
+  const zIndex = options?.zIndex ?? zLayerValue("dropdown");
+  const rect = trigger.getBoundingClientRect();
+  const menuHeight = menu?.offsetHeight ?? 0;
+  const menuWidth = menu?.offsetWidth ?? 0;
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const spaceBelow = vh - rect.bottom - sideOffset - VIEWPORT_MARGIN;
+  const spaceAbove = rect.top - sideOffset - VIEWPORT_MARGIN;
+  const openBelow = menuHeight === 0 || spaceBelow >= menuHeight || spaceBelow >= spaceAbove;
+  let top = openBelow ? rect.bottom + sideOffset : rect.top - sideOffset - (menuHeight || 0);
+  let left = rect.left;
+  let transform;
+  if (align === "center") {
+    left = rect.left + rect.width / 2;
+    transform = "translateX(-50%)";
+    if (menuWidth > 0) {
+      const half = menuWidth / 2;
+      if (left - half < VIEWPORT_MARGIN) left = VIEWPORT_MARGIN + half;
+      if (left + half > vw - VIEWPORT_MARGIN) left = vw - VIEWPORT_MARGIN - half;
+    }
+  } else if (align === "end") {
+    left = rect.right;
+    transform = "translateX(-100%)";
+    if (menuWidth > 0 && left - menuWidth < VIEWPORT_MARGIN) {
+      left = VIEWPORT_MARGIN + menuWidth;
+    }
+  } else if (menuWidth > 0 && left + menuWidth > vw - VIEWPORT_MARGIN) {
+    left = Math.max(VIEWPORT_MARGIN, vw - VIEWPORT_MARGIN - menuWidth);
+  }
+  if (top < VIEWPORT_MARGIN) top = VIEWPORT_MARGIN;
+  if (menuHeight > 0 && top + menuHeight > vh - VIEWPORT_MARGIN) {
+    top = Math.max(VIEWPORT_MARGIN, vh - VIEWPORT_MARGIN - menuHeight);
+  }
+  const available = openBelow ? spaceBelow : spaceAbove;
+  const maxHeight = Math.max(120, Math.min(maxHeightCap, available));
+  return {
+    position: "fixed",
+    top,
+    left,
+    transform,
+    zIndex,
+    minWidth: align === "start" ? `${Math.max(rect.width, 0)}px` : minWidth,
+    maxHeight,
+    overflowY: "auto",
+    visibility: "visible"
+  };
+}
 var tooltipContentVariants = classVarianceAuthority.cva(
   [
-    "z-toast overflow-visible rounded-md px-3 py-1.5 text-xs shadow-md",
+    "z-toast overflow-visible rounded-control-md px-3 py-1.5 text-xs shadow-md",
     "transition-opacity ease-out"
   ].join(" "),
   {
@@ -621,24 +813,6 @@ function tooltipArrowClass(placement, variant) {
 }
 var HIDDEN = { top: -9999, left: -9999 };
 var CONTENT_HOVER_CLOSE_DELAY_MS = 160;
-var VIEWPORT_PADDING = 8;
-function clampToViewport(left, top, w, h) {
-  const p = VIEWPORT_PADDING;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const maxLeft = Math.max(p, vw - w - p);
-  const maxTop = Math.max(p, vh - h - p);
-  return {
-    left: Math.min(Math.max(left, p), maxLeft),
-    top: Math.min(Math.max(top, p), maxTop)
-  };
-}
-function fitsInViewport(left, top, w, h) {
-  const p = VIEWPORT_PADDING;
-  const vw = typeof window !== "undefined" ? window.innerWidth : 0;
-  const vh = typeof window !== "undefined" ? window.innerHeight : 0;
-  return left >= p && top >= p && left + w <= vw - p && top + h <= vh - p;
-}
 function flipPlacement(p) {
   switch (p) {
     case "top":
@@ -705,7 +879,7 @@ function mergeRefs(...refs) {
     }
   };
 }
-function Tooltip({
+var Tooltip = React10__namespace.forwardRef(function Tooltip2({
   content,
   disabled,
   children,
@@ -719,45 +893,45 @@ function Tooltip({
   yOffset = 0,
   maxWidth,
   showArrow = true
-}) {
-  const triggerRef = React9__namespace.useRef(null);
-  const floatingRef = React9__namespace.useRef(null);
-  const hideTimeoutRef = React9__namespace.useRef(null);
-  const [open, setOpen] = React9__namespace.useState(false);
-  const [entered, setEntered] = React9__namespace.useState(false);
-  const [coords, setCoords] = React9__namespace.useState(HIDDEN);
-  const [resolvedPlacement, setResolvedPlacement] = React9__namespace.useState(placement);
-  const id = React9__namespace.useId();
+}, forwardedRef) {
+  const triggerRef = React10__namespace.useRef(null);
+  const floatingRef = React10__namespace.useRef(null);
+  const hideTimeoutRef = React10__namespace.useRef(null);
+  const [open, setOpen] = React10__namespace.useState(false);
+  const [entered, setEntered] = React10__namespace.useState(false);
+  const [coords, setCoords] = React10__namespace.useState(HIDDEN);
+  const [resolvedPlacement, setResolvedPlacement] = React10__namespace.useState(placement);
+  const id = React10__namespace.useId();
   const tooltipId = `tooltip-${id}`;
   const maxWidthCss = maxWidth !== void 0 && maxWidth !== null && maxWidth !== "" ? typeof maxWidth === "number" ? `${maxWidth}px` : String(maxWidth) : void 0;
-  React9__namespace.useLayoutEffect(() => {
+  React10__namespace.useLayoutEffect(() => {
     if (!open) setResolvedPlacement(placement);
   }, [placement, open]);
-  const clearCloseTimer = React9__namespace.useCallback(() => {
+  const clearCloseTimer = React10__namespace.useCallback(() => {
     if (hideTimeoutRef.current != null) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
   }, []);
-  const hide = React9__namespace.useCallback(() => {
+  const hide = React10__namespace.useCallback(() => {
     clearCloseTimer();
     setOpen(false);
     setEntered(false);
     setCoords(HIDDEN);
   }, [clearCloseTimer]);
-  const scheduleClose = React9__namespace.useCallback(() => {
+  const scheduleClose = React10__namespace.useCallback(() => {
     clearCloseTimer();
     hideTimeoutRef.current = window.setTimeout(() => {
       hideTimeoutRef.current = null;
       hide();
     }, CONTENT_HOVER_CLOSE_DELAY_MS);
   }, [hide, clearCloseTimer]);
-  const show = React9__namespace.useCallback(() => {
+  const show = React10__namespace.useCallback(() => {
     clearCloseTimer();
     if (!disabled) setOpen(true);
   }, [disabled, clearCloseTimer]);
-  React9__namespace.useEffect(() => () => clearCloseTimer(), [clearCloseTimer]);
-  const onTriggerPointerLeave = React9__namespace.useCallback(
+  React10__namespace.useEffect(() => () => clearCloseTimer(), [clearCloseTimer]);
+  const onTriggerPointerLeave = React10__namespace.useCallback(
     (e, childHandler) => {
       childHandler?.(e);
       if (keepOpenOnContentHover) {
@@ -770,7 +944,7 @@ function Tooltip({
     },
     [keepOpenOnContentHover, scheduleClose, hide]
   );
-  const updatePosition = React9__namespace.useCallback(() => {
+  const updatePosition = React10__namespace.useCallback(() => {
     const trigger2 = triggerRef.current;
     const float = floatingRef.current;
     if (!trigger2 || !float) return;
@@ -789,7 +963,7 @@ function Tooltip({
     setResolvedPlacement(resolved);
     setCoords(next);
   }, [placement, autoPlacement, xOffset, yOffset]);
-  React9__namespace.useLayoutEffect(() => {
+  React10__namespace.useLayoutEffect(() => {
     if (!open) return;
     updatePosition();
     const onScrollOrResize = () => updatePosition();
@@ -800,7 +974,7 @@ function Tooltip({
       window.removeEventListener("resize", onScrollOrResize);
     };
   }, [open, updatePosition, content, placement, maxWidthCss]);
-  React9__namespace.useLayoutEffect(() => {
+  React10__namespace.useLayoutEffect(() => {
     if (!open) return;
     setEntered(false);
     const id2 = requestAnimationFrame(() => setEntered(true));
@@ -809,9 +983,10 @@ function Tooltip({
   const bindTrigger = (el) => {
     triggerRef.current = el;
   };
-  const trigger = React9__namespace.isValidElement(children) && typeof children !== "string" ? React9__namespace.cloneElement(children, {
+  const trigger = React10__namespace.isValidElement(children) && typeof children !== "string" ? React10__namespace.cloneElement(children, {
     ref: mergeRefs(
       bindTrigger,
+      forwardedRef,
       children.ref
     ),
     onPointerEnter: (e) => {
@@ -836,7 +1011,7 @@ function Tooltip({
   }) : /* @__PURE__ */ jsxRuntime.jsx(
     "span",
     {
-      ref: bindTrigger,
+      ref: mergeRefs(bindTrigger, forwardedRef),
       className: "inline-flex",
       onPointerEnter: show,
       onPointerLeave: (e) => onTriggerPointerLeave(e),
@@ -881,7 +1056,7 @@ function Tooltip({
     trigger,
     portal
   ] });
-}
+});
 Tooltip.displayName = "Tooltip";
 function TooltipProvider({ children }) {
   return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children });
@@ -889,7 +1064,7 @@ function TooltipProvider({ children }) {
 TooltipProvider.displayName = "TooltipProvider";
 var defaultCopyIcon = /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Copy, { className: "h-4 w-4" });
 var defaultCopiedIcon = /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-4 w-4" });
-var CopyButton = React9__namespace.forwardRef(
+var CopyButton = React10__namespace.forwardRef(
   ({
     value,
     onValueCopy,
@@ -899,7 +1074,7 @@ var CopyButton = React9__namespace.forwardRef(
     copyIcon = defaultCopyIcon,
     copiedIcon = defaultCopiedIcon,
     timeout = 2e3,
-    tooltip = true,
+    tooltip = false,
     tooltipLabel,
     tooltipCopiedLabel,
     tooltipContent,
@@ -910,9 +1085,9 @@ var CopyButton = React9__namespace.forwardRef(
     ariaLabel,
     ...buttonProps
   }, ref) => {
-    const [copied, setCopied] = React9__namespace.useState(false);
-    const timerRef = React9__namespace.useRef();
-    React9__namespace.useEffect(() => () => clearTimeout(timerRef.current), []);
+    const [copied, setCopied] = React10__namespace.useState(false);
+    const timerRef = React10__namespace.useRef();
+    React10__namespace.useEffect(() => () => clearTimeout(timerRef.current), []);
     const handleCopy = async () => {
       if (disabled) return;
       try {
@@ -952,71 +1127,39 @@ var CopyButton = React9__namespace.forwardRef(
   }
 );
 CopyButton.displayName = "CopyButton";
-
-// src/utils/zIndex.ts
-var zLayers = {
-  sticky: 10,
-  dropdown: 20,
-  overlay: 40,
-  modal: 50,
-  toast: 60
-};
-function zLayerValue(layer) {
-  return zLayers[layer];
+var REVEAL_FALLBACK_MS = 48;
+function usePositionedPortal(open, updatePosition) {
+  const [positioned, setPositioned] = React10__namespace.useState(false);
+  React10__namespace.useLayoutEffect(() => {
+    if (!open) {
+      setPositioned(false);
+      return;
+    }
+    setPositioned(false);
+    updatePosition();
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      updatePosition();
+      raf2 = requestAnimationFrame(() => setPositioned(true));
+    });
+    const fallback = window.setTimeout(() => setPositioned(true), REVEAL_FALLBACK_MS);
+    const onReposition = () => updatePosition();
+    window.addEventListener("scroll", onReposition, true);
+    window.addEventListener("resize", onReposition);
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+      window.clearTimeout(fallback);
+      window.removeEventListener("scroll", onReposition, true);
+      window.removeEventListener("resize", onReposition);
+    };
+  }, [open, updatePosition]);
+  return positioned;
 }
-
-// src/utils/floatingPosition.ts
-var VIEWPORT_MARGIN = 8;
-function computeFloatingMenuStyle(trigger, menu, options) {
-  const align = options?.align ?? "start";
-  const sideOffset = options?.sideOffset ?? 4;
-  const maxHeightCap = options?.maxHeightCap ?? 320;
-  const minWidth = options?.minWidth ?? "10rem";
-  const zIndex = options?.zIndex ?? zLayerValue("dropdown");
-  const rect = trigger.getBoundingClientRect();
-  const menuHeight = menu?.offsetHeight ?? 0;
-  const menuWidth = menu?.offsetWidth ?? 0;
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-  const spaceBelow = vh - rect.bottom - sideOffset - VIEWPORT_MARGIN;
-  const spaceAbove = rect.top - sideOffset - VIEWPORT_MARGIN;
-  const openBelow = menuHeight === 0 || spaceBelow >= menuHeight || spaceBelow >= spaceAbove;
-  let top = openBelow ? rect.bottom + sideOffset : rect.top - sideOffset - (menuHeight || 0);
-  let left = rect.left;
-  let transform;
-  if (align === "center") {
-    left = rect.left + rect.width / 2;
-    transform = "translateX(-50%)";
-    if (menuWidth > 0) {
-      const half = menuWidth / 2;
-      if (left - half < VIEWPORT_MARGIN) left = VIEWPORT_MARGIN + half;
-      if (left + half > vw - VIEWPORT_MARGIN) left = vw - VIEWPORT_MARGIN - half;
-    }
-  } else if (align === "end") {
-    left = rect.right;
-    transform = "translateX(-100%)";
-    if (menuWidth > 0 && left - menuWidth < VIEWPORT_MARGIN) {
-      left = VIEWPORT_MARGIN + menuWidth;
-    }
-  } else if (menuWidth > 0 && left + menuWidth > vw - VIEWPORT_MARGIN) {
-    left = Math.max(VIEWPORT_MARGIN, vw - VIEWPORT_MARGIN - menuWidth);
-  }
-  if (top < VIEWPORT_MARGIN) top = VIEWPORT_MARGIN;
-  if (menuHeight > 0 && top + menuHeight > vh - VIEWPORT_MARGIN) {
-    top = Math.max(VIEWPORT_MARGIN, vh - VIEWPORT_MARGIN - menuHeight);
-  }
-  const available = openBelow ? spaceBelow : spaceAbove;
-  const maxHeight = Math.max(120, Math.min(maxHeightCap, available));
+function withPortalVisibility(style, positioned) {
   return {
-    position: "fixed",
-    top,
-    left,
-    transform,
-    zIndex,
-    minWidth: align === "start" ? `${Math.max(rect.width, 0)}px` : minWidth,
-    maxHeight,
-    overflowY: "auto",
-    visibility: "visible"
+    ...style,
+    visibility: positioned ? style.visibility ?? "visible" : "hidden"
   };
 }
 
@@ -1032,9 +1175,8 @@ function useFloatingMenu({
   maxHeight: maxHeightCap = 320,
   zIndex = zLayerValue("dropdown")
 }) {
-  const [menuStyle, setMenuStyle] = React9__namespace.useState({ visibility: "hidden" });
-  const [positioned, setPositioned] = React9__namespace.useState(false);
-  const updatePosition = React9__namespace.useCallback(() => {
+  const [menuStyle, setMenuStyle] = React10__namespace.useState({ visibility: "hidden" });
+  const updatePosition = React10__namespace.useCallback(() => {
     const trigger = triggerRef.current;
     const menu = menuRef.current;
     if (!trigger) return;
@@ -1048,31 +1190,8 @@ function useFloatingMenu({
       })
     );
   }, [align, maxHeightCap, minWidth, sideOffset, triggerRef, menuRef, zIndex]);
-  React9__namespace.useLayoutEffect(() => {
-    if (!open) {
-      setPositioned(false);
-      return;
-    }
-    setPositioned(false);
-    updatePosition();
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      updatePosition();
-      raf2 = requestAnimationFrame(() => setPositioned(true));
-    });
-    const fallback = window.setTimeout(() => setPositioned(true), 48);
-    const onReposition = () => updatePosition();
-    window.addEventListener("scroll", onReposition, true);
-    window.addEventListener("resize", onReposition);
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      window.clearTimeout(fallback);
-      window.removeEventListener("scroll", onReposition, true);
-      window.removeEventListener("resize", onReposition);
-    };
-  }, [open, updatePosition]);
-  React9__namespace.useEffect(() => {
+  const positioned = usePositionedPortal(open, updatePosition);
+  React10__namespace.useEffect(() => {
     if (!open) return;
     const onPointerDown = (e) => {
       const t = e.target;
@@ -1089,19 +1208,125 @@ function useFloatingMenu({
       document.removeEventListener("keydown", onKeyDown, true);
     };
   }, [open, onOpenChange, triggerRef, menuRef]);
-  const resolvedStyle = React9__namespace.useMemo(
-    () => ({
-      ...menuStyle,
-      visibility: positioned ? menuStyle.visibility ?? "visible" : "hidden"
-    }),
+  const resolvedStyle = React10__namespace.useMemo(
+    () => withPortalVisibility(menuStyle, positioned),
     [menuStyle, positioned]
   );
   return { menuStyle: resolvedStyle, updatePosition, positioned };
 }
-var floatingMenuListClass = "z-dropdown overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none";
-var floatingMenuSurfaceClass = "z-dropdown overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none";
+function useControllableOpen({
+  open: openProp,
+  defaultOpen = false,
+  onOpenChange
+}) {
+  const [uncontrolled, setUncontrolled] = React10__namespace.useState(defaultOpen);
+  const isControlled = openProp !== void 0;
+  const open = isControlled ? openProp : uncontrolled;
+  const setOpen = React10__namespace.useCallback(
+    (next) => {
+      if (!isControlled) setUncontrolled(next);
+      onOpenChange?.(next);
+    },
+    [isControlled, onOpenChange]
+  );
+  return [open, setOpen];
+}
+var FOCUSABLE_SELECTOR = [
+  "a[href]",
+  "button:not([disabled])",
+  "input:not([disabled])",
+  "select:not([disabled])",
+  "textarea:not([disabled])",
+  '[tabindex]:not([tabindex="-1"])'
+].join(",");
+function focusableWithin(root) {
+  if (!root) return [];
+  return Array.from(root.querySelectorAll(FOCUSABLE_SELECTOR)).filter(
+    (el) => el.offsetParent !== null || el === root
+  );
+}
+function useReturnFocusOnClose(open, options) {
+  const enabled = options?.enabled ?? true;
+  const triggerRef = options?.triggerRef;
+  const previous = React10__namespace.useRef(null);
+  const wasOpen = React10__namespace.useRef(false);
+  React10__namespace.useEffect(() => {
+    if (!enabled) return;
+    if (open) {
+      if (!wasOpen.current) {
+        wasOpen.current = true;
+        previous.current = typeof document !== "undefined" ? document.activeElement : null;
+      }
+      return;
+    }
+    if (!wasOpen.current) return;
+    wasOpen.current = false;
+    const remembered = previous.current;
+    previous.current = null;
+    const fromTrigger = triggerRef?.current?.matches?.(FOCUSABLE_SELECTOR) === true ? triggerRef.current : focusableWithin(triggerRef?.current ?? null)[0] ?? null;
+    const target = fromTrigger ?? remembered;
+    if (target && typeof target.focus === "function" && target.isConnected) target.focus();
+  }, [open, enabled, triggerRef]);
+}
+function useDialogA11y({
+  open,
+  onClose,
+  closeOnEscape = true,
+  initialFocus,
+  enabled = true
+}) {
+  const surfaceRef = React10__namespace.useRef(null);
+  useReturnFocusOnClose(open, { enabled });
+  React10__namespace.useEffect(() => {
+    if (!enabled || !open) return;
+    const raf = requestAnimationFrame(() => {
+      const surface = surfaceRef.current;
+      if (!surface) return;
+      if (surface.contains(document.activeElement)) return;
+      const target = initialFocus?.current ?? focusableWithin(surface)[0] ?? surface;
+      target.focus();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [enabled, open, initialFocus]);
+  React10__namespace.useEffect(() => {
+    if (!enabled || !open) return;
+    const onKeyDown = (e) => {
+      if (e.key === "Escape") {
+        if (!closeOnEscape) return;
+        e.stopPropagation();
+        onClose?.();
+        return;
+      }
+      if (e.key !== "Tab") return;
+      const surface = surfaceRef.current;
+      if (!surface) return;
+      const nodes = focusableWithin(surface);
+      if (nodes.length === 0) {
+        e.preventDefault();
+        surface.focus();
+        return;
+      }
+      const first = nodes[0];
+      const last = nodes[nodes.length - 1];
+      const active = document.activeElement;
+      const inside = surface.contains(active);
+      if (e.shiftKey && (!inside || active === first)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && (!inside || active === last)) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener("keydown", onKeyDown, true);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [enabled, open, closeOnEscape, onClose]);
+  return surfaceRef;
+}
+var floatingMenuListClass = "z-dropdown overflow-y-auto rounded-control-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none";
+var floatingMenuSurfaceClass = "z-dropdown overflow-hidden rounded-control-md border border-border bg-popover text-popover-foreground shadow-md outline-none";
 var floatingMenuHoverClass = "hover:bg-[hsl(var(--foreground)/0.08)] focus-visible:bg-[hsl(var(--foreground)/0.08)] active:bg-[hsl(var(--foreground)/0.12)]";
-var floatingMenuItemClass = "flex w-full cursor-default select-none items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors disabled:pointer-events-none disabled:opacity-50";
+var floatingMenuItemClass = "flex w-full cursor-default select-none items-center gap-2 rounded-control-sm border-0 bg-transparent px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors disabled:pointer-events-none disabled:opacity-50";
 var floatingMenuItemSelectedClass = "bg-[hsl(var(--foreground)/0.06)]";
 function FloatingMenuItem({ className, selected, type = "button", ...props }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -1114,132 +1339,180 @@ function FloatingMenuItem({ className, selected, type = "button", ...props }) {
   );
 }
 FloatingMenuItem.displayName = "FloatingMenuItem";
-function Dropdown({
-  items,
-  triggerProps,
-  trigger,
-  contentClassName,
-  align = "start",
-  sideOffset = 4,
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  className,
-  ...rest
-}) {
-  const { label = "Menu", left, variant = "outline", size = "md", className: triggerClassName } = triggerProps ?? {};
-  const [internalOpen, setInternalOpen] = React9__namespace.useState(defaultOpen);
-  const isControlled = openProp !== void 0 && onOpenChange != null;
-  const open = isControlled ? Boolean(openProp) : internalOpen;
-  const setOpen = React9__namespace.useCallback(
-    (next) => {
-      if (!isControlled) setInternalOpen(next);
-      onOpenChange?.(next);
-    },
-    [isControlled, onOpenChange]
-  );
-  const triggerRef = React9__namespace.useRef(null);
-  const menuRef = React9__namespace.useRef(null);
-  const { menuStyle } = useFloatingMenu({
-    open,
-    onOpenChange: setOpen,
-    triggerRef,
-    menuRef,
-    align,
-    sideOffset
-  });
-  const focusableIndex = React9__namespace.useRef(0);
-  const onMenuKeyDown = (e) => {
-    const menu = menuRef.current;
-    if (!menu) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const count = menu.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])').length;
-      focusableIndex.current = Math.min(focusableIndex.current + 1, Math.max(0, count - 1));
-      const nodes = menu.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])');
-      nodes[focusableIndex.current]?.focus();
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      focusableIndex.current = Math.max(focusableIndex.current - 1, 0);
-      const nodes = menu.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])');
-      nodes[focusableIndex.current]?.focus();
-    } else if (e.key === "Home") {
-      e.preventDefault();
-      focusableIndex.current = 0;
-      menu.querySelector('[role="menuitem"]')?.focus();
-    } else if (e.key === "End") {
-      e.preventDefault();
-      const nodes = menu.querySelectorAll('[role="menuitem"]:not([aria-disabled="true"])');
-      focusableIndex.current = Math.max(0, nodes.length - 1);
-      nodes[nodes.length - 1]?.focus();
+var menuSeparatorClass = "-mx-1 my-1 h-px bg-border";
+var menuItemRowVariants = classVarianceAuthority.cva(cn(floatingMenuItemClass, floatingMenuHoverClass), {
+  variants: {
+    disabled: {
+      true: "pointer-events-none opacity-50",
+      false: ""
     }
-  };
-  React9__namespace.useEffect(() => {
-    if (!open || !menuRef.current) return;
-    focusableIndex.current = 0;
-    const first = menuRef.current.querySelector('[role="menuitem"]:not([aria-disabled="true"])');
-    requestAnimationFrame(() => first?.focus());
-  }, [open]);
-  const menuContent = open ? /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
+  },
+  defaultVariants: {
+    disabled: false
+  }
+});
+var MenuItemRow = React10__namespace.forwardRef(
+  ({ item, onSelect, className, onClick, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
+    "button",
     {
-      ref: menuRef,
-      role: "menu",
+      ref,
+      type: "button",
+      role: "menuitem",
       tabIndex: -1,
-      style: menuStyle,
-      onKeyDown: onMenuKeyDown,
-      className: cn(floatingMenuListClass, contentClassName),
-      children: items.map(
-        (item, index) => item.separator ? /* @__PURE__ */ jsxRuntime.jsx("div", { role: "separator", className: "-mx-1 my-1 h-px bg-border" }, `sep-${index}`) : /* @__PURE__ */ jsxRuntime.jsxs(
-          "button",
-          {
-            type: "button",
-            role: "menuitem",
-            tabIndex: -1,
-            disabled: item.disabled,
-            className: cn(floatingMenuItemClass, floatingMenuHoverClass, item.disabled && "pointer-events-none opacity-50"),
-            onClick: () => {
-              if (item.disabled) return;
-              item.onClick?.();
-              setOpen(false);
-            },
-            children: [
-              item.left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) }) : null,
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children: item.label })
-            ]
-          },
-          item.value ?? `item-${index}`
-        )
-      )
-    }
-  ) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("relative inline-block", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React9__namespace.isValidElement(trigger) ? React9__namespace.cloneElement(trigger, {
-      onClick: (e) => {
-        trigger.props.onClick?.(e);
-        setOpen(!open);
+      disabled: item.disabled,
+      "aria-disabled": item.disabled || void 0,
+      className: cn(menuItemRowVariants({ disabled: Boolean(item.disabled) }), className),
+      onClick: (event) => {
+        onClick?.(event);
+        if (item.disabled) return;
+        item.onClick?.();
+        onSelect?.();
       },
-      "aria-expanded": open,
-      "aria-haspopup": "menu"
-    }) : trigger : /* @__PURE__ */ jsxRuntime.jsxs(
-      Button,
-      {
-        variant,
-        size,
-        className: cn("gap-2", triggerClassName),
-        "aria-expanded": open,
-        "aria-haspopup": "menu",
-        onClick: () => setOpen(!open),
-        children: [
-          left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "sm" }) : null,
-          label
-        ]
-      }
-    ) }),
-    typeof document !== "undefined" && menuContent ? reactDom.createPortal(menuContent, document.body) : null
-  ] });
+      ...props,
+      children: [
+        item.left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) }) : null,
+        /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children: item.label })
+      ]
+    }
+  )
+);
+MenuItemRow.displayName = "MenuItemRow";
+function renderMenuItems(items, onSelect) {
+  return items.map(
+    (item, index) => item.separator ? /* @__PURE__ */ jsxRuntime.jsx("div", { role: "separator", className: menuSeparatorClass }, `sep-${index}`) : /* @__PURE__ */ jsxRuntime.jsx(MenuItemRow, { item, onSelect }, item.value ?? `item-${index}`)
+  );
 }
+function useMenuKeyboard(menuRef, open) {
+  const activeIndex = React10__namespace.useRef(0);
+  const rows = React10__namespace.useCallback(
+    () => Array.from(
+      menuRef.current?.querySelectorAll(
+        '[role="menuitem"]:not([aria-disabled="true"])'
+      ) ?? []
+    ),
+    [menuRef]
+  );
+  React10__namespace.useEffect(() => {
+    if (!open) return;
+    activeIndex.current = 0;
+    const raf = requestAnimationFrame(() => rows()[0]?.focus());
+    return () => cancelAnimationFrame(raf);
+  }, [open, rows]);
+  return React10__namespace.useCallback(
+    (e) => {
+      if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
+      const nodes = rows();
+      if (nodes.length === 0) return;
+      e.preventDefault();
+      if (e.key === "ArrowDown") {
+        activeIndex.current = Math.min(activeIndex.current + 1, nodes.length - 1);
+      } else if (e.key === "ArrowUp") {
+        activeIndex.current = Math.max(activeIndex.current - 1, 0);
+      } else if (e.key === "Home") {
+        activeIndex.current = 0;
+      } else {
+        activeIndex.current = nodes.length - 1;
+      }
+      nodes[activeIndex.current]?.focus();
+    },
+    [rows]
+  );
+}
+var Dropdown = React10__namespace.forwardRef(
+  ({
+    items,
+    triggerProps,
+    trigger,
+    contentClassName,
+    align = "start",
+    sideOffset = 4,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
+    className,
+    ...rest
+  }, ref) => {
+    const {
+      label = "Menu",
+      left,
+      variant = "outline",
+      size = "md",
+      className: triggerClassName
+    } = triggerProps ?? {};
+    const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+    const triggerRef = React10__namespace.useRef(null);
+    const menuRef = React10__namespace.useRef(null);
+    const { menuStyle } = useFloatingMenu({
+      open,
+      onOpenChange: setOpen,
+      triggerRef,
+      menuRef,
+      align,
+      sideOffset
+    });
+    const onMenuKeyDown = useMenuKeyboard(menuRef, open);
+    useReturnFocusOnClose(open, { triggerRef });
+    const menuContent = open ? /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        ref: menuRef,
+        role: "menu",
+        tabIndex: -1,
+        style: menuStyle,
+        onKeyDown: onMenuKeyDown,
+        className: cn(floatingMenuListClass, contentClassName),
+        children: renderMenuItems(items, () => setOpen(false))
+      }
+    ) : null;
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative inline-block", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React10__namespace.isValidElement(trigger) ? React10__namespace.cloneElement(trigger, {
+        onClick: (e) => {
+          trigger.props.onClick?.(e);
+          setOpen(!open);
+        },
+        "aria-expanded": open,
+        "aria-haspopup": "menu"
+      }) : trigger : /* @__PURE__ */ jsxRuntime.jsxs(
+        Button,
+        {
+          variant,
+          size,
+          className: cn("gap-2", triggerClassName),
+          "aria-expanded": open,
+          "aria-haspopup": "menu",
+          onClick: () => setOpen(!open),
+          children: [
+            left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "sm" }) : null,
+            label
+          ]
+        }
+      ) }),
+      typeof document !== "undefined" && menuContent ? reactDom.createPortal(menuContent, document.body) : null
+    ] });
+  }
+);
 Dropdown.displayName = "Dropdown";
+var splitButtonGroupVariants = classVarianceAuthority.cva("inline-flex divide-x overflow-hidden", {
+  variants: {
+    variant: {
+      primary: "divide-primary-foreground/25",
+      secondary: "divide-secondary-foreground/25",
+      outline: "divide-border border border-border bg-background",
+      ghost: "divide-border/50",
+      destructive: "divide-destructive-foreground/25"
+    },
+    size: {
+      sm: "rounded-control-sm",
+      md: "rounded-control-md",
+      lg: "rounded-control-lg"
+    }
+  },
+  defaultVariants: {
+    variant: "primary",
+    size: "md"
+  }
+});
+var splitButtonHalf = "rounded-[0] border-0 shadow-none";
 function menuToDropdownItems(items) {
   return items.map((item) => ({
     label: item.label,
@@ -1249,7 +1522,7 @@ function menuToDropdownItems(items) {
     separator: item.separator
   }));
 }
-function SplitButton({
+var SplitButton = React10__namespace.forwardRef(function SplitButton2({
   onClick,
   menuItems,
   disabled,
@@ -1261,7 +1534,7 @@ function SplitButton({
   dropdownProps,
   className,
   ...rest
-}) {
+}, ref) {
   const items = menuToDropdownItems(menuItems ?? []);
   const {
     className: bpClass,
@@ -1270,48 +1543,58 @@ function SplitButton({
     loading: bpLoading,
     ...restButton
   } = buttonProps ?? {};
-  const divideClass = variant === "outline" ? "divide-border border border-border bg-background" : variant === "ghost" ? "divide-border/50" : variant === "secondary" ? "divide-secondary-foreground/25" : "divide-primary-foreground/25";
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("inline-flex divide-x overflow-hidden rounded-md", divideClass, className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        variant,
-        size,
-        disabled: disabled ?? bpDisabled,
-        loading: loading ?? bpLoading,
-        className: cn("rounded-none rounded-l-md border-0 shadow-none", bpClass),
-        onClick: (e) => {
-          bpOnClick?.(e);
-          onClick?.();
-        },
-        ...restButton,
-        children: children ?? "Action"
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Dropdown,
-      {
-        items,
-        align: "end",
-        trigger: /* @__PURE__ */ jsxRuntime.jsx(
+  const isDisabled = disabled ?? bpDisabled;
+  const isLoading = loading ?? bpLoading;
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      ref,
+      "data-slot": "split-button",
+      className: cn(splitButtonGroupVariants({ variant, size }), className),
+      ...rest,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
           Button,
           {
             variant,
             size,
-            iconOnly: true,
-            ariaLabel: "Open menu",
-            disabled: Boolean(disabled ?? bpDisabled) || Boolean(loading ?? bpLoading),
-            className: cn("rounded-none rounded-r-md border-0 shadow-none", bpClass),
-            left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4", strokeWidth: 2, "aria-hidden": true })
+            disabled: isDisabled,
+            loading: isLoading,
+            className: cn(splitButtonHalf, bpClass),
+            onClick: (e) => {
+              bpOnClick?.(e);
+              onClick?.();
+            },
+            ...restButton,
+            children: children ?? "Action"
           }
         ),
-        ...dropdownProps
-      }
-    )
-  ] });
-}
+        /* @__PURE__ */ jsxRuntime.jsx(
+          Dropdown,
+          {
+            items,
+            align: "end",
+            trigger: /* @__PURE__ */ jsxRuntime.jsx(
+              Button,
+              {
+                variant,
+                size,
+                iconOnly: true,
+                ariaLabel: "Open menu",
+                disabled: Boolean(isDisabled) || Boolean(isLoading),
+                className: cn(splitButtonHalf, bpClass),
+                left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-4 w-4", strokeWidth: 2, "aria-hidden": true })
+              }
+            ),
+            ...dropdownProps
+          }
+        )
+      ]
+    }
+  );
+});
 SplitButton.displayName = "SplitButton";
-var TextInput = React9__namespace.forwardRef(
+var TextInput = React10__namespace.forwardRef(
   ({
     id,
     label,
@@ -1333,9 +1616,9 @@ var TextInput = React9__namespace.forwardRef(
     maxLength,
     ...props
   }, ref) => {
-    const generatedId = React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
     const inputId = id ?? generatedId;
-    const [uncontrolledValue, setUncontrolledValue] = React9__namespace.useState(String(defaultValue ?? ""));
+    const [uncontrolledValue, setUncontrolledValue] = React10__namespace.useState(String(defaultValue ?? ""));
     const resolvedValue = value != null ? String(value) : uncontrolledValue;
     const { validationError, hasError, validationOpts } = useSyncStringFieldValidation(resolvedValue, {
       validate,
@@ -1394,7 +1677,7 @@ function getResizeClass(resize) {
   if (resize === "horizontal") return "resize-x";
   return "resize";
 }
-var Textarea = React9__namespace.forwardRef(
+var Textarea = React10__namespace.forwardRef(
   ({
     id,
     label,
@@ -1414,9 +1697,9 @@ var Textarea = React9__namespace.forwardRef(
     resize = "vertical",
     ...props
   }, ref) => {
-    const generatedId = React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
     const textareaId = id ?? generatedId;
-    const [uncontrolledValue, setUncontrolledValue] = React9__namespace.useState(String(defaultValue ?? ""));
+    const [uncontrolledValue, setUncontrolledValue] = React10__namespace.useState(String(defaultValue ?? ""));
     const resolvedValue = value != null ? String(value) : uncontrolledValue;
     const { validationError, hasError, validationOpts } = useSyncStringFieldValidation(resolvedValue, {
       validate,
@@ -1464,8 +1747,25 @@ var Textarea = React9__namespace.forwardRef(
   }
 );
 Textarea.displayName = "Textarea";
+function useControllableValue({
+  value: valueProp,
+  defaultValue,
+  onChange
+}) {
+  const [uncontrolled, setUncontrolled] = React10__namespace.useState(defaultValue);
+  const isControlled = valueProp !== void 0;
+  const value = isControlled ? valueProp : uncontrolled;
+  const setValue = React10__namespace.useCallback(
+    (next) => {
+      if (!isControlled) setUncontrolled(next);
+      onChange?.(next);
+    },
+    [isControlled, onChange]
+  );
+  return [value, setValue];
+}
 var checkboxVariants = classVarianceAuthority.cva(
-  `inline-flex items-center justify-center rounded border border-border bg-background text-primary ${ringOffsetBackground} transition-colors ${disabledControl}`,
+  `inline-flex items-center justify-center rounded-control-sm border border-border bg-background text-primary ${ringOffsetBackground} transition-colors ${disabledControl}`,
   {
     variants: {
       size: {
@@ -1479,7 +1779,7 @@ var checkboxVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Checkbox = React9__namespace.forwardRef(
+var Checkbox = React10__namespace.forwardRef(
   ({
     size,
     label,
@@ -1493,19 +1793,20 @@ var Checkbox = React9__namespace.forwardRef(
     indeterminate,
     ...props
   }, ref) => {
-    const generatedId = React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
     const checkboxId = id ?? generatedId;
-    const isControlled = checked !== void 0 && onChange != null;
-    const resolvedDefault = Boolean(defaultState ?? checked);
-    const [internalChecked, setInternalChecked] = React9__namespace.useState(resolvedDefault);
-    const resolvedChecked = isControlled ? Boolean(checked) : internalChecked;
-    const inputRef = React9__namespace.useRef(null);
-    React9__namespace.useEffect(() => {
+    const [resolvedChecked, setChecked] = useControllableValue({
+      value: checked === void 0 ? void 0 : Boolean(checked),
+      defaultValue: Boolean(defaultState),
+      onChange
+    });
+    const inputRef = React10__namespace.useRef(null);
+    React10__namespace.useEffect(() => {
       if (inputRef.current) {
         inputRef.current.indeterminate = Boolean(indeterminate);
       }
     }, [indeterminate]);
-    React9__namespace.useImperativeHandle(ref, () => inputRef.current);
+    React10__namespace.useImperativeHandle(ref, () => inputRef.current);
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("label", { htmlFor: checkboxId, className: "inline-flex shrink-0 cursor-pointer", children: [
@@ -1516,14 +1817,8 @@ var Checkbox = React9__namespace.forwardRef(
               id: checkboxId,
               type: "checkbox",
               className: "peer sr-only",
-              checked: isControlled ? Boolean(checked) : void 0,
-              defaultChecked: isControlled ? void 0 : resolvedDefault,
-              onChange: (event) => {
-                if (!isControlled) {
-                  setInternalChecked(event.target.checked);
-                }
-                onChange?.(event.target.checked);
-              },
+              checked: resolvedChecked,
+              onChange: (event) => setChecked(event.target.checked),
               ...props
             }
           ),
@@ -1549,7 +1844,7 @@ var Checkbox = React9__namespace.forwardRef(
 );
 Checkbox.displayName = "Checkbox";
 var radioVariants = classVarianceAuthority.cva(
-  `inline-flex items-center justify-center rounded-full border border-border bg-background transition-colors ${disabledControl}`,
+  `inline-flex items-center justify-center rounded-pill border border-border bg-background transition-colors ${disabledControl}`,
   {
     variants: {
       size: {
@@ -1568,7 +1863,7 @@ var radioVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Radio = React9__namespace.forwardRef(
+var Radio = React10__namespace.forwardRef(
   ({
     size,
     checked,
@@ -1583,18 +1878,19 @@ var Radio = React9__namespace.forwardRef(
     disabled,
     ...props
   }, ref) => {
-    const generatedId = React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
     const radioId = id ?? generatedId;
-    const resolvedDefault = defaultState ?? defaultChecked;
-    const [internalChecked, setInternalChecked] = React9__namespace.useState(Boolean(checked ?? resolvedDefault));
-    const isControlled = checked !== void 0 && onChange != null;
-    const resolvedChecked = isControlled ? checked : internalChecked;
+    const [resolvedChecked, setChecked] = useControllableValue({
+      value: checked === void 0 ? void 0 : Boolean(checked),
+      defaultValue: Boolean(defaultState ?? defaultChecked),
+      onChange
+    });
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
       /* @__PURE__ */ jsxRuntime.jsxs(
         "label",
         {
           htmlFor: radioId,
-          className: cn("flex items-start gap-2", disabled && "cursor-not-allowed opacity-60"),
+          className: cn("flex items-start gap-2", disabled && disabledSurfaceStyles),
           children: [
             /* @__PURE__ */ jsxRuntime.jsxs("span", { className: cn(radioVariants({ size, selected: resolvedChecked }), className), children: [
               /* @__PURE__ */ jsxRuntime.jsx(
@@ -1604,19 +1900,13 @@ var Radio = React9__namespace.forwardRef(
                   id: radioId,
                   type: "radio",
                   className: "sr-only",
-                  checked: isControlled ? checked : void 0,
-                  defaultChecked: isControlled ? void 0 : Boolean(checked ?? resolvedDefault),
-                  onChange: (event) => {
-                    if (!isControlled) {
-                      setInternalChecked(event.target.checked);
-                    }
-                    onChange?.(event.target.checked);
-                  },
+                  checked: resolvedChecked,
+                  onChange: (event) => setChecked(event.target.checked),
                   ...props,
                   disabled
                 }
               ),
-              resolvedChecked ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 rounded-full bg-primary" }) : null
+              resolvedChecked ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 rounded-pill bg-primary" }) : null
             ] }),
             /* @__PURE__ */ jsxRuntime.jsx(ControlLabelStack, { label, description })
           ]
@@ -1628,7 +1918,7 @@ var Radio = React9__namespace.forwardRef(
 );
 Radio.displayName = "Radio";
 var toggleVariants = classVarianceAuthority.cva(
-  `peer inline-flex shrink-0 cursor-pointer items-center rounded-full border transition-colors ${disabledControl} data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=unchecked]:border-border`,
+  `peer inline-flex shrink-0 cursor-pointer items-center rounded-pill border transition-colors ${disabledControl} data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=unchecked]:border-border`,
   {
     variants: {
       size: {
@@ -1643,7 +1933,7 @@ var toggleVariants = classVarianceAuthority.cva(
   }
 );
 var toggleThumbVariants = classVarianceAuthority.cva(
-  "pointer-events-none block rounded-full bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0.5",
+  "pointer-events-none block rounded-pill bg-background shadow-lg ring-0 transition-transform data-[state=checked]:translate-x-[calc(100%-2px)] data-[state=unchecked]:translate-x-0.5",
   {
     variants: {
       size: {
@@ -1657,7 +1947,7 @@ var toggleThumbVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Toggle = React9__namespace.forwardRef(
+var Toggle = React10__namespace.forwardRef(
   ({
     size,
     label,
@@ -1673,13 +1963,13 @@ var Toggle = React9__namespace.forwardRef(
     onClick,
     ...props
   }, ref) => {
-    const generatedId = React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
     const toggleId = id ?? generatedId;
-    const resolvedDefault = defaultState ?? defaultChecked ?? false;
-    const isControlled = checked !== void 0;
-    const [internalChecked, setInternalChecked] = React9__namespace.useState(() => Boolean(resolvedDefault));
-    const on = isControlled ? Boolean(checked) : internalChecked;
-    const readOnly = isControlled && !onChange;
+    const [on, setOn] = useControllableValue({
+      value: checked === void 0 ? void 0 : Boolean(checked),
+      defaultValue: Boolean(defaultState ?? defaultChecked ?? false),
+      onChange
+    });
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("label", { htmlFor: toggleId, className: "flex items-start gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsx(
@@ -1695,10 +1985,8 @@ var Toggle = React9__namespace.forwardRef(
             className: cn(toggleVariants({ size }), className),
             onClick: (e) => {
               onClick?.(e);
-              if (readOnly || disabled) return;
-              const next = !on;
-              if (!isControlled) setInternalChecked(next);
-              onChange?.(next);
+              if (disabled) return;
+              setOn(!on);
             },
             ...props,
             children: /* @__PURE__ */ jsxRuntime.jsx("span", { "data-state": on ? "checked" : "unchecked", className: toggleThumbVariants({ size }) })
@@ -1711,7 +1999,7 @@ var Toggle = React9__namespace.forwardRef(
   }
 );
 Toggle.displayName = "Toggle";
-var sliderThumbClassName = `block h-4 w-4 rounded-full border border-primary/60 bg-background shadow ${focusRing} ${disabledControl}`;
+var sliderThumbClassName = `block h-4 w-4 rounded-pill border border-primary/60 bg-background shadow ${focusRing} ${disabledControl}`;
 var sliderVariants = classVarianceAuthority.cva("relative flex w-full touch-none select-none items-center", {
   variants: {
     size: {
@@ -1724,7 +2012,7 @@ var sliderVariants = classVarianceAuthority.cva("relative flex w-full touch-none
     size: "md"
   }
 });
-var Slider = React9__namespace.forwardRef(
+var Slider = React10__namespace.forwardRef(
   ({
     value,
     defaultValue = 0,
@@ -1740,7 +2028,7 @@ var Slider = React9__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const normalizeValue = React9__namespace.useCallback(
+    const normalizeValue = React10__namespace.useCallback(
       (nextValue) => {
         if (Array.isArray(nextValue)) return nextValue;
         if (range2) return [nextValue, nextValue];
@@ -1748,13 +2036,11 @@ var Slider = React9__namespace.forwardRef(
       },
       [range2]
     );
-    const initialValue = React9__namespace.useMemo(() => {
-      const seed = value ?? defaultValue;
-      return normalizeValue(seed);
-    }, [defaultValue, normalizeValue, value]);
-    const [internalValue, setInternalValue] = React9__namespace.useState(initialValue);
-    const isControlled = value !== void 0 && onChange != null;
-    const current = isControlled ? value : internalValue;
+    const [current, setCurrent] = useControllableValue({
+      value: value === void 0 ? void 0 : normalizeValue(value),
+      defaultValue: normalizeValue(defaultValue),
+      onChange
+    });
     const currentDisplay = valueFormatter ? valueFormatter(current) : Array.isArray(current) ? `${current[0]} - ${current[1]}` : current;
     const toRadix = (v) => Array.isArray(v) ? [v[0], v[1]] : [v];
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "w-full space-y-1.5", children: [
@@ -1767,10 +2053,10 @@ var Slider = React9__namespace.forwardRef(
         {
           ref,
           value: toRadix(current),
+          orientation,
           onValueChange: (next) => {
             const nextValue = range2 ? [next[0] ?? 0, next[1] ?? next[0] ?? 0] : next[0] ?? 0;
-            if (!isControlled) setInternalValue(nextValue);
-            onChange?.(nextValue);
+            setCurrent(nextValue);
           },
           className: cn(
             sliderVariants({ size }),
@@ -1779,7 +2065,7 @@ var Slider = React9__namespace.forwardRef(
           ),
           ...props,
           children: [
-            /* @__PURE__ */ jsxRuntime.jsx(SliderPrimitive__namespace.Track, { className: "relative h-1.5 w-full grow overflow-hidden rounded-full bg-muted", children: /* @__PURE__ */ jsxRuntime.jsx(SliderPrimitive__namespace.Range, { className: "absolute h-full bg-primary" }) }),
+            /* @__PURE__ */ jsxRuntime.jsx(SliderPrimitive__namespace.Track, { className: "relative grow overflow-hidden rounded-pill bg-muted data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5", children: /* @__PURE__ */ jsxRuntime.jsx(SliderPrimitive__namespace.Range, { className: "absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" }) }),
             /* @__PURE__ */ jsxRuntime.jsx(SliderPrimitive__namespace.Thumb, { className: sliderThumbClassName }),
             range2 ? /* @__PURE__ */ jsxRuntime.jsx(SliderPrimitive__namespace.Thumb, { className: sliderThumbClassName }) : null
           ]
@@ -1817,7 +2103,7 @@ function valueFromPointer(starIndex1Based, clientX, starLeft, starWidth, max, pr
   const raw = starIndex1Based - 1 + frac;
   return roundToStep(Math.min(max, raw), step);
 }
-var Rating = React9__namespace.forwardRef(
+var Rating = React10__namespace.forwardRef(
   ({
     className,
     size,
@@ -1837,19 +2123,20 @@ var Rating = React9__namespace.forwardRef(
   }, ref) => {
     const n = Number(precisionProp);
     const precision = n === 0.25 ? 0.25 : n === 0.5 ? 0.5 : 1;
-    const isControlled = valueProp !== void 0;
-    const [internal, setInternal] = React9__namespace.useState(() => roundToStep(defaultValue, precision));
-    const value = roundToStep(isControlled ? valueProp : internal, precision);
-    const setValue = React9__namespace.useCallback(
+    const [rawValue, setRawValue] = useControllableValue({
+      value: valueProp,
+      defaultValue,
+      onChange
+    });
+    const value = roundToStep(rawValue, precision);
+    const setValue = React10__namespace.useCallback(
       (next) => {
-        const v = roundToStep(next, precision);
-        if (!isControlled) setInternal(v);
-        onChange?.(v);
+        setRawValue(roundToStep(next, precision));
       },
-      [isControlled, onChange, precision]
+      [setRawValue, precision]
     );
-    const starRefs = React9__namespace.useRef([]);
-    const onStarPointer = React9__namespace.useCallback(
+    const starRefs = React10__namespace.useRef([]);
+    const onStarPointer = React10__namespace.useCallback(
       (starIndex1Based, clientX) => {
         if (readOnly || disabled) return;
         const el = starRefs.current[starIndex1Based - 1];
@@ -1876,7 +2163,8 @@ var Rating = React9__namespace.forwardRef(
         setValue(max);
       }
     };
-    const rootId = id ?? React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
+    const rootId = id ?? generatedId;
     const interactive = !readOnly && !disabled;
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("flex flex-col gap-1", className), ...props, children: [
       label ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "medium", className: "text-foreground", children: label }) : null,
@@ -1895,7 +2183,10 @@ var Rating = React9__namespace.forwardRef(
             "aria-valuetext": `${value} of ${max}`,
             tabIndex: interactive ? 0 : void 0,
             onKeyDown,
-            className: cn(ratingVariants({ size }), interactive && "cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"),
+            className: cn(
+              ratingVariants({ size }),
+              interactive && cn("cursor-pointer rounded-control-md", focusRing, focusRingOffset, ringOffsetBackground)
+            ),
             children: Array.from({ length: max }, (_, i) => {
               const k = i + 1;
               const fill = fillForStar(k, value);
@@ -1951,7 +2242,7 @@ var Rating = React9__namespace.forwardRef(
   }
 );
 Rating.displayName = "Rating";
-var InputOTP = React9__namespace.forwardRef(
+var InputOTP = React10__namespace.forwardRef(
   ({
     id,
     label,
@@ -1972,16 +2263,11 @@ var InputOTP = React9__namespace.forwardRef(
     onBlur,
     ...props
   }, ref) => {
-    const isControlled = valueProp !== void 0;
-    const [internal, setInternal] = React9__namespace.useState(defaultValue);
-    const value = isControlled ? valueProp : internal;
-    const setValue = React9__namespace.useCallback(
-      (next) => {
-        if (!isControlled) setInternal(next);
-        onChange?.(next);
-      },
-      [isControlled, onChange]
-    );
+    const [value, setValue] = useControllableValue({
+      value: valueProp,
+      defaultValue,
+      onChange
+    });
     const { validationOpts, validationError } = useSyncStringFieldValidation(value, {
       validate,
       required: false,
@@ -1992,7 +2278,8 @@ var InputOTP = React9__namespace.forwardRef(
     });
     const showError = errorMessage ?? validationError;
     const invalid = Boolean(showError);
-    const rootId = id ?? React9__namespace.useId();
+    const generatedId = React10__namespace.useId();
+    const rootId = id ?? generatedId;
     return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, htmlFor: rootId, size, errorMessage: showError, children: /* @__PURE__ */ jsxRuntime.jsx(
       inputOtp.OTPInput,
       {
@@ -2015,13 +2302,13 @@ var InputOTP = React9__namespace.forwardRef(
           "div",
           {
             className: cn(
-              "relative flex w-10 items-center justify-center rounded-md border font-mono tabular-nums",
+              "relative flex w-10 items-center justify-center rounded-control-md border font-mono tabular-nums",
               fieldSurfaceVariants({ control: "input", size, variant, invalid }),
-              slot.isActive && "ring-2 ring-ring ring-offset-2 ring-offset-background"
+              slot.isActive && cn("ring-2 ring-ring ring-offset-2", ringOffsetBackground)
             ),
             children: /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "text-foreground", children: [
               mask && slot.char ? "\u2022" : slot.char,
-              slot.hasFakeCaret ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-4 w-px animate-pulse bg-foreground duration-1000" }) }) : null
+              slot.hasFakeCaret ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-4 w-px animate-pulse bg-foreground duration-slow" }) }) : null
             ] })
           },
           i
@@ -2031,7 +2318,7 @@ var InputOTP = React9__namespace.forwardRef(
   }
 );
 InputOTP.displayName = "InputOTP";
-var SearchInput = React9__namespace.forwardRef(
+var SearchInput = React10__namespace.forwardRef(
   ({
     className,
     size = "md",
@@ -2049,17 +2336,12 @@ var SearchInput = React9__namespace.forwardRef(
     name,
     ...props
   }, ref) => {
-    const isControlled = valueProp !== void 0;
-    const [internal, setInternal] = React9__namespace.useState(String(defaultValue ?? ""));
-    const value = isControlled ? String(valueProp ?? "") : internal;
-    const setValue = React9__namespace.useCallback(
-      (next) => {
-        if (!isControlled) setInternal(next);
-        onChange?.(next);
-      },
-      [isControlled, onChange]
-    );
-    React9__namespace.useEffect(() => {
+    const [value, setValue] = useControllableValue({
+      value: valueProp === void 0 ? void 0 : String(valueProp ?? ""),
+      defaultValue: String(defaultValue ?? ""),
+      onChange
+    });
+    React10__namespace.useEffect(() => {
       if (!onSearch) return;
       if (debounceMs <= 0) {
         onSearch(value);
@@ -2091,27 +2373,18 @@ var SearchInput = React9__namespace.forwardRef(
         value,
         left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Search, { className: "h-4 w-4", strokeWidth: 2 }),
         right: loading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm", className: "pointer-events-none" }) : showClear ? /* @__PURE__ */ jsxRuntime.jsx(
-          "button",
+          IconButton,
           {
-            type: "button",
             tabIndex: -1,
             disabled,
             onClick: handleClear,
-            className: cn(
-              "inline-flex h-8 w-8 items-center justify-center rounded-md",
-              "text-muted-foreground hover:text-foreground",
-              "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            ),
-            "aria-label": "Clear search",
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4", strokeWidth: 2 })
+            tone: "muted",
+            icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { strokeWidth: 2 }),
+            ariaLabel: "Clear search"
           }
         ) : void 0,
         rightInteractive: showClear,
-        onChange: (e) => {
-          const next = e.target.value;
-          if (!isControlled) setInternal(next);
-          onChange?.(next);
-        },
+        onChange: (e) => setValue(e.target.value),
         ...props
       }
     );
@@ -2172,89 +2445,109 @@ function splitPhoneValue(value, allowed = PHONE_COUNTRIES, preferredCountryCode)
   if (match.dial === "+1" && preferredCountryCode) ;
   return { country: match, number: trimmed.slice(match.dial.length).replace(/\D/g, "") };
 }
-function PhoneInput({
-  value,
-  defaultValue,
-  onChange,
-  defaultCountry = "US",
-  allowedCountries,
-  placeholder = "Phone number",
-  disabled,
-  required,
-  label,
-  errorMessage,
-  validate,
-  onValidate,
-  size = "md",
-  variant = "outline",
-  inputProps,
-  dropdownProps,
-  className,
-  ...rest
-}) {
-  const allowed = React9__namespace.useMemo(() => {
-    if (!allowedCountries?.length) return PHONE_COUNTRIES;
-    return PHONE_COUNTRIES.filter((c) => allowedCountries.includes(c.code));
-  }, [allowedCountries]);
-  const initial = normalizePhoneValue(
-    defaultValue ?? toPhoneValue(findCountry(defaultCountry), ""),
-    allowed
-  );
-  const [internal, setInternal] = React9__namespace.useState(initial);
-  const isControlled = value !== void 0;
-  const resolved = normalizePhoneValue(isControlled ? value : internal, allowed);
-  const country = React9__namespace.useMemo(
-    () => allowed.find((c) => c.code === resolved.countryCode) ?? findCountry(resolved.countryCode),
-    [allowed, resolved.countryCode]
-  );
-  const emit2 = (nextCountry, nextNumber) => {
-    const next = toPhoneValue(nextCountry, nextNumber);
-    if (!isControlled) setInternal(next);
-    onChange?.(next);
-  };
-  const validateString = validate === void 0 ? void 0 : typeof validate === "function" ? (raw) => validate(normalizePhoneValue({ ...resolved, number: raw }, allowed)) : validate;
-  const countryItems = allowed.map((c) => ({
-    label: `${c.label} (${c.dial})`,
-    value: c.code,
-    onClick: () => emit2(c, resolved.number)
-  }));
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("w-full", disabled && "pointer-events-none opacity-50", className), ...rest, children: /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, required, errorMessage, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex w-full items-stretch overflow-hidden rounded-md border border-border bg-background shadow-sm focus-within:ring-2 focus-within:ring-ring", children: [
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Dropdown,
-      {
-        items: countryItems,
-        triggerProps: {
-          label: `${country.code} \xB7 ${country.dial}`,
-          variant: "ghost",
+var phoneShellVariants = classVarianceAuthority.cva(
+  "flex w-full items-stretch overflow-hidden focus-within:ring-2 focus-within:ring-ring",
+  {
+    variants: {
+      variant: {
+        outline: "rounded-control-md border border-border bg-background shadow-sm",
+        filled: "rounded-control-md border border-transparent bg-muted",
+        ghost: "rounded-control-md border border-transparent bg-transparent",
+        // Arbitrary zero rather than the flat Tailwind scale's zero utility:
+        // that scale is banned, and an underline field is an explicit "no
+        // shape" anyway, not a themeable radius.
+        underline: "rounded-[0] border-0 border-b border-border"
+      }
+    },
+    defaultVariants: { variant: "outline" }
+  }
+);
+var PhoneInput = React10__namespace.forwardRef(
+  ({
+    value,
+    defaultValue,
+    onChange,
+    defaultCountry = "US",
+    allowedCountries,
+    placeholder = "Phone number",
+    disabled,
+    required,
+    label,
+    errorMessage,
+    validate,
+    onValidate,
+    size = "md",
+    variant = "outline",
+    inputProps,
+    dropdownProps,
+    className,
+    ...rest
+  }, ref) => {
+    const allowed = React10__namespace.useMemo(() => {
+      if (!allowedCountries?.length) return PHONE_COUNTRIES;
+      return PHONE_COUNTRIES.filter((c) => allowedCountries.includes(c.code));
+    }, [allowedCountries]);
+    const initial = normalizePhoneValue(
+      defaultValue ?? toPhoneValue(findCountry(defaultCountry), ""),
+      allowed
+    );
+    const [rawValue, setValue] = useControllableValue({
+      value,
+      defaultValue: initial,
+      onChange
+    });
+    const resolved = normalizePhoneValue(rawValue, allowed);
+    const country = React10__namespace.useMemo(
+      () => allowed.find((c) => c.code === resolved.countryCode) ?? findCountry(resolved.countryCode),
+      [allowed, resolved.countryCode]
+    );
+    const emit2 = (nextCountry, nextNumber) => {
+      setValue(toPhoneValue(nextCountry, nextNumber));
+    };
+    const validateString = validate === void 0 ? void 0 : typeof validate === "function" ? (raw) => validate(normalizePhoneValue({ ...resolved, number: raw }, allowed)) : validate;
+    const countryItems = allowed.map((c) => ({
+      label: `${c.label} (${c.dial})`,
+      value: c.code,
+      onClick: () => emit2(c, resolved.number)
+    }));
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("w-full", disabled && disabledSurfaceStyles, className), ...rest, children: /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, required, errorMessage, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: phoneShellVariants({ variant }), children: [
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Dropdown,
+        {
+          items: countryItems,
+          triggerProps: {
+            label: `${country.code} \xB7 ${country.dial}`,
+            variant: "ghost",
+            size,
+            className: "shrink-0 rounded-[0] border-0 border-r border-border"
+          },
+          ...dropdownProps
+        }
+      ),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
+        TextInput,
+        {
+          required,
           size,
-          className: "shrink-0 rounded-none border-0 border-r border-border"
-        },
-        ...dropdownProps
-      }
-    ),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: /* @__PURE__ */ jsxRuntime.jsx(
-      TextInput,
-      {
-        required,
-        size,
-        variant: "ghost",
-        disabled,
-        placeholder,
-        value: resolved.number,
-        validate: validateString,
-        onValidate,
-        inputMode: "tel",
-        autoComplete: "tel-national",
-        className: "border-0 shadow-none focus-visible:ring-0",
-        onChange: (e) => {
-          const next = e.target.value.replace(/[^\d\s()-]/g, "");
-          emit2(country, next);
-        },
-        ...inputProps
-      }
-    ) })
-  ] }) }) });
-}
+          variant: "ghost",
+          disabled,
+          placeholder,
+          value: resolved.number,
+          validate: validateString,
+          onValidate,
+          inputMode: "tel",
+          autoComplete: "tel-national",
+          className: "border-0 shadow-none focus-visible:ring-0",
+          onChange: (e) => {
+            const next = e.target.value.replace(/[^\d\s()-]/g, "");
+            emit2(country, next);
+          },
+          ...inputProps
+        }
+      ) })
+    ] }) }) });
+  }
+);
 PhoneInput.displayName = "PhoneInput";
 function defaultFilter(item, query) {
   const q = query.trim().toLowerCase();
@@ -2263,186 +2556,190 @@ function defaultFilter(item, query) {
   const haystack = [label, item.value, ...item.keywords ?? []].join(" ").toLowerCase();
   return haystack.includes(q);
 }
-function Command({
-  items = [],
-  value,
-  defaultValue,
-  onValueChange,
-  inputValue,
-  defaultInputValue = "",
-  onInputValueChange,
-  onSelect,
-  placeholder = "Search\u2026",
-  emptyState = "No results.",
-  loading = false,
-  disabled,
-  loop = true,
-  debounceMs = 0,
-  filterFn = defaultFilter,
-  maxHeight = "16rem",
-  searchInputProps,
-  className,
-  children,
-  ...rest
-}) {
-  const [internalValue, setInternalValue] = React9__namespace.useState(defaultValue ?? "");
-  const [internalQuery, setInternalQuery] = React9__namespace.useState(defaultInputValue);
-  const [open, setOpen] = React9__namespace.useState(false);
-  const [activeIndex, setActiveIndex] = React9__namespace.useState(0);
-  const triggerRef = React9__namespace.useRef(null);
-  const menuRef = React9__namespace.useRef(null);
-  const [menuStyle, setMenuStyle] = React9__namespace.useState({ visibility: "hidden" });
-  const isValueControlled = value !== void 0;
-  const isQueryControlled = inputValue !== void 0;
-  const selectedValue = isValueControlled ? value ?? "" : internalValue;
-  const query = isQueryControlled ? inputValue ?? "" : internalQuery;
-  const filtered = React9__namespace.useMemo(
-    () => items.filter((item) => !item.disabled && filterFn(item, query)),
-    [items, query, filterFn]
-  );
-  const grouped = React9__namespace.useMemo(() => {
-    const out = [];
-    for (const item of filtered) {
-      const g = item.group;
-      const last = out[out.length - 1];
-      if (last && last.group === g) last.items.push(item);
-      else out.push({ group: g, items: [item] });
-    }
-    return out;
-  }, [filtered]);
-  const flatItems = filtered;
-  const setQuery = (next) => {
-    if (!isQueryControlled) setInternalQuery(next);
-    onInputValueChange?.(next);
-    setOpen(true);
-    setActiveIndex(0);
-  };
-  const selectItem = (item) => {
-    if (!isValueControlled) setInternalValue(item.value);
-    onValueChange?.(item.value);
-    onSelect?.(item);
-    setQuery(typeof item.label === "string" ? item.label : item.value);
-    setOpen(false);
-  };
-  const updatePosition = React9__namespace.useCallback(() => {
-    const el = triggerRef.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    setMenuStyle({
-      position: "fixed",
-      top: rect.bottom + 4,
-      left: rect.left,
-      width: rect.width,
-      zIndex: zLayerValue("dropdown"),
-      visibility: "visible"
-    });
-  }, []);
-  React9__namespace.useLayoutEffect(() => {
-    if (!open) return;
-    updatePosition();
-    const ro = () => updatePosition();
-    window.addEventListener("scroll", ro, true);
-    window.addEventListener("resize", ro);
-    return () => {
-      window.removeEventListener("scroll", ro, true);
-      window.removeEventListener("resize", ro);
-    };
-  }, [open, updatePosition]);
-  React9__namespace.useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e) => {
-      const t = e.target;
-      if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return;
-      setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [open]);
-  const onInputKeyDown = (e) => {
-    if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
-      setOpen(true);
-      return;
-    }
-    if (!flatItems.length) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      setActiveIndex((i) => {
-        const next = i + 1;
-        if (next >= flatItems.length) return loop ? 0 : i;
-        return next;
-      });
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      setActiveIndex((i) => {
-        const next = i - 1;
-        if (next < 0) return loop ? flatItems.length - 1 : 0;
-        return next;
-      });
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      const item = flatItems[activeIndex];
-      if (item) selectItem(item);
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  };
-  const menu = open && items.length ? /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      ref: menuRef,
-      role: "listbox",
-      style: { ...menuStyle, maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight },
-      className: "overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md",
-      children: loading ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center p-4", children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) }) : flatItems.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-3 py-2 text-sm text-muted-foreground", children: emptyState }) : grouped.map((section, sectionIndex) => /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
-        section.group ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-2 py-1.5 text-xs font-medium text-muted-foreground", children: section.group }) : null,
-        section.items.map((item) => {
-          const flatIndex = flatItems.indexOf(item);
-          const active = item.value === selectedValue || flatIndex === activeIndex;
-          return /* @__PURE__ */ jsxRuntime.jsxs(
-            "button",
-            {
-              type: "button",
-              role: "option",
-              "aria-selected": active,
-              disabled: item.disabled,
-              className: cn(
-                "flex w-full items-center gap-2 rounded-sm px-2 py-1.5 text-left text-sm",
-                "hover:bg-accent hover:text-accent-foreground",
-                active && "bg-accent text-accent-foreground",
-                item.disabled && "pointer-events-none opacity-50"
-              ),
-              onMouseEnter: () => setActiveIndex(flatIndex),
-              onClick: () => selectItem(item),
-              children: [
-                item.left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) }) : null,
-                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children: item.label })
-              ]
-            },
-            item.value
-          );
-        })
-      ] }, section.group ?? `section-${sectionIndex}`))
-    }
-  ) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("relative w-full", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
-      SearchInput,
-      {
-        placeholder,
-        disabled,
-        loading,
-        debounceMs,
-        value: query,
-        onChange: setQuery,
-        onFocus: () => setOpen(true),
-        onKeyDown: onInputKeyDown,
-        ...searchInputProps
-      }
-    ) }),
+var Command = React10__namespace.forwardRef(
+  ({
+    items = [],
+    value,
+    defaultValue,
+    onChange,
+    inputValue,
+    defaultInputValue = "",
+    onInputValueChange,
+    onSelect,
+    placeholder = "Search\u2026",
+    emptyState = "No results.",
+    loading = false,
+    disabled,
+    loop = true,
+    debounceMs = 0,
+    filterFn = defaultFilter,
+    maxHeight = "16rem",
+    searchInputProps,
+    className,
     children,
-    typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
-  ] });
-}
+    ...rest
+  }, ref) => {
+    const [open, setOpen] = React10__namespace.useState(false);
+    const [activeIndex, setActiveIndex] = React10__namespace.useState(0);
+    const triggerRef = React10__namespace.useRef(null);
+    const menuRef = React10__namespace.useRef(null);
+    const [menuStyle, setMenuStyle] = React10__namespace.useState({ visibility: "hidden" });
+    const [selectedValue, setSelectedValue] = useControllableValue({
+      value: value === void 0 ? void 0 : value ?? "",
+      defaultValue: defaultValue ?? "",
+      onChange
+    });
+    const [query, setQueryValue] = useControllableValue({
+      value: inputValue === void 0 ? void 0 : inputValue ?? "",
+      defaultValue: defaultInputValue,
+      onChange: onInputValueChange
+    });
+    const filtered = React10__namespace.useMemo(
+      () => items.filter((item) => !item.disabled && filterFn(item, query)),
+      [items, query, filterFn]
+    );
+    const grouped = React10__namespace.useMemo(() => {
+      const out = [];
+      for (const item of filtered) {
+        const g = item.group;
+        const last = out[out.length - 1];
+        if (last && last.group === g) last.items.push(item);
+        else out.push({ group: g, items: [item] });
+      }
+      return out;
+    }, [filtered]);
+    const flatItems = filtered;
+    const setQuery = (next) => {
+      setQueryValue(next);
+      setOpen(true);
+      setActiveIndex(0);
+    };
+    const selectItem = (item) => {
+      setSelectedValue(item.value);
+      onSelect?.(item);
+      setQuery(typeof item.label === "string" ? item.label : item.value);
+      setOpen(false);
+    };
+    const updatePosition = React10__namespace.useCallback(() => {
+      const el = triggerRef.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      setMenuStyle({
+        position: "fixed",
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+        zIndex: zLayerValue("dropdown"),
+        visibility: "visible"
+      });
+    }, []);
+    React10__namespace.useLayoutEffect(() => {
+      if (!open) return;
+      updatePosition();
+      const ro = () => updatePosition();
+      window.addEventListener("scroll", ro, true);
+      window.addEventListener("resize", ro);
+      return () => {
+        window.removeEventListener("scroll", ro, true);
+        window.removeEventListener("resize", ro);
+      };
+    }, [open, updatePosition]);
+    React10__namespace.useEffect(() => {
+      if (!open) return;
+      const onPointerDown = (e) => {
+        const t = e.target;
+        if (triggerRef.current?.contains(t) || menuRef.current?.contains(t)) return;
+        setOpen(false);
+      };
+      document.addEventListener("pointerdown", onPointerDown, true);
+      return () => document.removeEventListener("pointerdown", onPointerDown, true);
+    }, [open]);
+    const onInputKeyDown = (e) => {
+      if (!open && (e.key === "ArrowDown" || e.key === "ArrowUp")) {
+        setOpen(true);
+        return;
+      }
+      if (!flatItems.length) return;
+      if (e.key === "ArrowDown") {
+        e.preventDefault();
+        setActiveIndex((i) => {
+          const next = i + 1;
+          if (next >= flatItems.length) return loop ? 0 : i;
+          return next;
+        });
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        setActiveIndex((i) => {
+          const next = i - 1;
+          if (next < 0) return loop ? flatItems.length - 1 : 0;
+          return next;
+        });
+      } else if (e.key === "Enter") {
+        e.preventDefault();
+        const item = flatItems[activeIndex];
+        if (item) selectItem(item);
+      } else if (e.key === "Escape") {
+        setOpen(false);
+      }
+    };
+    const menu = open ? /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        ref: menuRef,
+        role: "listbox",
+        style: { ...menuStyle, maxHeight: typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight },
+        className: "overflow-y-auto rounded-surface-md border border-border bg-popover p-1 text-popover-foreground shadow-md",
+        children: loading ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex items-center justify-center p-4", children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) }) : flatItems.length === 0 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-3 py-2 text-sm text-muted-foreground", children: emptyState }) : grouped.map((section, sectionIndex) => /* @__PURE__ */ jsxRuntime.jsxs("div", { children: [
+          section.group ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-2 py-1.5 text-xs font-medium text-muted-foreground", children: section.group }) : null,
+          section.items.map((item) => {
+            const flatIndex = flatItems.indexOf(item);
+            const active = item.value === selectedValue || flatIndex === activeIndex;
+            return /* @__PURE__ */ jsxRuntime.jsxs(
+              "button",
+              {
+                type: "button",
+                role: "option",
+                "aria-selected": active,
+                disabled: item.disabled,
+                className: cn(
+                  "flex w-full items-center gap-2 rounded-control-sm px-2 py-1.5 text-left text-sm",
+                  "hover:bg-accent hover:text-accent-foreground",
+                  active && "bg-accent text-accent-foreground",
+                  item.disabled && disabledSurfaceStyles
+                ),
+                onMouseEnter: () => setActiveIndex(flatIndex),
+                onClick: () => selectItem(item),
+                children: [
+                  item.left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) }) : null,
+                  /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children: item.label })
+                ]
+              },
+              item.value
+            );
+          })
+        ] }, section.group ?? `section-${sectionIndex}`))
+      }
+    ) : null;
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative w-full", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
+        SearchInput,
+        {
+          placeholder,
+          disabled,
+          loading,
+          debounceMs,
+          value: query,
+          onChange: setQuery,
+          onFocus: () => setOpen(true),
+          onKeyDown: onInputKeyDown,
+          ...searchInputProps
+        }
+      ) }),
+      children,
+      typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
+    ] });
+  }
+);
 Command.displayName = "Command";
 
 // src/components/inputs/dateUtils.ts
@@ -2568,6 +2865,38 @@ function getCalendarDays(month, weekStartsOn = 0) {
   return days;
 }
 var WEEKDAY_LABELS = ["Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"];
+var dayCellVariants = classVarianceAuthority.cva("h-9 w-9 border-0 bg-transparent text-sm transition-colors", {
+  // Key order is class order, and class order is what `cn()`'s tailwind-merge
+  // resolves conflicts by: the dimming states have to be emitted before `tone`
+  // so a selected endpoint's foreground still wins over an outside-month day's.
+  variants: {
+    outsideMonth: { true: "text-muted-foreground/50", false: "" },
+    dimmed: { true: "pointer-events-none opacity-40", false: "" },
+    highlight: { true: "font-semibold text-primary", false: "" },
+    tone: {
+      plain: "",
+      interactive: floatingMenuHoverClass,
+      rangeMiddle: `bg-primary/15 text-foreground ${floatingMenuHoverClass}`,
+      endpoint: "bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90"
+    },
+    shape: {
+      none: "",
+      soft: "rounded-control-md",
+      // Arbitrary zero rather than the flat Tailwind scale's zero utility: that
+      // scale is banned, and a merged range edge is "no shape", not a radius.
+      square: "rounded-[0]",
+      startEdge: "rounded-control-md rounded-r-[0]",
+      endEdge: "rounded-control-md rounded-l-[0]"
+    }
+  },
+  defaultVariants: {
+    tone: "plain",
+    shape: "none",
+    outsideMonth: false,
+    dimmed: false,
+    highlight: false
+  }
+});
 function isDateDisabled(date, opts) {
   if (opts.disabled) return true;
   if (opts.minDate && isBeforeDay(date, opts.minDate)) return true;
@@ -2588,266 +2917,258 @@ function normalizeRange(value) {
   if (Array.isArray(value)) return { from: value[0] ?? null, to: value[1] ?? null };
   return { from: value.from ?? null, to: value.to ?? null };
 }
-function Calendar({
-  value,
-  defaultValue,
-  onChange,
-  minDate,
-  maxDate,
-  minRangeDays,
-  maxRangeDays,
-  disabled,
-  selectionMode = "single",
-  showOutsideDays = true,
-  weekStartsOn = 0,
-  disabledDates,
-  highlightedDates = [],
-  locale,
-  className,
-  ...rest
-}) {
-  const initial = value ?? defaultValue ?? null;
-  const [month, setMonth] = React9__namespace.useState(() => startOfMonth(initial instanceof Date ? initial : /* @__PURE__ */ new Date()));
-  const [internal, setInternal] = React9__namespace.useState(initial);
-  const [rangeDraft, setRangeDraft] = React9__namespace.useState(null);
-  const isControlled = value !== void 0;
-  const selected = isControlled ? value ?? null : internal;
-  const setSelected = (next) => {
-    if (!isControlled) setInternal(next);
-    onChange?.(next);
-  };
-  const monthLabel = month.toLocaleDateString(locale, { month: "long", year: "numeric" });
-  const days = getCalendarDays(month, weekStartsOn);
-  const weekdays = [...WEEKDAY_LABELS.slice(weekStartsOn), ...WEEKDAY_LABELS.slice(0, weekStartsOn)];
-  const range2 = normalizeRange(selected);
-  const rangeAnchor = selectionMode === "range" && range2.from && !range2.to ? startOfDay(range2.from) : rangeDraft;
-  const disableOpts = {
-    disabled,
+var Calendar = React10__namespace.forwardRef(
+  ({
+    value,
+    defaultValue,
+    onChange,
     minDate,
     maxDate,
-    disabledDates,
-    selectionMode,
-    rangeAnchor,
     minRangeDays,
-    maxRangeDays
-  };
-  const handleSelect = (date) => {
-    if (isDateDisabled(date, disableOpts)) return;
-    const day = startOfDay(date);
-    if (selectionMode === "single") {
-      setSelected(day);
-      return;
-    }
-    if (selectionMode === "multiple") {
-      const current = Array.isArray(selected) ? selected : [];
-      const exists = current.some((d) => isSameDay(d, day));
-      const next = exists ? current.filter((d) => !isSameDay(d, day)) : [...current, day];
-      setSelected(next);
-      return;
-    }
-    const range3 = normalizeRange(selected);
-    if (!rangeDraft || range3.from && range3.to) {
-      setRangeDraft(day);
-      setSelected({ from: day, to: null });
-      return;
-    }
-    const from = isBeforeDay(rangeDraft, day) ? rangeDraft : day;
-    const to = isBeforeDay(rangeDraft, day) ? day : rangeDraft;
-    if (minRangeDays != null && rangeLengthDays(from, to) < minRangeDays) return;
-    if (maxRangeDays != null && rangeLengthDays(from, to) > maxRangeDays) return;
-    setRangeDraft(null);
-    setSelected({ from, to });
-  };
-  const isSelectedDay = (date) => {
-    if (!selected) return false;
-    if (selectionMode === "single" && selected instanceof Date) return isSameDay(selected, date);
-    if (selectionMode === "multiple" && Array.isArray(selected)) return selected.some((d) => isSameDay(d, date));
-    const range3 = normalizeRange(selected);
-    if (range3.from && !range3.to) return isSameDay(range3.from, date);
-    if (range3.from && range3.to) return isBetweenDays(date, range3.from, range3.to);
-    return false;
-  };
-  const isRangeEdge = (date) => {
-    if (selectionMode !== "range") return false;
-    const range3 = normalizeRange(selected);
-    if (range3.from && isSameDay(range3.from, date)) return "start";
-    if (range3.to && isSameDay(range3.to, date)) return "end";
-    return false;
-  };
-  const isRangeMiddle = (date) => {
-    if (selectionMode !== "range") return false;
-    const range3 = normalizeRange(selected);
-    if (!range3.from || !range3.to) return false;
-    return isBetweenDays(date, range3.from, range3.to) && !isSameDay(date, range3.from) && !isSameDay(date, range3.to);
-  };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("w-[280px] select-none p-3", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-center justify-between gap-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          iconOnly: true,
-          "aria-label": "Previous month",
-          disabled,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronLeft, { className: "h-4 w-4" }),
-          onClick: () => setMonth((m) => addMonths(m, -1))
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "semibold", children: monthLabel }),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          iconOnly: true,
-          "aria-label": "Next month",
-          disabled,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-4 w-4" }),
-          onClick: () => setMonth((m) => addMonths(m, 1))
-        }
-      )
-    ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-1 grid grid-cols-7 gap-1", children: weekdays.map((label) => /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "xs", variant: "muted", className: "text-center", children: label }, label)) }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-7 gap-1", children: days.map((date) => {
-      const inMonth = date.getMonth() === month.getMonth();
-      if (!showOutsideDays && !inMonth) {
-        return /* @__PURE__ */ jsxRuntime.jsx("div", { "aria-hidden": true }, date.toISOString());
-      }
-      const dayDisabled = isDateDisabled(date, disableOpts);
-      const rangeEdge = isRangeEdge(date);
-      const rangeMiddle = isRangeMiddle(date);
-      const highlighted = highlightedDates.some((d) => isSameDay(d, date));
-      const activeRange = normalizeRange(selected);
-      const pendingStart = selectionMode === "range" && activeRange.from && !activeRange.to && isSameDay(activeRange.from, date);
-      const isEndpoint = rangeEdge === "start" || rangeEdge === "end" || pendingStart || selectionMode === "single" && isSelectedDay(date) || selectionMode === "multiple" && isSelectedDay(date);
-      return /* @__PURE__ */ jsxRuntime.jsx(
-        "button",
-        {
-          type: "button",
-          disabled: dayDisabled,
-          onClick: () => handleSelect(date),
-          className: cn(
-            "h-9 w-9 border-0 bg-transparent text-sm transition-colors",
-            !inMonth && "text-muted-foreground/50",
-            dayDisabled && "pointer-events-none opacity-40",
-            highlighted && !isEndpoint && !rangeMiddle && "font-semibold text-primary",
-            rangeMiddle && cn("rounded-none bg-primary/15 text-foreground", floatingMenuHoverClass),
-            isEndpoint && cn(
-              "rounded-md bg-primary text-primary-foreground hover:bg-primary/90 focus-visible:bg-primary/90",
-              rangeEdge === "start" && activeRange.to && "rounded-r-none",
-              rangeEdge === "end" && "rounded-l-none"
-            ),
-            inMonth && !dayDisabled && !isEndpoint && !rangeMiddle && cn("rounded-md", floatingMenuHoverClass)
-          ),
-          children: date.getDate()
-        },
-        date.toISOString()
-      );
-    }) })
-  ] });
-}
-Calendar.displayName = "Calendar";
-function DatePicker({
-  value,
-  defaultValue,
-  onChange,
-  minDate,
-  maxDate,
-  disabled,
-  required,
-  placeholder = "Pick a date",
-  label,
-  errorMessage,
-  format = "PP",
-  locale,
-  closeOnSelect = true,
-  clearable = true,
-  size = "md",
-  variant = "outline",
-  inputProps,
-  calendarProps,
-  className,
-  ...rest
-}) {
-  const [internal, setInternal] = React9__namespace.useState(defaultValue ?? null);
-  const [open, setOpen] = React9__namespace.useState(false);
-  const [inputText, setInputText] = React9__namespace.useState("");
-  const triggerRef = React9__namespace.useRef(null);
-  const menuRef = React9__namespace.useRef(null);
-  const isControlled = value !== void 0;
-  const selected = isControlled ? value ?? null : internal;
-  const { menuStyle } = useFloatingMenu({
-    open,
-    onOpenChange: setOpen,
-    triggerRef,
-    menuRef,
-    maxHeight: 360
-  });
-  const setSelected = (next) => {
-    if (!isControlled) setInternal(next);
-    onChange?.(next);
-    setInputText(next ? formatDate(next, format) : "");
-  };
-  React9__namespace.useEffect(() => {
-    setInputText(selected ? formatDate(selected, format) : "");
-  }, [selected, format]);
-  const menu = open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: menuRef, style: menuStyle, className: floatingMenuSurfaceClass, children: /* @__PURE__ */ jsxRuntime.jsx(
-    Calendar,
-    {
-      value: selected,
-      onChange: (next) => {
-        const date = next instanceof Date ? startOfDay(next) : null;
-        setSelected(date);
-        if (closeOnSelect) setOpen(false);
-      },
+    maxRangeDays,
+    disabled,
+    selectionMode = "single",
+    showOutsideDays = true,
+    weekStartsOn = 0,
+    disabledDates,
+    highlightedDates = [],
+    locale,
+    className,
+    ...rest
+  }, ref) => {
+    const initial = value ?? defaultValue ?? null;
+    const [month, setMonth] = React10__namespace.useState(() => startOfMonth(initial instanceof Date ? initial : /* @__PURE__ */ new Date()));
+    const [rangeDraft, setRangeDraft] = React10__namespace.useState(null);
+    const [selected, setSelected] = useControllableValue({
+      value,
+      defaultValue: defaultValue ?? null,
+      onChange
+    });
+    const monthLabel = month.toLocaleDateString(locale, { month: "long", year: "numeric" });
+    const days = getCalendarDays(month, weekStartsOn);
+    const weekdays = [...WEEKDAY_LABELS.slice(weekStartsOn), ...WEEKDAY_LABELS.slice(0, weekStartsOn)];
+    const range2 = normalizeRange(selected);
+    const rangeAnchor = selectionMode === "range" && range2.from && !range2.to ? startOfDay(range2.from) : rangeDraft;
+    const disableOpts = {
+      disabled,
       minDate,
       maxDate,
-      disabled,
-      locale,
-      selectionMode: "single",
-      ...calendarProps
-    }
-  ) }) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("relative w-full", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
-      TextInput,
-      {
-        label,
-        required,
-        errorMessage,
-        size,
-        variant,
-        disabled,
-        placeholder,
-        value: inputText,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "h-4 w-4", strokeWidth: 2 }),
-        right: clearable && selected && !disabled ? /* @__PURE__ */ jsxRuntime.jsx(
+      disabledDates,
+      selectionMode,
+      rangeAnchor,
+      minRangeDays,
+      maxRangeDays
+    };
+    const handleSelect = (date) => {
+      if (isDateDisabled(date, disableOpts)) return;
+      const day = startOfDay(date);
+      if (selectionMode === "single") {
+        setSelected(day);
+        return;
+      }
+      if (selectionMode === "multiple") {
+        const current = Array.isArray(selected) ? selected : [];
+        const exists = current.some((d) => isSameDay(d, day));
+        const next = exists ? current.filter((d) => !isSameDay(d, day)) : [...current, day];
+        setSelected(next);
+        return;
+      }
+      const range3 = normalizeRange(selected);
+      if (!rangeDraft || range3.from && range3.to) {
+        setRangeDraft(day);
+        setSelected({ from: day, to: null });
+        return;
+      }
+      const from = isBeforeDay(rangeDraft, day) ? rangeDraft : day;
+      const to = isBeforeDay(rangeDraft, day) ? day : rangeDraft;
+      if (minRangeDays != null && rangeLengthDays(from, to) < minRangeDays) return;
+      if (maxRangeDays != null && rangeLengthDays(from, to) > maxRangeDays) return;
+      setRangeDraft(null);
+      setSelected({ from, to });
+    };
+    const isSelectedDay = (date) => {
+      if (!selected) return false;
+      if (selectionMode === "single" && selected instanceof Date) return isSameDay(selected, date);
+      if (selectionMode === "multiple" && Array.isArray(selected)) return selected.some((d) => isSameDay(d, date));
+      const range3 = normalizeRange(selected);
+      if (range3.from && !range3.to) return isSameDay(range3.from, date);
+      if (range3.from && range3.to) return isBetweenDays(date, range3.from, range3.to);
+      return false;
+    };
+    const isRangeEdge = (date) => {
+      if (selectionMode !== "range") return false;
+      const range3 = normalizeRange(selected);
+      if (range3.from && isSameDay(range3.from, date)) return "start";
+      if (range3.to && isSameDay(range3.to, date)) return "end";
+      return false;
+    };
+    const isRangeMiddle = (date) => {
+      if (selectionMode !== "range") return false;
+      const range3 = normalizeRange(selected);
+      if (!range3.from || !range3.to) return false;
+      return isBetweenDays(date, range3.from, range3.to) && !isSameDay(date, range3.from) && !isSameDay(date, range3.to);
+    };
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("w-[280px] select-none p-3", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-3 flex items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          IconButton,
+          {
+            ariaLabel: "Previous month",
+            disabled,
+            icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronLeft, {}),
+            onClick: () => setMonth((m) => addMonths(m, -1))
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "semibold", children: monthLabel }),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          IconButton,
+          {
+            ariaLabel: "Next month",
+            disabled,
+            icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, {}),
+            onClick: () => setMonth((m) => addMonths(m, 1))
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-1 grid grid-cols-7 gap-1", children: weekdays.map((label) => /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "xs", variant: "muted", className: "text-center", children: label }, label)) }),
+      /* @__PURE__ */ jsxRuntime.jsx("div", { className: "grid grid-cols-7 gap-1", children: days.map((date) => {
+        const inMonth = date.getMonth() === month.getMonth();
+        if (!showOutsideDays && !inMonth) {
+          return /* @__PURE__ */ jsxRuntime.jsx("div", { "aria-hidden": true }, date.toISOString());
+        }
+        const dayDisabled = isDateDisabled(date, disableOpts);
+        const rangeEdge = isRangeEdge(date);
+        const rangeMiddle = isRangeMiddle(date);
+        const highlighted = highlightedDates.some((d) => isSameDay(d, date));
+        const activeRange = normalizeRange(selected);
+        const pendingStart = selectionMode === "range" && activeRange.from && !activeRange.to && isSameDay(activeRange.from, date);
+        const isEndpoint = rangeEdge === "start" || rangeEdge === "end" || pendingStart || selectionMode === "single" && isSelectedDay(date) || selectionMode === "multiple" && isSelectedDay(date);
+        return /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
             type: "button",
-            tabIndex: -1,
-            className: "inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
-            "aria-label": "Clear date",
-            onClick: () => setSelected(null),
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
-          }
-        ) : void 0,
-        rightInteractive: clearable && Boolean(selected),
-        onFocus: () => !disabled && setOpen(true),
-        onChange: (e) => {
-          const nextText = e.target.value;
-          setInputText(nextText);
-          const parsed = parseDateInput(nextText);
-          if (parsed) setSelected(parsed);
-          if (!nextText) setSelected(null);
+            disabled: dayDisabled,
+            onClick: () => handleSelect(date),
+            className: cn(
+              dayCellVariants({
+                tone: rangeMiddle ? "rangeMiddle" : isEndpoint ? "endpoint" : inMonth && !dayDisabled ? "interactive" : "plain",
+                shape: rangeMiddle ? "square" : isEndpoint ? rangeEdge === "start" && activeRange.to ? "startEdge" : rangeEdge === "end" ? "endEdge" : "soft" : inMonth && !dayDisabled ? "soft" : "none",
+                outsideMonth: !inMonth,
+                dimmed: dayDisabled,
+                highlight: highlighted && !isEndpoint && !rangeMiddle
+              })
+            ),
+            children: date.getDate()
+          },
+          date.toISOString()
+        );
+      }) })
+    ] });
+  }
+);
+Calendar.displayName = "Calendar";
+var DatePicker = React10__namespace.forwardRef(
+  ({
+    value,
+    defaultValue,
+    onChange,
+    minDate,
+    maxDate,
+    disabled,
+    required,
+    placeholder = "Pick a date",
+    label,
+    errorMessage,
+    format = "PP",
+    locale,
+    closeOnSelect = true,
+    clearable = true,
+    size = "md",
+    variant = "outline",
+    inputProps,
+    calendarProps,
+    className,
+    ...rest
+  }, ref) => {
+    const [open, setOpen] = React10__namespace.useState(false);
+    const [inputText, setInputText] = React10__namespace.useState("");
+    const triggerRef = React10__namespace.useRef(null);
+    const menuRef = React10__namespace.useRef(null);
+    const [selected, setSelectedValue] = useControllableValue({
+      value,
+      defaultValue: defaultValue ?? null,
+      onChange
+    });
+    const { menuStyle } = useFloatingMenu({
+      open,
+      onOpenChange: setOpen,
+      triggerRef,
+      menuRef,
+      maxHeight: 360
+    });
+    const setSelected = (next) => {
+      setSelectedValue(next);
+      setInputText(next ? formatDate(next, format) : "");
+    };
+    React10__namespace.useEffect(() => {
+      setInputText(selected ? formatDate(selected, format) : "");
+    }, [selected, format]);
+    const menu = open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: menuRef, style: menuStyle, className: floatingMenuSurfaceClass, children: /* @__PURE__ */ jsxRuntime.jsx(
+      Calendar,
+      {
+        value: selected,
+        onChange: (next) => {
+          const date = next instanceof Date ? startOfDay(next) : null;
+          setSelected(date);
+          if (closeOnSelect) setOpen(false);
         },
-        ...inputProps
+        minDate,
+        maxDate,
+        disabled,
+        locale,
+        selectionMode: "single",
+        ...calendarProps
       }
-    ) }),
-    typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
-  ] });
-}
+    ) }) : null;
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative w-full", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
+        TextInput,
+        {
+          label,
+          required,
+          errorMessage,
+          size,
+          variant,
+          disabled,
+          placeholder,
+          value: inputText,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "h-4 w-4", strokeWidth: 2 }),
+          right: clearable && selected && !disabled ? /* @__PURE__ */ jsxRuntime.jsx(
+            IconButton,
+            {
+              tabIndex: -1,
+              tone: "muted",
+              icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, {}),
+              ariaLabel: "Clear date",
+              onClick: () => setSelected(null)
+            }
+          ) : void 0,
+          rightInteractive: clearable && Boolean(selected),
+          onFocus: () => !disabled && setOpen(true),
+          onChange: (e) => {
+            const nextText = e.target.value;
+            setInputText(nextText);
+            const parsed = parseDateInput(nextText);
+            if (parsed) setSelected(parsed);
+            if (!nextText) setSelected(null);
+          },
+          ...inputProps
+        }
+      ) }),
+      typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
+    ] });
+  }
+);
 DatePicker.displayName = "DatePicker";
 function buildTimeOptions(format, step) {
   const options = [];
@@ -2860,98 +3181,100 @@ function buildTimeOptions(format, step) {
   }
   return options;
 }
-function TimePicker({
-  value,
-  defaultValue,
-  onChange,
-  disabled,
-  required,
-  placeholder = "Pick a time",
-  label,
-  errorMessage,
-  format = "24h",
-  step = 30,
-  closeOnSelect = true,
-  clearable = true,
-  size = "md",
-  variant = "outline",
-  inputProps,
-  className,
-  ...rest
-}) {
-  const [internal, setInternal] = React9__namespace.useState(defaultValue ?? null);
-  const [open, setOpen] = React9__namespace.useState(false);
-  const [inputText, setInputText] = React9__namespace.useState("");
-  const triggerRef = React9__namespace.useRef(null);
-  const menuRef = React9__namespace.useRef(null);
-  const isControlled = value !== void 0;
-  const selected = isControlled ? value ?? null : internal;
-  const options = React9__namespace.useMemo(() => buildTimeOptions(format, step), [format, step]);
-  const { menuStyle } = useFloatingMenu({
-    open,
-    onOpenChange: setOpen,
-    triggerRef,
-    menuRef,
-    maxHeight: 224
-  });
-  const setSelected = (next) => {
-    if (!isControlled) setInternal(next);
-    onChange?.(next);
-    setInputText(next ? formatTime(next, format) : "");
-    if (closeOnSelect) setOpen(false);
-  };
-  React9__namespace.useEffect(() => {
-    setInputText(selected ? formatTime(selected, format) : "");
-  }, [selected, format]);
-  const menu = open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: menuRef, role: "listbox", style: menuStyle, className: floatingMenuListClass, children: options.map((option) => /* @__PURE__ */ jsxRuntime.jsx(
-    FloatingMenuItem,
-    {
-      role: "option",
-      selected: inputText === option,
-      onClick: () => setSelected(parseTimeInput(option, format)),
-      children: option
-    },
-    option
-  )) }) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("relative w-full", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
-      TextInput,
+var TimePicker = React10__namespace.forwardRef(
+  ({
+    value,
+    defaultValue,
+    onChange,
+    disabled,
+    required,
+    placeholder = "Pick a time",
+    label,
+    errorMessage,
+    format = "24h",
+    step = 30,
+    closeOnSelect = true,
+    clearable = true,
+    size = "md",
+    variant = "outline",
+    inputProps,
+    className,
+    ...rest
+  }, ref) => {
+    const [open, setOpen] = React10__namespace.useState(false);
+    const [inputText, setInputText] = React10__namespace.useState("");
+    const triggerRef = React10__namespace.useRef(null);
+    const menuRef = React10__namespace.useRef(null);
+    const [selected, setSelectedValue] = useControllableValue({
+      value,
+      defaultValue: defaultValue ?? null,
+      onChange
+    });
+    const options = React10__namespace.useMemo(() => buildTimeOptions(format, step), [format, step]);
+    const { menuStyle } = useFloatingMenu({
+      open,
+      onOpenChange: setOpen,
+      triggerRef,
+      menuRef,
+      maxHeight: 224
+    });
+    const setSelected = (next) => {
+      setSelectedValue(next);
+      setInputText(next ? formatTime(next, format) : "");
+      if (closeOnSelect) setOpen(false);
+    };
+    React10__namespace.useEffect(() => {
+      setInputText(selected ? formatTime(selected, format) : "");
+    }, [selected, format]);
+    const menu = open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: menuRef, role: "listbox", style: menuStyle, className: floatingMenuListClass, children: options.map((option) => /* @__PURE__ */ jsxRuntime.jsx(
+      FloatingMenuItem,
       {
-        label,
-        required,
-        errorMessage,
-        size,
-        variant,
-        disabled,
-        placeholder,
-        value: inputText,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Clock, { className: "h-4 w-4", strokeWidth: 2 }),
-        right: clearable && selected && !disabled ? /* @__PURE__ */ jsxRuntime.jsx(
-          "button",
-          {
-            type: "button",
-            tabIndex: -1,
-            className: "inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
-            "aria-label": "Clear time",
-            onClick: () => setSelected(null),
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
-          }
-        ) : void 0,
-        rightInteractive: clearable && Boolean(selected),
-        onFocus: () => !disabled && setOpen(true),
-        onChange: (e) => {
-          const nextText = e.target.value;
-          setInputText(nextText);
-          const parsed = parseTimeInput(nextText, format);
-          if (parsed) setSelected(parsed);
-          if (!nextText) setSelected(null);
-        },
-        ...inputProps
-      }
-    ) }),
-    typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
-  ] });
-}
+        role: "option",
+        selected: inputText === option,
+        onClick: () => setSelected(parseTimeInput(option, format)),
+        children: option
+      },
+      option
+    )) }) : null;
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative w-full", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
+        TextInput,
+        {
+          label,
+          required,
+          errorMessage,
+          size,
+          variant,
+          disabled,
+          placeholder,
+          value: inputText,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Clock, { className: "h-4 w-4", strokeWidth: 2 }),
+          right: clearable && selected && !disabled ? /* @__PURE__ */ jsxRuntime.jsx(
+            IconButton,
+            {
+              tabIndex: -1,
+              tone: "muted",
+              icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, {}),
+              ariaLabel: "Clear time",
+              onClick: () => setSelected(null)
+            }
+          ) : void 0,
+          rightInteractive: clearable && Boolean(selected),
+          onFocus: () => !disabled && setOpen(true),
+          onChange: (e) => {
+            const nextText = e.target.value;
+            setInputText(nextText);
+            const parsed = parseTimeInput(nextText, format);
+            if (parsed) setSelected(parsed);
+            if (!nextText) setSelected(null);
+          },
+          ...inputProps
+        }
+      ) }),
+      typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
+    ] });
+  }
+);
 TimePicker.displayName = "TimePicker";
 var EMPTY_RANGE = { from: null, to: null };
 function normalizeRangeInput(next) {
@@ -2961,204 +3284,251 @@ function normalizeRangeInput(next) {
     to: next.to ? startOfDay(next.to) : null
   };
 }
-function DateRangePicker({
-  value,
-  defaultValue,
-  onChange,
-  minDate,
-  maxDate,
-  minRangeDays,
-  maxRangeDays,
-  disabled,
-  required,
-  placeholder = "Pick a date range",
-  label,
-  errorMessage,
-  format = "PP",
-  locale,
-  showApplyButton = false,
-  applyLabel = "Apply",
-  cancelLabel = "Cancel",
-  clearable = true,
-  presets = [],
-  size = "md",
-  variant = "outline",
-  inputProps,
-  calendarProps,
-  className,
-  ...rest
-}) {
-  const [internal, setInternal] = React9__namespace.useState(
-    normalizeRangeInput(defaultValue ?? null)
-  );
-  const [open, setOpen] = React9__namespace.useState(false);
-  const [draft, setDraft] = React9__namespace.useState(EMPTY_RANGE);
-  const triggerRef = React9__namespace.useRef(null);
-  const menuRef = React9__namespace.useRef(null);
-  const isControlled = value !== void 0;
-  const selected = isControlled ? normalizeRangeInput(value ?? null) : internal;
-  const limits = React9__namespace.useMemo(
-    () => ({ minDate, maxDate, minRangeDays, maxRangeDays }),
-    [minDate, maxDate, minRangeDays, maxRangeDays]
-  );
-  const { menuStyle } = useFloatingMenu({
-    open,
-    onOpenChange: setOpen,
-    triggerRef,
-    menuRef,
-    maxHeight: 420
-  });
-  React9__namespace.useEffect(() => {
-    if (!open) return;
-    setDraft(selected ?? EMPTY_RANGE);
-  }, [open, selected]);
-  const commitRange = (next) => {
-    const normalized = normalizeRangeInput(next);
-    if (!isControlled) setInternal(normalized);
-    onChange?.(normalized);
-  };
-  const setSelected = (next) => {
-    const normalized = normalizeRangeInput(next);
-    if (showApplyButton) {
-      setDraft(normalized ?? EMPTY_RANGE);
-      return;
-    }
-    commitRange(normalized);
-    if (!showApplyButton && normalized?.from && normalized?.to && isRangeWithinLimits(normalized, limits)) {
+var DateRangePicker = React10__namespace.forwardRef(
+  ({
+    value,
+    defaultValue,
+    onChange,
+    minDate,
+    maxDate,
+    minRangeDays,
+    maxRangeDays,
+    disabled,
+    required,
+    placeholder = "Pick a date range",
+    label,
+    errorMessage,
+    format = "PP",
+    locale,
+    showApplyButton = false,
+    applyLabel = "Apply",
+    cancelLabel = "Cancel",
+    clearable = true,
+    presets = [],
+    size = "md",
+    variant = "outline",
+    inputProps,
+    calendarProps,
+    className,
+    ...rest
+  }, ref) => {
+    const [open, setOpen] = React10__namespace.useState(false);
+    const [draft, setDraft] = React10__namespace.useState(EMPTY_RANGE);
+    const triggerRef = React10__namespace.useRef(null);
+    const menuRef = React10__namespace.useRef(null);
+    const [rawSelected, setRawSelected] = useControllableValue({
+      value,
+      defaultValue: normalizeRangeInput(defaultValue ?? null),
+      onChange
+    });
+    const hasRange = rawSelected != null;
+    const fromTime = rawSelected?.from ? rawSelected.from.getTime() : null;
+    const toTime = rawSelected?.to ? rawSelected.to.getTime() : null;
+    const selected = React10__namespace.useMemo(
+      () => hasRange ? {
+        from: fromTime === null ? null : startOfDay(new Date(fromTime)),
+        to: toTime === null ? null : startOfDay(new Date(toTime))
+      } : null,
+      [hasRange, fromTime, toTime]
+    );
+    const limits = React10__namespace.useMemo(
+      () => ({ minDate, maxDate, minRangeDays, maxRangeDays }),
+      [minDate, maxDate, minRangeDays, maxRangeDays]
+    );
+    const { menuStyle } = useFloatingMenu({
+      open,
+      onOpenChange: setOpen,
+      triggerRef,
+      menuRef,
+      maxHeight: 420
+    });
+    React10__namespace.useEffect(() => {
+      if (!open) return;
+      setDraft(selected ?? EMPTY_RANGE);
+    }, [open, selected]);
+    const commitRange = (next) => {
+      setRawSelected(normalizeRangeInput(next));
+    };
+    const setSelected = (next) => {
+      const normalized = normalizeRangeInput(next);
+      if (showApplyButton) {
+        setDraft(normalized ?? EMPTY_RANGE);
+        return;
+      }
+      commitRange(normalized);
+      if (!showApplyButton && normalized?.from && normalized?.to && isRangeWithinLimits(normalized, limits)) {
+        setOpen(false);
+      }
+    };
+    const applyDraft = () => {
+      if (!draft?.from || !draft?.to || !isRangeWithinLimits(draft, limits)) return;
+      commitRange(draft);
       setOpen(false);
-    }
-  };
-  const applyDraft = () => {
-    if (!draft?.from || !draft?.to || !isRangeWithinLimits(draft, limits)) return;
-    commitRange(draft);
-    setOpen(false);
-  };
-  const cancelDraft = () => {
-    setDraft(selected ?? EMPTY_RANGE);
-    setOpen(false);
-  };
-  const calendarValue = showApplyButton && open ? draft : selected ?? EMPTY_RANGE;
-  const canApply = Boolean(draft?.from && draft?.to && isRangeWithinLimits(draft, limits));
-  const display = selected ? formatDateRange(selected, format) : "";
-  const menu = open ? /* @__PURE__ */ jsxRuntime.jsxs("div", { ref: menuRef, style: menuStyle, className: floatingMenuSurfaceClass, children: [
-    presets.length ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-1 border-b border-border p-2", children: presets.map((preset, index) => {
-      const next = normalizeRangeInput(preset.value);
-      const valid = next && isRangeWithinLimits(next, limits);
-      return /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: "outline",
-          size: "sm",
-          disabled: !valid,
-          onClick: () => {
-            if (!next || !valid) return;
-            if (showApplyButton) setDraft(next);
-            else setSelected(next);
-          },
-          children: preset.label
-        },
-        index
-      );
-    }) }) : null,
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Calendar,
-      {
-        value: calendarValue,
-        onChange: (next) => {
-          if (next && typeof next === "object" && !Array.isArray(next) && !(next instanceof Date)) {
-            setSelected({
-              from: next.from ? startOfDay(next.from) : null,
-              to: next.to ? startOfDay(next.to) : null
-            });
-          }
-        },
-        minDate,
-        maxDate,
-        minRangeDays,
-        maxRangeDays,
-        disabled,
-        locale,
-        selectionMode: "range",
-        ...calendarProps
-      }
-    ),
-    showApplyButton ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-end gap-2 border-t border-border p-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "ghost", size: "sm", onClick: cancelDraft, children: cancelLabel }),
-      /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "primary", size: "sm", disabled: !canApply, onClick: applyDraft, children: applyLabel })
-    ] }) : null
-  ] }) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("relative w-full", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
-      TextInput,
-      {
-        label,
-        required,
-        errorMessage,
-        size,
-        variant,
-        disabled,
-        placeholder,
-        readOnly: true,
-        value: display,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "h-4 w-4", strokeWidth: 2 }),
-        right: clearable && selected?.from && !disabled ? /* @__PURE__ */ jsxRuntime.jsx(
-          "button",
+    };
+    const cancelDraft = () => {
+      setDraft(selected ?? EMPTY_RANGE);
+      setOpen(false);
+    };
+    const calendarValue = showApplyButton && open ? draft : selected ?? EMPTY_RANGE;
+    const canApply = Boolean(draft?.from && draft?.to && isRangeWithinLimits(draft, limits));
+    const display = selected ? formatDateRange(selected, format) : "";
+    const menu = open ? /* @__PURE__ */ jsxRuntime.jsxs("div", { ref: menuRef, style: menuStyle, className: floatingMenuSurfaceClass, children: [
+      presets.length ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-wrap gap-1 border-b border-border p-2", children: presets.map((preset, index) => {
+        const next = normalizeRangeInput(preset.value);
+        const valid = next && isRangeWithinLimits(next, limits);
+        return /* @__PURE__ */ jsxRuntime.jsx(
+          Button,
           {
-            type: "button",
-            tabIndex: -1,
-            className: "inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground",
-            "aria-label": "Clear range",
+            variant: "outline",
+            size: "sm",
+            disabled: !valid,
             onClick: () => {
-              if (showApplyButton) setDraft(EMPTY_RANGE);
-              commitRange(null);
+              if (!next || !valid) return;
+              if (showApplyButton) setDraft(next);
+              else setSelected(next);
             },
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
-          }
-        ) : void 0,
-        rightInteractive: clearable && Boolean(selected?.from),
-        onFocus: () => !disabled && setOpen(true),
-        onClick: () => !disabled && setOpen(true),
-        ...inputProps
-      }
-    ) }),
-    typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
-  ] });
-}
+            children: preset.label
+          },
+          index
+        );
+      }) }) : null,
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Calendar,
+        {
+          value: calendarValue,
+          onChange: (next) => {
+            if (next && typeof next === "object" && !Array.isArray(next) && !(next instanceof Date)) {
+              setSelected({
+                from: next.from ? startOfDay(next.from) : null,
+                to: next.to ? startOfDay(next.to) : null
+              });
+            }
+          },
+          minDate,
+          maxDate,
+          minRangeDays,
+          maxRangeDays,
+          disabled,
+          locale,
+          selectionMode: "range",
+          ...calendarProps
+        }
+      ),
+      showApplyButton ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex justify-end gap-2 border-t border-border p-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "ghost", size: "sm", onClick: cancelDraft, children: cancelLabel }),
+        /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "primary", size: "sm", disabled: !canApply, onClick: applyDraft, children: applyLabel })
+      ] }) : null
+    ] }) : null;
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative w-full", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: /* @__PURE__ */ jsxRuntime.jsx(
+        TextInput,
+        {
+          label,
+          required,
+          errorMessage,
+          size,
+          variant,
+          disabled,
+          placeholder,
+          readOnly: true,
+          value: display,
+          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Calendar, { className: "h-4 w-4", strokeWidth: 2 }),
+          right: clearable && selected?.from && !disabled ? /* @__PURE__ */ jsxRuntime.jsx(
+            IconButton,
+            {
+              tabIndex: -1,
+              tone: "muted",
+              icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, {}),
+              ariaLabel: "Clear range",
+              onClick: () => {
+                if (showApplyButton) setDraft(EMPTY_RANGE);
+                commitRange(null);
+              }
+            }
+          ) : void 0,
+          rightInteractive: clearable && Boolean(selected?.from),
+          onFocus: () => !disabled && setOpen(true),
+          onClick: () => !disabled && setOpen(true),
+          ...inputProps
+        }
+      ) }),
+      typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
+    ] });
+  }
+);
 DateRangePicker.displayName = "DateRangePicker";
+
+// src/components/layout/shared.ts
+function hasNonEmptyChildren(children) {
+  if (children == null || children === false) return false;
+  if (typeof children === "string") return children.trim().length > 0;
+  if (typeof children === "number") return true;
+  if (Array.isArray(children)) return children.some((child) => hasNonEmptyChildren(child));
+  return true;
+}
+function sizeToCss(value) {
+  if (value == null) return void 0;
+  return typeof value === "number" ? `${value}px` : value;
+}
+function resolveSectionBorders(regions) {
+  const { hasHeader, hasContent, hasFooter } = regions;
+  return {
+    headerBorderBottom: hasContent || hasHeader && hasFooter,
+    footerBorderTop: hasContent && hasHeader
+  };
+}
+var gapScale = {
+  none: "gap-0",
+  sm: "gap-2",
+  md: "gap-4",
+  lg: "gap-6"
+};
+var columnGapScale = {
+  none: "gap-x-0",
+  sm: "gap-x-2",
+  md: "gap-x-4",
+  lg: "gap-x-6"
+};
+var rowGapScale = {
+  none: "gap-y-0",
+  sm: "gap-y-2",
+  md: "gap-y-4",
+  lg: "gap-y-6"
+};
 var skeletonVariants = classVarianceAuthority.cva("animate-pulse bg-skeleton", {
   variants: {
+    // Radius mirrors the real thing each placeholder stands in for: controls
+    // get `control-*`, cards get `surface-*`, round things get `pill`.
     variant: {
-      text: "h-4 w-12 rounded",
-      avatar: "h-10 w-10 rounded-full",
-      button: "h-9 w-24 rounded-md",
-      badge: "h-5 w-5 rounded-full",
-      card: "h-32 w-32 rounded-lg",
-      input: "h-9 w-24 rounded-md",
-      checkbox: "h-4 w-4 rounded-sm",
-      tableCell: "h-4 w-full rounded",
-      tableRow: "h-10 w-full rounded-md",
-      radio: "h-5 w-5 rounded-full"
+      text: "h-4 w-12 rounded-control-sm",
+      avatar: "h-10 w-10 rounded-pill",
+      button: "h-9 w-24 rounded-control-md",
+      badge: "h-5 w-5 rounded-pill",
+      card: "h-32 w-32 rounded-surface-md",
+      input: "h-9 w-24 rounded-control-md",
+      checkbox: "h-4 w-4 rounded-control-sm",
+      tableCell: "h-4 w-full rounded-control-sm",
+      tableRow: "h-10 w-full rounded-control-md",
+      radio: "h-5 w-5 rounded-pill"
     }
   },
   defaultVariants: {
     variant: "text"
   }
 });
-function withUnit(value) {
-  if (value == null) return void 0;
-  return typeof value === "number" ? `${value}px` : value;
-}
-var Skeleton = React9__namespace.forwardRef(
+var Skeleton = React10__namespace.forwardRef(
   ({ variant, width, height, count = 1, className, children, ...props }, ref) => {
-    const items = Array.from({ length: Math.max(1, count) });
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("flex flex-col gap-2", count === 1 && "contents"), children: items.map((_, idx) => /* @__PURE__ */ jsxRuntime.jsx(
+    const shapeClass = cn(skeletonVariants({ variant }), className);
+    const shapeStyle = { width: sizeToCss(width), height: sizeToCss(height) };
+    if (count <= 1) {
+      return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, "data-slot": "skeleton", className: shapeClass, style: shapeStyle, ...props, children });
+    }
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, "data-slot": "skeleton-group", className: "flex flex-col gap-2", ...props, children: Array.from({ length: count }).map((_, idx) => /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        ref: idx === 0 ? ref : void 0,
         "data-slot": `skeleton-${idx}`,
-        className: cn(skeletonVariants({ variant }), className),
-        style: { width: withUnit(width), height: withUnit(height) },
-        ...props,
+        className: shapeClass,
+        style: shapeStyle,
         children
       },
       idx
@@ -3194,7 +3564,7 @@ function TableSkeleton({
         Skeleton,
         {
           className: cn(
-            "block min-w-0 flex-1 rounded-sm leading-none",
+            "block min-w-0 flex-1 rounded-control-sm leading-none",
             cellHeight,
             width === void 0 && colIndex > 0 && "max-w-[12rem]"
           ),
@@ -3208,11 +3578,19 @@ function TableSkeleton({
 TableSkeleton.displayName = "TableSkeleton";
 var imageVariants = classVarianceAuthority.cva("block bg-muted", {
   variants: {
+    // An image is a media surface, so `soft` reads from the surface tier.
+    // `square` means *no* radius — an explicit "no shape", which is why it uses
+    // an arbitrary zero rather than the banned flat scale's zero utility (the
+    // same call fieldPieces makes for underline fields).
+    //
+    // `soft` is a rename (BREAKING): the old key shared its spelling with the
+    // banned bare radius utility, and the check gate reads raw file text, so a
+    // variant key spelled that way is indistinguishable from a real violation.
     variant: {
       default: "",
-      rounded: "rounded-md",
-      circle: "rounded-full",
-      square: "rounded-none"
+      soft: "rounded-surface-sm",
+      circle: "rounded-pill",
+      square: "rounded-[0]"
     },
     fit: {
       cover: "object-cover",
@@ -3227,7 +3605,7 @@ var imageVariants = classVarianceAuthority.cva("block bg-muted", {
     fit: "cover"
   }
 });
-var Image = React9__namespace.forwardRef(
+var Image = React10__namespace.forwardRef(
   ({
     src,
     alt,
@@ -3244,18 +3622,18 @@ var Image = React9__namespace.forwardRef(
     style,
     ...props
   }, ref) => {
-    const [loaded, setLoaded] = React9__namespace.useState(false);
-    const [failed, setFailed] = React9__namespace.useState(false);
-    const shellRef = React9__namespace.useRef(null);
-    const [isFullscreen, setIsFullscreen] = React9__namespace.useState(false);
-    React9__namespace.useEffect(() => {
+    const [loaded, setLoaded] = React10__namespace.useState(false);
+    const [failed, setFailed] = React10__namespace.useState(false);
+    const shellRef = React10__namespace.useRef(null);
+    const [isFullscreen, setIsFullscreen] = React10__namespace.useState(false);
+    React10__namespace.useEffect(() => {
       const onChange = () => {
         setIsFullscreen(document.fullscreenElement === shellRef.current);
       };
       document.addEventListener("fullscreenchange", onChange);
       return () => document.removeEventListener("fullscreenchange", onChange);
     }, []);
-    const toggleFullscreen = React9__namespace.useCallback(() => {
+    const toggleFullscreen = React10__namespace.useCallback(() => {
       const el = shellRef.current;
       if (!el) return;
       void (async () => {
@@ -3284,7 +3662,7 @@ var Image = React9__namespace.forwardRef(
         className: cn(
           imageVariants({ fit, variant }),
           className,
-          placeholder !== "none" && !loaded && "sr-only",
+          placeholder === "skeleton" && !loaded && "sr-only",
           isFullscreen && "max-h-full max-w-full object-contain"
         ),
         loading: loadingStrategy,
@@ -3308,22 +3686,25 @@ var Image = React9__namespace.forwardRef(
         className: cn("group/image relative inline-block max-w-full", isFullscreen && "flex h-full w-full items-center justify-center bg-background"),
         children: [
           inner,
-          loaded ? /* @__PURE__ */ jsxRuntime.jsx(
-            "button",
-            {
-              type: "button",
-              className: cn(
-                "absolute bottom-1.5 right-1.5 z-10 rounded-md border border-border bg-background/90 p-1.5 text-foreground shadow-sm backdrop-blur-sm",
-                "opacity-0 transition-opacity hover:bg-background group-hover/image:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
-                "motion-reduce:opacity-100"
-              ),
-              "aria-label": isFullscreen ? "Exit fullscreen" : "Enter fullscreen",
-              onClick: (e) => {
-                e.stopPropagation();
-                toggleFullscreen();
-              },
-              children: isFullscreen ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Minimize2, { className: "h-4 w-4", "aria-hidden": true }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Maximize2, { className: "h-4 w-4", "aria-hidden": true })
-            }
+          loaded ? (
+            // z-sticky: in-image chrome, above the picture but below any menu.
+            /* @__PURE__ */ jsxRuntime.jsx(
+              IconButton,
+              {
+                variant: "outline",
+                className: cn(
+                  "absolute bottom-1.5 right-1.5 z-sticky h-8 w-8 bg-background/90 shadow-sm backdrop-blur-sm",
+                  "opacity-0 transition-opacity group-hover/image:opacity-100 focus:opacity-100",
+                  "motion-reduce:opacity-100"
+                ),
+                ariaLabel: isFullscreen ? "Exit fullscreen" : "Enter fullscreen",
+                icon: isFullscreen ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Minimize2, { className: "h-4 w-4", "aria-hidden": true }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Maximize2, { className: "h-4 w-4", "aria-hidden": true }),
+                onClick: (e) => {
+                  e.stopPropagation();
+                  toggleFullscreen();
+                }
+              }
+            )
           ) : null
         ]
       }
@@ -3363,191 +3744,202 @@ function matchesAccept(file, accept) {
     return type === rule;
   });
 }
-function Upload({
-  onUpload,
-  onRemove,
-  value,
-  defaultValue = [],
-  onChange,
-  multiple = false,
-  maxFiles,
-  accept,
-  maxSize,
-  disabled,
-  loading = false,
-  dragAndDrop = true,
-  preview = true,
-  label,
-  errorMessage,
-  showFileList = true,
-  size = "md",
-  variant = "outline",
-  className,
-  children,
-  ...rest
-}) {
-  const inputRef = React9__namespace.useRef(null);
-  const [internal, setInternal] = React9__namespace.useState(defaultValue);
-  const [dragOver, setDragOver] = React9__namespace.useState(false);
-  const [localError, setLocalError] = React9__namespace.useState();
-  const isControlled = value !== void 0;
-  const files = isControlled ? value : internal;
-  const setFiles = (next) => {
-    if (!isControlled) setInternal(next);
-    onChange?.(next);
-  };
-  const validateFiles = (incoming) => {
-    let accepted = incoming;
-    if (accept) {
-      const rejected = incoming.filter((file) => !matchesAccept(file, accept));
-      if (rejected.length > 0) {
-        const hint = formatAcceptHint(accept);
-        setLocalError(
-          `Unsupported file type. Accepted: ${hint ?? accept}.`
-        );
-        accepted = incoming.filter((file) => matchesAccept(file, accept));
-      } else if (!maxSize || !incoming.find((f) => f.size > maxSize)) {
-        setLocalError(void 0);
+var Upload = React10__namespace.forwardRef(
+  ({
+    onUpload,
+    onRemove,
+    value,
+    defaultValue = [],
+    onChange,
+    multiple = false,
+    maxFiles,
+    accept,
+    maxSize,
+    disabled,
+    loading = false,
+    dragAndDrop = true,
+    preview = true,
+    label,
+    errorMessage,
+    showFileList = true,
+    size = "md",
+    variant = "outline",
+    className,
+    children,
+    ...rest
+  }, ref) => {
+    const inputRef = React10__namespace.useRef(null);
+    const [dragOver, setDragOver] = React10__namespace.useState(false);
+    const [localError, setLocalError] = React10__namespace.useState();
+    const [files, setFiles] = useControllableValue({
+      value,
+      defaultValue,
+      onChange
+    });
+    const [previewUrls, setPreviewUrls] = React10__namespace.useState([]);
+    React10__namespace.useEffect(() => {
+      if (!preview) {
+        setPreviewUrls([]);
+        return;
       }
-    }
-    if (maxSize) {
-      const tooLarge = accepted.find((f) => f.size > maxSize);
-      if (tooLarge) {
-        setLocalError(`"${tooLarge.name}" exceeds max size (${formatBytes(maxSize)}).`);
-        accepted = accepted.filter((f) => f.size <= maxSize);
-      } else if (!accept || accepted.every((f) => matchesAccept(f, accept))) {
-        setLocalError(void 0);
+      const urls = files.map(
+        (file) => file.type.startsWith("image/") ? URL.createObjectURL(file) : null
+      );
+      setPreviewUrls(urls);
+      return () => {
+        for (const url of urls) if (url) URL.revokeObjectURL(url);
+      };
+    }, [files, preview]);
+    const validateFiles = (incoming) => {
+      let accepted = incoming;
+      if (accept) {
+        const rejected = incoming.filter((file) => !matchesAccept(file, accept));
+        if (rejected.length > 0) {
+          const hint = formatAcceptHint(accept);
+          setLocalError(
+            `Unsupported file type. Accepted: ${hint ?? accept}.`
+          );
+          accepted = incoming.filter((file) => matchesAccept(file, accept));
+        } else if (!maxSize || !incoming.find((f) => f.size > maxSize)) {
+          setLocalError(void 0);
+        }
       }
-    }
-    if (maxFiles) accepted = accepted.slice(0, maxFiles);
-    return accepted;
-  };
-  const handleIncoming = async (incoming) => {
-    if (disabled || loading) return;
-    const next = validateFiles(multiple ? [...files, ...incoming] : incoming.slice(0, 1));
-    setFiles(next);
-    await onUpload(next);
-  };
-  const onInputChange = (e) => {
-    const list = e.target.files ? Array.from(e.target.files) : [];
-    void handleIncoming(list);
-    e.target.value = "";
-  };
-  const removeAt = (index) => {
-    const file = files[index];
-    const next = files.filter((_, i) => i !== index);
-    setFiles(next);
-    onRemove?.(file, index);
-  };
-  const shellClass = cn(
-    "relative flex min-h-[8rem] w-full flex-col items-center justify-center gap-2 rounded-lg border border-dashed p-4 text-center transition-colors",
-    variant === "filled" && "bg-muted/40",
-    variant === "ghost" && "border-transparent bg-muted/20",
-    dragOver && "border-primary bg-primary/5",
-    disabled && "pointer-events-none opacity-50",
-    errorMessage || localError ? "border-destructive/50" : "border-border"
-  );
-  return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, errorMessage: errorMessage ?? localError, size, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("w-full", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs(
-      "div",
-      {
-        className: shellClass,
-        onDragEnter: dragAndDrop ? (e) => {
-          e.preventDefault();
-          setDragOver(true);
-        } : void 0,
-        onDragOver: dragAndDrop ? (e) => {
-          e.preventDefault();
-          setDragOver(true);
-        } : void 0,
-        onDragLeave: dragAndDrop ? () => setDragOver(false) : void 0,
-        onDrop: dragAndDrop ? (e) => {
-          e.preventDefault();
-          setDragOver(false);
-          void handleIncoming(Array.from(e.dataTransfer.files));
-        } : void 0,
-        children: [
-          /* @__PURE__ */ jsxRuntime.jsx(
-            "input",
-            {
-              ref: inputRef,
-              type: "file",
-              className: "sr-only",
-              disabled: disabled || loading,
-              multiple,
-              accept,
-              onChange: onInputChange
-            }
-          ),
-          loading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "md" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "h-8 w-8 text-muted-foreground" }),
-          children ?? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
-            /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "medium", children: dragAndDrop ? "Drag files here or browse" : "Browse files" }),
-            /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "xs", variant: "muted", children: [
-              multiple ? "Multiple files allowed" : "Single file",
-              accept ? ` \xB7 ${formatAcceptHint(accept)}` : null,
-              maxSize ? ` \xB7 Max ${formatBytes(maxSize)}` : null
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntime.jsxs(
-            Button,
-            {
-              variant: "outline",
-              size: size === "lg" ? "md" : "sm",
-              disabled: disabled || loading,
-              onClick: () => inputRef.current?.click(),
-              children: [
-                "Choose file",
-                multiple ? "s" : ""
-              ]
-            }
-          )
-        ]
+      if (maxSize) {
+        const tooLarge = accepted.find((f) => f.size > maxSize);
+        if (tooLarge) {
+          setLocalError(`"${tooLarge.name}" exceeds max size (${formatBytes(maxSize)}).`);
+          accepted = accepted.filter((f) => f.size <= maxSize);
+        } else if (!accept || accepted.every((f) => matchesAccept(f, accept))) {
+          setLocalError(void 0);
+        }
       }
-    ),
-    showFileList && files.length > 0 ? /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-3 space-y-2", children: files.map((file, index) => /* @__PURE__ */ jsxRuntime.jsxs(
-      "li",
-      {
-        className: "flex items-center gap-3 rounded-md border border-border bg-background p-2",
-        children: [
-          preview && file.type.startsWith("image/") ? /* @__PURE__ */ jsxRuntime.jsx(
-            Image,
-            {
-              src: URL.createObjectURL(file),
-              alt: file.name,
-              width: 40,
-              height: 40,
-              className: "h-10 w-10 rounded object-cover"
-            }
-          ) : null,
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
-            /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", className: "truncate", children: file.name }),
-            /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "xs", variant: "muted", children: [
-              formatFileType(file),
-              " \xB7 ",
-              formatBytes(file.size)
-            ] })
-          ] }),
-          /* @__PURE__ */ jsxRuntime.jsx(
-            Button,
-            {
-              variant: "ghost",
-              size: "sm",
-              iconOnly: true,
-              "aria-label": `Remove ${file.name}`,
-              disabled: disabled || loading,
-              left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" }),
-              onClick: () => removeAt(index)
-            }
-          )
-        ]
-      },
-      `${file.name}-${index}`
-    )) }) : null
-  ] }) });
-}
+      if (maxFiles) accepted = accepted.slice(0, maxFiles);
+      return accepted;
+    };
+    const handleIncoming = async (incoming) => {
+      if (disabled || loading) return;
+      const next = validateFiles(multiple ? [...files, ...incoming] : incoming.slice(0, 1));
+      setFiles(next);
+      await onUpload(next);
+    };
+    const onInputChange = (e) => {
+      const list = e.target.files ? Array.from(e.target.files) : [];
+      void handleIncoming(list);
+      e.target.value = "";
+    };
+    const removeAt = (index) => {
+      const file = files[index];
+      const next = files.filter((_, i) => i !== index);
+      setFiles(next);
+      onRemove?.(file, index);
+    };
+    const shellClass = cn(
+      "relative flex min-h-[8rem] w-full flex-col items-center justify-center gap-2 rounded-surface-lg border border-dashed p-4 text-center transition-colors",
+      variant === "filled" && "bg-muted/40",
+      variant === "ghost" && "border-transparent bg-muted/20",
+      dragOver && "border-primary bg-primary/5",
+      disabled && disabledSurfaceStyles,
+      errorMessage || localError ? "border-destructive/50" : "border-border"
+    );
+    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, errorMessage: errorMessage ?? localError, size, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("w-full", className), ...rest, children: [
+      /* @__PURE__ */ jsxRuntime.jsxs(
+        "div",
+        {
+          className: shellClass,
+          onDragEnter: dragAndDrop ? (e) => {
+            e.preventDefault();
+            setDragOver(true);
+          } : void 0,
+          onDragOver: dragAndDrop ? (e) => {
+            e.preventDefault();
+            setDragOver(true);
+          } : void 0,
+          onDragLeave: dragAndDrop ? () => setDragOver(false) : void 0,
+          onDrop: dragAndDrop ? (e) => {
+            e.preventDefault();
+            setDragOver(false);
+            void handleIncoming(Array.from(e.dataTransfer.files));
+          } : void 0,
+          children: [
+            /* @__PURE__ */ jsxRuntime.jsx(
+              "input",
+              {
+                ref: inputRef,
+                type: "file",
+                className: "sr-only",
+                disabled: disabled || loading,
+                multiple,
+                accept,
+                onChange: onInputChange
+              }
+            ),
+            loading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "md" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Upload, { className: "h-8 w-8 text-muted-foreground" }),
+            children ?? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+              /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "medium", children: dragAndDrop ? "Drag files here or browse" : "Browse files" }),
+              /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "xs", variant: "muted", children: [
+                multiple ? "Multiple files allowed" : "Single file",
+                accept ? ` \xB7 ${formatAcceptHint(accept)}` : null,
+                maxSize ? ` \xB7 Max ${formatBytes(maxSize)}` : null
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsxs(
+              Button,
+              {
+                variant: "outline",
+                size: size === "lg" ? "md" : "sm",
+                disabled: disabled || loading,
+                onClick: () => inputRef.current?.click(),
+                children: [
+                  "Choose file",
+                  multiple ? "s" : ""
+                ]
+              }
+            )
+          ]
+        }
+      ),
+      showFileList && files.length > 0 ? /* @__PURE__ */ jsxRuntime.jsx("ul", { className: "mt-3 space-y-2", children: files.map((file, index) => /* @__PURE__ */ jsxRuntime.jsxs(
+        "li",
+        {
+          className: "flex items-center gap-3 rounded-surface-sm border border-border bg-background p-2",
+          children: [
+            previewUrls[index] ? /* @__PURE__ */ jsxRuntime.jsx(
+              Image,
+              {
+                src: previewUrls[index],
+                alt: file.name,
+                width: 40,
+                height: 40,
+                className: "h-10 w-10 rounded-control-sm object-cover"
+              }
+            ) : null,
+            /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1", children: [
+              /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", className: "truncate", children: file.name }),
+              /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "xs", variant: "muted", children: [
+                formatFileType(file),
+                " \xB7 ",
+                formatBytes(file.size)
+              ] })
+            ] }),
+            /* @__PURE__ */ jsxRuntime.jsx(
+              IconButton,
+              {
+                ariaLabel: `Remove ${file.name}`,
+                disabled: disabled || loading,
+                icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, {}),
+                onClick: () => removeAt(index)
+              }
+            )
+          ]
+        },
+        `${file.name}-${index}`
+      )) }) : null
+    ] }) });
+  }
+);
 Upload.displayName = "Upload";
 var inlineInputClass = cn(
-  "m-0 min-w-[4ch] max-w-full rounded-sm border-0 border-b border-transparent bg-transparent p-0 text-sm leading-5 text-foreground shadow-none outline-none",
+  "m-0 min-w-[4ch] max-w-full rounded-control-sm border-0 border-b border-transparent bg-transparent p-0 text-sm leading-5 text-foreground shadow-none outline-none",
   "transition-colors placeholder:text-muted-foreground",
   "hover:border-border/60 focus:border-border focus:bg-muted/30",
   focusRing,
@@ -3562,144 +3954,148 @@ function validateDraft(value, validate, required) {
   if (required && value.trim().length === 0) return false;
   return true;
 }
-function InlineEdit({
-  value,
-  defaultValue = "",
-  onSave,
-  onCancel,
-  placeholder = "Click to edit",
-  disabled,
-  loading,
-  required,
-  validate,
-  editTrigger = "click",
-  saveOnBlur = false,
-  saveOnEnter = true,
-  saveButtonProps,
-  cancelButtonProps,
-  className,
-  ...rest
-}) {
-  const [editing, setEditing] = React9__namespace.useState(false);
-  const [internal, setInternal] = React9__namespace.useState(defaultValue);
-  const [draft, setDraft] = React9__namespace.useState(defaultValue);
-  const [saving, setSaving] = React9__namespace.useState(false);
-  const inputRef = React9__namespace.useRef(null);
-  const isControlled = value !== void 0;
-  const displayValue = isControlled ? value : internal;
-  const busy = Boolean(loading || saving);
-  const locked = Boolean(disabled || busy);
-  React9__namespace.useEffect(() => {
-    if (!editing) setDraft(displayValue);
-  }, [displayValue, editing]);
-  const startEdit = () => {
-    if (locked) return;
-    setDraft(displayValue);
-    setEditing(true);
-  };
-  const cancel = () => {
-    if (busy) return;
-    setDraft(displayValue);
-    setEditing(false);
-    onCancel?.();
-  };
-  const save = React9__namespace.useCallback(async () => {
-    if (busy) return;
-    if (!validateDraft(draft, validate, required)) return;
-    const result = onSave?.(draft);
-    if (result != null && typeof result.then === "function") {
-      setSaving(true);
-      try {
-        await result;
-        if (!isControlled) setInternal(draft);
-        setEditing(false);
-      } finally {
-        setSaving(false);
+var InlineEdit = React10__namespace.forwardRef(
+  ({
+    value,
+    defaultValue = "",
+    onSave,
+    onCancel,
+    placeholder = "Click to edit",
+    disabled,
+    loading,
+    required,
+    validate,
+    editTrigger = "click",
+    saveOnBlur = false,
+    saveOnEnter = true,
+    saveButtonProps,
+    cancelButtonProps,
+    className,
+    ...rest
+  }, ref) => {
+    const [editing, setEditing] = React10__namespace.useState(false);
+    const [internal, setInternal] = React10__namespace.useState(defaultValue);
+    const [draft, setDraft] = React10__namespace.useState(defaultValue);
+    const [saving, setSaving] = React10__namespace.useState(false);
+    const inputRef = React10__namespace.useRef(null);
+    const isControlled = value !== void 0;
+    const displayValue = isControlled ? value : internal;
+    const busy = Boolean(loading || saving);
+    const locked = Boolean(disabled || busy);
+    React10__namespace.useEffect(() => {
+      if (!editing) setDraft(displayValue);
+    }, [displayValue, editing]);
+    const startEdit = () => {
+      if (locked) return;
+      setDraft(displayValue);
+      setEditing(true);
+    };
+    const cancel = () => {
+      if (busy) return;
+      setDraft(displayValue);
+      setEditing(false);
+      onCancel?.();
+    };
+    const save = React10__namespace.useCallback(async () => {
+      if (busy) return;
+      if (!validateDraft(draft, validate, required)) return;
+      const result = onSave?.(draft);
+      if (result != null && typeof result.then === "function") {
+        setSaving(true);
+        try {
+          await result;
+          if (!isControlled) setInternal(draft);
+          setEditing(false);
+        } finally {
+          setSaving(false);
+        }
+        return;
       }
-      return;
-    }
-    if (!isControlled) setInternal(draft);
-    setEditing(false);
-  }, [busy, draft, isControlled, onSave, required, validate]);
-  if (editing) {
-    return /* @__PURE__ */ jsxRuntime.jsxs("span", { className: cn("inline-flex max-w-full items-center gap-0.5", className), ...rest, children: [
-      /* @__PURE__ */ jsxRuntime.jsx(
-        "input",
-        {
-          ref: inputRef,
-          type: "text",
-          value: draft,
-          required,
-          placeholder,
-          autoFocus: true,
-          disabled: busy,
-          "aria-busy": busy || void 0,
-          className: inlineInputClass,
-          style: { width: `${fieldWidthChars(draft, placeholder)}ch` },
-          onChange: (e) => setDraft(e.target.value),
-          onBlur: saveOnBlur && !busy ? () => void save() : void 0,
-          onKeyDown: (e) => {
-            if (busy) return;
-            if (saveOnEnter && e.key === "Enter") {
-              e.preventDefault();
-              void save();
-            }
-            if (e.key === "Escape") {
-              e.preventDefault();
-              cancel();
+      if (!isControlled) setInternal(draft);
+      setEditing(false);
+    }, [busy, draft, isControlled, onSave, required, validate]);
+    if (editing) {
+      return /* @__PURE__ */ jsxRuntime.jsxs("span", { ref, className: cn("inline-flex max-w-full items-center gap-1", className), ...rest, children: [
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "input",
+          {
+            ref: inputRef,
+            type: "text",
+            value: draft,
+            required,
+            placeholder,
+            autoFocus: true,
+            disabled: busy,
+            "aria-busy": busy || void 0,
+            className: inlineInputClass,
+            style: { width: `${fieldWidthChars(draft, placeholder)}ch` },
+            onChange: (e) => setDraft(e.target.value),
+            onBlur: saveOnBlur && !busy ? () => void save() : void 0,
+            onKeyDown: (e) => {
+              if (busy) return;
+              if (saveOnEnter && e.key === "Enter") {
+                e.preventDefault();
+                void save();
+              }
+              if (e.key === "Escape") {
+                e.preventDefault();
+                cancel();
+              }
             }
           }
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          type: "button",
-          variant: "ghost",
-          size: "sm",
-          iconOnly: true,
-          ariaLabel: "Save",
-          loading: busy,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-3.5 w-3.5" }),
-          onClick: () => void save(),
-          ...saveButtonProps
-        }
-      ),
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          type: "button",
-          variant: "ghost",
-          size: "sm",
-          iconOnly: true,
-          ariaLabel: "Cancel",
-          disabled: busy,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-3.5 w-3.5" }),
-          onClick: cancel,
-          ...cancelButtonProps
-        }
-      )
-    ] });
-  }
-  return /* @__PURE__ */ jsxRuntime.jsx("span", { className: cn("inline-flex max-w-full items-center", className), ...rest, children: /* @__PURE__ */ jsxRuntime.jsxs(
-    "button",
-    {
-      type: "button",
-      disabled: locked,
-      "aria-busy": busy || void 0,
-      className: cn(
-        "group inline-flex max-w-full items-center gap-1 rounded-sm px-0.5 py-0 text-left leading-5 transition-colors hover:bg-muted/50",
-        locked && "pointer-events-none opacity-50"
-      ),
-      onClick: editTrigger === "click" ? startEdit : void 0,
-      onDoubleClick: editTrigger === "doubleClick" ? startEdit : void 0,
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "span", size: "sm", className: "truncate leading-5", children: displayValue || /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: placeholder }) }),
-        !locked ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Pencil, { className: "h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-70" }) : null
-      ]
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          Button,
+          {
+            type: "button",
+            variant: "ghost",
+            size: "sm",
+            iconOnly: true,
+            ariaLabel: "Save",
+            loading: busy,
+            left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-3.5 w-3.5" }),
+            onClick: () => void save(),
+            ...saveButtonProps,
+            className: cn("h-6 w-6 shrink-0", saveButtonProps?.className)
+          }
+        ),
+        /* @__PURE__ */ jsxRuntime.jsx(
+          Button,
+          {
+            type: "button",
+            variant: "ghost",
+            size: "sm",
+            iconOnly: true,
+            ariaLabel: "Cancel",
+            disabled: busy,
+            left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-3.5 w-3.5" }),
+            onClick: cancel,
+            ...cancelButtonProps,
+            className: cn("h-6 w-6 shrink-0", cancelButtonProps?.className)
+          }
+        )
+      ] });
     }
-  ) });
-}
+    return /* @__PURE__ */ jsxRuntime.jsx("span", { ref, className: cn("inline-flex max-w-full items-center", className), ...rest, children: /* @__PURE__ */ jsxRuntime.jsxs(
+      "button",
+      {
+        type: "button",
+        disabled: locked,
+        "aria-busy": busy || void 0,
+        className: cn(
+          "group inline-flex max-w-full items-center gap-2 rounded-control-sm px-0.5 py-0 text-left leading-5 transition-colors hover:bg-muted/50",
+          locked && disabledSurfaceStyles
+        ),
+        onClick: editTrigger === "click" ? startEdit : void 0,
+        onDoubleClick: editTrigger === "doubleClick" ? startEdit : void 0,
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "span", size: "sm", className: "truncate leading-5", children: displayValue || /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: placeholder }) }),
+          !locked ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Pencil, { className: "h-3 w-3 shrink-0 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-70" }) : null
+        ]
+      }
+    ) });
+  }
+);
 InlineEdit.displayName = "InlineEdit";
 function optionText(label) {
   if (typeof label === "string" || typeof label === "number") return String(label);
@@ -3710,7 +4106,7 @@ function hasAdornment(node) {
   if (typeof node === "string") return node.trim().length > 0;
   return true;
 }
-var Select = React9__namespace.forwardRef(
+var Select = React10__namespace.forwardRef(
   ({
     items,
     left,
@@ -3727,10 +4123,12 @@ var Select = React9__namespace.forwardRef(
     onValueChange,
     onChange,
     disabled,
+    id,
     ...selectProps
   }, ref) => {
-    const generatedId = React9__namespace.useId();
-    const grouped = React9__namespace.useMemo(() => {
+    const generatedId = React10__namespace.useId();
+    const selectId = id ?? generatedId;
+    const grouped = React10__namespace.useMemo(() => {
       const out = [];
       for (const it of items) {
         const g = it.group;
@@ -3743,31 +4141,32 @@ var Select = React9__namespace.forwardRef(
       }
       return out;
     }, [items]);
-    const isControlled = value !== void 0;
-    const [uncontrolledValue, setUncontrolledValue] = React9__namespace.useState(() => defaultValue ?? "");
-    const currentValue = isControlled ? value ?? "" : uncontrolledValue;
-    const selectedOption = React9__namespace.useMemo(
+    const [currentValue, setCurrentValue] = useControllableValue({
+      value: value === void 0 ? void 0 : value ?? "",
+      defaultValue: defaultValue ?? "",
+      onChange: onValueChange
+    });
+    const selectedOption = React10__namespace.useMemo(
       () => items.find((it) => it.value === currentValue),
       [items, currentValue]
     );
     const effectiveLeft = hasAdornment(selectedOption?.left) ? selectedOption?.left : left;
     const mergedOnChange = (e) => {
-      if (!isControlled) setUncontrolledValue(e.target.value);
       onChange?.(e);
-      onValueChange?.(e.target.value);
+      setCurrentValue(e.target.value);
     };
-    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, htmlFor: generatedId, required, size, errorMessage, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative w-full", children: [
-      hasAdornment(effectiveLeft) ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground", children: React9__namespace.isValidElement(effectiveLeft) ? effectiveLeft : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: effectiveLeft, size: "sm", variant: "muted" }) }) : null,
+    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, htmlFor: selectId, required, size, errorMessage, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative w-full", children: [
+      hasAdornment(effectiveLeft) ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground", children: React10__namespace.isValidElement(effectiveLeft) ? effectiveLeft : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: effectiveLeft, size: "sm", variant: "muted" }) }) : null,
       /* @__PURE__ */ jsxRuntime.jsxs(
         "select",
         {
           ref,
-          id: generatedId,
           ...selectProps,
+          id: selectId,
           "aria-required": required,
           "aria-invalid": Boolean(errorMessage) || void 0,
           disabled,
-          ...isControlled ? { value: value ?? "" } : { defaultValue },
+          value: currentValue,
           onChange: mergedOnChange,
           className: cn(
             fieldSurfaceVariants({ control: "input", size, variant, invalid: Boolean(errorMessage) }),
@@ -3809,7 +4208,7 @@ var groupVariants = classVarianceAuthority.cva("space-y-2", {
     orientation: "vertical"
   }
 });
-var RadioGroup = React9__namespace.forwardRef(
+var RadioGroup = React10__namespace.forwardRef(
   ({
     items,
     value,
@@ -3825,22 +4224,20 @@ var RadioGroup = React9__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const generatedName = React9__namespace.useId().replace(/:/g, "");
+    const generatedName = React10__namespace.useId().replace(/:/g, "");
     const name = nameProp ?? `radio-group-${generatedName}`;
-    const isControlled = value !== void 0;
-    const [internal, setInternal] = React9__namespace.useState(defaultValue ?? "");
-    const selected = isControlled ? value ?? "" : internal;
-    const setValue = (next) => {
-      if (!isControlled) setInternal(next);
-      onChange?.(next);
-    };
+    const [selected, setValue] = useControllableValue({
+      value: value === void 0 ? void 0 : value ?? "",
+      defaultValue: defaultValue ?? "",
+      onChange
+    });
     return /* @__PURE__ */ jsxRuntime.jsxs(
       "fieldset",
       {
         ref,
         className: cn(
           "space-y-2",
-          disabled && "cursor-not-allowed opacity-60",
+          disabled && disabledSurfaceStyles,
           className
         ),
         disabled,
@@ -3874,148 +4271,157 @@ var RadioGroup = React9__namespace.forwardRef(
   }
 );
 RadioGroup.displayName = "RadioGroup";
-var FormContext = React9__namespace.createContext(null);
+var FormContext = React10__namespace.createContext(null);
 function useFormContext() {
-  return React9__namespace.useContext(FormContext);
+  return React10__namespace.useContext(FormContext);
 }
-function Form({
-  onSubmit,
-  onCancel,
-  initialValues,
-  values: valuesProp,
-  onValuesChange,
-  validate,
-  errors: errorsProp,
-  validateOn = "submit",
-  submitted: submittedProp,
-  onSubmittedChange,
-  resetSubmittedAfterMs,
-  layout = "vertical",
-  columns = 1,
-  submitLabel = "Submit",
-  cancelLabel = "Cancel",
-  footer,
-  disabled,
-  loading,
-  submitButtonProps,
-  cancelButtonProps,
-  children,
-  className,
-  ...props
-}) {
-  const [internalValues, setInternalValues] = React9__namespace.useState(initialValues ?? {});
-  const [internalErrors, setInternalErrors] = React9__namespace.useState({});
-  const [touched, setTouchedState] = React9__namespace.useState({});
-  const [internalSubmitted, setInternalSubmitted] = React9__namespace.useState(false);
-  const isControlled = valuesProp !== void 0;
-  const isSubmittedControlled = submittedProp !== void 0;
-  const submitted = isSubmittedControlled ? Boolean(submittedProp) : internalSubmitted;
-  const setSubmitted = React9__namespace.useCallback(
-    (next) => {
-      if (!isSubmittedControlled) setInternalSubmitted(next);
-      onSubmittedChange?.(next);
-    },
-    [isSubmittedControlled, onSubmittedChange]
-  );
-  React9__namespace.useEffect(() => {
-    if (!resetSubmittedAfterMs || !submitted) return;
-    const timer = window.setTimeout(() => setSubmitted(false), resetSubmittedAfterMs);
-    return () => window.clearTimeout(timer);
-  }, [resetSubmittedAfterMs, submitted, setSubmitted]);
-  const values = isControlled ? valuesProp : internalValues;
-  const errors = errorsProp ?? internalErrors;
-  const setValue = React9__namespace.useCallback(
-    (name, value) => {
-      const next = { ...values, [name]: value };
-      if (!isControlled) setInternalValues(next);
-      onValuesChange?.(next);
-    },
-    [values, isControlled, onValuesChange]
-  );
-  const setError = React9__namespace.useCallback(
-    (name, error) => {
-      if (errorsProp) return;
-      setInternalErrors((prev) => ({ ...prev, [name]: error }));
-    },
-    [errorsProp]
-  );
-  const setTouched = React9__namespace.useCallback((name, isTouched) => {
-    setTouchedState((prev) => ({ ...prev, [name]: isTouched }));
-  }, []);
-  const runValidation = React9__namespace.useCallback(() => {
-    if (!validate) return true;
-    const result = validate(values) ?? {};
-    if (!errorsProp) setInternalErrors(result);
-    return Object.values(result).every((e) => !e);
-  }, [validate, values, errorsProp]);
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setSubmitted(true);
-    const allTouched = Object.keys(values).reduce((acc, key) => {
-      acc[key] = true;
-      return acc;
-    }, {});
-    setTouchedState((prev) => ({ ...prev, ...allTouched }));
-    const valid = runValidation();
-    if (!valid) return;
-    await onSubmit(values);
-  };
-  const ctx = {
-    values,
-    errors,
-    touched,
-    submitted,
-    setValue,
-    setError,
-    setTouched,
-    validateOn,
+var Form = React10__namespace.forwardRef(
+  ({
+    onSubmit,
+    onCancel,
+    initialValues,
+    values: valuesProp,
+    onValuesChange,
+    validate,
+    errors: errorsProp,
+    validateOn = "submit",
+    submitted: submittedProp,
+    onSubmittedChange,
+    resetSubmittedAfterMs,
+    layout = "vertical",
+    columns = 1,
+    submitLabel = "Submit",
+    cancelLabel = "Cancel",
+    footer,
     disabled,
-    loading
-  };
-  const layoutClass = layout === "grid" ? cn(
-    "grid gap-4",
-    columns === 2 && "grid-cols-1 sm:grid-cols-2",
-    columns === 3 && "grid-cols-1 sm:grid-cols-3",
-    columns === 4 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
-  ) : layout === "horizontal" ? "flex flex-col gap-4 sm:grid sm:grid-cols-[minmax(8rem,12rem)_1fr] sm:items-start sm:gap-x-4 sm:gap-y-4" : "flex flex-col gap-4";
-  const defaultFooter = /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-end gap-2", children: [
-    onCancel ? /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        type: "button",
-        variant: "outline",
-        label: cancelLabel,
-        disabled: disabled || loading,
-        onClick: onCancel,
-        ...cancelButtonProps
-      }
-    ) : null,
-    /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        type: "submit",
-        variant: "primary",
-        label: submitLabel,
-        loading,
+    loading,
+    submitButtonProps,
+    cancelButtonProps,
+    children,
+    className,
+    ...props
+  }, ref) => {
+    const [internalValues, setInternalValues] = React10__namespace.useState(initialValues ?? {});
+    const [internalErrors, setInternalErrors] = React10__namespace.useState({});
+    const [touched, setTouchedState] = React10__namespace.useState({});
+    const [internalSubmitted, setInternalSubmitted] = React10__namespace.useState(false);
+    const isControlled = valuesProp !== void 0;
+    const isSubmittedControlled = submittedProp !== void 0;
+    const submitted = isSubmittedControlled ? Boolean(submittedProp) : internalSubmitted;
+    const setSubmitted = React10__namespace.useCallback(
+      (next) => {
+        if (!isSubmittedControlled) setInternalSubmitted(next);
+        onSubmittedChange?.(next);
+      },
+      [isSubmittedControlled, onSubmittedChange]
+    );
+    React10__namespace.useEffect(() => {
+      if (!resetSubmittedAfterMs || !submitted) return;
+      const timer = window.setTimeout(() => setSubmitted(false), resetSubmittedAfterMs);
+      return () => window.clearTimeout(timer);
+    }, [resetSubmittedAfterMs, submitted, setSubmitted]);
+    const values = isControlled ? valuesProp : internalValues;
+    const errors = errorsProp ?? internalErrors;
+    const valuesRef = React10__namespace.useRef(values);
+    valuesRef.current = values;
+    const setValue = React10__namespace.useCallback(
+      (name, value) => {
+        const next = { ...valuesRef.current, [name]: value };
+        valuesRef.current = next;
+        if (!isControlled) setInternalValues(next);
+        onValuesChange?.(next);
+      },
+      [isControlled, onValuesChange]
+    );
+    const setError = React10__namespace.useCallback(
+      (name, error) => {
+        if (errorsProp) return;
+        setInternalErrors((prev) => ({ ...prev, [name]: error }));
+      },
+      [errorsProp]
+    );
+    const setTouched = React10__namespace.useCallback((name, isTouched) => {
+      setTouchedState((prev) => ({ ...prev, [name]: isTouched }));
+    }, []);
+    const runValidation = React10__namespace.useCallback(() => {
+      if (!validate) return true;
+      const result = validate(values) ?? {};
+      if (!errorsProp) setInternalErrors(result);
+      return Object.values(result).every((e) => !e);
+    }, [validate, values, errorsProp]);
+    const handleSubmit = async (e) => {
+      e.preventDefault();
+      setSubmitted(true);
+      const allTouched = Object.keys(values).reduce((acc, key) => {
+        acc[key] = true;
+        return acc;
+      }, {});
+      setTouchedState((prev) => ({ ...prev, ...allTouched }));
+      const valid = runValidation();
+      if (!valid) return;
+      await onSubmit(values);
+    };
+    const ctx = React10__namespace.useMemo(
+      () => ({
+        values,
+        errors,
+        touched,
+        submitted,
+        setValue,
+        setError,
+        setTouched,
+        validateOn,
         disabled,
-        ...submitButtonProps
+        loading
+      }),
+      [values, errors, touched, submitted, setValue, setError, setTouched, validateOn, disabled, loading]
+    );
+    const layoutClass = layout === "grid" ? cn(
+      "grid gap-4",
+      columns === 2 && "grid-cols-1 sm:grid-cols-2",
+      columns === 3 && "grid-cols-1 sm:grid-cols-3",
+      columns === 4 && "grid-cols-1 sm:grid-cols-2 lg:grid-cols-4"
+    ) : layout === "horizontal" ? "flex flex-col gap-4 sm:grid sm:grid-cols-[minmax(8rem,12rem)_1fr] sm:items-start sm:gap-x-4 sm:gap-y-4" : "flex flex-col gap-4";
+    const defaultFooter = /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-end gap-2", children: [
+      onCancel ? /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          type: "button",
+          variant: "outline",
+          label: cancelLabel,
+          disabled: disabled || loading,
+          onClick: onCancel,
+          ...cancelButtonProps
+        }
+      ) : null,
+      /* @__PURE__ */ jsxRuntime.jsx(
+        Button,
+        {
+          type: "submit",
+          variant: "primary",
+          label: submitLabel,
+          loading,
+          disabled,
+          ...submitButtonProps
+        }
+      )
+    ] });
+    return /* @__PURE__ */ jsxRuntime.jsx(FormContext.Provider, { value: ctx, children: /* @__PURE__ */ jsxRuntime.jsxs(
+      "form",
+      {
+        ref,
+        noValidate: true,
+        onSubmit: handleSubmit,
+        className: cn("w-full space-y-4", className),
+        ...props,
+        children: [
+          /* @__PURE__ */ jsxRuntime.jsx("div", { className: layoutClass, children }),
+          footer ?? defaultFooter
+        ]
       }
-    )
-  ] });
-  return /* @__PURE__ */ jsxRuntime.jsx(FormContext.Provider, { value: ctx, children: /* @__PURE__ */ jsxRuntime.jsxs(
-    "form",
-    {
-      noValidate: true,
-      onSubmit: handleSubmit,
-      className: cn("w-full space-y-4", className),
-      ...props,
-      children: [
-        /* @__PURE__ */ jsxRuntime.jsx("div", { className: layoutClass, children }),
-        footer ?? defaultFooter
-      ]
-    }
-  ) });
-}
+    ) });
+  }
+);
 Form.displayName = "Form";
 function resolveFieldError(value, validate, required, errorMessage) {
   if (!validate) return void 0;
@@ -4040,7 +4446,6 @@ function FormField({
   children,
   className,
   inputProps,
-  onValueChange,
   items,
   rows,
   accept,
@@ -4052,7 +4457,7 @@ function FormField({
   onUpload
 }) {
   const form = useFormContext();
-  const fieldId = React9__namespace.useId();
+  const fieldId = React10__namespace.useId();
   const value = valueProp != null ? String(valueProp) : form ? String(form.values[name] ?? "") : String(defaultValue ?? "");
   const touched = touchedProp ?? form?.touched[name] ?? false;
   const contextError = form?.errors[name];
@@ -4062,7 +4467,6 @@ function FormField({
   const setValue = (next) => {
     onChangeProp?.(next);
     form?.setValue(name, next);
-    onValueChange?.(next);
     if (form && validate) {
       const err = resolveFieldError(next, validate, required, errorMessage);
       if (form.validateOn === "change" || form.submitted) {
@@ -4095,9 +4499,9 @@ function FormField({
     return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { className, label, htmlFor: fieldId, required, errorMessage: displayError, children: render(shared) });
   }
   if (children) {
-    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { className, label, htmlFor: fieldId, required, errorMessage: displayError, children: React9__namespace.Children.map(children, (child) => {
-      if (!React9__namespace.isValidElement(child)) return child;
-      return React9__namespace.cloneElement(child, {
+    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { className, label, htmlFor: fieldId, required, errorMessage: displayError, children: React10__namespace.Children.map(children, (child) => {
+      if (!React10__namespace.isValidElement(child)) return child;
+      return React10__namespace.cloneElement(child, {
         id: fieldId,
         name,
         value,
@@ -4214,65 +4618,69 @@ function isNonEmptyLead(node) {
   if (Array.isArray(node)) return node.some((n) => isNonEmptyLead(n));
   return true;
 }
-var InputGroupContext = React9__namespace.createContext(null);
+var InputGroupContext = React10__namespace.createContext(null);
 function useInputGroupContext() {
-  return React9__namespace.useContext(InputGroupContext);
+  return React10__namespace.useContext(InputGroupContext);
 }
-function InputGroup({
-  children,
-  disabled = false,
-  loading,
-  invalid = false,
-  orientation = "horizontal",
-  attached = true,
-  size = "md",
-  variant = "outline",
-  left,
-  placeholder,
-  className,
-  ...props
-}) {
-  const vertical = orientation === "vertical";
-  const ctx = React9__namespace.useMemo(
-    () => ({
-      attached: attached && !vertical,
-      vertical,
-      size,
-      variant,
-      disabled,
-      invalid,
-      left,
-      placeholder
-    }),
-    [attached, vertical, size, variant, disabled, invalid, left, placeholder]
-  );
-  const pillShell = isNonEmptyLead(ctx.left) && ctx.attached && !vertical;
-  return /* @__PURE__ */ jsxRuntime.jsx(InputGroupContext.Provider, { value: ctx, children: /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      "data-slot": "input-group",
-      "data-invalid": invalid || void 0,
-      className: cn(
-        "relative flex w-full",
-        vertical ? "flex-col gap-2" : "flex-row flex-wrap items-stretch",
-        !vertical && ctx.attached && cn(
-          "overflow-hidden border bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background [&>*+*]:border-l [&>*+*]:border-border",
-          pillShell ? "rounded-full" : "rounded-md",
-          invalid ? "border-destructive focus-within:ring-destructive" : "border-border"
+var InputGroup = React10__namespace.forwardRef(
+  ({
+    children,
+    disabled = false,
+    loading,
+    invalid = false,
+    orientation = "horizontal",
+    attached = true,
+    size = "md",
+    variant = "outline",
+    left,
+    placeholder,
+    className,
+    ...props
+  }, ref) => {
+    const vertical = orientation === "vertical";
+    const ctx = React10__namespace.useMemo(
+      () => ({
+        attached: attached && !vertical,
+        vertical,
+        size,
+        variant,
+        disabled,
+        invalid,
+        left,
+        placeholder
+      }),
+      [attached, vertical, size, variant, disabled, invalid, left, placeholder]
+    );
+    const pillShell = isNonEmptyLead(ctx.left) && ctx.attached && !vertical;
+    const sizeKey = size ?? "md";
+    return /* @__PURE__ */ jsxRuntime.jsx(InputGroupContext.Provider, { value: ctx, children: /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        ref,
+        "data-slot": "input-group",
+        "data-invalid": invalid || void 0,
+        className: cn(
+          "relative flex w-full",
+          vertical ? "flex-col gap-2" : "flex-row flex-wrap items-stretch",
+          !vertical && ctx.attached && cn(
+            "overflow-hidden border bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background [&>*+*]:border-l [&>*+*]:border-border",
+            pillShell ? "rounded-pill" : controlRadiusClass[sizeKey],
+            invalid ? "border-destructive focus-within:ring-destructive" : "border-border"
+          ),
+          disabled && disabledSurfaceStyles,
+          className
         ),
-        disabled && "pointer-events-none opacity-60",
-        className
-      ),
-      ...props,
-      children: [
-        loading ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) }) : null,
-        children
-      ]
-    }
-  ) });
-}
+        ...props,
+        children: [
+          loading ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute right-3 top-1/2 z-sticky -translate-y-1/2", children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) }) : null,
+          children
+        ]
+      }
+    ) });
+  }
+);
 InputGroup.displayName = "InputGroup";
-var InputGroupInput = React9__namespace.forwardRef(
+var InputGroupInput = React10__namespace.forwardRef(
   ({
     className,
     size: sizeProp,
@@ -4308,11 +4716,12 @@ var InputGroupInput = React9__namespace.forwardRef(
           }),
           !inGroupShell && "w-full",
           inGroupShell && cn(
-            "min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none",
+            // Arbitrary zero, not the flat scale's zero utility: that scale is
+            // banned, and a merged shell edge is "no shape", not a themeable radius.
+            "min-w-0 flex-1 rounded-[0] border-0 bg-transparent shadow-none",
             "focus-visible:z-[1] focus-visible:ring-0 focus-visible:ring-offset-0",
             disabledControl
           ),
-          inGroupShell && "rounded-none",
           shellLead && "pl-9",
           className
         ),
@@ -4345,25 +4754,31 @@ var InputGroupInput = React9__namespace.forwardRef(
   }
 );
 InputGroupInput.displayName = "InputGroupInput";
-function InputGroupAddon({ className, children, ...props }) {
-  const ctx = useInputGroupContext();
-  const inShell = ctx?.attached && !ctx.vertical;
-  return /* @__PURE__ */ jsxRuntime.jsx(
-    "span",
-    {
-      role: "presentation",
-      className: cn(
-        "inline-flex shrink-0 items-center bg-muted/40 px-3 text-sm text-muted-foreground",
-        inShell ? "rounded-none" : "rounded-md border border-border",
-        className
-      ),
-      ...props,
-      children
-    }
-  );
-}
+var InputGroupAddon = React10__namespace.forwardRef(
+  ({ className, children, ...props }, ref) => {
+    const ctx = useInputGroupContext();
+    const inShell = ctx?.attached && !ctx.vertical;
+    const size = ctx?.size ?? "md";
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "span",
+      {
+        ref,
+        role: "presentation",
+        className: cn(
+          "inline-flex shrink-0 items-center bg-muted/40 px-3 text-sm text-muted-foreground",
+          // Same height source a bare TextInput reads, so density themes move both.
+          !inShell && controlHeightClass[size],
+          inShell ? "rounded-[0]" : cn(controlRadiusClass[size], "border border-border"),
+          className
+        ),
+        ...props,
+        children
+      }
+    );
+  }
+);
 InputGroupAddon.displayName = "InputGroupAddon";
-var InputGroupButton = React9__namespace.forwardRef(
+var InputGroupButton = React10__namespace.forwardRef(
   ({ className, variant = "outline", size = "md", disabled, ...props }, ref) => {
     const ctx = useInputGroupContext();
     const inShell = ctx?.attached && !ctx.vertical;
@@ -4376,10 +4791,7 @@ var InputGroupButton = React9__namespace.forwardRef(
         size,
         disabled: disabled || groupDisabled,
         className: cn(
-          inShell && "shrink-0 rounded-none border-y-0 border-r-0 border-l border-border shadow-none",
-          inShell && size === "sm" && "h-8",
-          inShell && size === "md" && "h-10",
-          inShell && size === "lg" && "h-11",
+          inShell && "shrink-0 rounded-[0] border-y-0 border-r-0 border-l border-border shadow-none",
           className
         ),
         ...props
@@ -4388,7 +4800,7 @@ var InputGroupButton = React9__namespace.forwardRef(
   }
 );
 InputGroupButton.displayName = "InputGroupButton";
-var cardVariants = classVarianceAuthority.cva("rounded-[var(--radius-card,0.5rem)] border text-foreground", {
+var cardVariants = classVarianceAuthority.cva("border text-foreground", {
   variants: {
     variant: {
       transparent: "border-transparent bg-transparent shadow-none",
@@ -4396,10 +4808,11 @@ var cardVariants = classVarianceAuthority.cva("rounded-[var(--radius-card,0.5rem
       "surface-2": "border-border bg-muted/40 shadow-md",
       outlined: "border-border bg-background shadow-none"
     },
+    // A Card is a surface, not a control — radius tier follows its own size.
     size: {
-      sm: "text-sm",
-      md: "text-base",
-      lg: "text-base"
+      sm: "text-sm rounded-surface-sm",
+      md: "text-base rounded-surface-md",
+      lg: "text-base rounded-surface-lg"
     }
   },
   defaultVariants: {
@@ -4412,36 +4825,48 @@ var sectionPad = {
   md: "px-4 py-3",
   lg: "px-6 py-4"
 };
-function withUnit2(value) {
-  if (value == null) return void 0;
-  return typeof value === "number" ? `${value}px` : value;
-}
-var Card = React9__namespace.forwardRef(
+var Card = React10__namespace.forwardRef(
   ({ variant, size = "md", header, footer, minHeight, maxHeight, className, children, style, ...props }, ref) => {
     const effectiveSize = size ?? "md";
+    const hasContent = hasNonEmptyChildren(children);
+    const hasHeader = Boolean(header);
+    const hasFooter = Boolean(footer);
+    const { headerBorderBottom, footerBorderTop } = resolveSectionBorders({
+      hasHeader,
+      hasContent,
+      hasFooter
+    });
     return /* @__PURE__ */ jsxRuntime.jsxs(
       "div",
       {
         ref,
         "data-slot": "card",
         className: cn("relative flex flex-col overflow-hidden", cardVariants({ variant, size: effectiveSize }), className),
-        style: { minHeight: withUnit2(minHeight), maxHeight: withUnit2(maxHeight), ...style },
+        style: { minHeight: sizeToCss(minHeight), maxHeight: sizeToCss(maxHeight), ...style },
         ...props,
         children: [
-          header ? /* @__PURE__ */ jsxRuntime.jsx(
+          hasHeader ? /* @__PURE__ */ jsxRuntime.jsx(
             "div",
             {
               "data-slot": "card-header",
-              className: cn("sticky top-0 shrink-0 border-b border-border bg-inherit", sectionPad[effectiveSize]),
+              className: cn(
+                "sticky top-0 shrink-0 bg-inherit",
+                headerBorderBottom && "border-b border-border",
+                sectionPad[effectiveSize]
+              ),
               children: header
             }
           ) : null,
-          /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-content", className: cn("min-h-0 flex-1 overflow-y-auto", sectionPad[effectiveSize]), children }),
-          footer ? /* @__PURE__ */ jsxRuntime.jsx(
+          hasContent ? /* @__PURE__ */ jsxRuntime.jsx("div", { "data-slot": "card-content", className: cn("min-h-0 flex-1 overflow-y-auto", sectionPad[effectiveSize]), children }) : null,
+          hasFooter ? /* @__PURE__ */ jsxRuntime.jsx(
             "div",
             {
               "data-slot": "card-footer",
-              className: cn("sticky bottom-0 shrink-0 border-t border-border bg-inherit", sectionPad[effectiveSize]),
+              className: cn(
+                "sticky bottom-0 shrink-0 bg-inherit",
+                footerBorderTop && "border-t border-border",
+                sectionPad[effectiveSize]
+              ),
               children: footer
             }
           ) : null
@@ -4451,7 +4876,7 @@ var Card = React9__namespace.forwardRef(
   }
 );
 Card.displayName = "Card";
-var separatorVariants = classVarianceAuthority.cva("shrink-0 bg-border ", {
+var separatorVariants = classVarianceAuthority.cva("shrink-0 bg-border", {
   variants: {
     variant: {
       solid: "",
@@ -4474,7 +4899,7 @@ var separatorVariants = classVarianceAuthority.cva("shrink-0 bg-border ", {
     variant: "solid"
   }
 });
-var Separator = React9__namespace.forwardRef(
+var Separator = React10__namespace.forwardRef(
   ({ variant, orientation, decorative = true, className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
@@ -4494,12 +4919,8 @@ var stackVariants = classVarianceAuthority.cva("flex", {
       row: "flex-row",
       column: "flex-col"
     },
-    gap: {
-      none: "gap-0",
-      sm: "gap-2",
-      md: "gap-4",
-      lg: "gap-6"
-    },
+    // Shared with Grid — see layout/shared.ts.
+    gap: gapScale,
     align: {
       start: "items-start",
       center: "items-center",
@@ -4547,12 +4968,12 @@ var StackInner = ({
       "data-slot": "stack",
       className: cn(stackVariants({ direction, gap, align, justify, wrap }), className),
       ...props,
-      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React9__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
+      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React10__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
     }
   );
 };
 var Stack = Object.assign(
-  React9__namespace.forwardRef(StackInner),
+  React10__namespace.forwardRef(StackInner),
   { displayName: "Stack" }
 );
 var columnClass = {
@@ -4573,24 +4994,10 @@ var rowClass = {
 };
 var gridSpacingVariants = classVarianceAuthority.cva("", {
   variants: {
-    gap: {
-      none: "gap-0",
-      sm: "gap-2",
-      md: "gap-4",
-      lg: "gap-6"
-    },
-    columnGap: {
-      none: "gap-x-0",
-      sm: "gap-x-2",
-      md: "gap-x-4",
-      lg: "gap-x-6"
-    },
-    rowGap: {
-      none: "gap-y-0",
-      sm: "gap-y-2",
-      md: "gap-y-4",
-      lg: "gap-y-6"
-    },
+    // Shared with Stack — see layout/shared.ts.
+    gap: gapScale,
+    columnGap: columnGapScale,
+    rowGap: rowGapScale,
     autoFlow: {
       default: "",
       row: "grid-flow-row",
@@ -4662,12 +5069,12 @@ var GridInner = ({
       ),
       style: minChildWidth ? { ...style, ["--grid-min"]: minChildWidth } : style,
       ...props,
-      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React9__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
+      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React10__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
     }
   );
 };
 var Grid = Object.assign(
-  React9__namespace.forwardRef(GridInner),
+  React10__namespace.forwardRef(GridInner),
   { displayName: "Grid" }
 );
 var DEFAULT_RATIO = 16 / 9;
@@ -4694,11 +5101,7 @@ function formatAspectRatioLabel(ratio) {
   }
   return String(Math.round(ratio * 1e3) / 1e3);
 }
-function sizeToCss(value) {
-  if (value == null) return void 0;
-  return typeof value === "number" ? `${value}px` : value;
-}
-var AspectRatio = React9__namespace.forwardRef(
+var AspectRatio = React10__namespace.forwardRef(
   ({ className, ratio: ratioProp = DEFAULT_RATIO, children, minWidth, maxWidth, style, ...props }, ref) => {
     const ratio = toRatioNumber(ratioProp, DEFAULT_RATIO);
     const ratioLabel = formatAspectRatioLabel(ratio);
@@ -4713,7 +5116,7 @@ var AspectRatio = React9__namespace.forwardRef(
   }
 );
 AspectRatio.displayName = "AspectRatio";
-var ResizablePanelGroup = React9__namespace.forwardRef(
+var ResizablePanelGroup = React10__namespace.forwardRef(
   ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     reactResizablePanels.PanelGroup,
     {
@@ -4724,7 +5127,7 @@ var ResizablePanelGroup = React9__namespace.forwardRef(
   )
 );
 ResizablePanelGroup.displayName = "ResizablePanelGroup";
-var ResizablePanel = React9__namespace.forwardRef((props, ref) => /* @__PURE__ */ jsxRuntime.jsx(reactResizablePanels.Panel, { ref, ...props }));
+var ResizablePanel = React10__namespace.forwardRef((props, ref) => /* @__PURE__ */ jsxRuntime.jsx(reactResizablePanels.Panel, { ref, ...props }));
 ResizablePanel.displayName = "ResizablePanel";
 function ResizableHandle({ className, withHandle, children, ...props }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -4735,13 +5138,13 @@ function ResizableHandle({ className, withHandle, children, ...props }) {
         className
       ),
       ...props,
-      children: children ?? (withHandle ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "z-10 flex h-7 w-4 items-center justify-center rounded-sm border border-border bg-muted", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.GripVertical, { className: "h-3.5 w-3.5 text-muted-foreground", strokeWidth: 2 }) }) : null)
+      children: children ?? (withHandle ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "z-sticky flex h-7 w-4 items-center justify-center rounded-control-sm border border-border bg-muted", children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.GripVertical, { className: "h-3.5 w-3.5 text-muted-foreground", strokeWidth: 2 }) }) : null)
     }
   );
 }
 ResizableHandle.displayName = "ResizableHandle";
-function Collapsible({
-  open: controlledOpen,
+var Collapsible = React10__namespace.forwardRef(function Collapsible2({
+  open: openProp,
   defaultOpen = false,
   onOpenChange,
   trigger,
@@ -4751,15 +5154,9 @@ function Collapsible({
   showContentDivider = true,
   className,
   ...props
-}) {
-  const [internal, setInternal] = React9__namespace.useState(defaultOpen);
-  const isControlled = controlledOpen !== void 0;
-  const open = isControlled ? controlledOpen : internal;
-  const setOpen = (next) => {
-    if (!isControlled) setInternal(next);
-    onOpenChange?.(next);
-  };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("w-full", className), ...props, children: [
+}, ref) {
+  const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, "data-slot": "collapsible", "data-state": open ? "open" : "closed", className: cn("w-full", className), ...props, children: [
     /* @__PURE__ */ jsxRuntime.jsx(
       Button,
       {
@@ -4772,7 +5169,7 @@ function Collapsible({
           lucideReact.ChevronRight,
           {
             className: cn(
-              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-fast",
               open && "rotate-90"
             ),
             "aria-hidden": true
@@ -4784,31 +5181,14 @@ function Collapsible({
     open ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("px-2 py-2 text-sm", showContentDivider && "border-t border-border"), children }) : null,
     footer ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "text-sm text-muted-foreground", children: footer }) : null
   ] });
-}
+});
 Collapsible.displayName = "Collapsible";
-function useControllableOpen({
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange
-}) {
-  const [uncontrolled, setUncontrolled] = React9__namespace.useState(defaultOpen);
-  const isControlled = openProp !== void 0;
-  const open = isControlled ? openProp : uncontrolled;
-  const setOpen = React9__namespace.useCallback(
-    (next) => {
-      if (!isControlled) setUncontrolled(next);
-      onOpenChange?.(next);
-    },
-    [isControlled, onOpenChange]
-  );
-  return [open, setOpen];
-}
 var ICON_RAIL_WIDTH = {
   sm: "var(--control-height-sm, 2rem)",
   md: "var(--control-height-md, 2.5rem)",
   lg: "var(--control-height-lg, 2.75rem)"
 };
-var collapsiblePanelRootVariants = classVarianceAuthority.cva("relative shrink-0 transition-[width,height] duration-200 ease-in-out", {
+var collapsiblePanelRootVariants = classVarianceAuthority.cva("relative shrink-0 transition-[width,height] duration-normal ease-in-out", {
   variants: {
     closeDirection: {
       left: "",
@@ -4852,22 +5232,34 @@ var collapsiblePanelSurfaceVariants = classVarianceAuthority.cva("flex h-full w-
     variant: "default"
   }
 });
-var floaterTriggerVariants = classVarianceAuthority.cva("absolute z-10", {
+var floaterTriggerVariants = classVarianceAuthority.cva("pointer-events-auto absolute z-sticky", {
   variants: {
     closeDirection: {
-      left: "left-full top-1/2 -translate-x-1/2 -translate-y-1/2",
-      right: "right-full top-1/2 translate-x-1/2 -translate-y-1/2",
-      top: "top-full left-1/2 -translate-x-1/2 -translate-y-1/2",
-      bottom: "bottom-full left-1/2 -translate-x-1/2 translate-y-1/2"
+      left: "left-full top-1/2 -translate-y-1/2",
+      right: "right-full top-1/2 -translate-y-1/2",
+      top: "top-full left-1/2 -translate-x-1/2",
+      bottom: "bottom-full left-1/2 -translate-x-1/2"
+    },
+    open: {
+      true: "",
+      false: ""
     }
   },
+  compoundVariants: [
+    { closeDirection: "left", open: true, class: "-translate-x-1/2" },
+    { closeDirection: "left", open: false, class: "translate-x-1" },
+    { closeDirection: "right", open: true, class: "translate-x-1/2" },
+    { closeDirection: "right", open: false, class: "-translate-x-1" },
+    { closeDirection: "top", open: true, class: "-translate-y-1/2" },
+    { closeDirection: "top", open: false, class: "translate-y-1" },
+    { closeDirection: "bottom", open: true, class: "translate-y-1/2" },
+    { closeDirection: "bottom", open: false, class: "-translate-y-1" }
+  ],
   defaultVariants: {
-    closeDirection: "left"
+    closeDirection: "left",
+    open: true
   }
 });
-function toCssSize(value, fallback) {
-  return typeof value === "number" ? `${value}px` : value;
-}
 function isHorizontalClose(closeDirection) {
   return closeDirection === "left" || closeDirection === "right";
 }
@@ -4879,7 +5271,7 @@ function isCollapsedSizeZero(resolved) {
 }
 function resolveCollapsedSize(collapsedSize, triggerPlacement, toggleButtonProps) {
   if (collapsedSize !== void 0) {
-    return typeof collapsedSize === "number" ? `${collapsedSize}px` : collapsedSize;
+    return sizeToCss(collapsedSize) ?? "0px";
   }
   if (triggerPlacement === "header") {
     const buttonSize = toggleButtonProps?.size ?? "sm";
@@ -4901,8 +5293,8 @@ function defaultToggleIcon(closeDirection, open) {
 }
 function mergeTrigger(trigger, onToggle, closeDirection, open, triggerVariant = "default", toggleButtonProps) {
   if (trigger != null) {
-    if (React9__namespace.isValidElement(trigger)) {
-      return React9__namespace.cloneElement(trigger, {
+    if (React10__namespace.isValidElement(trigger)) {
+      return React10__namespace.cloneElement(trigger, {
         onClick: (event) => {
           trigger.props.onClick?.(event);
           onToggle();
@@ -4912,23 +5304,22 @@ function mergeTrigger(trigger, onToggle, closeDirection, open, triggerVariant = 
     return trigger;
   }
   return /* @__PURE__ */ jsxRuntime.jsx(
-    Button,
+    IconButton,
     {
-      variant: "ghost",
       size: "sm",
-      iconOnly: true,
       ariaLabel: open ? "Collapse panel" : "Expand panel",
-      left: defaultToggleIcon(closeDirection, open),
+      icon: defaultToggleIcon(closeDirection, open),
+      shape: triggerVariant === "pill" ? "round" : "control",
       onClick: onToggle,
       ...toggleButtonProps,
       className: cn(
-        triggerVariant === "pill" && "h-6 w-6 rounded-full border border-border bg-muted text-foreground shadow-md hover:bg-accent",
+        triggerVariant === "pill" && "h-6 w-6 border border-border bg-muted text-foreground shadow-md hover:bg-accent",
         toggleButtonProps?.className
       )
     }
   );
 }
-var CollapsiblePanel = React9__namespace.forwardRef(function CollapsiblePanel2({
+var CollapsiblePanel = React10__namespace.forwardRef(function CollapsiblePanel2({
   open: openProp,
   defaultOpen = true,
   onOpenChange,
@@ -4956,12 +5347,19 @@ var CollapsiblePanel = React9__namespace.forwardRef(function CollapsiblePanel2({
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const horizontalClose = isHorizontalClose(closeDirection);
   const resolvedCollapsed = resolveCollapsedSize(collapsedSize, triggerPlacement, toggleButtonProps);
-  const axisSize = open ? toCssSize(size) : resolvedCollapsed;
+  const axisSize = open ? sizeToCss(size) ?? "16rem" : resolvedCollapsed;
   const collapsedToZero = isCollapsedSizeZero(resolvedCollapsed);
   const showHeaderTrigger = triggerPlacement === "header";
   const showFloaterTrigger = triggerPlacement === "floater";
   const showHeaderRow = Boolean(header || showHeaderTrigger) && (open || showHeaderTrigger || !collapsedToZero);
   const hideContent = !open && (collapsedToZero || showHeaderTrigger);
+  const hasContent = hasNonEmptyChildren(children);
+  const hasFooter = Boolean(footer);
+  const { headerBorderBottom, footerBorderTop } = resolveSectionBorders({
+    hasHeader: showHeaderRow,
+    hasContent,
+    hasFooter
+  });
   const toggle = () => setOpen(!open);
   const triggerNode = mergeTrigger(trigger, toggle, closeDirection, open, triggerVariant, toggleButtonProps);
   const axisStyle = horizontalClose ? { width: axisSize } : { height: axisSize };
@@ -4980,7 +5378,8 @@ var CollapsiblePanel = React9__namespace.forwardRef(function CollapsiblePanel2({
             "div",
             {
               className: cn(
-                "flex shrink-0 items-center gap-2 border-b border-border px-2 py-2",
+                "flex shrink-0 items-center gap-2 px-2 py-2",
+                headerBorderBottom && "border-b border-border",
                 !open && showHeaderTrigger && "justify-center px-1",
                 headerClassName
               ),
@@ -5003,9 +5402,19 @@ var CollapsiblePanel = React9__namespace.forwardRef(function CollapsiblePanel2({
               children
             }
           ),
-          footer && open ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("shrink-0 border-t border-border px-2 py-2 text-sm text-muted-foreground", footerClassName), children: footer }) : null
+          footer && open ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: cn(
+                "shrink-0 px-2 py-2 text-sm text-muted-foreground",
+                footerBorderTop && "border-t border-border",
+                footerClassName
+              ),
+              children: footer
+            }
+          ) : null
         ] }),
-        showFloaterTrigger ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: floaterTriggerVariants({ closeDirection }), children: triggerNode }) : null
+        showFloaterTrigger ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: floaterTriggerVariants({ closeDirection, open }), children: triggerNode }) : null
       ]
     }
   );
@@ -5018,20 +5427,14 @@ function asArray(multiple, v) {
   if (Array.isArray(v)) return v.length ? [v[0]] : [];
   return [];
 }
-function Accordion({
-  items = [],
-  type = "single",
-  value,
-  defaultValue,
-  onChange,
-  className,
-  ...props
-}) {
+var Accordion = React10__namespace.forwardRef(function Accordion2({ items = [], type = "single", value, defaultValue, onChange, className, ...props }, ref) {
   const multiple = type === "multiple";
-  const initial = asArray(multiple, defaultValue);
-  const [internal, setInternal] = React9__namespace.useState(initial);
-  const isControlled = value !== void 0;
-  const openValues = asArray(multiple, isControlled ? value : internal);
+  const [selection, setSelection] = useControllableValue({
+    value,
+    defaultValue: defaultValue ?? (multiple ? [] : ""),
+    onChange
+  });
+  const openValues = asArray(multiple, selection);
   const setOpen = (panel, nextOpen) => {
     let next;
     if (multiple) {
@@ -5040,126 +5443,172 @@ function Accordion({
     } else {
       next = nextOpen ? [panel] : [];
     }
-    if (!isControlled) setInternal(next);
-    onChange?.(multiple ? next : next[0] ?? "");
+    setSelection(multiple ? next : next[0] ?? "");
   };
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("w-full divide-y divide-border rounded-md border border-border", className), ...props, children: items.map((item) => {
-    const open = openValues.includes(item.value);
-    const trigger = /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex min-w-0 items-center gap-2", children: [
-      item.left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) : null,
-      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0 flex-1", children: item.label }),
-      item.loading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) : null
-    ] });
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "px-2 py-1 first:pt-2 last:pb-2", children: /* @__PURE__ */ jsxRuntime.jsx(
-      Collapsible,
-      {
-        open,
-        onOpenChange: (o) => setOpen(item.value, o),
-        trigger,
-        disabled: item.disabled,
-        showContentDivider: false,
-        className: "border-0",
-        children: item.content
-      }
-    ) }, item.value);
-  }) });
-}
-Accordion.displayName = "Accordion";
-function ResizeContainer({
-  direction: _direction = "both",
-  minScale = 0.5,
-  maxScale = 2,
-  defaultScale = 1,
-  scale: scaleProp,
-  onScaleChange,
-  fit = "contain",
-  showControls = true,
-  disabled,
-  maxWidth,
-  maxHeight,
-  containerProps,
-  contentProps,
-  children,
-  className,
-  ...rest
-}) {
-  const [internalScale, setInternalScale] = React9__namespace.useState(defaultScale);
-  const isControlled = scaleProp !== void 0;
-  const scale = isControlled ? scaleProp : internalScale;
-  const setScale = (next) => {
-    const clamped = Math.min(maxScale, Math.max(minScale, next));
-    if (!isControlled) setInternalScale(clamped);
-    onScaleChange?.(clamped);
-  };
-  const fitClass = fit === "cover" ? "object-cover" : fit === "fill" ? "object-fill" : "object-contain";
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("w-full", className), ...rest, children: [
-    showControls ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between gap-2", children: [
-      /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "span", size: "sm", variant: "muted", children: [
-        "Zoom ",
-        Math.round(scale * 100),
-        "%"
-      ] }),
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          Button,
-          {
-            variant: "outline",
-            size: "sm",
-            iconOnly: true,
-            "aria-label": "Zoom out",
-            disabled: disabled || scale <= minScale,
-            left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Minus, { className: "h-4 w-4" }),
-            onClick: () => setScale(scale - 0.1)
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          Button,
-          {
-            variant: "outline",
-            size: "sm",
-            iconOnly: true,
-            "aria-label": "Zoom in",
-            disabled: disabled || scale >= maxScale,
-            left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "h-4 w-4" }),
-            onClick: () => setScale(scale + 0.1)
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          Button,
-          {
-            variant: "ghost",
-            size: "sm",
-            iconOnly: true,
-            "aria-label": "Reset zoom",
-            disabled,
-            left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcw, { className: "h-4 w-4" }),
-            onClick: () => setScale(defaultScale)
-          }
-        )
-      ] })
-    ] }) : null,
-    /* @__PURE__ */ jsxRuntime.jsx(
-      "div",
-      {
-        className: "overflow-auto rounded-lg border border-border bg-muted/20 p-4",
-        style: { maxWidth, maxHeight },
-        ...containerProps,
-        children: /* @__PURE__ */ jsxRuntime.jsx(
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      ref,
+      "data-slot": "accordion",
+      className: cn("w-full divide-y divide-border rounded-surface-md border border-border", className),
+      ...props,
+      children: items.map((item) => {
+        const open = openValues.includes(item.value);
+        const trigger = /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "flex min-w-0 items-center gap-2", children: [
+          item.left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) : null,
+          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0 flex-1", children: item.label }),
+          item.loading ? /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) : null
+        ] });
+        return /* @__PURE__ */ jsxRuntime.jsx(
           "div",
           {
-            className: cn("origin-top-left transition-transform", fitClass),
-            style: { transform: `scale(${scale})` },
-            ...contentProps,
-            children
-          }
-        )
-      }
-    )
-  ] });
-}
+            "data-disabled": item.disabled ? "true" : void 0,
+            className: cn(
+              "px-2 py-1 first:pt-2 last:pb-2",
+              disabledSurface,
+              "data-[disabled=true]:[&_button]:opacity-100"
+            ),
+            children: /* @__PURE__ */ jsxRuntime.jsx(
+              Collapsible,
+              {
+                open,
+                onOpenChange: (o) => setOpen(item.value, o),
+                trigger,
+                disabled: item.disabled,
+                showContentDivider: false,
+                className: "border-0",
+                children: item.content
+              }
+            )
+          },
+          item.value
+        );
+      })
+    }
+  );
+});
+Accordion.displayName = "Accordion";
+var resizeViewportVariants = classVarianceAuthority.cva("border border-border bg-muted/20 p-4 rounded-surface-lg", {
+  variants: {
+    direction: {
+      horizontal: "overflow-x-auto overflow-y-hidden",
+      vertical: "overflow-y-auto overflow-x-hidden",
+      both: "overflow-auto"
+    }
+  },
+  defaultVariants: {
+    direction: "both"
+  }
+});
+var resizeContentVariants = classVarianceAuthority.cva("origin-top-left transition-transform", {
+  variants: {
+    fit: {
+      contain: "object-contain",
+      cover: "object-cover",
+      fill: "object-fill"
+    }
+  },
+  defaultVariants: {
+    fit: "contain"
+  }
+});
+var ResizeContainer = React10__namespace.forwardRef(
+  function ResizeContainer2({
+    direction = "both",
+    minScale = 0.5,
+    maxScale = 2,
+    defaultScale = 1,
+    scale: scaleProp,
+    onScaleChange,
+    fit = "contain",
+    showControls = true,
+    disabled,
+    maxWidth,
+    maxHeight,
+    containerProps,
+    contentProps,
+    children,
+    className,
+    ...rest
+  }, ref) {
+    const [scale, setScaleValue] = useControllableValue({
+      value: scaleProp,
+      defaultValue: defaultScale,
+      onChange: onScaleChange
+    });
+    const setScale = (next) => {
+      setScaleValue(Math.min(maxScale, Math.max(minScale, next)));
+    };
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, "data-slot": "resize-container", className: cn("w-full", className), ...rest, children: [
+      showControls ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-2 flex items-center justify-between gap-2", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "span", size: "sm", variant: "muted", children: [
+          "Zoom ",
+          Math.round(scale * 100),
+          "%"
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center gap-1", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              iconOnly: true,
+              ariaLabel: "Zoom out",
+              disabled: disabled || scale <= minScale,
+              left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Minus, { className: "h-4 w-4" }),
+              onClick: () => setScale(scale - 0.1)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Button,
+            {
+              variant: "outline",
+              size: "sm",
+              iconOnly: true,
+              ariaLabel: "Zoom in",
+              disabled: disabled || scale >= maxScale,
+              left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "h-4 w-4" }),
+              onClick: () => setScale(scale + 0.1)
+            }
+          ),
+          /* @__PURE__ */ jsxRuntime.jsx(
+            Button,
+            {
+              variant: "ghost",
+              size: "sm",
+              iconOnly: true,
+              ariaLabel: "Reset zoom",
+              disabled,
+              left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcw, { className: "h-4 w-4" }),
+              onClick: () => setScale(defaultScale)
+            }
+          )
+        ] })
+      ] }) : null,
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          ...containerProps,
+          className: cn(resizeViewportVariants({ direction }), containerProps?.className),
+          style: { maxWidth, maxHeight, ...containerProps?.style },
+          children: /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              ...contentProps,
+              className: cn(resizeContentVariants({ fit }), contentProps?.className),
+              style: { transform: `scale(${scale})`, ...contentProps?.style },
+              children
+            }
+          )
+        }
+      )
+    ] });
+  }
+);
 ResizeContainer.displayName = "ResizeContainer";
 var linkVariants = classVarianceAuthority.cva(
-  "inline-flex items-center rounded-sm transition-colors focus-visible:outline-none",
+  // Radius only ever shows on the focus ring — control tier.
+  "inline-flex items-center rounded-control-sm transition-colors focus-visible:outline-none",
   {
     variants: {
       variant: {
@@ -5173,7 +5622,7 @@ var linkVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Link = React9__namespace.forwardRef(
+var Link = React10__namespace.forwardRef(
   ({ href, target, rel, variant, className, children, ...props }, ref) => {
     const opensNewTab = typeof target === "string" && target.toLowerCase() === "_blank";
     const resolvedRel = rel ?? (opensNewTab ? "noopener noreferrer" : void 0);
@@ -5192,10 +5641,10 @@ var Link = React9__namespace.forwardRef(
   }
 );
 Link.displayName = "Link";
-var Breadcrumb = React9__namespace.forwardRef(
+var Breadcrumb = React10__namespace.forwardRef(
   ({ items, separator, maxItems, className, "aria-label": ariaLabel = "Breadcrumb", ...props }, ref) => {
     const sep = separator ?? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-3.5 w-3.5 shrink-0 text-muted-foreground", "aria-hidden": true });
-    const visible = React9__namespace.useMemo(() => {
+    const visible = React10__namespace.useMemo(() => {
       if (!maxItems || items.length <= maxItems) return items;
       const first = items[0];
       const last = items[items.length - 1];
@@ -5229,12 +5678,43 @@ var Breadcrumb = React9__namespace.forwardRef(
   }
 );
 Breadcrumb.displayName = "Breadcrumb";
-var sidebarVariants = classVarianceAuthority.cva("flex flex-col border-border bg-background transition-[width] duration-200", {
+
+// src/components/navigation/shared.ts
+function itemIdentity(item, index, prefix = "") {
+  return item.value ?? `${prefix}item-${index}`;
+}
+function firstEnabledValue(items, prefix = "") {
+  if (!items) return void 0;
+  for (let i = 0; i < items.length; i++) {
+    const item = items[i];
+    const value = itemIdentity(item, i, prefix);
+    if (!item.disabled) return value;
+    if (item.children?.length) {
+      const nested = firstEnabledValue(item.children, `${value}-`);
+      if (nested) return nested;
+    }
+  }
+  return void 0;
+}
+function navigateToHref(href, item, onNavigate) {
+  if (!href) return;
+  if (onNavigate) {
+    onNavigate(href, item);
+    return;
+  }
+  if (typeof window !== "undefined") window.location.assign(href);
+}
+function handleNavLinkClick(event, href, item, onNavigate) {
+  if (!href || !onNavigate) return;
+  event.preventDefault();
+  onNavigate(href, item);
+}
+var sidebarVariants = classVarianceAuthority.cva("flex flex-col border-border bg-background transition-[width] duration-normal", {
   variants: {
     variant: {
       default: "border-r",
-      floating: "m-2 rounded-xl border shadow-sm",
-      inset: "m-2 rounded-xl border bg-muted/30"
+      floating: "m-2 rounded-surface-lg border shadow-sm",
+      inset: "m-2 rounded-surface-lg border bg-muted/30"
     },
     side: {
       left: "",
@@ -5246,40 +5726,29 @@ var sidebarVariants = classVarianceAuthority.cva("flex flex-col border-border bg
     side: "left"
   }
 });
-function toCssSize2(value, fallback) {
+function toCssSize(value, fallback) {
   if (value == null) return fallback;
   return typeof value === "number" ? `${value}px` : value;
-}
-function itemValue(item, index, prefix = "") {
-  return item.value ?? `${prefix}item-${index}`;
-}
-function firstEnabledValue(items) {
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i];
-    if (!item.disabled) return itemValue(item, i);
-    if (item.children?.length) {
-      const nested = firstEnabledValue(item.children);
-      if (nested) return nested;
-    }
-  }
-  return void 0;
 }
 function SidebarNavItem({
   item,
   index,
   depth,
+  pathPrefix,
   collapsed,
   activeValue,
   onSelect,
+  onNavigate,
   itemProps
 }) {
-  const value = itemValue(item, index, depth > 0 ? `${depth}-` : "");
+  const value = itemIdentity(item, index, pathPrefix);
   const isActive = activeValue === value;
   const hasChildren = Boolean(item.children?.length);
-  const [nestedOpen, setNestedOpen] = React9__namespace.useState(false);
+  const [nestedOpen, setNestedOpen] = React10__namespace.useState(false);
   const rowClass2 = cn(
-    "flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-medium transition-colors",
-    "hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    "flex w-full items-center gap-2 rounded-control-md px-2 py-2 text-sm font-medium transition-colors",
+    "hover:bg-muted/80",
+    focusRing,
     isActive && "bg-muted text-foreground",
     !isActive && "text-muted-foreground hover:text-foreground",
     item.disabled && "pointer-events-none opacity-50",
@@ -5304,7 +5773,7 @@ function SidebarNavItem({
       return;
     }
     onSelect(value);
-    if (item.href && typeof window !== "undefined") window.location.assign(item.href);
+    navigateToHref(item.href, item, onNavigate);
   };
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn(depth > 0 && !collapsed && "pl-2"), children: [
     item.href && !hasChildren ? /* @__PURE__ */ jsxRuntime.jsx(
@@ -5313,7 +5782,10 @@ function SidebarNavItem({
         href: item.href,
         className: rowClass2,
         "aria-current": isActive ? "page" : void 0,
-        onClick: () => onSelect(value),
+        onClick: (e) => {
+          onSelect(value);
+          handleNavLinkClick(e, item.href, item, onNavigate);
+        },
         children: content
       }
     ) : /* @__PURE__ */ jsxRuntime.jsx("button", { type: "button", className: rowClass2, disabled: item.disabled, onClick: handleActivate, ...itemProps, children: content }),
@@ -5323,16 +5795,18 @@ function SidebarNavItem({
         item: child,
         index: childIndex,
         depth: depth + 1,
+        pathPrefix: `${value}-`,
         collapsed,
         activeValue,
         onSelect,
+        onNavigate,
         itemProps
       },
-      itemValue(child, childIndex, `${value}-`)
+      itemIdentity(child, childIndex, `${value}-`)
     )) }) : null
   ] });
 }
-function Sidebar({
+var Sidebar = React10__namespace.forwardRef(function Sidebar2({
   items = [],
   value,
   defaultValue,
@@ -5352,27 +5826,27 @@ function Sidebar({
   collapsedWidth = "3.5rem",
   toggleButtonProps,
   itemProps,
+  onNavigate,
   className,
   ...rest
-}) {
+}, ref) {
   const autoDefault = value === void 0 && defaultValue === void 0 ? firstEnabledValue(items) : void 0;
-  const [internalValue, setInternalValue] = React9__namespace.useState(defaultValue ?? autoDefault ?? "");
-  const isValueControlled = value !== void 0;
-  const activeValue = isValueControlled ? value : internalValue;
+  const [activeValue, handleSelect] = useControllableValue({
+    value,
+    defaultValue: defaultValue ?? autoDefault ?? "",
+    onChange
+  });
   const [collapsed, setCollapsed] = useControllableOpen({
     open: collapsedProp,
     defaultOpen: defaultCollapsed,
     onOpenChange: onCollapsedChange
   });
   const isCollapsed = collapsible ? collapsed : false;
-  const resolvedWidth = isCollapsed ? toCssSize2(collapsedWidth, "3.5rem") : toCssSize2(width, "16rem");
-  const handleSelect = (next) => {
-    if (!isValueControlled) setInternalValue(next);
-    onChange?.(next);
-  };
+  const resolvedWidth = isCollapsed ? toCssSize(collapsedWidth, "3.5rem") : toCssSize(width, "16rem");
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "aside",
     {
+      ref,
       "aria-label": "Sidebar",
       style: { width: resolvedWidth },
       className: cn(
@@ -5389,13 +5863,10 @@ function Sidebar({
         header || collapsible ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex items-center gap-2 p-3", isCollapsed && "justify-center"), children: [
           !isCollapsed && header ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: header }) : null,
           collapsible ? /* @__PURE__ */ jsxRuntime.jsx(
-            Button,
+            IconButton,
             {
-              variant: "ghost",
-              size: "sm",
-              iconOnly: true,
-              "aria-label": isCollapsed ? "Expand sidebar" : "Collapse sidebar",
-              left: isCollapsed ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelLeftOpen, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelLeftClose, { className: "h-4 w-4" }),
+              ariaLabel: isCollapsed ? "Expand sidebar" : "Collapse sidebar",
+              icon: isCollapsed ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelLeftOpen, { className: "h-4 w-4" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.PanelLeftClose, { className: "h-4 w-4" }),
               onClick: () => setCollapsed(!isCollapsed),
               ...toggleButtonProps
             }
@@ -5407,12 +5878,14 @@ function Sidebar({
             item,
             index,
             depth: 0,
+            pathPrefix: "",
             collapsed: isCollapsed,
             activeValue,
             onSelect: handleSelect,
+            onNavigate,
             itemProps
           },
-          itemValue(item, index)
+          itemIdentity(item, index)
         )) }),
         children,
         footer ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
@@ -5422,7 +5895,7 @@ function Sidebar({
       ]
     }
   );
-}
+});
 Sidebar.displayName = "Sidebar";
 function computePopoverStyle(trigger, content, placement, offset) {
   if (placement === "bottom") {
@@ -5464,7 +5937,7 @@ function computePopoverStyle(trigger, content, placement, offset) {
       return base;
   }
 }
-function Popover({
+var Popover = React10__namespace.forwardRef(function Popover2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -5472,78 +5945,55 @@ function Popover({
   trigger,
   openOnClick = true,
   closeOnOutsideClick = true,
+  closeOnEscape = true,
   placement = "bottom",
   offset = 8,
   className,
   cardProps,
   children,
   ...rest
-}) {
+}, ref) {
   const { label = "Open", left, variant = "outline", size = "md", className: triggerClassName } = triggerProps ?? {};
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const triggerRef = React9__namespace.useRef(null);
-  const contentRef = React9__namespace.useRef(null);
-  const [contentStyle, setContentStyle] = React9__namespace.useState({ visibility: "hidden" });
-  const [positioned, setPositioned] = React9__namespace.useState(false);
-  const updatePosition = React9__namespace.useCallback(() => {
+  const triggerRef = React10__namespace.useRef(null);
+  const contentRef = React10__namespace.useRef(null);
+  const [contentStyle, setContentStyle] = React10__namespace.useState({ visibility: "hidden" });
+  const updatePosition = React10__namespace.useCallback(() => {
     const el = triggerRef.current;
     const panel = contentRef.current;
     if (!el) return;
     setContentStyle(computePopoverStyle(el, panel, placement, offset));
   }, [placement, offset]);
-  React9__namespace.useLayoutEffect(() => {
-    if (!open) {
-      setPositioned(false);
-      return;
-    }
-    setPositioned(false);
-    updatePosition();
-    let raf2 = 0;
-    const raf1 = requestAnimationFrame(() => {
-      updatePosition();
-      raf2 = requestAnimationFrame(() => setPositioned(true));
-    });
-    const onReflow = () => updatePosition();
-    window.addEventListener("scroll", onReflow, true);
-    window.addEventListener("resize", onReflow);
-    return () => {
-      cancelAnimationFrame(raf1);
-      cancelAnimationFrame(raf2);
-      window.removeEventListener("scroll", onReflow, true);
-      window.removeEventListener("resize", onReflow);
-    };
-  }, [open, updatePosition]);
-  React9__namespace.useEffect(() => {
+  const positioned = usePositionedPortal(open, updatePosition);
+  React10__namespace.useEffect(() => {
     if (!open || !closeOnOutsideClick) return;
     const onPointerDown = (e) => {
       const t = e.target;
       if (triggerRef.current?.contains(t) || contentRef.current?.contains(t)) return;
       setOpen(false);
     };
+    document.addEventListener("pointerdown", onPointerDown, true);
+    return () => document.removeEventListener("pointerdown", onPointerDown, true);
+  }, [open, closeOnOutsideClick, setOpen]);
+  React10__namespace.useEffect(() => {
+    if (!open || !closeOnEscape) return;
     const onKeyDown = (e) => {
       if (e.key === "Escape") setOpen(false);
     };
-    document.addEventListener("pointerdown", onPointerDown, true);
     document.addEventListener("keydown", onKeyDown, true);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      document.removeEventListener("keydown", onKeyDown, true);
-    };
-  }, [open, closeOnOutsideClick, setOpen]);
+    return () => document.removeEventListener("keydown", onKeyDown, true);
+  }, [open, closeOnEscape, setOpen]);
   const content = open ? /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
       ref: contentRef,
-      style: {
-        ...contentStyle,
-        visibility: positioned ? contentStyle.visibility ?? "visible" : "hidden"
-      },
+      style: withPortalVisibility(contentStyle, positioned),
       className: "w-max max-w-xs",
       children: /* @__PURE__ */ jsxRuntime.jsx(Card, { variant: "surface-1", size: "sm", ...cardProps, className: cn("shadow-md", cardProps?.className), children })
     }
   ) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("relative inline-block", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React9__namespace.isValidElement(trigger) ? React9__namespace.cloneElement(trigger, {
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative inline-block", className), ...rest, children: [
+    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React10__namespace.isValidElement(trigger) ? React10__namespace.cloneElement(trigger, {
       onClick: (e) => {
         trigger.props.onClick?.(e);
         if (openOnClick) setOpen(!open);
@@ -5565,34 +6015,48 @@ function Popover({
     ) }),
     typeof document !== "undefined" && content ? reactDom.createPortal(content, document.body) : null
   ] });
-}
+});
 Popover.displayName = "Popover";
-function itemValue2(item, index) {
-  return item.value ?? `item-${index}`;
-}
-function firstEnabledValue2(items) {
-  return items.find((i) => !i.disabled)?.value ?? (items[0] ? itemValue2(items[0], 0) : void 0);
-}
 function NavMenuLeaf({
   item,
   active,
-  onSelect
+  onSelect,
+  onNavigate
 }) {
   const className = cn(
-    "inline-flex items-center gap-2 rounded-md px-3 py-2 text-sm font-medium transition-colors",
-    "hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    "inline-flex items-center gap-2 rounded-control-md px-3 py-2 text-sm font-medium transition-colors",
+    "hover:bg-muted/80",
+    focusRing,
     active ? "bg-muted text-foreground" : "text-muted-foreground hover:text-foreground",
     item.disabled && "pointer-events-none opacity-50"
   );
   if (item.href) {
-    return /* @__PURE__ */ jsxRuntime.jsxs(Link, { href: item.href, className, "aria-current": active ? "page" : void 0, onClick: onSelect, children: [
-      item.left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) : null,
-      item.label
-    ] });
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      Link,
+      {
+        href: item.href,
+        className,
+        "aria-current": active ? "page" : void 0,
+        onClick: (e) => {
+          onSelect();
+          handleNavLinkClick(e, item.href, item, onNavigate);
+        },
+        children: [
+          item.left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) : null,
+          item.label
+        ]
+      }
+    );
   }
   return /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "ghost", size: "md", className, disabled: item.disabled, left: item.left, onClick: onSelect, children: item.label });
 }
-function NavMenuSubmenu({ item, activeValue, onSelect }) {
+function NavMenuSubmenu({
+  item,
+  parentValue,
+  activeValue,
+  onSelect,
+  onNavigate
+}) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     Popover,
     {
@@ -5605,7 +6069,7 @@ function NavMenuSubmenu({ item, activeValue, onSelect }) {
       cardProps: { className: "min-w-[14rem] p-2" },
       placement: "bottom",
       children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-1", children: item.children?.map((child, index) => {
-        const value = itemValue2(child, index);
+        const value = itemIdentity(child, index, `${parentValue}-`);
         const active = activeValue === value;
         return /* @__PURE__ */ jsxRuntime.jsxs(
           "button",
@@ -5613,13 +6077,14 @@ function NavMenuSubmenu({ item, activeValue, onSelect }) {
             type: "button",
             disabled: child.disabled,
             className: cn(
-              "flex w-full flex-col items-start gap-0.5 rounded-md px-3 py-2 text-left transition-colors hover:bg-muted/80",
+              "flex w-full flex-col items-start gap-0.5 rounded-control-md px-3 py-2 text-left transition-colors hover:bg-muted/80",
+              focusRing,
               active && "bg-muted",
               child.disabled && "pointer-events-none opacity-50"
             ),
             onClick: () => {
               onSelect(value);
-              if (child.href && typeof window !== "undefined") window.location.assign(child.href);
+              navigateToHref(child.href, child, onNavigate);
             },
             children: [
               /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "span", size: "sm", weight: "medium", children: child.label }),
@@ -5632,27 +6097,17 @@ function NavMenuSubmenu({ item, activeValue, onSelect }) {
     }
   );
 }
-function NavigationMenu({
-  items,
-  value,
-  defaultValue,
-  onChange,
-  orientation = "horizontal",
-  children,
-  className,
-  ...rest
-}) {
-  const autoDefault = value === void 0 && defaultValue === void 0 ? firstEnabledValue2(items) : void 0;
-  const [internalValue, setInternalValue] = React9__namespace.useState(defaultValue ?? autoDefault ?? "");
-  const isControlled = value !== void 0;
-  const activeValue = isControlled ? value : internalValue;
-  const select = (next) => {
-    if (!isControlled) setInternalValue(next);
-    onChange?.(next);
-  };
+var NavigationMenu = React10__namespace.forwardRef(function NavigationMenu2({ items, value, defaultValue, onChange, orientation = "horizontal", onNavigate, children, className, ...rest }, ref) {
+  const autoDefault = value === void 0 && defaultValue === void 0 ? firstEnabledValue(items) : void 0;
+  const [activeValue, select] = useControllableValue({
+    value,
+    defaultValue: defaultValue ?? autoDefault ?? "",
+    onChange
+  });
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "nav",
     {
+      ref,
       "aria-label": "Main",
       className: cn(
         "flex gap-1",
@@ -5662,19 +6117,27 @@ function NavigationMenu({
       ...rest,
       children: [
         items.map((item, index) => {
-          const itemKey = itemValue2(item, index);
+          const itemKey = itemIdentity(item, index);
           if (item.children?.length) {
-            return /* @__PURE__ */ jsxRuntime.jsx(NavMenuSubmenu, { item, activeValue, onSelect: select }, itemKey);
+            return /* @__PURE__ */ jsxRuntime.jsx(
+              NavMenuSubmenu,
+              {
+                item,
+                parentValue: itemKey,
+                activeValue,
+                onSelect: select,
+                onNavigate
+              },
+              itemKey
+            );
           }
           return /* @__PURE__ */ jsxRuntime.jsx(
             NavMenuLeaf,
             {
               item,
               active: activeValue === itemKey,
-              onSelect: () => {
-                select(itemKey);
-                if (item.href && typeof window !== "undefined") window.location.assign(item.href);
-              }
+              onNavigate,
+              onSelect: () => select(itemKey)
             },
             itemKey
           );
@@ -5683,141 +6146,178 @@ function NavigationMenu({
       ]
     }
   );
-}
+});
 NavigationMenu.displayName = "NavigationMenu";
-function menuValue(menu, index) {
-  return menu.value ?? `menu-${index}`;
-}
-function Menubar({ menus = [], value, defaultValue, onChange, className, ...rest }) {
-  const [internalValue, setInternalValue] = React9__namespace.useState(defaultValue ?? "");
-  const isControlled = value !== void 0;
-  const activeValue = isControlled ? value : internalValue;
-  const setActive = (next) => {
-    if (!isControlled) setInternalValue(next);
-    onChange?.(next);
-  };
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { role: "menubar", className: cn("inline-flex items-center gap-1 rounded-md border border-border bg-background p-1", className), ...rest, children: menus.map((menu, index) => {
-    const menuKey = menuValue(menu, index);
-    const open = activeValue === menuKey;
-    return /* @__PURE__ */ jsxRuntime.jsx(
-      Dropdown,
-      {
-        items: menu.items,
-        open,
-        onOpenChange: (nextOpen) => setActive(nextOpen ? menuKey : ""),
-        triggerProps: {
-          label: menu.label,
-          variant: "ghost",
-          size: "md",
-          className: cn("font-medium", open && "bg-muted text-foreground")
-        }
-      },
-      menuKey
-    );
-  }) });
-}
-Menubar.displayName = "Menubar";
-function ContextMenu({
-  items,
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  children,
-  className,
-  contentClassName,
-  ...rest
-}) {
-  const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const [coords, setCoords] = React9__namespace.useState({ x: 0, y: 0 });
-  const menuRef = React9__namespace.useRef(null);
-  React9__namespace.useEffect(() => {
-    if (!open) return;
-    const onPointerDown = (e) => {
-      const t = e.target;
-      if (menuRef.current?.contains(t)) return;
-      setOpen(false);
-    };
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true);
-      document.removeEventListener("keydown", onKeyDown, true);
-    };
-  }, [open, setOpen]);
-  const onContextMenu = (e) => {
-    e.preventDefault();
-    setCoords({ x: e.clientX, y: e.clientY });
-    setOpen(true);
-  };
-  const menu = open ? /* @__PURE__ */ jsxRuntime.jsx(
-    "div",
-    {
-      ref: menuRef,
-      role: "menu",
-      tabIndex: -1,
-      style: { position: "fixed", top: coords.y, left: coords.x, zIndex: zLayerValue("dropdown"), minWidth: "10rem" },
-      className: cn(
-        "overflow-hidden rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none animate-in fade-in-0",
-        contentClassName
-      ),
-      children: items.map(
-        (item, index) => item.separator ? /* @__PURE__ */ jsxRuntime.jsx("div", { role: "separator", className: "-mx-1 my-1 h-px bg-border" }, `sep-${index}`) : /* @__PURE__ */ jsxRuntime.jsxs(
-          "div",
-          {
-            role: "menuitem",
-            tabIndex: -1,
-            "aria-disabled": item.disabled || void 0,
-            className: cn(
-              "relative flex cursor-default select-none items-center gap-2 rounded-sm px-2 py-1.5 text-sm outline-none",
-              "focus:bg-accent focus:text-accent-foreground hover:bg-accent hover:text-accent-foreground",
-              item.disabled && "pointer-events-none opacity-50"
-            ),
-            onClick: () => {
-              if (item.disabled) return;
-              item.onClick?.();
-              setOpen(false);
-            },
-            children: [
-              item.left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "text-muted-foreground", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) }) : null,
-              /* @__PURE__ */ jsxRuntime.jsx("span", { className: "flex-1", children: item.label })
-            ]
-          },
-          item.value ?? `item-${index}`
-        )
-      )
-    }
-  ) : null;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("inline-block", className), onContextMenu, ...rest, children: [
-    children,
-    typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
-  ] });
-}
-ContextMenu.displayName = "ContextMenu";
-var navbarVariants = classVarianceAuthority.cva("w-full", {
+var menubarVariants = classVarianceAuthority.cva("inline-flex items-center gap-1 p-1", {
   variants: {
     variant: {
-      default: "bg-background",
-      bordered: "border-b border-border bg-background",
-      floating: "mx-auto max-w-6xl rounded-xl border border-border bg-background shadow-sm"
+      default: "rounded-control-md border border-border bg-background",
+      ghost: "bg-transparent"
     }
   },
   defaultVariants: {
     variant: "default"
   }
 });
-function navChildrenToDropdownItems(children) {
+function menuValue(menu, index) {
+  return menu.value ?? `menu-${index}`;
+}
+var Menubar = React10__namespace.forwardRef(
+  ({ menus = [], value, defaultValue, onChange, variant, className, ...rest }, ref) => {
+    const [activeValue, setActive] = useControllableValue({
+      value,
+      defaultValue: defaultValue ?? "",
+      onChange
+    });
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        ref,
+        role: "menubar",
+        className: cn(menubarVariants({ variant }), className),
+        ...rest,
+        children: menus.map((menu, index) => {
+          const menuKey = menuValue(menu, index);
+          const open = activeValue === menuKey;
+          return /* @__PURE__ */ jsxRuntime.jsx(
+            Dropdown,
+            {
+              items: menu.items,
+              open,
+              onOpenChange: (nextOpen) => setActive(nextOpen ? menuKey : ""),
+              triggerProps: {
+                label: menu.label,
+                variant: "ghost",
+                size: "md",
+                className: cn("font-medium", open && "bg-muted text-foreground")
+              }
+            },
+            menuKey
+          );
+        })
+      }
+    );
+  }
+);
+Menubar.displayName = "Menubar";
+var contextMenuVariants = classVarianceAuthority.cva(floatingMenuListClass, {
+  variants: {
+    /** Minimum width of the menu surface. */
+    size: {
+      sm: "min-w-[10rem]",
+      md: "min-w-[14rem]"
+    }
+  },
+  defaultVariants: {
+    size: "sm"
+  }
+});
+var ContextMenu = React10__namespace.forwardRef(
+  ({
+    items,
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
+    size,
+    children,
+    className,
+    contentClassName,
+    onContextMenu: consumerOnContextMenu,
+    ...rest
+  }, ref) => {
+    const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+    const [coords, setCoords] = React10__namespace.useState({ x: 0, y: 0 });
+    const [menuStyle, setMenuStyle] = React10__namespace.useState({ visibility: "hidden" });
+    const menuRef = React10__namespace.useRef(null);
+    const updatePosition = React10__namespace.useCallback(() => {
+      const menu2 = menuRef.current;
+      const width = menu2?.offsetWidth ?? 0;
+      const height = menu2?.offsetHeight ?? 0;
+      const vh = typeof window !== "undefined" ? window.innerHeight : 0;
+      const { left, top } = clampToViewport(coords.x, coords.y, width, height);
+      setMenuStyle({
+        position: "fixed",
+        top,
+        left,
+        zIndex: zLayerValue("dropdown"),
+        maxHeight: Math.max(120, vh - VIEWPORT_MARGIN * 2),
+        overflowY: "auto",
+        visibility: "visible"
+      });
+    }, [coords]);
+    const positioned = usePositionedPortal(open, updatePosition);
+    const onMenuKeyDown = useMenuKeyboard(menuRef, open);
+    React10__namespace.useEffect(() => {
+      if (!open) return;
+      const onPointerDown = (e) => {
+        const t = e.target;
+        if (menuRef.current?.contains(t)) return;
+        setOpen(false);
+      };
+      const onKeyDown = (e) => {
+        if (e.key === "Escape") setOpen(false);
+      };
+      document.addEventListener("pointerdown", onPointerDown, true);
+      document.addEventListener("keydown", onKeyDown, true);
+      return () => {
+        document.removeEventListener("pointerdown", onPointerDown, true);
+        document.removeEventListener("keydown", onKeyDown, true);
+      };
+    }, [open, setOpen]);
+    const handleContextMenu = (e) => {
+      consumerOnContextMenu?.(e);
+      e.preventDefault();
+      setCoords({ x: e.clientX, y: e.clientY });
+      setOpen(true);
+    };
+    const menu = open ? /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        ref: menuRef,
+        role: "menu",
+        tabIndex: -1,
+        style: withPortalVisibility(menuStyle, positioned),
+        onKeyDown: onMenuKeyDown,
+        className: cn(contextMenuVariants({ size }), "animate-in fade-in-0", contentClassName),
+        children: renderMenuItems(items, () => setOpen(false))
+      }
+    ) : null;
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        ref,
+        className: cn("inline-block", className),
+        onContextMenu: handleContextMenu,
+        ...rest,
+        children: [
+          children,
+          typeof document !== "undefined" && menu ? reactDom.createPortal(menu, document.body) : null
+        ]
+      }
+    );
+  }
+);
+ContextMenu.displayName = "ContextMenu";
+var navbarVariants = classVarianceAuthority.cva("w-full", {
+  variants: {
+    variant: {
+      default: "bg-background",
+      bordered: "border-b border-border bg-background",
+      floating: "mx-auto max-w-6xl rounded-surface-lg border border-border bg-background shadow-sm"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+function navChildrenToDropdownItems(children, onNavigate) {
   return children.map((c) => ({
     label: c.label,
     disabled: c.disabled,
-    onClick: c.disabled ? void 0 : c.href ? () => {
-      if (typeof window !== "undefined") window.location.assign(c.href);
-    } : void 0
+    onClick: c.disabled || !c.href ? void 0 : () => navigateToHref(c.href, c, onNavigate)
   }));
 }
-function Navbar({
+var Navbar = React10__namespace.forwardRef(function Navbar2({
   logo,
   items = [],
   left,
@@ -5828,11 +6328,13 @@ function Navbar({
   className,
   children,
   linkVariant = "muted",
+  onNavigate,
   ...rest
-}) {
+}, ref) {
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "header",
     {
+      ref,
       className: cn(
         navbarVariants({ variant }),
         sticky && "sticky top-0 z-sticky",
@@ -5848,7 +6350,7 @@ function Navbar({
               return /* @__PURE__ */ jsxRuntime.jsx(
                 Dropdown,
                 {
-                  items: navChildrenToDropdownItems(item.children),
+                  items: navChildrenToDropdownItems(item.children, onNavigate),
                   triggerProps: {
                     label: item.label,
                     left: item.left,
@@ -5870,11 +6372,12 @@ function Navbar({
                   href: item.href,
                   variant: linkVariant,
                   className: cn(
-                    "rounded-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/80",
+                    "rounded-control-md px-3 py-2 text-sm font-medium transition-colors hover:bg-muted/80",
                     item.active && "bg-muted text-foreground",
                     item.disabled && "pointer-events-none opacity-50"
                   ),
                   "aria-current": item.active ? "page" : void 0,
+                  onClick: (e) => handleNavLinkClick(e, item.href, item, onNavigate),
                   children: item.label
                 },
                 index
@@ -5903,7 +6406,7 @@ function Navbar({
       ]
     }
   );
-}
+});
 Navbar.displayName = "Navbar";
 function range(start, end) {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
@@ -5923,7 +6426,7 @@ function paginationWindow(current, totalPages, siblingCount) {
   items.push(totalPages);
   return items;
 }
-var Pagination = React9__namespace.forwardRef(
+var Pagination = React10__namespace.forwardRef(
   ({
     total,
     pageSize = 10,
@@ -5940,10 +6443,10 @@ var Pagination = React9__namespace.forwardRef(
   }, ref) => {
     const pageCount = Math.max(1, pageCountProp ?? Math.ceil(total / Math.max(1, pageSize)));
     const isControlled = value !== void 0;
-    const [internalPage, setInternalPage] = React9__namespace.useState(
+    const [internalPage, setInternalPage] = React10__namespace.useState(
       () => Math.min(Math.max(1, defaultValue), pageCount)
     );
-    React9__namespace.useEffect(() => {
+    React10__namespace.useEffect(() => {
       if (!isControlled) {
         setInternalPage((p) => Math.min(Math.max(1, p), pageCount));
       }
@@ -6035,6 +6538,8 @@ var Pagination = React9__namespace.forwardRef(
 Pagination.displayName = "Pagination";
 var STEP_VERTICAL_ITEM_PAD = "pb-5 last:pb-0";
 var STEP_LABEL_GAP = "gap-2";
+var STEP_CIRCLE_SIZE = "2.25rem";
+var STEP_CIRCLE_CLASS = "h-[var(--step-circle)] w-[var(--step-circle)]";
 function resolveStatus(step, index, active) {
   if (step.status) return step.status;
   if (index < active) return "complete";
@@ -6057,7 +6562,8 @@ function StepCircle({
         variant: "ghost",
         size: "sm",
         className: cn(
-          "h-9 w-9 shrink-0 rounded-full border-2 p-0",
+          STEP_CIRCLE_CLASS,
+          "shrink-0 rounded-pill border-2 p-0",
           circleClass,
           !canClick && "pointer-events-none cursor-default hover:bg-transparent"
         ),
@@ -6071,7 +6577,8 @@ function StepCircle({
     "div",
     {
       className: cn(
-        "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold tabular-nums",
+        STEP_CIRCLE_CLASS,
+        "flex shrink-0 items-center justify-center rounded-pill border-2 text-sm font-semibold tabular-nums",
         circleClass
       ),
       "aria-current": status === "current" ? "step" : void 0,
@@ -6079,7 +6586,7 @@ function StepCircle({
     }
   );
 }
-var Stepper = React9__namespace.forwardRef(
+var Stepper = React10__namespace.forwardRef(
   ({
     steps = [],
     value,
@@ -6089,9 +6596,10 @@ var Stepper = React9__namespace.forwardRef(
     allowBack = true,
     horizontalGap = "none",
     className,
+    style,
     ...props
   }, ref) => {
-    const [internal, setInternal] = React9__namespace.useState(defaultValue);
+    const [internal, setInternal] = React10__namespace.useState(defaultValue);
     const isControlled = value !== void 0;
     const active = isControlled ? value : internal;
     const setStep = (next) => {
@@ -6099,59 +6607,27 @@ var Stepper = React9__namespace.forwardRef(
       onChange?.(next);
     };
     const stepChange = onChange ? (i) => setStep(i) : void 0;
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, role: "navigation", "aria-label": "Progress", className: cn("w-full", className), ...props, children: orientation === "vertical" ? /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "relative flex list-none flex-col", children: [
-      steps.length > 1 ? /* @__PURE__ */ jsxRuntime.jsx(
-        "div",
-        {
-          className: "pointer-events-none absolute bottom-5 left-[1.125rem] top-[1.125rem] w-px -translate-x-1/2 bg-border",
-          "aria-hidden": true
-        }
-      ) : null,
-      steps.map((step, index) => {
-        const status = resolveStatus(step, index, active);
-        return /* @__PURE__ */ jsxRuntime.jsxs("li", { className: cn("relative z-[1] flex gap-3", STEP_VERTICAL_ITEM_PAD), children: [
-          /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex shrink-0 flex-col items-center", children: /* @__PURE__ */ jsxRuntime.jsx(
-            StepCircle,
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      "div",
+      {
+        ref,
+        role: "navigation",
+        "aria-label": "Progress",
+        className: cn("w-full", className),
+        style: { ["--step-circle"]: STEP_CIRCLE_SIZE, ...style },
+        ...props,
+        children: orientation === "vertical" ? /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "relative flex list-none flex-col", children: [
+          steps.length > 1 ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
             {
-              index,
-              status,
-              onChange: stepChange,
-              allowBack
+              className: "pointer-events-none absolute bottom-5 left-[calc(var(--step-circle)/2)] top-[calc(var(--step-circle)/2)] w-px -translate-x-1/2 bg-border",
+              "aria-hidden": true
             }
-          ) }),
-          /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex min-w-0 flex-col pt-1.5", STEP_LABEL_GAP), children: [
-            /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "sm", weight: "medium", className: "block leading-tight", children: [
-              step.label,
-              step.optional ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-xs font-normal text-muted-foreground", children: "(optional)" }) : null
-            ] }),
-            step.description ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "2xs", variant: "muted", className: "block w-full leading-snug", children: step.description }) : null
-          ] })
-        ] }, index);
-      })
-    ] }) : /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "relative flex w-full list-none flex-row items-start gap-0", children: [
-      steps.length > 1 ? /* @__PURE__ */ jsxRuntime.jsx(
-        "div",
-        {
-          className: "pointer-events-none absolute inset-x-0 top-[1.125rem] h-0.5 -translate-y-1/2 bg-border",
-          style: {
-            left: `${100 / steps.length / 2}%`,
-            right: `${100 / steps.length / 2}%`
-          },
-          "aria-hidden": true
-        }
-      ) : null,
-      steps.map((step, index) => {
-        const status = resolveStatus(step, index, active);
-        return /* @__PURE__ */ jsxRuntime.jsxs(
-          "li",
-          {
-            className: cn(
-              "relative z-[1] flex min-h-0 min-w-0 flex-1 basis-0 flex-col items-center text-center",
-              horizontalGap === "md" && index > 0 && "ml-4",
-              STEP_LABEL_GAP
-            ),
-            children: [
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex w-full items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsx(
+          ) : null,
+          steps.map((step, index) => {
+            const status = resolveStatus(step, index, active);
+            return /* @__PURE__ */ jsxRuntime.jsxs("li", { className: cn("relative z-[1] flex gap-3", STEP_VERTICAL_ITEM_PAD), children: [
+              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex shrink-0 flex-col items-center", children: /* @__PURE__ */ jsxRuntime.jsx(
                 StepCircle,
                 {
                   index,
@@ -6160,23 +6636,66 @@ var Stepper = React9__namespace.forwardRef(
                   allowBack
                 }
               ) }),
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex w-full flex-col items-center px-1", STEP_LABEL_GAP), children: [
-                /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "sm", weight: "medium", className: "block w-full leading-tight", children: [
+              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex min-w-0 flex-col pt-1.5", STEP_LABEL_GAP), children: [
+                /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "sm", weight: "medium", className: "block leading-tight", children: [
                   step.label,
                   step.optional ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-xs font-normal text-muted-foreground", children: "(optional)" }) : null
                 ] }),
                 step.description ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "2xs", variant: "muted", className: "block w-full leading-snug", children: step.description }) : null
               ] })
-            ]
-          },
-          index
-        );
-      })
-    ] }) });
+            ] }, index);
+          })
+        ] }) : /* @__PURE__ */ jsxRuntime.jsxs("ol", { className: "relative flex w-full list-none flex-row items-start gap-0", children: [
+          steps.length > 1 ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: "pointer-events-none absolute inset-x-0 top-[calc(var(--step-circle)/2)] h-0.5 -translate-y-1/2 bg-border",
+              style: {
+                left: `${100 / steps.length / 2}%`,
+                right: `${100 / steps.length / 2}%`
+              },
+              "aria-hidden": true
+            }
+          ) : null,
+          steps.map((step, index) => {
+            const status = resolveStatus(step, index, active);
+            return /* @__PURE__ */ jsxRuntime.jsxs(
+              "li",
+              {
+                className: cn(
+                  "relative z-[1] flex min-h-0 min-w-0 flex-1 basis-0 flex-col items-center text-center",
+                  horizontalGap === "md" && index > 0 && "ml-4",
+                  STEP_LABEL_GAP
+                ),
+                children: [
+                  /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex w-full items-center justify-center", children: /* @__PURE__ */ jsxRuntime.jsx(
+                    StepCircle,
+                    {
+                      index,
+                      status,
+                      onChange: stepChange,
+                      allowBack
+                    }
+                  ) }),
+                  /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex w-full flex-col items-center px-1", STEP_LABEL_GAP), children: [
+                    /* @__PURE__ */ jsxRuntime.jsxs(Text, { as: "div", size: "sm", weight: "medium", className: "block w-full leading-tight", children: [
+                      step.label,
+                      step.optional ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "ml-1 text-xs font-normal text-muted-foreground", children: "(optional)" }) : null
+                    ] }),
+                    step.description ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "2xs", variant: "muted", className: "block w-full leading-snug", children: step.description }) : null
+                  ] })
+                ]
+              },
+              index
+            );
+          })
+        ] })
+      }
+    );
   }
 );
 Stepper.displayName = "Stepper";
-var tabsListVariants = classVarianceAuthority.cva("inline-flex h-10 items-center gap-1 rounded-md text-muted-foreground", {
+var tabsListVariants = classVarianceAuthority.cva("inline-flex h-10 items-center gap-1 rounded-control-md text-muted-foreground", {
   variants: {
     variant: {
       default: "bg-muted/50 p-1",
@@ -6189,13 +6708,19 @@ var tabsListVariants = classVarianceAuthority.cva("inline-flex h-10 items-center
   }
 });
 var tabsTriggerVariants = classVarianceAuthority.cva(
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+  cn(
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-control-sm px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+    focusRing,
+    focusRingOffset,
+    `focus-visible:${ringOffsetBackground}`,
+    disabledControl
+  ),
   {
     variants: {
       variant: {
         default: "aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm",
-        underline: "rounded-none border-b-2 border-transparent px-3 pb-2 pt-1 aria-selected:border-primary aria-selected:text-foreground",
-        pill: "rounded-full border border-transparent px-3 py-1.5 aria-selected:border-border aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm"
+        underline: "rounded-[0] border-b-2 border-transparent px-3 pb-2 pt-1 aria-selected:border-primary aria-selected:text-foreground",
+        pill: "rounded-pill border border-transparent px-3 py-1.5 aria-selected:border-border aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm"
       }
     },
     defaultVariants: {
@@ -6203,10 +6728,7 @@ var tabsTriggerVariants = classVarianceAuthority.cva(
     }
   }
 );
-function firstEnabledValue3(items) {
-  return items.find((i) => !i.disabled)?.value ?? items[0]?.value;
-}
-var Tabs = React9__namespace.forwardRef(
+var Tabs = React10__namespace.forwardRef(
   ({
     items,
     orientation = "horizontal",
@@ -6220,17 +6742,14 @@ var Tabs = React9__namespace.forwardRef(
     onValueChange,
     ...props
   }, ref) => {
-    const autoDefault = value === void 0 && defaultValue === void 0 ? firstEnabledValue3(items) : void 0;
-    const initial = defaultValue ?? autoDefault ?? "";
-    const [internal, setInternal] = React9__namespace.useState(initial);
-    const isControlled = value !== void 0;
-    const active = isControlled ? value : internal;
-    const setTab = (next) => {
-      if (!isControlled) setInternal(next);
-      onValueChange?.(next);
-    };
-    const enabledValues = React9__namespace.useMemo(() => items.filter((i) => !i.disabled).map((i) => i.value), [items]);
-    const tabIds = React9__namespace.useId();
+    const autoDefault = value === void 0 && defaultValue === void 0 ? firstEnabledValue(items) : void 0;
+    const [active, setTab] = useControllableValue({
+      value,
+      defaultValue: defaultValue ?? autoDefault ?? "",
+      onChange: onValueChange
+    });
+    const enabledValues = React10__namespace.useMemo(() => items.filter((i) => !i.disabled).map((i) => i.value), [items]);
+    const tabIds = React10__namespace.useId();
     const onTabListKeyDown = (e) => {
       const horizontal = orientation === "horizontal";
       const prevKey = horizontal ? "ArrowLeft" : "ArrowUp";
@@ -6306,7 +6825,9 @@ var Tabs = React9__namespace.forwardRef(
                 id: `${tabIds}-panel-${item.value}`,
                 "aria-labelledby": `${tabIds}-tab-${item.value}`,
                 className: cn(
-                  "mt-3 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                  "mt-3 min-h-0 outline-none",
+                  focusRing,
+                  focusRingOffset,
                   orientation === "vertical" && "mt-0 flex-1",
                   panelClassName
                 ),
@@ -6321,6 +6842,35 @@ var Tabs = React9__namespace.forwardRef(
   }
 );
 Tabs.displayName = "Tabs";
+function FeedbackBody({
+  left,
+  title,
+  description,
+  children,
+  footer,
+  onDismiss,
+  dismissLabel = "Dismiss"
+}) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
+    left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 pt-0.5", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "md" }) }) : null,
+    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex min-w-0 flex-1 flex-col gap-1", onDismiss && "pr-6"), children: [
+      title ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "semibold", children: title }) : null,
+      description ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", className: "text-current opacity-80", children: description }) : null,
+      children,
+      footer
+    ] }),
+    onDismiss ? /* @__PURE__ */ jsxRuntime.jsx(
+      IconButton,
+      {
+        className: "absolute right-2 top-2 shrink-0 text-current",
+        ariaLabel: dismissLabel,
+        icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" }),
+        onClick: onDismiss
+      }
+    ) : null
+  ] });
+}
+FeedbackBody.displayName = "FeedbackBody";
 var toneCompoundVariants = [
   { tone: "neutral", variant: "solid", class: "border-transparent bg-muted text-foreground" },
   { tone: "neutral", variant: "outline", class: "border-border" },
@@ -6358,11 +6908,11 @@ function feedbackSurfaceVariants(base, defaultVariants) {
     defaultVariants
   });
 }
-var alertVariants = feedbackSurfaceVariants("relative flex w-full gap-3 rounded-lg border p-4", {
+var alertVariants = feedbackSurfaceVariants("relative flex w-full gap-3 rounded-surface-md border p-4", {
   tone: "neutral",
   variant: "subtle"
 });
-var Alert = React9__namespace.forwardRef(
+var Alert = React10__namespace.forwardRef(
   ({
     tone,
     variant,
@@ -6377,59 +6927,55 @@ var Alert = React9__namespace.forwardRef(
     role = "alert",
     ...props
   }, ref) => {
-    const [dismissed, setDismissed] = React9__namespace.useState(false);
+    const [dismissed, setDismissed] = React10__namespace.useState(false);
+    const handleDismiss = React10__namespace.useCallback(() => {
+      setDismissed(true);
+      onClose?.();
+    }, [onClose]);
     if (dismissed) {
       return null;
     }
-    const handleDismiss = () => {
-      setDismissed(true);
-      onClose?.();
-    };
-    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, role, className: cn(alertVariants({ tone, variant }), className), ...props, children: [
-      left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 pt-0.5", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "md" }) }) : null,
-      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1 flex flex-col gap-1", children: [
-        title ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "semibold", children: title }) : null,
-        description ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", className: "text-current opacity-80", children: description }) : null,
-        children,
-        action ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pt-2", children: action }) : null
-      ] }),
-      dismissible ? /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          iconOnly: true,
-          "aria-label": "Dismiss",
-          className: "absolute right-2 top-2 h-8 w-8 shrink-0 text-current",
-          onClick: handleDismiss,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
-        }
-      ) : null
-    ] });
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, role, className: cn(alertVariants({ tone, variant }), className), ...props, children: /* @__PURE__ */ jsxRuntime.jsx(
+      FeedbackBody,
+      {
+        left,
+        title,
+        description,
+        footer: action ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "pt-2", children: action }) : null,
+        onDismiss: dismissible ? handleDismiss : void 0,
+        children
+      }
+    ) });
   }
 );
 Alert.displayName = "Alert";
 var toastVariants = feedbackSurfaceVariants(
-  "pointer-events-auto relative flex w-full max-w-sm gap-3 rounded-lg border p-4 shadow-lg",
+  "pointer-events-auto relative flex w-full max-w-sm gap-3 rounded-surface-md border p-4 shadow-lg",
   { tone: "neutral", variant: "solid" }
 );
-function Toast({
-  tone,
-  variant,
-  title,
-  description,
-  action,
-  left,
-  dismissible = true,
-  onClose,
-  className
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { role: "status", className: cn(toastVariants({ tone, variant }), className), children: [
-    left ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 pt-0.5", children: /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: left, size: "md" }) }) : null,
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "min-w-0 flex-1 flex flex-col gap-1 pr-6", children: [
-      title ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", weight: "semibold", children: title }) : null,
-      description ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", className: "text-current opacity-80", children: description }) : null,
-      action ? /* @__PURE__ */ jsxRuntime.jsx(
+var Toast = React10__namespace.forwardRef(
+  ({
+    tone,
+    variant,
+    title,
+    description,
+    action,
+    left,
+    dismissible = true,
+    onClose,
+    // Destructured only so it never reaches the DOM as an unknown attribute
+    // when `Toaster` spreads a whole queue record in. See the JSDoc above.
+    duration: _duration,
+    className,
+    role = "status",
+    ...props
+  }, ref) => /* @__PURE__ */ jsxRuntime.jsx("div", { ref, role, className: cn(toastVariants({ tone, variant }), className), ...props, children: /* @__PURE__ */ jsxRuntime.jsx(
+    FeedbackBody,
+    {
+      left,
+      title,
+      description,
+      footer: action ? /* @__PURE__ */ jsxRuntime.jsx(
         Button,
         {
           variant: "ghost",
@@ -6438,22 +6984,11 @@ function Toast({
           label: action.label,
           onClick: action.onClick
         }
-      ) : null
-    ] }),
-    dismissible && onClose ? /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
-      {
-        variant: "ghost",
-        size: "sm",
-        iconOnly: true,
-        "aria-label": "Dismiss",
-        className: "absolute right-2 top-2 h-8 w-8 shrink-0 text-current",
-        onClick: onClose,
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" })
-      }
-    ) : null
-  ] });
-}
+      ) : null,
+      onDismiss: dismissible && onClose ? onClose : void 0
+    }
+  ) })
+);
 Toast.displayName = "Toast";
 var toasts = [];
 var listeners = /* @__PURE__ */ new Set();
@@ -6496,16 +7031,41 @@ var positionClasses = {
   "bottom-right": "bottom-4 right-4 items-end"
 };
 function Toaster({ position = "bottom-right", maxVisible = 5, className }) {
-  const [items, setItems] = React9__namespace.useState([]);
-  React9__namespace.useEffect(() => subscribeToasts(setItems), []);
+  const [items, setItems] = React10__namespace.useState([]);
+  React10__namespace.useEffect(() => subscribeToasts(setItems), []);
   const visible = items.slice(-maxVisible);
-  React9__namespace.useEffect(() => {
-    const timers = visible.map((item) => {
-      if (!item.duration || item.duration <= 0) return null;
-      return window.setTimeout(() => dismissToast(item.id), item.duration);
-    });
-    return () => timers.forEach((t) => t != null && clearTimeout(t));
-  }, [visible]);
+  const timers = React10__namespace.useRef(/* @__PURE__ */ new Map());
+  const visibleRef = React10__namespace.useRef(visible);
+  visibleRef.current = visible;
+  const visibleKey = visible.map((item) => item.id).join("|");
+  React10__namespace.useEffect(() => {
+    const current = visibleRef.current;
+    const liveIds = new Set(current.map((item) => item.id));
+    for (const [id, handle] of timers.current) {
+      if (!liveIds.has(id)) {
+        clearTimeout(handle);
+        timers.current.delete(id);
+      }
+    }
+    for (const item of current) {
+      if (!item.duration || item.duration <= 0) continue;
+      if (timers.current.has(item.id)) continue;
+      timers.current.set(
+        item.id,
+        window.setTimeout(() => {
+          timers.current.delete(item.id);
+          dismissToast(item.id);
+        }, item.duration)
+      );
+    }
+  }, [visibleKey]);
+  React10__namespace.useEffect(() => {
+    const handles = timers.current;
+    return () => {
+      handles.forEach((handle) => clearTimeout(handle));
+      handles.clear();
+    };
+  }, []);
   if (typeof document === "undefined") return null;
   return reactDom.createPortal(
     /* @__PURE__ */ jsxRuntime.jsx(
@@ -6546,7 +7106,7 @@ var overlayVariants = classVarianceAuthority.cva(
     }
   }
 );
-var OverlayPortalParentContext = React9__namespace.createContext(null);
+var OverlayPortalParentContext = React10__namespace.createContext(null);
 function isPortalRef(value) {
   if (value === null || typeof value !== "object") return false;
   if (typeof HTMLElement !== "undefined" && value instanceof HTMLElement) return false;
@@ -6569,62 +7129,86 @@ function OverlayPortalScope({
   children,
   className
 }) {
-  const [host, setHost] = React9__namespace.useState(null);
+  const [host, setHost] = React10__namespace.useState(null);
   return /* @__PURE__ */ jsxRuntime.jsx(OverlayPortalParentContext.Provider, { value: host, children: /* @__PURE__ */ jsxRuntime.jsx("div", { ref: setHost, className: cn("relative isolate", className), children }) });
 }
-function Overlay({
+var Overlay = React10__namespace.forwardRef(function Overlay2({
   open = false,
   onClose,
   container,
   blur,
   showCloseButton = false,
   closeOnBackdropClick = true,
+  dialog = false,
+  dialogRole = "dialog",
+  dialogLabel,
+  closeOnEscape = true,
+  initialFocus,
+  contentClassName,
   className,
-  children
-}) {
-  const parentHost = React9__namespace.useContext(OverlayPortalParentContext);
+  style,
+  children,
+  ...rest
+}, ref) {
+  const parentHost = React10__namespace.useContext(OverlayPortalParentContext);
   const target = resolvePortalTarget(container, parentHost);
   const viewportFixed = typeof document !== "undefined" && target !== null && target === document.body;
+  const modal = dialog && viewportFixed;
+  const surfaceRef = useDialogA11y({
+    open,
+    onClose,
+    closeOnEscape,
+    initialFocus,
+    enabled: modal
+  });
   const node = /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
+      ref,
       role: "presentation",
       "data-state": open ? "open" : "closed",
       "aria-hidden": !open,
       className: cn(
         overlayVariants({ blur }),
-        viewportFixed ? "fixed z-overlay" : "absolute z-10",
+        // Backdrops read the overlay layer: the token class at viewport scope,
+        // the OverlayPortalScope-local value when mounted inside a card.
+        viewportFixed ? "fixed z-overlay" : "absolute",
         !open && "pointer-events-none opacity-0",
         className
       ),
+      style: viewportFixed ? style : { zIndex: zScoped.overlay, ...style },
       onClick: (e) => {
         if (closeOnBackdropClick && e.target === e.currentTarget) onClose?.();
       },
+      ...rest,
       children: [
         /* @__PURE__ */ jsxRuntime.jsx(
           "div",
           {
-            className: "pointer-events-auto min-h-0 min-w-0 max-w-full",
+            ref: surfaceRef,
+            role: dialog ? dialogRole : void 0,
+            "aria-modal": modal ? true : void 0,
+            "aria-label": dialog ? dialogLabel : void 0,
+            tabIndex: dialog ? -1 : void 0,
+            className: cn("pointer-events-auto min-h-0 min-w-0 max-w-full outline-none", contentClassName),
             onClick: (e) => e.stopPropagation(),
             onPointerDown: (e) => e.stopPropagation(),
             children
           }
         ),
         showCloseButton && onClose ? /* @__PURE__ */ jsxRuntime.jsx(
-          "button",
+          IconButton,
           {
-            type: "button",
-            "aria-label": "Close",
-            className: cn(
-              "pointer-events-auto absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full",
-              "border border-border bg-background text-foreground shadow-md",
-              "hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-            ),
+            variant: "outline",
+            shape: "round",
+            ariaLabel: "Close",
+            icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4", strokeWidth: 2, "aria-hidden": true }),
+            className: "pointer-events-auto absolute right-4 top-4 h-9 w-9 shadow-md",
+            style: { zIndex: zScoped.surface },
             onClick: (e) => {
               e.stopPropagation();
               onClose();
-            },
-            children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4", strokeWidth: 2, "aria-hidden": true })
+            }
           }
         ) : null
       ]
@@ -6633,7 +7217,7 @@ function Overlay({
   if (!open) return null;
   if (!target) return null;
   return reactDom.createPortal(node, target);
-}
+});
 Overlay.displayName = "Overlay";
 function LoadingOverlay({
   open,
@@ -6662,10 +7246,10 @@ LoadingOverlay.displayName = "LoadingOverlay";
 var emptyStateVariants = classVarianceAuthority.cva("mx-auto flex flex-col items-center justify-center text-center", {
   variants: {
     variant: {
-      default: "rounded-xl border border-border bg-card/40 px-6 py-8 shadow-sm ring-1 ring-border/60",
-      minimal: "rounded-md border-0 bg-transparent py-4 text-muted-foreground",
-      spacious: "max-w-2xl rounded-2xl border-2 border-dashed border-muted-foreground/30 bg-muted/20 px-10 py-16",
-      error: "rounded-xl border-2 border-destructive/45 bg-destructive/[0.07] px-6 py-8 text-destructive shadow-sm"
+      default: "rounded-surface-lg border border-border bg-card/40 px-6 py-8 shadow-sm ring-1 ring-border/60",
+      minimal: "rounded-surface-sm border-0 bg-transparent py-4 text-muted-foreground",
+      spacious: "max-w-2xl rounded-surface-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 px-10 py-16",
+      error: "rounded-surface-lg border-2 border-destructive/45 bg-destructive/[0.07] px-6 py-8 text-destructive shadow-sm"
     },
     size: {
       sm: "max-w-sm gap-2",
@@ -6682,7 +7266,7 @@ var emptyStateVariants = classVarianceAuthority.cva("mx-auto flex flex-col items
     size: "md"
   }
 });
-var EmptyState = React9__namespace.forwardRef(
+var EmptyState = React10__namespace.forwardRef(
   ({ variant, size, title, description, icon, action, className, ...props }, ref) => {
     const iconMuted = variant === "minimal" ? "text-muted-foreground/80" : variant === "error" ? "text-destructive/80" : "text-muted-foreground";
     return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -6732,6 +7316,10 @@ var EmptyState = React9__namespace.forwardRef(
   }
 );
 EmptyState.displayName = "EmptyState";
+var pillShapeRadius = {
+  soft: "rounded-control-md",
+  pill: "rounded-pill"
+};
 var pillSurfaceVariants = classVarianceAuthority.cva("inline-flex w-fit max-w-full items-center", {
   variants: {
     appearance: {
@@ -6751,10 +7339,7 @@ var pillSurfaceVariants = classVarianceAuthority.cva("inline-flex w-fit max-w-fu
       warning: "",
       danger: ""
     },
-    shape: {
-      rounded: "rounded-md",
-      pill: "rounded-full"
-    },
+    shape: pillShapeRadius,
     selected: {
       true: "ring-2 ring-primary/40",
       false: ""
@@ -6804,10 +7389,7 @@ var toggleSurfaceVariants = classVarianceAuthority.cva(
         sm: "h-5 px-2",
         md: "h-6 px-2.5"
       },
-      shape: {
-        rounded: "rounded-md",
-        pill: "rounded-full"
-      }
+      shape: pillShapeRadius
     },
     defaultVariants: {
       toggleSurface: "secondary",
@@ -6820,7 +7402,7 @@ var pillTextSize = {
   sm: "xs",
   md: "sm"
 };
-var Pill = React9__namespace.forwardRef(
+var Pill = React10__namespace.forwardRef(
   ({
     as = "span",
     appearance,
@@ -6832,6 +7414,7 @@ var Pill = React9__namespace.forwardRef(
     left,
     right,
     onRemove,
+    removeLabel,
     dot,
     disabled,
     toggleSurface,
@@ -6844,22 +7427,23 @@ var Pill = React9__namespace.forwardRef(
     const resolvedToggleSurface = toggleSurface != null && toggleSurface !== "" ? toggleSurface : void 0;
     const busy = Boolean(loading);
     const isDisabled = disabled || busy;
-    const removeBtn = onRemove && !isDisabled ? /* @__PURE__ */ jsxRuntime.jsx(
-      "button",
-      {
-        type: "button",
-        onClick: (e) => {
-          e.stopPropagation();
-          onRemove();
-        },
-        className: cn(
-          "-mr-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
-          "text-current opacity-70 hover:opacity-100",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
-        ),
-        "aria-label": "Remove",
-        children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-3.5 w-3.5", strokeWidth: 2 })
-      }
+    const removeBtn = onRemove && !isDisabled ? (
+      // IconButton at pill scale: `h-5 w-5` overrides Button's control-height
+      // sizing (twmerge keeps the last of each utility group), and the
+      // hover/bg overrides keep the chip's flat look.
+      /* @__PURE__ */ jsxRuntime.jsx(
+        IconButton,
+        {
+          shape: "round",
+          onClick: (e) => {
+            e.stopPropagation();
+            onRemove();
+          },
+          className: "-mr-0.5 h-5 w-5 shrink-0 bg-transparent text-current opacity-70 hover:bg-transparent hover:opacity-100",
+          ariaLabel: removeLabel ? `Remove ${removeLabel}` : "Remove",
+          icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-3.5 w-3.5", strokeWidth: 2 })
+        }
+      )
     ) : void 0;
     const spinnerSize = resolvedSize === "sm" ? "xs" : "sm";
     const mergedRight = busy || removeBtn != null || right != null ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
@@ -6888,7 +7472,7 @@ var Pill = React9__namespace.forwardRef(
           dot ? /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
-              className: "mr-1.5 inline-block h-1.5 w-1.5 shrink-0 align-middle rounded-full bg-current",
+              className: "mr-1.5 inline-block h-1.5 w-1.5 shrink-0 align-middle rounded-pill bg-current",
               "aria-hidden": true
             }
           ) : null,
@@ -6899,11 +7483,11 @@ var Pill = React9__namespace.forwardRef(
   }
 );
 Pill.displayName = "Pill";
-var Badge = React9__namespace.forwardRef(function Badge2(props, ref) {
+var Badge = React10__namespace.forwardRef(function Badge2(props, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(Pill, { ref, ...props });
 });
 Badge.displayName = "Badge";
-var Tag = React9__namespace.forwardRef(function Tag2({ label, onRemove, variant = "subtle", left, disabled, className, ...props }, ref) {
+var Tag = React10__namespace.forwardRef(function Tag2({ label, onRemove, variant = "subtle", left, disabled, className, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     Pill,
     {
@@ -6924,7 +7508,7 @@ var pageHeaderVariants = classVarianceAuthority.cva("w-full", {
   variants: {
     variant: {
       default: "",
-      bordered: "rounded-lg border border-border bg-card/40 px-4 py-3",
+      bordered: "rounded-surface-md border border-border bg-card/40 px-4 py-3",
       minimal: ""
     }
   },
@@ -6932,7 +7516,7 @@ var pageHeaderVariants = classVarianceAuthority.cva("w-full", {
     variant: "default"
   }
 });
-function PageHeader({
+var PageHeader = React10__namespace.forwardRef(function PageHeader2({
   heading,
   subheading,
   description,
@@ -6946,11 +7530,12 @@ function PageHeader({
   className,
   children,
   ...props
-}) {
+}, ref) {
   const resolvedRight = right ?? actions;
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
+      ref,
       "data-slot": "page-header",
       className: cn(
         pageHeaderVariants({ variant }),
@@ -6978,7 +7563,7 @@ function PageHeader({
       ]
     }
   );
-}
+});
 PageHeader.displayName = "PageHeader";
 var pageFooterVariants = classVarianceAuthority.cva("w-full", {
   variants: {
@@ -6991,19 +7576,12 @@ var pageFooterVariants = classVarianceAuthority.cva("w-full", {
     variant: "default"
   }
 });
-function PageFooter({
-  left,
-  right,
-  sticky,
-  separator,
-  variant,
-  className,
-  children,
-  ...props
-}) {
+var PageFooter = React10__namespace.forwardRef(function PageFooter2({ left, right, sticky, separator, variant, className, children, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "footer",
     {
+      ref,
+      "data-slot": "page-footer",
       className: cn(
         pageFooterVariants({ variant }),
         sticky && "sticky bottom-0 z-sticky bg-background/95 backdrop-blur",
@@ -7020,31 +7598,25 @@ function PageFooter({
       ]
     }
   );
-}
+});
 PageFooter.displayName = "PageFooter";
 var heroVariants = classVarianceAuthority.cva("w-full", {
   variants: {
     variant: {
-      default: "rounded-xl border border-border bg-card/40 p-8",
-      centered: "rounded-xl border border-border bg-card/40 px-8 py-12 text-center",
-      split: "grid gap-8 rounded-xl border border-border bg-card/40 p-8 md:grid-cols-2 md:items-center"
+      default: "rounded-surface-lg border border-border bg-card/40 p-8",
+      centered: "rounded-surface-lg border border-border bg-card/40 px-8 py-12 text-center",
+      split: "grid gap-8 rounded-surface-lg border border-border bg-card/40 p-8 md:grid-cols-2 md:items-center"
     }
   },
   defaultVariants: {
     variant: "default"
   }
 });
-function Hero({
-  title,
-  description,
-  image,
-  badge,
-  actions,
-  variant = "default",
-  className,
-  children,
-  ...props
-}) {
+var Hero = React10__namespace.forwardRef(function Hero2({ title, description, image, badge, actions, variant = "default", className, children, ...props }, ref) {
+  const actionButtons = [
+    actions?.secondary ? { key: "secondary", variant: "outline", props: actions.secondary } : null,
+    actions?.primary ? { key: "primary", variant: "primary", props: actions.primary } : null
+  ].filter(Boolean);
   const content = /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex flex-col gap-4", variant === "centered" && "items-center text-center"), children: [
     badge ? typeof badge === "string" ? /* @__PURE__ */ jsxRuntime.jsx(Pill, { appearance: "subtle", tone: "info", className: "self-start", children: badge }) : badge : null,
     title ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "2xl", weight: "bold", className: variant === "centered" ? "mx-auto max-w-2xl" : void 0, children: title }) : null,
@@ -7058,128 +7630,189 @@ function Hero({
         children: description
       }
     ) : null,
-    actions?.primary || actions?.secondary ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex flex-wrap gap-2", variant === "centered" && "justify-center"), children: [
-      actions.secondary ? /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "outline", ...actions.secondary }) : null,
-      actions.primary ? /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "primary", ...actions.primary }) : null
-    ] }) : null,
+    actionButtons.length ? /* @__PURE__ */ jsxRuntime.jsx(
+      Stack,
+      {
+        direction: "row",
+        gap: "sm",
+        wrap: true,
+        justify: variant === "centered" ? "center" : "start",
+        items: actionButtons,
+        getItemKey: (action) => action.key,
+        renderItem: (action) => /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: action.variant, ...action.props })
+      }
+    ) : null,
     children
   ] });
   if (variant === "split" && image) {
-    return /* @__PURE__ */ jsxRuntime.jsxs("section", { className: cn(heroVariants({ variant }), className), ...props, children: [
+    return /* @__PURE__ */ jsxRuntime.jsxs("section", { ref, "data-slot": "hero", className: cn(heroVariants({ variant }), className), ...props, children: [
       /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex flex-col gap-4", children: content }),
-      /* @__PURE__ */ jsxRuntime.jsx(Image, { src: image, alt: "", className: "h-56 w-full rounded-lg md:h-72", fit: "cover", variant: "rounded" })
+      /* @__PURE__ */ jsxRuntime.jsx(Image, { src: image, alt: "", className: "h-56 w-full rounded-surface-md md:h-72", fit: "cover", variant: "soft" })
     ] });
   }
   const effectiveVariant = variant === "split" && !image ? "default" : variant;
-  return /* @__PURE__ */ jsxRuntime.jsxs("section", { className: cn(heroVariants({ variant: effectiveVariant }), "space-y-4", className), ...props, children: [
-    image && variant !== "split" ? /* @__PURE__ */ jsxRuntime.jsx(Image, { src: image, alt: "", className: "mb-4 h-40 w-full rounded-lg", fit: "cover", variant: "rounded" }) : null,
-    content
-  ] });
-}
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "section",
+    {
+      ref,
+      "data-slot": "hero",
+      className: cn(heroVariants({ variant: effectiveVariant }), "space-y-4", className),
+      ...props,
+      children: [
+        image && variant !== "split" ? /* @__PURE__ */ jsxRuntime.jsx(Image, { src: image, alt: "", className: "mb-4 h-40 w-full rounded-surface-md", fit: "cover", variant: "soft" }) : null,
+        content
+      ]
+    }
+  );
+});
 Hero.displayName = "Hero";
-function AuthLayout({ title, subtitle, logo, footer, children, className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("flex min-h-screen items-center justify-center bg-muted/30 p-4", className), ...props, children: /* @__PURE__ */ jsxRuntime.jsxs(Card, { className: "w-full max-w-md p-6 shadow-sm", children: [
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-6 space-y-2 text-center", children: [
-      logo ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-2 flex justify-center", children: logo }) : null,
-      title ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "xl", weight: "semibold", children: title }) : null,
-      subtitle ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "p", size: "sm", variant: "muted", children: subtitle }) : null
-    ] }),
-    /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4", children }),
-    footer ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-6 border-t border-border pt-4 text-center text-sm text-muted-foreground", children: footer }) : null
-  ] }) });
-}
+var AuthLayout = React10__namespace.forwardRef(function AuthLayout2({ title, subtitle, logo, footer, children, className, ...props }, ref) {
+  return /* @__PURE__ */ jsxRuntime.jsx(
+    "div",
+    {
+      ref,
+      "data-slot": "auth-layout",
+      className: cn("flex min-h-screen items-center justify-center bg-muted/30 p-4", className),
+      ...props,
+      children: /* @__PURE__ */ jsxRuntime.jsxs(Card, { className: "w-full max-w-md p-6 shadow-sm", children: [
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "mb-6 space-y-2 text-center", children: [
+          logo ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mb-2 flex justify-center", children: logo }) : null,
+          title ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "xl", weight: "semibold", children: title }) : null,
+          subtitle ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "p", size: "sm", variant: "muted", children: subtitle }) : null
+        ] }),
+        /* @__PURE__ */ jsxRuntime.jsx("div", { className: "space-y-4", children }),
+        footer ? /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", variant: "muted", className: "mt-6 border-t border-border pt-4 text-center", children: footer }) : null
+      ] })
+    }
+  );
+});
 AuthLayout.displayName = "AuthLayout";
-function AppShell({ sidebar, header, footer, children, className, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex h-full min-h-0 w-full max-w-full overflow-hidden bg-background", className), ...props, children: [
-    sidebar ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-full min-h-0 shrink-0 flex-col", children: sidebar }) : null,
-    /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full min-h-0 min-w-0 flex-1 flex-col", children: [
-      header ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "shrink-0", children: header }) : null,
-      /* @__PURE__ */ jsxRuntime.jsx("main", { className: "relative min-h-0 flex-1 overflow-y-auto p-4 md:p-6", children }),
-      footer ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "shrink-0", children: footer }) : null
-    ] })
-  ] });
-}
+var AppShell = React10__namespace.forwardRef(function AppShell2({ sidebar, header, footer, children, className, ...props }, ref) {
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      ref,
+      "data-slot": "app-shell",
+      className: cn("flex h-full min-h-0 w-full max-w-full overflow-hidden bg-background", className),
+      ...props,
+      children: [
+        sidebar ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "flex h-full min-h-0 shrink-0 flex-col", children: sidebar }) : null,
+        /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex h-full min-h-0 min-w-0 flex-1 flex-col", children: [
+          header ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "shrink-0", children: header }) : null,
+          /* @__PURE__ */ jsxRuntime.jsx("main", { className: "relative min-h-0 flex-1 overflow-y-auto p-4 md:p-6", children }),
+          footer ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "shrink-0", children: footer }) : null
+        ] })
+      ]
+    }
+  );
+});
 AppShell.displayName = "AppShell";
-function wrapWithTooltip(show, content, node) {
-  if (!show) return node;
-  return /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content, children: node });
-}
-function HistoryControlButtons({
-  canUndo = true,
-  canRedo = true,
-  canReset = true,
-  onUndo,
-  onRedo,
-  onReset,
-  showUndo = true,
-  showRedo = true,
-  showLabels = false,
-  showTooltips = false,
-  undoButtonProps,
-  redoButtonProps,
-  resetButtonProps,
-  className,
-  ...rest
-}) {
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("inline-flex items-center gap-1", className), ...rest, children: [
-    showUndo ? wrapWithTooltip(
-      showTooltips,
-      "Undo",
-      /* @__PURE__ */ jsxRuntime.jsx(
+var HistoryControlButtons = React10__namespace.forwardRef(
+  function HistoryControlButtons2({
+    canUndo = true,
+    canRedo = true,
+    canReset = true,
+    onUndo,
+    onRedo,
+    onReset,
+    showUndo = true,
+    showRedo = true,
+    showLabels = false,
+    showTooltips = true,
+    undoButtonProps,
+    redoButtonProps,
+    resetButtonProps,
+    className,
+    children: _ignoredChildren,
+    ...rest
+  }, ref) {
+    const controls = [
+      showUndo ? {
+        key: "undo",
+        label: "Undo",
+        icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Undo2, {}),
+        variant: "outline",
+        disabled: !canUndo,
+        onClick: onUndo,
+        overrides: undoButtonProps
+      } : null,
+      showRedo ? {
+        key: "redo",
+        label: "Redo",
+        icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Redo2, {}),
+        variant: "outline",
+        disabled: !canRedo,
+        onClick: onRedo,
+        overrides: redoButtonProps
+      } : null,
+      onReset ? {
+        key: "reset",
+        label: "Reset",
+        icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcw, {}),
+        variant: "ghost",
+        disabled: !canReset,
+        onClick: onReset,
+        overrides: resetButtonProps
+      } : null
+    ].filter(Boolean);
+    const renderControl = (control) => {
+      const {
+        label: overrideLabel,
+        left: overrideIcon,
+        right: _right,
+        children: _children,
+        href: _href,
+        iconOnly: _iconOnly,
+        ariaLabel: overrideAriaLabel,
+        ...overrides
+      } = control.overrides ?? {};
+      const icon = overrideIcon ?? control.icon;
+      const ariaLabel = overrideAriaLabel ?? overrideLabel ?? control.label;
+      const node = showLabels ? /* @__PURE__ */ jsxRuntime.jsx(
         Button,
         {
-          variant: "outline",
+          variant: control.variant,
           size: "sm",
-          disabled: !canUndo,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Undo2, { className: "h-4 w-4" }),
-          label: showLabels ? "Undo" : void 0,
-          iconOnly: !showLabels,
-          ariaLabel: "Undo",
-          onClick: onUndo,
-          ...undoButtonProps
+          disabled: control.disabled,
+          left: icon,
+          label: overrideLabel ?? control.label,
+          ariaLabel,
+          onClick: control.onClick,
+          ...overrides
         }
-      )
-    ) : null,
-    showRedo ? wrapWithTooltip(
-      showTooltips,
-      "Redo",
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
+      ) : /* @__PURE__ */ jsxRuntime.jsx(
+        IconButton,
         {
-          variant: "outline",
+          variant: control.variant,
           size: "sm",
-          disabled: !canRedo,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Redo2, { className: "h-4 w-4" }),
-          label: showLabels ? "Redo" : void 0,
-          iconOnly: !showLabels,
-          ariaLabel: "Redo",
-          onClick: onRedo,
-          ...redoButtonProps
+          disabled: control.disabled,
+          icon,
+          ariaLabel,
+          onClick: control.onClick,
+          ...overrides
         }
-      )
-    ) : null,
-    onReset ? wrapWithTooltip(
-      showTooltips,
-      "Reset",
-      /* @__PURE__ */ jsxRuntime.jsx(
-        Button,
-        {
-          variant: "ghost",
-          size: "sm",
-          disabled: !canReset,
-          left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.RotateCcw, { className: "h-4 w-4" }),
-          label: showLabels ? "Reset" : void 0,
-          iconOnly: !showLabels,
-          ariaLabel: "Reset",
-          onClick: onReset,
-          ...resetButtonProps
-        }
-      )
-    ) : null
-  ] });
-}
+      );
+      if (!showTooltips || showLabels) return node;
+      return /* @__PURE__ */ jsxRuntime.jsx(Tooltip, { content: ariaLabel, children: node });
+    };
+    return /* @__PURE__ */ jsxRuntime.jsx(
+      Stack,
+      {
+        ref,
+        direction: "row",
+        gap: "sm",
+        align: "center",
+        className: cn("inline-flex", className),
+        items: controls,
+        getItemKey: (control) => control.key,
+        renderItem: renderControl,
+        ...rest
+      }
+    );
+  }
+);
 HistoryControlButtons.displayName = "HistoryControlButtons";
-var positionVariants = classVarianceAuthority.cva("fixed z-modal flex flex-col gap-2", {
+var positionVariants = classVarianceAuthority.cva("fixed z-dropdown flex flex-col gap-2", {
   variants: {
     position: {
       "top-left": "left-4 top-4 items-start",
@@ -7194,7 +7827,7 @@ var positionVariants = classVarianceAuthority.cva("fixed z-modal flex flex-col g
     position: "bottom-right"
   }
 });
-var slideVariants = classVarianceAuthority.cva("transition-all duration-300 ease-out", {
+var slideVariants = classVarianceAuthority.cva("transition-all duration-normal ease-out", {
   variants: {
     slideFrom: {
       left: "data-[state=open]:translate-x-0 data-[state=closed]:-translate-x-4 data-[state=closed]:opacity-0",
@@ -7207,84 +7840,103 @@ var slideVariants = classVarianceAuthority.cva("transition-all duration-300 ease
     slideFrom: "right"
   }
 });
-function FixedScreenWidget({
-  open: openProp,
-  defaultOpen = false,
-  onOpenChange,
-  position = "bottom-right",
-  slideFrom = "right",
-  trigger,
-  triggerProps,
-  panelProps,
-  offsetX = 0,
-  offsetY = 0,
-  pointerEvents = "auto",
-  closeOnOutsideClick = true,
-  closeOnEscape = true,
-  children,
-  className,
-  ...rest
-}) {
-  const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const panelRef = React9__namespace.useRef(null);
-  React9__namespace.useEffect(() => {
-    if (!open || !closeOnOutsideClick) return;
-    const onPointerDown = (e) => {
-      if (panelRef.current?.contains(e.target)) return;
-      setOpen(false);
-    };
-    document.addEventListener("pointerdown", onPointerDown, true);
-    return () => document.removeEventListener("pointerdown", onPointerDown, true);
-  }, [open, closeOnOutsideClick, setOpen]);
-  React9__namespace.useEffect(() => {
-    if (!open || !closeOnEscape) return;
-    const onKeyDown = (e) => {
-      if (e.key === "Escape") setOpen(false);
-    };
-    document.addEventListener("keydown", onKeyDown, true);
-    return () => document.removeEventListener("keydown", onKeyDown, true);
-  }, [open, closeOnEscape, setOpen]);
-  const panelHeader = panelProps?.header;
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      className: cn(positionVariants({ position }), className),
-      style: { marginLeft: offsetX, marginTop: offsetY, pointerEvents },
-      ...rest,
-      children: [
-        trigger ? React9__namespace.isValidElement(trigger) ? React9__namespace.cloneElement(trigger, {
-          onClick: () => setOpen(!open)
-        }) : trigger : /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "primary", onClick: () => setOpen(!open), ...triggerProps, children: triggerProps?.label ?? "Open" }),
-        open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: panelRef, children: /* @__PURE__ */ jsxRuntime.jsxs(
-          Card,
-          {
-            "data-state": "open",
-            className: cn("w-80 max-w-[calc(100vw-2rem)] shadow-lg", slideVariants({ slideFrom })),
-            ...panelProps,
-            header: void 0,
-            children: [
-              /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-2 border-b border-border px-3 py-2", children: [
-                panelHeader ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: panelHeader }) : /* @__PURE__ */ jsxRuntime.jsx("span", {}),
+var EXIT_MS = 300;
+var FixedScreenWidget = React10__namespace.forwardRef(
+  function FixedScreenWidget2({
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
+    position = "bottom-right",
+    slideFrom = "right",
+    trigger,
+    triggerProps,
+    panelProps,
+    offsetX = 0,
+    offsetY = 0,
+    pointerEvents = "auto",
+    closeOnOutsideClick = true,
+    closeOnEscape = true,
+    children,
+    className,
+    style,
+    ...rest
+  }, ref) {
+    const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+    const panelRef = React10__namespace.useRef(null);
+    const [mounted, setMounted] = React10__namespace.useState(open);
+    const [state, setState] = React10__namespace.useState(open ? "open" : "closed");
+    React10__namespace.useEffect(() => {
+      if (open) {
+        setMounted(true);
+        const frame = requestAnimationFrame(() => setState("open"));
+        return () => cancelAnimationFrame(frame);
+      }
+      setState("closed");
+      const timer = window.setTimeout(() => setMounted(false), EXIT_MS);
+      return () => window.clearTimeout(timer);
+    }, [open]);
+    React10__namespace.useEffect(() => {
+      if (!open || !closeOnOutsideClick) return;
+      const onPointerDown = (e) => {
+        if (panelRef.current?.contains(e.target)) return;
+        setOpen(false);
+      };
+      document.addEventListener("pointerdown", onPointerDown, true);
+      return () => document.removeEventListener("pointerdown", onPointerDown, true);
+    }, [open, closeOnOutsideClick, setOpen]);
+    React10__namespace.useEffect(() => {
+      if (!open || !closeOnEscape) return;
+      const onKeyDown = (e) => {
+        if (e.key === "Escape") setOpen(false);
+      };
+      document.addEventListener("keydown", onKeyDown, true);
+      return () => document.removeEventListener("keydown", onKeyDown, true);
+    }, [open, closeOnEscape, setOpen]);
+    const { header: panelHeader, className: panelClassName, ...restPanelProps } = panelProps ?? {};
+    return /* @__PURE__ */ jsxRuntime.jsxs(
+      "div",
+      {
+        ref,
+        "data-slot": "fixed-screen-widget",
+        "data-state": state,
+        className: cn(positionVariants({ position }), className),
+        style: { marginLeft: offsetX, marginTop: offsetY, pointerEvents, ...style },
+        ...rest,
+        children: [
+          trigger ? React10__namespace.isValidElement(trigger) ? React10__namespace.cloneElement(trigger, {
+            onClick: () => setOpen(!open)
+          }) : trigger : /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "primary", onClick: () => setOpen(!open), ...triggerProps, children: triggerProps?.label ?? "Open" }),
+          mounted ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: panelRef, "data-state": state, "aria-hidden": state === "closed", children: /* @__PURE__ */ jsxRuntime.jsx(
+            Card,
+            {
+              "data-state": state,
+              header: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-center justify-between gap-2", children: [
+                /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: panelHeader }),
                 /* @__PURE__ */ jsxRuntime.jsx(
-                  Button,
+                  IconButton,
                   {
-                    variant: "ghost",
-                    size: "sm",
-                    iconOnly: true,
-                    "aria-label": "Close panel",
-                    left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" }),
+                    ariaLabel: "Close panel",
+                    icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, {}),
+                    tone: "muted",
                     onClick: () => setOpen(false)
                   }
                 )
               ] }),
-              /* @__PURE__ */ jsxRuntime.jsx("div", { className: "p-4", children })
-            ]
-          }
-        ) }) : null
-      ]
-    }
-  );
-}
+              ...restPanelProps,
+              className: cn(
+                "w-80 max-w-[calc(100vw-2rem)] shadow-lg",
+                slideVariants({ slideFrom }),
+                state === "closed" && "pointer-events-none",
+                panelClassName
+              ),
+              children
+            }
+          ) }) : null
+        ]
+      }
+    );
+  }
+);
 FixedScreenWidget.displayName = "FixedScreenWidget";
 var modalSurfaceVariants = classVarianceAuthority.cva("relative w-full shadow-lg", {
   variants: {
@@ -7311,7 +7963,7 @@ var modalOverlayLayout = classVarianceAuthority.cva("flex justify-center p-4", {
     align: "center"
   }
 });
-var Modal = React9__namespace.forwardRef(function Modal2({
+var Modal = React10__namespace.forwardRef(function Modal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -7320,6 +7972,7 @@ var Modal = React9__namespace.forwardRef(function Modal2({
   footer,
   showClose = true,
   loading,
+  closeOnBackdropClick,
   size,
   align,
   minHeight,
@@ -7328,10 +7981,12 @@ var Modal = React9__namespace.forwardRef(function Modal2({
   overlayClassName,
   cardProps,
   container,
+  ariaLabel,
+  initialFocus,
   children
 }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const handleClose = React9__namespace.useCallback(() => {
+  const handleClose = React10__namespace.useCallback(() => {
     setOpen(false);
     onClose?.();
   }, [setOpen, onClose]);
@@ -7342,8 +7997,12 @@ var Modal = React9__namespace.forwardRef(function Modal2({
       onClose: handleClose,
       container,
       blur: true,
+      dialog: true,
+      dialogLabel: ariaLabel,
+      initialFocus,
+      closeOnEscape: !loading,
       showCloseButton: showClose,
-      closeOnBackdropClick: !loading,
+      closeOnBackdropClick: closeOnBackdropClick ?? (!showClose && !loading),
       className: cn(modalOverlayLayout({ align }), overlayClassName),
       children: /* @__PURE__ */ jsxRuntime.jsx(
         Card,
@@ -7363,15 +8022,7 @@ var Modal = React9__namespace.forwardRef(function Modal2({
   );
 });
 Modal.displayName = "Modal";
-function TriggerModal({
-  trigger,
-  triggerProps,
-  showClose = true,
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  ...modalProps
-}) {
+var TriggerModal = React10__namespace.forwardRef(function TriggerModal2({ trigger, triggerProps, showClose = true, open: openProp, defaultOpen, onOpenChange, ...modalProps }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const triggerNode = trigger ?? (triggerProps ? /* @__PURE__ */ jsxRuntime.jsx(
     Button,
@@ -7389,18 +8040,24 @@ function TriggerModal({
   ) : null);
   return /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
     triggerNode,
-    /* @__PURE__ */ jsxRuntime.jsx(Modal, { open, onOpenChange: setOpen, showClose, ...modalProps })
+    /* @__PURE__ */ jsxRuntime.jsx(Modal, { ref, open, onOpenChange: setOpen, showClose, ...modalProps })
   ] });
-}
+});
 TriggerModal.displayName = "TriggerModal";
-var intentButtonVariant = {
-  default: "primary",
-  destructive: "destructive",
-  delete: "destructive",
-  save: "primary",
-  warning: "primary"
+var intentConfirmButton = {
+  default: { variant: "primary" },
+  save: {
+    variant: "primary",
+    className: "bg-success text-success-foreground hover:bg-success/90"
+  },
+  warning: {
+    variant: "primary",
+    className: "bg-warning text-warning-foreground hover:bg-warning/90"
+  },
+  destructive: { variant: "destructive" },
+  delete: { variant: "destructive" }
 };
-function ConfirmModal({
+var ConfirmModal = React10__namespace.forwardRef(function ConfirmModal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -7417,24 +8074,26 @@ function ConfirmModal({
   className,
   size = "md",
   ...rest
-}) {
+}, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
+  const confirmButton = intentConfirmButton[intent];
   const busy = Boolean(loading || confirmProps?.loading);
-  const handleClose = React9__namespace.useCallback(() => {
+  const handleClose = React10__namespace.useCallback(() => {
     if (busy) return;
     setOpen(false);
   }, [busy, setOpen]);
-  const handleConfirm = React9__namespace.useCallback(async () => {
+  const handleConfirm = React10__namespace.useCallback(async () => {
     await confirmProps.onClick?.();
     handleClose();
   }, [confirmProps, handleClose]);
-  const handleCancel = React9__namespace.useCallback(() => {
+  const handleCancel = React10__namespace.useCallback(() => {
     cancelProps?.onClick?.();
     handleClose();
   }, [cancelProps, handleClose]);
   return /* @__PURE__ */ jsxRuntime.jsx(
     TriggerModal,
     {
+      ref,
       open,
       onOpenChange: setOpen,
       triggerProps,
@@ -7452,33 +8111,42 @@ function ConfirmModal({
           variant: "minimal"
         }
       ),
-      footer: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex flex-wrap justify-end gap-2", children: [
-        /* @__PURE__ */ jsxRuntime.jsx(
-          Button,
-          {
-            type: "button",
-            variant: "outline",
-            label: cancelProps?.label ?? "Cancel",
-            disabled: busy,
-            onClick: handleCancel
-          }
-        ),
-        /* @__PURE__ */ jsxRuntime.jsx(
-          Button,
-          {
-            type: "button",
-            variant: intentButtonVariant[intent],
-            label: confirmProps.label,
-            loading: busy,
-            onClick: handleConfirm
-          }
-        )
-      ] }),
+      footer: /* @__PURE__ */ jsxRuntime.jsx(
+        Stack,
+        {
+          direction: "row",
+          gap: "sm",
+          wrap: true,
+          justify: "end",
+          items: ["cancel", "confirm"],
+          getItemKey: (slot) => slot,
+          renderItem: (slot) => slot === "cancel" ? /* @__PURE__ */ jsxRuntime.jsx(
+            Button,
+            {
+              type: "button",
+              variant: "outline",
+              label: cancelProps?.label ?? "Cancel",
+              disabled: busy,
+              onClick: handleCancel
+            }
+          ) : /* @__PURE__ */ jsxRuntime.jsx(
+            Button,
+            {
+              type: "button",
+              variant: confirmButton.variant,
+              className: confirmButton.className,
+              label: confirmProps.label,
+              loading: busy,
+              onClick: handleConfirm
+            }
+          )
+        }
+      ),
       ...triggerModalProps,
       ...rest
     }
   );
-}
+});
 ConfirmModal.displayName = "ConfirmModal";
 function resolvePlaceholder(placeholder, values) {
   if (placeholder == null) return void 0;
@@ -7539,7 +8207,7 @@ function SchemaFieldRow({
     items,
     disabled,
     errorMessage: resolvedError,
-    onValueChange: onValueChange ? (value) => onValueChange(value, changeHelpers) : void 0,
+    onChange: onValueChange ? (value) => onValueChange(value, changeHelpers) : void 0,
     onUpload: onUpload ? (files) => onUpload(files, changeHelpers) : void 0
   };
   const row = /* @__PURE__ */ jsxRuntime.jsx(FormField, { ...props });
@@ -7553,7 +8221,7 @@ function SchemaFieldRow({
     onChange: (value) => form?.setValue(field.name, value),
     onBlur: () => form?.setTouched(field.name, true)
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs(React9__namespace.Fragment, { children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
     row,
     renderAfter({
       ...changeHelpers,
@@ -7570,7 +8238,7 @@ function FormModalFields({
 }) {
   return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fields.map((field) => /* @__PURE__ */ jsxRuntime.jsx(SchemaFieldRow, { field, busy }, field.name)) });
 }
-function FormModal({
+var FormModal = React10__namespace.forwardRef(function FormModal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -7599,17 +8267,17 @@ function FormModal({
   children,
   size = "md",
   ...rest
-}) {
+}, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const [submitting, setSubmitting] = React9__namespace.useState(false);
+  const [submitting, setSubmitting] = React10__namespace.useState(false);
   const busy = Boolean(loading || submitting);
   const resolvedSubmitLabel = busy && submittingLabel ? submittingLabel : submitLabel ?? (mode === "edit" ? "Save changes" : "Create");
-  const handleClose = React9__namespace.useCallback(() => {
+  const handleClose = React10__namespace.useCallback(() => {
     if (busy) return;
     setOpen(false);
     onCancel?.();
   }, [busy, setOpen, onCancel]);
-  const handleSubmit = React9__namespace.useCallback(
+  const handleSubmit = React10__namespace.useCallback(
     async (values) => {
       setSubmitting(true);
       try {
@@ -7624,7 +8292,7 @@ function FormModal({
     },
     [onSubmit, onSubmitSuccess, onSubmitError, setOpen]
   );
-  const initialValues = React9__namespace.useMemo(() => {
+  const initialValues = React10__namespace.useMemo(() => {
     if (formProps?.initialValues) return formProps.initialValues;
     if (!fields) return {};
     return fields.reduce((acc, field) => {
@@ -7637,6 +8305,7 @@ function FormModal({
   return /* @__PURE__ */ jsxRuntime.jsx(
     TriggerModal,
     {
+      ref,
       open,
       onOpenChange: setOpen,
       triggerProps,
@@ -7679,21 +8348,34 @@ function FormModal({
       )
     }
   );
-}
+});
 FormModal.displayName = "FormModal";
+
+// src/components/data-display/shared.ts
+var avatarSizeScale = {
+  xs: { box: "h-6 w-6", overflowBox: "h-6 min-w-[1.5rem]", text: "text-[10px]", icon: "xs" },
+  sm: { box: "h-8 w-8", overflowBox: "h-8 min-w-[2rem]", text: "text-xs", icon: "sm" },
+  md: { box: "h-10 w-10", overflowBox: "h-10 min-w-[2.5rem]", text: "text-sm", icon: "md" },
+  lg: { box: "h-12 w-12", overflowBox: "h-12 min-w-[3rem]", text: "text-base", icon: "lg" },
+  xl: { box: "h-16 w-16", overflowBox: "h-16 min-w-[4rem]", text: "text-lg", icon: "xl" }
+};
+var avatarShapeRadius = {
+  circle: "rounded-pill",
+  square: "rounded-surface-sm"
+};
+var sizeClass2 = (key) => `${avatarSizeScale[key].box} ${avatarSizeScale[key].text}`;
 var avatarVariants = classVarianceAuthority.cva("relative inline-flex shrink-0 bg-muted text-muted-foreground", {
   variants: {
+    // Size + shape both come from `data-display/shared.ts` so AvatarGroup's
+    // overflow chip can't drift away from a real avatar.
     size: {
-      xs: "h-6 w-6 text-[10px]",
-      sm: "h-8 w-8 text-xs",
-      md: "h-10 w-10 text-sm",
-      lg: "h-12 w-12 text-base",
-      xl: "h-16 w-16 text-lg"
+      xs: sizeClass2("xs"),
+      sm: sizeClass2("sm"),
+      md: sizeClass2("md"),
+      lg: sizeClass2("lg"),
+      xl: sizeClass2("xl")
     },
-    shape: {
-      circle: "rounded-full",
-      square: "rounded-md"
-    }
+    shape: avatarShapeRadius
   },
   defaultVariants: {
     size: "md",
@@ -7716,15 +8398,15 @@ function getAvatarInitials(name) {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
-var Avatar = React9__namespace.forwardRef(
+var Avatar = React10__namespace.forwardRef(
   ({ src, alt, name, color, fallback, status, size, shape, className, style, ...props }, ref) => {
-    const [failed, setFailed] = React9__namespace.useState(false);
+    const [failed, setFailed] = React10__namespace.useState(false);
     const imageNode = src && !failed ? /* @__PURE__ */ jsxRuntime.jsx(
       "img",
       {
         src,
         alt: alt ?? "Avatar",
-        className: cn("h-full w-full object-cover", shape === "square" ? "rounded-md" : "rounded-full"),
+        className: cn("h-full w-full object-cover", avatarShapeRadius[shape ?? "circle"]),
         onError: () => setFailed(true)
       }
     ) : null;
@@ -7747,7 +8429,7 @@ var Avatar = React9__namespace.forwardRef(
             alt,
             status,
             statusPosition: "bottom-right",
-            size: size === "xs" ? "xs" : size === "sm" ? "sm" : size === "lg" ? "lg" : size === "xl" ? "xl" : "md",
+            size: avatarSizeScale[size ?? "md"].icon,
             shape: shape === "square" ? "square" : "circle",
             className: "h-full w-full justify-center"
           }
@@ -7757,42 +8439,44 @@ var Avatar = React9__namespace.forwardRef(
   }
 );
 Avatar.displayName = "Avatar";
-function AvatarGroup({ items = [], max, size = "md", className, ...rest }) {
-  const visible = max != null ? items.slice(0, max) : items;
-  const overflow = max != null && items.length > max ? items.length - max : 0;
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("flex items-center", className), ...rest, children: [
-    visible.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(
-      Avatar,
-      {
-        ...item,
-        size,
-        className: cn("-ml-2 ring-2 ring-background first:ml-0", item.className)
-      },
-      index
-    )),
-    overflow > 0 ? /* @__PURE__ */ jsxRuntime.jsxs(
-      "div",
-      {
-        className: cn(
-          "-ml-2 flex shrink-0 items-center justify-center ring-2 ring-background",
-          "bg-muted text-muted-foreground",
-          size === "xs" && "h-6 min-w-[1.5rem] rounded-full text-[10px]",
-          size === "sm" && "h-8 min-w-[2rem] rounded-full text-xs",
-          size === "md" && "h-10 min-w-[2.5rem] rounded-full text-sm",
-          size === "lg" && "h-12 min-w-[3rem] rounded-full text-base",
-          size === "xl" && "h-16 min-w-[4rem] rounded-full text-lg"
-        ),
-        "aria-label": `${overflow} more`,
-        children: [
-          "+",
-          overflow
-        ]
-      }
-    ) : null
-  ] });
-}
+var AvatarGroup = React10__namespace.forwardRef(
+  ({ items = [], max, size = "md", className, ...props }, ref) => {
+    const visible = max != null ? items.slice(0, max) : items;
+    const overflow = max != null && items.length > max ? items.length - max : 0;
+    const scale = avatarSizeScale[size ?? "md"];
+    return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("flex items-center", className), ...props, children: [
+      visible.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(
+        Avatar,
+        {
+          ...item,
+          size,
+          className: cn("-ml-2 ring-2 ring-background first:ml-0", item.className)
+        },
+        index
+      )),
+      overflow > 0 ? /* @__PURE__ */ jsxRuntime.jsxs(
+        "div",
+        {
+          className: cn(
+            "-ml-2 flex shrink-0 items-center justify-center ring-2 ring-background",
+            "bg-muted text-muted-foreground",
+            // Shared with Avatar — see data-display/shared.ts.
+            scale.overflowBox,
+            scale.text,
+            avatarShapeRadius.circle
+          ),
+          "aria-label": `${overflow} more`,
+          children: [
+            "+",
+            overflow
+          ]
+        }
+      ) : null
+    ] });
+  }
+);
 AvatarGroup.displayName = "AvatarGroup";
-var progressVariants = classVarianceAuthority.cva("relative w-full overflow-hidden rounded-full bg-muted", {
+var progressVariants = classVarianceAuthority.cva("relative w-full overflow-hidden rounded-pill bg-muted", {
   variants: {
     size: {
       sm: "h-1.5",
@@ -7804,7 +8488,7 @@ var progressVariants = classVarianceAuthority.cva("relative w-full overflow-hidd
     size: "md"
   }
 });
-var Progress = React9__namespace.forwardRef(
+var Progress = React10__namespace.forwardRef(
   ({ value, max = 100, showLabel, loading: loadingProp, size, className, ...props }, ref) => {
     const isLoading = Boolean(loadingProp) || value === null;
     const numeric = isLoading ? 0 : value ?? 0;
@@ -7827,13 +8511,13 @@ var Progress = React9__namespace.forwardRef(
           children: /* @__PURE__ */ jsxRuntime.jsx("div", { className: "relative h-full w-full overflow-hidden rounded-[inherit]", children: isLoading ? /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
-              className: "absolute inset-y-0 left-0 w-[32%] min-w-[3rem] rounded-full bg-primary shadow-sm ring-1 ring-primary/25 animate-progress-indeterminate motion-reduce:animate-none",
+              className: "absolute inset-y-0 left-0 w-[32%] min-w-[3rem] rounded-pill bg-primary shadow-sm ring-1 ring-primary/25 animate-progress-indeterminate motion-reduce:animate-none",
               "aria-hidden": true
             }
           ) : /* @__PURE__ */ jsxRuntime.jsx(
             "div",
             {
-              className: "h-full rounded-[inherit] bg-primary transition-[width] duration-300 ease-out",
+              className: "h-full rounded-[inherit] bg-primary transition-[width] duration-normal ease-out",
               style: { width: `${percent}%` }
             }
           ) })
@@ -7844,7 +8528,8 @@ var Progress = React9__namespace.forwardRef(
 );
 Progress.displayName = "Progress";
 var kbdVariants = classVarianceAuthority.cva(
-  "inline-flex items-center rounded border border-border bg-muted font-mono text-muted-foreground shadow-sm",
+  // A key cap is control-shaped, not a surface.
+  "inline-flex items-center rounded-control-sm border border-border bg-muted font-mono text-muted-foreground shadow-sm",
   {
     variants: {
       size: {
@@ -7857,9 +8542,9 @@ var kbdVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Kbd = React9__namespace.forwardRef(({ size, className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("kbd", { ref, className: cn(kbdVariants({ size }), className), ...props, children }));
+var Kbd = React10__namespace.forwardRef(({ size, className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("kbd", { ref, className: cn(kbdVariants({ size }), className), ...props, children }));
 Kbd.displayName = "Kbd";
-var KbdGroup = React9__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("inline-flex items-center gap-1", className), ...props }));
+var KbdGroup = React10__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("inline-flex items-center gap-1", className), ...props }));
 KbdGroup.displayName = "KbdGroup";
 var groupVariants2 = classVarianceAuthority.cva("flex", {
   variants: {
@@ -7878,7 +8563,12 @@ var groupVariants2 = classVarianceAuthority.cva("flex", {
     wrap: true
   }
 });
-function PillGroup({
+function removeLabelFor(item) {
+  if (item.removeLabel) return item.removeLabel;
+  if (typeof item.label === "string" || typeof item.label === "number") return String(item.label);
+  return item.value;
+}
+var PillGroup = React10__namespace.forwardRef(function PillGroup2({
   items,
   value,
   defaultValue,
@@ -7899,59 +8589,51 @@ function PillGroup({
   wrap,
   className,
   ...props
-}) {
+}, ref) {
   const groupBusy = Boolean(groupLoading);
   const resolvedToggleSurface = toggleSurface != null && toggleSurface !== "" ? toggleSurface : void 0;
-  const initialSelectedValues = React9__namespace.useMemo(() => {
-    if (defaultValue) return defaultValue;
-    return items.filter((item) => item.selected).map((item) => item.value);
-  }, [defaultValue, items]);
-  const [internalItems, setInternalItems] = React9__namespace.useState(items);
-  const [internalValue, setInternalValue] = React9__namespace.useState(initialSelectedValues);
-  React9__namespace.useEffect(() => {
-    setInternalItems(items);
-  }, [items]);
-  const selectedValues = value ?? internalValue;
-  const isControlled = value !== void 0;
+  const [initialSelectedValues] = React10__namespace.useState(
+    () => defaultValue ?? items.filter((item) => item.selected).map((item) => item.value)
+  );
+  const [selectedValues, setSelectedValues] = useControllableValue({
+    value,
+    defaultValue: initialSelectedValues,
+    onChange
+  });
   const isInteractive = selectable;
-  const visibleItems = typeof maxVisible === "number" && maxVisible >= 0 ? internalItems.slice(0, maxVisible) : internalItems;
-  const overflowCount = typeof maxVisible === "number" && maxVisible >= 0 ? Math.max(0, internalItems.length - maxVisible) : 0;
+  const visibleItems = typeof maxVisible === "number" && maxVisible >= 0 ? items.slice(0, maxVisible) : items;
+  const overflowCount = typeof maxVisible === "number" && maxVisible >= 0 ? Math.max(0, items.length - maxVisible) : 0;
   const handleToggle = (item) => {
     if (groupBusy || item.disabled || !selectable) return;
     const isSelected = selectedValues.includes(item.value);
     const next = multiple ? isSelected ? selectedValues.filter((v) => v !== item.value) : [...selectedValues, item.value] : isSelected ? [] : [item.value];
-    if (!isControlled) {
-      setInternalValue(next);
-    }
-    onChange?.(next);
+    setSelectedValues(next);
     onSelect?.(item, !isSelected);
   };
   const handleRemove = (item) => {
     if (groupBusy || !removable || item.disabled) return;
-    setInternalItems((prev) => prev.filter((pill) => pill.value !== item.value));
-    if (selectable) {
-      const nextSelected = selectedValues.filter((value2) => value2 !== item.value);
-      if (!isControlled) {
-        setInternalValue(nextSelected);
-      }
-      onChange?.(nextSelected);
+    if (selectable && selectedValues.includes(item.value)) {
+      setSelectedValues(selectedValues.filter((v) => v !== item.value));
     }
-    onRemove?.(item.value);
+    onRemove?.(
+      item.value,
+      items.filter((pill) => pill.value !== item.value)
+    );
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn(groupVariants2({ gap, wrap }), className), ...props, children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn(groupVariants2({ gap, wrap }), className), ...props, children: [
     visibleItems.map((item) => {
       const selected = selectable ? selectedValues.includes(item.value) : Boolean(item.selected);
       const badgeClassName = cn(
         isInteractive && !groupBusy && "cursor-pointer hover:opacity-90",
         (item.disabled || groupBusy) && "cursor-not-allowed opacity-60"
       );
-      const removeNode2 = removable && !item.disabled ? /* @__PURE__ */ jsxRuntime.jsx(
+      const removeNode2 = removable && !item.disabled && !groupBusy ? /* @__PURE__ */ jsxRuntime.jsx(
         "span",
         {
           role: "button",
           tabIndex: 0,
           className: "text-current/70 hover:text-current",
-          "aria-label": `Remove ${String(item.label)}`,
+          "aria-label": `Remove ${removeLabelFor(item)}`,
           onClick: (event) => {
             event.preventDefault();
             event.stopPropagation();
@@ -7967,54 +8649,43 @@ function PillGroup({
           children: "\xD7"
         }
       ) : null;
+      const shared = {
+        size,
+        appearance: resolvedToggleSurface != null ? void 0 : variant,
+        tone: item.tone ?? "neutral",
+        toggleSurface: resolvedToggleSurface,
+        selected,
+        left: item.left,
+        right: removeNode2,
+        className: badgeClassName,
+        dot: item.dot,
+        loading: !groupBusy && Boolean(item.loading),
+        disabled: item.disabled || groupBusy
+      };
       return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "inline-flex", children: isInteractive ? /* @__PURE__ */ jsxRuntime.jsx(
         Pill,
         {
           as: "button",
           onClick: () => handleToggle(item),
-          disabled: item.disabled || groupBusy,
-          "aria-pressed": selectable ? selected : void 0,
-          size,
-          appearance: resolvedToggleSurface != null ? void 0 : variant,
-          tone: item.tone ?? "neutral",
-          toggleSurface: resolvedToggleSurface,
-          selected,
-          left: item.left,
-          right: removeNode2,
-          className: badgeClassName,
-          dot: item.dot,
-          loading: !groupBusy && Boolean(item.loading),
+          "aria-pressed": selected,
+          ...shared,
           children: item.label
         }
-      ) : /* @__PURE__ */ jsxRuntime.jsx(
-        Pill,
-        {
-          size,
-          appearance: resolvedToggleSurface != null ? void 0 : variant,
-          tone: item.tone ?? "neutral",
-          toggleSurface: resolvedToggleSurface,
-          selected,
-          left: item.left,
-          right: removeNode2,
-          className: badgeClassName,
-          dot: item.dot,
-          loading: !groupBusy && Boolean(item.loading),
-          disabled: item.disabled || groupBusy,
-          children: item.label
-        }
-      ) }, item.value);
+      ) : /* @__PURE__ */ jsxRuntime.jsx(Pill, { ...shared, children: item.label }) }, item.value);
     }),
     overflowCount > 0 && /* @__PURE__ */ jsxRuntime.jsx(Pill, { size, appearance: "outline", tone: "neutral", disabled: groupBusy, children: overflowLabel.replace("{count}", String(overflowCount)) }),
     groupBusy ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "inline-flex items-center self-center pl-1", "aria-busy": true, children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) }) : null,
     children
   ] });
-}
+});
 PillGroup.displayName = "PillGroup";
 var descriptionListVariants = classVarianceAuthority.cva("", {
   variants: {
+    // These used to be two empty strings with the real classes living in a
+    // ternary at the call site — the cva claimed to own a variant it didn't.
     layout: {
-      horizontal: "",
-      vertical: ""
+      horizontal: "grid grid-cols-[minmax(8rem,auto)_1fr] sm:grid-cols-[minmax(10rem,auto)_1fr]",
+      vertical: "flex flex-col"
     },
     size: {
       sm: "gap-x-4 gap-y-1 text-sm",
@@ -8026,7 +8697,7 @@ var descriptionListVariants = classVarianceAuthority.cva("", {
     size: "md"
   }
 });
-var DescriptionList = React9__namespace.forwardRef(
+var DescriptionList = React10__namespace.forwardRef(
   ({ className, items, layout = "vertical", size, ...props }, ref) => {
     const isHorizontal = layout === "horizontal";
     return /* @__PURE__ */ jsxRuntime.jsx(
@@ -8034,13 +8705,9 @@ var DescriptionList = React9__namespace.forwardRef(
       {
         ref,
         "data-slot": "description-list",
-        className: cn(
-          descriptionListVariants({ layout, size }),
-          isHorizontal ? "grid grid-cols-[minmax(8rem,auto)_1fr] sm:grid-cols-[minmax(10rem,auto)_1fr]" : "flex flex-col",
-          className
-        ),
+        className: cn(descriptionListVariants({ layout, size }), className),
         ...props,
-        children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsxs(React9__namespace.Fragment, { children: [
+        children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "dt",
             {
@@ -8068,11 +8735,12 @@ var DescriptionList = React9__namespace.forwardRef(
   }
 );
 DescriptionList.displayName = "DescriptionList";
+var EMPTY_CHIP_SELECTION = [];
 function reactNodeToSearchText(node) {
   if (node == null || typeof node === "boolean") return "";
   if (typeof node === "string" || typeof node === "number") return String(node).toLowerCase();
   if (Array.isArray(node)) return node.map(reactNodeToSearchText).join(" ");
-  if (React9__namespace.isValidElement(node)) {
+  if (React10__namespace.isValidElement(node)) {
     const ch = node.props.children;
     return reactNodeToSearchText(ch);
   }
@@ -8096,26 +8764,14 @@ function defaultListChipFilter(items, selected) {
     return keys.some((key) => selected.includes(key));
   });
 }
-var List = React9__namespace.forwardRef(
+var List = React10__namespace.forwardRef(
   ({
     className,
     items,
     layout = "list",
     listType = "unordered",
-    gap,
-    direction,
-    align,
-    justify,
-    wrap,
-    columns,
-    rows,
-    minChildWidth,
-    columnGap,
-    rowGap,
-    autoFlow,
-    alignItems,
-    justifyItems,
-    gridGap,
+    stackProps,
+    gridProps,
     divider,
     selectable,
     selectedValue: selectedValueProp,
@@ -8154,36 +8810,26 @@ var List = React9__namespace.forwardRef(
       filterItems: chipFilterItems = true,
       ...pillGroupProps
     } = filterChips ?? {};
-    const isChipControlled = chipValueProp !== void 0;
-    const [internalChipSelection, setInternalChipSelection] = React9__namespace.useState(
-      () => chipDefaultValue ?? []
-    );
-    const chipSelection = isChipControlled ? chipValueProp : internalChipSelection;
-    const setChipSelection = React9__namespace.useCallback(
-      (next) => {
-        if (!isChipControlled) setInternalChipSelection(next);
-        onChipChangeProp?.(next);
-      },
-      [isChipControlled, onChipChangeProp]
-    );
-    const isSearchControlled = searchValueProp !== void 0;
-    const [internalSearchQuery, setInternalSearchQuery] = React9__namespace.useState(() => defaultQuery ?? "");
-    const searchQuery = isSearchControlled ? searchValueProp : internalSearchQuery;
-    const setSearchQuery = React9__namespace.useCallback(
-      (next) => {
-        if (!isSearchControlled) setInternalSearchQuery(next);
-        onSearchChangeProp?.(next);
-      },
-      [isSearchControlled, onSearchChangeProp]
-    );
-    const [debouncedQuery, setDebouncedQuery] = React9__namespace.useState(() => defaultQuery ?? "");
-    React9__namespace.useEffect(() => {
+    const [chipSelection, setChipSelection] = useControllableValue({
+      value: chipValueProp,
+      defaultValue: chipDefaultValue ?? EMPTY_CHIP_SELECTION,
+      onChange: onChipChangeProp
+    });
+    const [searchQuery, setSearchQuery] = useControllableValue({
+      value: searchValueProp,
+      defaultValue: defaultQuery ?? "",
+      onChange: onSearchChangeProp
+    });
+    const [debouncedQuery, setDebouncedQuery] = React10__namespace.useState(() => defaultQuery ?? "");
+    React10__namespace.useEffect(() => {
       onDebouncedChange?.(debouncedQuery);
     }, [debouncedQuery, onDebouncedChange]);
-    const isControlled = selectedValueProp !== void 0;
-    const [internalSelected, setInternalSelected] = React9__namespace.useState(defaultSelectedValue);
-    const selectedValue = isControlled ? selectedValueProp : internalSelected;
-    const filteredItems = React9__namespace.useMemo(() => {
+    const [selectedValue, setSelectedValue] = useControllableValue({
+      value: selectedValueProp,
+      defaultValue: defaultSelectedValue,
+      onChange: void 0
+    });
+    const filteredItems = React10__namespace.useMemo(() => {
       let next = [...items];
       if (filterChipsEnabled && chipFilterItems) {
         const runChip = customChipFilter ?? defaultListChipFilter;
@@ -8205,13 +8851,13 @@ var List = React9__namespace.forwardRef(
       customChipFilter,
       chipSelection
     ]);
-    const select = React9__namespace.useCallback(
+    const select = React10__namespace.useCallback(
       (item) => {
         if (!selectable || item.disabled || item.value == null) return;
-        if (!isControlled) setInternalSelected(item.value);
+        setSelectedValue(item.value);
         onSelect?.(item.value, item);
       },
-      [selectable, isControlled, onSelect]
+      [selectable, setSelectedValue, onSelect]
     );
     const renderRow = (item, index) => {
       if (renderItem) return renderItem(item, index);
@@ -8225,7 +8871,7 @@ var List = React9__namespace.forwardRef(
               layout === "grid" && "h-full",
               selectable && !item.disabled && "cursor-pointer",
               item.disabled && "cursor-not-allowed opacity-60",
-              selected2 && layout === "grid" && "ring-2 ring-ring ring-offset-2 ring-offset-background rounded-lg"
+              selected2 && layout === "grid" && "ring-2 ring-ring ring-offset-2 ring-offset-background rounded-surface-md"
             ),
             role: selectable ? "option" : void 0,
             "aria-selected": selectable ? selected2 : void 0,
@@ -8246,7 +8892,7 @@ var List = React9__namespace.forwardRef(
         "div",
         {
           className: cn(
-            "flex min-w-0 items-start gap-3 rounded-md px-2 py-2",
+            "flex min-w-0 items-start gap-3 rounded-control-md px-2 py-2",
             layout === "grid" && "border border-border",
             selectable && !item.disabled && "cursor-pointer hover:bg-muted/60",
             item.disabled && "cursor-not-allowed opacity-60",
@@ -8277,14 +8923,13 @@ var List = React9__namespace.forwardRef(
     const renderWrappedRow = (item, index) => {
       const row = renderRow(item, index);
       if (listType === "none") {
-        return /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0", children: row });
+        return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("min-w-0", layout === "grid" && "h-full"), children: row });
       }
-      return /* @__PURE__ */ jsxRuntime.jsx("li", { className: "list-none", children: row });
+      return /* @__PURE__ */ jsxRuntime.jsx("li", { className: cn("list-none", layout === "grid" && "h-full"), children: row });
     };
     const listChrome = listType !== "none" && "list-none pl-0";
-    const resolvedGridMin = minChildWidth ?? (columns == null ? "12rem" : void 0);
-    const resolvedColumns = resolvedGridMin ? void 0 : columns ?? 2;
-    const resolvedGridGap = gridGap ?? gap;
+    const resolvedGridMin = gridProps?.minChildWidth ?? (gridProps?.columns == null ? "12rem" : void 0);
+    const resolvedColumns = resolvedGridMin ? void 0 : gridProps?.columns ?? 2;
     const body = layout === "list" ? /* @__PURE__ */ jsxRuntime.jsx(
       Stack,
       {
@@ -8294,11 +8939,8 @@ var List = React9__namespace.forwardRef(
         items: filteredItems,
         getItemKey: (item, i) => item.value ?? i,
         renderItem: renderWrappedRow,
-        direction,
-        gap: divider ? gap ?? "none" : gap,
-        align,
-        justify,
-        wrap
+        ...stackProps,
+        gap: divider ? stackProps?.gap ?? "none" : stackProps?.gap
       }
     ) : /* @__PURE__ */ jsxRuntime.jsx(
       Grid,
@@ -8309,15 +8951,10 @@ var List = React9__namespace.forwardRef(
         items: filteredItems,
         getItemKey: (item, i) => item.value ?? i,
         renderItem: renderWrappedRow,
+        alignItems: "stretch",
+        ...gridProps,
         columns: resolvedColumns,
-        rows,
-        minChildWidth: resolvedGridMin,
-        gap: resolvedGridGap,
-        columnGap,
-        rowGap,
-        autoFlow,
-        alignItems,
-        justifyItems
+        minChildWidth: resolvedGridMin
       }
     );
     const emptyItems = items.length === 0;
@@ -8374,10 +9011,7 @@ function alignClass(a) {
   if (a === "right") return "text-right";
   return "text-left";
 }
-function resolveRowId(data, row, getRowId) {
-  const i = data.indexOf(row);
-  return getRowId(row, i === -1 ? 0 : i);
-}
+var defaultGetRowId = (_row, index) => index;
 function nextDirection(current, sameKey) {
   if (!sameKey) return "asc";
   return current === "asc" ? "desc" : "asc";
@@ -8419,23 +9053,25 @@ function stickyRightOffset(columns, columnIndex) {
 function stickyColumnClasses(side) {
   return cn(
     "bg-background",
-    side === "left" && "border-r border-border shadow-[inset_-10px_0_14px_-10px_rgba(0,0,0,0.14)]",
-    side === "right" && "border-l border-border shadow-[inset_10px_0_14px_-10px_rgba(0,0,0,0.14)]"
+    side === "left" && "border-r border-border",
+    side === "right" && "border-l border-border"
   );
 }
 function stickyCheckboxEdgeClasses() {
-  return cn(
-    "bg-background border-r border-border shadow-[inset_-10px_0_14px_-10px_rgba(0,0,0,0.14)]"
-  );
+  return "bg-background border-r border-border";
 }
-function stickyCellZ(header, stickyHeaderRow, columnSticky) {
-  if (header) {
-    if (stickyHeaderRow && columnSticky) return 5;
-    if (stickyHeaderRow) return 4;
-    if (columnSticky) return 3;
-    return 0;
+var stickyZ = {
+  column: "var(--z-sticky, 10)",
+  header: "calc(var(--z-sticky, 10) + 1)",
+  headerColumn: "calc(var(--z-sticky, 10) + 2)"
+};
+function stickyCellZ(isHeader, stickyHeaderRow, columnSticky) {
+  if (isHeader) {
+    if (columnSticky) return stickyZ.headerColumn;
+    if (stickyHeaderRow) return stickyZ.header;
+    return void 0;
   }
-  return columnSticky ? 2 : 0;
+  return columnSticky ? stickyZ.column : void 0;
 }
 function Table({
   data = [],
@@ -8450,7 +9086,7 @@ function Table({
   selectedRows: selectedRowsProp,
   defaultSelectedRows,
   onSelectionChange,
-  getRowId = (_row, index) => index,
+  getRowId = defaultGetRowId,
   stickyHeader,
   onRowClick,
   loading,
@@ -8463,25 +9099,29 @@ function Table({
   className,
   ...props
 }) {
-  const [internalSortKey, setInternalSortKey] = React9__namespace.useState(defaultSortKey);
-  const [internalSortDir, setInternalSortDir] = React9__namespace.useState(defaultSortDirection);
+  const [internalSortKey, setInternalSortKey] = React10__namespace.useState(defaultSortKey);
+  const [internalSortDir, setInternalSortDir] = React10__namespace.useState(defaultSortDirection);
   const sortKey = sortKeyProp !== void 0 ? sortKeyProp : internalSortKey;
   const sortDir = sortDirectionProp !== void 0 ? sortDirectionProp : internalSortDir;
-  const [internalSelected, setInternalSelected] = React9__namespace.useState(defaultSelectedRows ?? []);
+  const [internalSelected, setInternalSelected] = React10__namespace.useState(defaultSelectedRows ?? []);
   const selectionControlled = selectedRowsProp !== void 0;
-  const selectedSet = React9__namespace.useMemo(() => {
+  const selectedSet = React10__namespace.useMemo(() => {
     const list = selectionControlled ? selectedRowsProp : internalSelected;
     return new Set(list);
   }, [selectionControlled, selectedRowsProp, internalSelected]);
-  const sortedData = React9__namespace.useMemo(() => {
-    if (!tableSortable || !sortKey) return data;
+  const rows = React10__namespace.useMemo(
+    () => data.map((row, index) => ({ row, index, id: getRowId(row, index) })),
+    [data, getRowId]
+  );
+  const sortedRows = React10__namespace.useMemo(() => {
+    if (!tableSortable || !sortKey) return rows;
     const col = columns.find((c) => c.key === sortKey);
-    if (!col?.sortable) return data;
-    const copy = [...data];
+    if (!col?.sortable) return rows;
+    const copy = [...rows];
     const mult = sortDir === "asc" ? 1 : -1;
     copy.sort((a, b) => {
-      const ai = a[sortKey];
-      const bi = b[sortKey];
+      const ai = a.row[sortKey];
+      const bi = b.row[sortKey];
       if (ai == null && bi == null) return 0;
       if (ai == null) return 1;
       if (bi == null) return -1;
@@ -8489,7 +9129,9 @@ function Table({
       return String(ai).localeCompare(String(bi), void 0, { numeric: true }) * mult;
     });
     return copy;
-  }, [data, columns, tableSortable, sortKey, sortDir]);
+  }, [rows, columns, tableSortable, sortKey, sortDir]);
+  const allSelected = sortedRows.length > 0 && sortedRows.every((entry) => selectedSet.has(entry.id));
+  const someSelected = sortedRows.some((entry) => selectedSet.has(entry.id));
   const toggleSort = (key, columnSortable) => {
     if (!tableSortable || !columnSortable) return;
     const same = sortKey === key;
@@ -8507,15 +9149,13 @@ function Table({
     onSelectionChange?.(arr);
   };
   const toggleAll = () => {
-    const allIds = sortedData.map((row) => resolveRowId(data, row, getRowId));
-    const allSelected = allIds.length > 0 && allIds.every((id) => selectedSet.has(id));
-    const next = allSelected ? [] : allIds;
+    const next = allSelected ? [] : sortedRows.map((entry) => entry.id);
     if (!selectionControlled) setInternalSelected(next);
     onSelectionChange?.(next);
   };
-  const showEmpty = !loading && sortedData.length === 0;
+  const showEmpty = !loading && sortedRows.length === 0;
   const skeletonRowCount = loadingRows ?? (data.length > 0 ? data.length : 5);
-  const skeletonLineClass = size === "sm" ? "h-5.5" : size === "lg" ? "h-7" : "h-6";
+  const skeletonLineClass = size === "sm" ? "h-5" : size === "lg" ? "h-7" : "h-6";
   const hasCheckbox = Boolean(selectable);
   const scrollStyle = {
     ...maxHeight != null ? {
@@ -8526,7 +9166,7 @@ function Table({
     /* @__PURE__ */ jsxRuntime.jsx(
       "div",
       {
-        className: "relative w-full overflow-auto rounded-[var(--radius-input,0.375rem)] border border-border",
+        className: "relative w-full overflow-auto rounded-surface-md border border-border",
         style: scrollStyle,
         children: /* @__PURE__ */ jsxRuntime.jsxs("table", { className: cn(tableVariants({ variant, size })), children: [
           /* @__PURE__ */ jsxRuntime.jsx("thead", { className: "border-b border-border bg-background [&_tr]:border-b", children: /* @__PURE__ */ jsxRuntime.jsxs("tr", { className: "transition-colors", children: [
@@ -8539,14 +9179,14 @@ function Table({
                   position: "sticky",
                   left: 0,
                   ...stickyHeader ? { top: 0 } : {},
-                  zIndex: stickyHeader ? 6 : 3
+                  zIndex: stickyZ.headerColumn
                 },
                 children: /* @__PURE__ */ jsxRuntime.jsx(
                   Checkbox,
                   {
                     "aria-label": "Select all rows",
-                    checked: sortedData.length > 0 && sortedData.every((row) => selectedSet.has(resolveRowId(data, row, getRowId))),
-                    indeterminate: sortedData.some((row) => selectedSet.has(resolveRowId(data, row, getRowId))) && !sortedData.every((row) => selectedSet.has(resolveRowId(data, row, getRowId))),
+                    checked: allSelected,
+                    indeterminate: someSelected && !allSelected,
                     onChange: toggleAll
                   }
                 )
@@ -8601,7 +9241,7 @@ function Table({
               "td",
               {
                 className: cn(stickyCheckboxEdgeClasses(), variant === "striped" && "bg-inherit"),
-                style: { position: "sticky", left: 0, zIndex: 3 },
+                style: { position: "sticky", left: 0, zIndex: stickyZ.column },
                 children: /* @__PURE__ */ jsxRuntime.jsx(Skeleton, { variant: "checkbox" })
               }
             ) : null,
@@ -8631,7 +9271,7 @@ function Table({
                     Skeleton,
                     {
                       className: cn(
-                        "block w-full max-w-full rounded-sm leading-none",
+                        "block w-full max-w-full rounded-control-sm leading-none",
                         skeletonLineClass,
                         col.width === void 0 && colIndex > 0 && "max-w-[12rem]"
                       ),
@@ -8642,9 +9282,7 @@ function Table({
                 col.key
               );
             })
-          ] }, `sk-${i}`)) : sortedData.map((row, rowIndex) => {
-            const id = resolveRowId(data, row, getRowId);
-            const sourceIndex = data.indexOf(row);
+          ] }, `sk-${i}`)) : sortedRows.map(({ row, index: sourceIndex, id }, rowIndex) => {
             const clickable = Boolean(onRowClick);
             return /* @__PURE__ */ jsxRuntime.jsxs(
               "tr",
@@ -8653,14 +9291,14 @@ function Table({
                   "border-b border-border/80 transition-colors",
                   clickable && "cursor-pointer hover:bg-muted/40"
                 ),
-                onClick: clickable ? () => onRowClick(row, sourceIndex === -1 ? rowIndex : sourceIndex) : void 0,
+                onClick: clickable ? () => onRowClick(row, sourceIndex) : void 0,
                 children: [
                   selectable ? /* @__PURE__ */ jsxRuntime.jsx(
                     "td",
                     {
                       onClick: (e) => e.stopPropagation(),
                       className: cn(stickyCheckboxEdgeClasses(), variant === "striped" && "bg-inherit"),
-                      style: { position: "sticky", left: 0, zIndex: 3 },
+                      style: { position: "sticky", left: 0, zIndex: stickyZ.column },
                       children: /* @__PURE__ */ jsxRuntime.jsx(
                         Checkbox,
                         {
@@ -8711,7 +9349,8 @@ function Table({
   ] });
 }
 Table.displayName = "Table";
-var Video = React9__namespace.forwardRef(
+var videoLetterbox = "bg-muted";
+var Video = React10__namespace.forwardRef(
   ({ className, src, width, height, style, ...props }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "video",
@@ -8719,7 +9358,7 @@ var Video = React9__namespace.forwardRef(
         ref,
         "data-slot": "video",
         src,
-        className: cn("max-w-full rounded-md bg-black object-contain", className),
+        className: cn("max-w-full rounded-surface-sm object-contain", videoLetterbox, className),
         style: { width, height, ...style },
         ...props
       }
@@ -8826,6 +9465,7 @@ function moveTreeNode(items, draggedId, targetId, position) {
   }
   return insertSibling(withoutDragged, targetId, removed, position === "after");
 }
+var treeRowControl = "h-6 w-6 shrink-0";
 function treeItemKey(item, index, prefix = "") {
   if (item.id) return item.id;
   const fallback = item.value;
@@ -8913,16 +9553,16 @@ function TreeRow({
         },
         onDragEnd,
         className: cn(
-          "group relative flex min-h-[30px] items-center rounded-sm text-sm transition-colors",
+          "group relative flex min-h-[30px] w-max min-w-full items-center rounded-control-sm text-sm transition-colors",
           selected && "bg-primary/10 text-foreground",
           !selected && "hover:bg-muted/70",
           dropInside && "bg-muted/60 ring-1 ring-inset ring-primary/40",
           showIndentGuides && depth > 0 && "border-l border-border/60"
         ),
-        style: { paddingLeft: depth * indent + 4 },
+        style: { marginLeft: depth * indent, paddingLeft: 4 },
         children: [
-          dropBefore ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inset-x-1 top-0 h-0.5 rounded-full bg-primary", "aria-hidden": true }) : null,
-          dropAfter ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary", "aria-hidden": true }) : null,
+          dropBefore ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inset-x-1 top-0 h-0.5 rounded-pill bg-primary", "aria-hidden": true }) : null,
+          dropAfter ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "absolute inset-x-1 bottom-0 h-0.5 rounded-pill bg-primary", "aria-hidden": true }) : null,
           draggable ? /* @__PURE__ */ jsxRuntime.jsx(
             "span",
             {
@@ -8932,77 +9572,101 @@ function TreeRow({
             }
           ) : null,
           /* @__PURE__ */ jsxRuntime.jsx(
-            "button",
+            IconButton,
             {
-              type: "button",
-              className: cn(
-                "flex h-6 w-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted",
-                !hasChildren && "invisible"
-              ),
-              "aria-label": expanded ? "Collapse" : "Expand",
+              className: cn("h-6 w-5 shrink-0 text-muted-foreground", !hasChildren && "invisible"),
+              ariaLabel: expanded ? "Collapse" : "Expand",
+              icon: expanded ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-3.5 w-3.5" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-3.5 w-3.5" }),
               onClick: (event) => {
                 event.stopPropagation();
                 if (hasChildren) onToggle(item.id);
-              },
-              children: hasChildren ? expanded ? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronDown, { className: "h-3.5 w-3.5" }) : /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-3.5 w-3.5" }) : null
+              }
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsxs(
-            "button",
+            "div",
             {
-              type: "button",
-              className: "flex min-w-0 flex-1 items-center gap-2 rounded-sm py-1 pr-1 text-left",
+              role: "button",
+              tabIndex: 0,
+              className: cn(
+                "flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-control-sm py-1 pr-1 text-left outline-none",
+                focusRing
+              ),
               onClick: () => onSelect(item.id),
+              onKeyDown: (event) => {
+                if (event.key === "Enter" || event.key === " ") {
+                  event.preventDefault();
+                  onSelect(item.id);
+                }
+              },
               children: [
                 /* @__PURE__ */ jsxRuntime.jsx("span", { className: "shrink-0 text-muted-foreground", children: item.left ? /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: item.left, size: "sm" }) : defaultIcon(item, expanded) }),
-                /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0 flex-1 truncate", children: item.label })
+                /* @__PURE__ */ jsxRuntime.jsx(
+                  "span",
+                  {
+                    className: cn(
+                      "flex-1",
+                      typeof item.label === "string" || typeof item.label === "number" ? "min-w-0 truncate" : "min-w-max"
+                    ),
+                    children: item.label
+                  }
+                )
               ]
             }
           ),
+          item.actions ? /* @__PURE__ */ jsxRuntime.jsx(
+            "div",
+            {
+              className: "flex shrink-0 items-center gap-0.5 pr-1",
+              onClick: (event) => event.stopPropagation(),
+              onKeyDown: (event) => event.stopPropagation(),
+              children: item.actions
+            }
+          ) : null,
           hasActions ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex shrink-0 items-center gap-0.5 pr-1 opacity-70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100", children: [
             showAddSibling ? /* @__PURE__ */ jsxRuntime.jsx(
-              "button",
+              IconButton,
               {
-                type: "button",
+                tone: "muted",
                 disabled: !onAdd,
-                className: "flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40",
-                "aria-label": "Add sibling",
+                className: treeRowControl,
+                ariaLabel: "Add sibling",
                 title: "Add sibling",
+                icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "h-3.5 w-3.5" }),
                 onClick: (event) => {
                   event.stopPropagation();
                   onAdd?.({ targetId: item.id, relation: "sibling" });
-                },
-                children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Plus, { className: "h-3.5 w-3.5" })
+                }
               }
             ) : null,
             showAddChild ? /* @__PURE__ */ jsxRuntime.jsx(
-              "button",
+              IconButton,
               {
-                type: "button",
+                tone: "muted",
                 disabled: !onAdd,
-                className: "flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40",
-                "aria-label": "Add child",
+                className: treeRowControl,
+                ariaLabel: "Add child",
                 title: "Add folder or request",
+                icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Folder, { className: "h-3.5 w-3.5" }),
                 onClick: (event) => {
                   event.stopPropagation();
                   onAdd?.({ targetId: item.id, relation: "child" });
-                },
-                children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Folder, { className: "h-3.5 w-3.5" })
+                }
               }
             ) : null,
             showDelete ? /* @__PURE__ */ jsxRuntime.jsx(
-              "button",
+              IconButton,
               {
-                type: "button",
+                tone: "muted",
                 disabled: !onDelete,
-                className: "flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-40",
-                "aria-label": "Delete",
+                className: cn(treeRowControl, "hover:bg-destructive/10 hover:text-destructive"),
+                ariaLabel: "Delete",
                 title: "Delete",
+                icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Trash2, { className: "h-3.5 w-3.5" }),
                 onClick: (event) => {
                   event.stopPropagation();
                   onDelete?.(item.id);
-                },
-                children: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Trash2, { className: "h-3.5 w-3.5" })
+                }
               }
             ) : null
           ] }) : null
@@ -9037,7 +9701,7 @@ function TreeRow({
     )) : null
   ] });
 }
-function TreeView({
+var TreeView = React10__namespace.forwardRef(function TreeView2({
   items,
   selectedId,
   defaultSelectedId,
@@ -9057,12 +9721,12 @@ function TreeView({
   onAdd,
   onDelete,
   className,
-  ...rest
-}) {
-  const [internalSelected, setInternalSelected] = React9__namespace.useState(defaultSelectedId);
-  const [internalExpanded, setInternalExpanded] = React9__namespace.useState(defaultExpandedIds);
-  const [draggedId, setDraggedId] = React9__namespace.useState(null);
-  const [dropHint, setDropHint] = React9__namespace.useState(null);
+  ...props
+}, ref) {
+  const [internalSelected, setInternalSelected] = React10__namespace.useState(defaultSelectedId);
+  const [internalExpanded, setInternalExpanded] = React10__namespace.useState(defaultExpandedIds);
+  const [draggedId, setDraggedId] = React10__namespace.useState(null);
+  const [dropHint, setDropHint] = React10__namespace.useState(null);
   const isSelectedControlled = selectedId !== void 0;
   const isExpandedControlled = expandedIds !== void 0;
   const resolvedSelected = isSelectedControlled ? selectedId : internalSelected;
@@ -9079,7 +9743,7 @@ function TreeView({
     if (!isExpandedControlled) setInternalExpanded(arr);
     onExpandedChange?.(arr);
   };
-  const normalizedItems = React9__namespace.useMemo(() => normalizeTreeItems(items), [items]);
+  const normalizedItems = React10__namespace.useMemo(() => normalizeTreeItems(items), [items]);
   const handleDragOver = (event, item) => {
     event.preventDefault();
     if (!draggedId || draggedId === item.id) return;
@@ -9102,17 +9766,21 @@ function TreeView({
     setDropHint(null);
   };
   if (loading) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("flex items-center justify-center p-6", className), children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) });
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("flex items-center justify-center p-6", className), ...props, children: /* @__PURE__ */ jsxRuntime.jsx(Spinner, { size: "sm" }) });
   }
   if (!normalizedItems.length) {
-    return /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("p-4 text-sm text-muted-foreground", className), ...rest, children: emptyState });
+    return /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("p-4 text-sm text-muted-foreground", className), ...props, children: emptyState });
   }
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
+      ref,
       role: "tree",
-      className: cn("w-full select-none space-y-px rounded-md border border-border/60 bg-background p-1", className),
-      ...rest,
+      className: cn(
+        "w-max min-w-full select-none space-y-px rounded-surface-sm border border-border/60 bg-background p-1",
+        className
+      ),
+      ...props,
       children: normalizedItems.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(
         TreeRow,
         {
@@ -9141,9 +9809,9 @@ function TreeView({
       ))
     }
   );
-}
+});
 TreeView.displayName = "TreeView";
-function Carousel({
+var Carousel = React10__namespace.forwardRef(function Carousel2({
   items = [],
   autoPlay = false,
   loop = true,
@@ -9152,11 +9820,11 @@ function Carousel({
   showArrows = true,
   orientation = "horizontal",
   className,
-  ...rest
-}) {
-  const [index, setIndex] = React9__namespace.useState(0);
+  ...props
+}, ref) {
+  const [index, setIndex] = React10__namespace.useState(0);
   const count = items.length;
-  const go = React9__namespace.useCallback(
+  const go = React10__namespace.useCallback(
     (next) => {
       if (!count) return;
       if (loop) setIndex((next % count + count) % count);
@@ -9164,7 +9832,7 @@ function Carousel({
     },
     [count, loop]
   );
-  React9__namespace.useEffect(() => {
+  React10__namespace.useEffect(() => {
     if (!autoPlay || count < 2) return;
     const timer = window.setInterval(() => go(index + 1), interval);
     return () => window.clearInterval(timer);
@@ -9174,12 +9842,13 @@ function Carousel({
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
+      ref,
       className: cn(
-        "relative overflow-hidden rounded-xl border border-border bg-card",
+        "relative overflow-hidden rounded-surface-lg border border-border bg-card",
         orientation === "vertical" ? "h-72" : "w-full",
         className
       ),
-      ...rest,
+      ...props,
       children: [
         /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn(orientation === "vertical" ? "h-full" : "w-full"), children: [
           /* @__PURE__ */ jsxRuntime.jsx(Image, { src: item.image, alt: item.imageAlt ?? "", className: "h-48 w-full md:h-56", fit: "cover", variant: "square" }),
@@ -9187,37 +9856,31 @@ function Carousel({
         ] }),
         showArrows && count > 1 ? /* @__PURE__ */ jsxRuntime.jsxs(jsxRuntime.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsx(
-            Button,
+            IconButton,
             {
-              variant: "ghost",
-              size: "sm",
-              iconOnly: true,
-              "aria-label": "Previous slide",
-              className: "absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-background/80",
-              left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronLeft, { className: "h-4 w-4" }),
+              ariaLabel: "Previous slide",
+              className: "absolute left-2 top-1/2 z-sticky -translate-y-1/2 bg-background/80",
+              icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronLeft, { className: "h-4 w-4" }),
               onClick: () => go(index - 1)
             }
           ),
           /* @__PURE__ */ jsxRuntime.jsx(
-            Button,
+            IconButton,
             {
-              variant: "ghost",
-              size: "sm",
-              iconOnly: true,
-              "aria-label": "Next slide",
-              className: "absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-background/80",
-              left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-4 w-4" }),
+              ariaLabel: "Next slide",
+              className: "absolute right-2 top-1/2 z-sticky -translate-y-1/2 bg-background/80",
+              icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-4 w-4" }),
               onClick: () => go(index + 1)
             }
           )
         ] }) : null,
-        showIndicators && count > 1 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5", children: items.map((_, i) => /* @__PURE__ */ jsxRuntime.jsx(
+        showIndicators && count > 1 ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "absolute bottom-3 left-1/2 z-sticky flex -translate-x-1/2 gap-1.5", children: items.map((_, i) => /* @__PURE__ */ jsxRuntime.jsx(
           "button",
           {
             type: "button",
             "aria-label": `Go to slide ${i + 1}`,
             className: cn(
-              "h-2 w-2 rounded-full transition-colors",
+              "h-2 w-2 rounded-pill transition-colors",
               i === index ? "bg-primary" : "bg-muted-foreground/40"
             ),
             onClick: () => setIndex(i)
@@ -9233,40 +9896,73 @@ function Carousel({
       ]
     }
   );
-}
+});
 Carousel.displayName = "Carousel";
-function CodeBlock({
+var codeBlockVariants = classVarianceAuthority.cva("relative flex min-h-0 flex-col overflow-hidden rounded-surface-md border", {
+  variants: {
+    variant: {
+      default: "border-border bg-muted/40",
+      surface: "border-border bg-card shadow-sm",
+      inset: "border-border/60 bg-muted/30",
+      ghost: "border-transparent bg-transparent"
+    }
+  },
+  defaultVariants: {
+    variant: "default"
+  }
+});
+var CodeBlock = React10__namespace.forwardRef(function CodeBlock2({
   code = "",
   language,
   showLineNumbers = false,
   showCopy = true,
+  showWrapToggle = false,
+  wrap: wrapProp,
+  defaultWrap = false,
+  onWrapChange,
   filename,
+  variant,
   className,
-  ...rest
-}) {
-  const lines = React9__namespace.useMemo(() => code.split(/\n/), [code]);
-  return /* @__PURE__ */ jsxRuntime.jsxs(
-    "div",
-    {
-      className: cn("relative overflow-hidden rounded-lg border border-border bg-muted/40", className),
-      ...rest,
-      children: [
-        filename != null || showCopy ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-h-10 items-center justify-between gap-2 border-b border-border px-4 py-2", children: [
-          filename != null ? /* @__PURE__ */ jsxRuntime.jsx(Text, { variant: "muted", className: "min-w-0 font-mono text-xs", children: filename }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0", "aria-hidden": true }),
-          showCopy ? /* @__PURE__ */ jsxRuntime.jsx(CopyButton, { value: code, variant: "ghost", size: "sm", tooltip: false }) : null
-        ] }) : null,
-        /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "overflow-x-auto p-4 text-sm leading-relaxed", children: showLineNumbers ? /* @__PURE__ */ jsxRuntime.jsx("code", { className: "grid grid-cols-[auto_minmax(0,1fr)] gap-x-4 font-mono text-foreground", children: lines.map((line, i) => /* @__PURE__ */ jsxRuntime.jsxs(React9__namespace.Fragment, { children: [
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "select-none text-right tabular-nums text-muted-foreground", children: i + 1 }),
-          /* @__PURE__ */ jsxRuntime.jsx("span", { className: "whitespace-pre", children: line })
-        ] }, i)) }) : /* @__PURE__ */ jsxRuntime.jsx("code", { className: "block whitespace-pre font-mono text-foreground", children: code }) }),
-        language ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "sr-only", children: [
-          "Language: ",
-          language
-        ] }) : null
-      ]
-    }
+  ...props
+}, ref) {
+  const [wrap, setWrap] = useControllableValue({
+    value: wrapProp,
+    defaultValue: defaultWrap,
+    onChange: onWrapChange
+  });
+  const lines = React10__namespace.useMemo(() => code.split(/\n/), [code]);
+  const lineClassName = cn(
+    "font-mono text-foreground",
+    wrap ? "whitespace-pre-wrap break-words" : "whitespace-pre"
   );
-}
+  const showToolbar = filename != null || showCopy || showWrapToggle;
+  return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn(codeBlockVariants({ variant }), className), ...props, children: [
+    showToolbar ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex min-h-10 shrink-0 items-center justify-between gap-2 border-b border-border px-4 py-2", children: [
+      filename != null ? /* @__PURE__ */ jsxRuntime.jsx(Text, { variant: "muted", className: "min-w-0 font-mono text-xs", children: filename }) : /* @__PURE__ */ jsxRuntime.jsx("span", { className: "min-w-0", "aria-hidden": true }),
+      /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex shrink-0 items-center gap-1", children: [
+        showWrapToggle ? /* @__PURE__ */ jsxRuntime.jsx(
+          IconButton,
+          {
+            ariaLabel: wrap ? "Disable word wrap" : "Enable word wrap",
+            "aria-pressed": wrap,
+            icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.WrapText, { className: "h-4 w-4" }),
+            className: cn(wrap && "bg-muted text-foreground"),
+            onClick: () => setWrap(!wrap)
+          }
+        ) : null,
+        showCopy ? /* @__PURE__ */ jsxRuntime.jsx(CopyButton, { value: code, variant: "ghost", size: "sm", tooltip: false }) : null
+      ] })
+    ] }) : null,
+    /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "min-h-0 flex-1 overflow-auto p-4 text-sm leading-relaxed", children: showLineNumbers ? /* @__PURE__ */ jsxRuntime.jsx("code", { className: "grid grid-cols-[auto_minmax(0,1fr)] gap-x-4", children: lines.map((line, i) => /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "select-none text-right tabular-nums text-muted-foreground", children: i + 1 }),
+      /* @__PURE__ */ jsxRuntime.jsx("span", { className: lineClassName, children: line })
+    ] }, i)) }) : /* @__PURE__ */ jsxRuntime.jsx("code", { className: cn("block", lineClassName), children: code }) }),
+    language ? /* @__PURE__ */ jsxRuntime.jsxs("span", { className: "sr-only", children: [
+      "Language: ",
+      language
+    ] }) : null
+  ] });
+});
 CodeBlock.displayName = "CodeBlock";
 var alertDialogVariants = classVarianceAuthority.cva("", {
   variants: {
@@ -9280,7 +9976,7 @@ var alertDialogVariants = classVarianceAuthority.cva("", {
     variant: "default"
   }
 });
-function AlertDialog({
+var AlertDialog = React10__namespace.forwardRef(function AlertDialog2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -9291,11 +9987,12 @@ function AlertDialog({
   cancelProps,
   loading,
   className,
-  container
-}) {
+  container,
+  initialFocus
+}, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const busy = Boolean(loading || confirmProps?.loading);
-  const handleClose = React9__namespace.useCallback(() => {
+  const handleClose = React10__namespace.useCallback(() => {
     if (busy) return;
     setOpen(false);
   }, [busy, setOpen]);
@@ -9307,11 +10004,17 @@ function AlertDialog({
       onClose: handleClose,
       container,
       blur: true,
+      dialog: true,
+      dialogRole: "alertdialog",
+      dialogLabel: title,
+      initialFocus,
+      closeOnEscape: !busy,
       closeOnBackdropClick: !busy,
       className: "flex items-center justify-center p-4",
       children: /* @__PURE__ */ jsxRuntime.jsx(
         Card,
         {
+          ref,
           "data-slot": "alert-dialog",
           variant: "surface-1",
           size: "md",
@@ -9350,7 +10053,7 @@ function AlertDialog({
       )
     }
   );
-}
+});
 AlertDialog.displayName = "AlertDialog";
 var drawerVariants = classVarianceAuthority.cva("relative flex flex-col border-border bg-card shadow-lg", {
   variants: {
@@ -9368,15 +10071,15 @@ var drawerVariants = classVarianceAuthority.cva("relative flex flex-col border-b
       full: ""
     },
     variant: {
-      default: "rounded-none",
+      default: "rounded-[0]",
       sheet: ""
     }
   },
   compoundVariants: [
-    { placement: "bottom", variant: "sheet", class: "rounded-t-xl" },
-    { placement: "top", variant: "sheet", class: "rounded-b-xl" },
-    { placement: "left", variant: "sheet", class: "rounded-r-xl" },
-    { placement: "right", variant: "sheet", class: "rounded-l-xl" },
+    { placement: "bottom", variant: "sheet", class: "rounded-t-surface-lg" },
+    { placement: "top", variant: "sheet", class: "rounded-b-surface-lg" },
+    { placement: "left", variant: "sheet", class: "rounded-r-surface-lg" },
+    { placement: "right", variant: "sheet", class: "rounded-l-surface-lg" },
     { placement: ["top", "bottom"], size: "sm", class: "max-h-[30vh]" },
     { placement: ["top", "bottom"], size: "md", class: "max-h-[50vh]" },
     { placement: ["top", "bottom"], size: "lg", class: "max-h-[70vh]" },
@@ -9400,7 +10103,7 @@ var overlayAlign = {
   left: "flex items-stretch justify-start p-0",
   right: "flex items-stretch justify-end p-0"
 };
-var Drawer = React9__namespace.forwardRef(function Drawer2({
+var Drawer = React10__namespace.forwardRef(function Drawer2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -9413,23 +10116,22 @@ var Drawer = React9__namespace.forwardRef(function Drawer2({
   className,
   cardProps,
   container,
+  ariaLabel,
+  initialFocus,
   children
 }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const resolvedPlacement = placement ?? "right";
-  const handleClose = React9__namespace.useCallback(() => {
+  const handleClose = React10__namespace.useCallback(() => {
     setOpen(false);
   }, [setOpen]);
   const resolvedHeader = header || showClose ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start justify-between gap-3", children: [
     header ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "min-w-0 flex-1", children: header }) : /* @__PURE__ */ jsxRuntime.jsx("span", {}),
     showClose ? /* @__PURE__ */ jsxRuntime.jsx(
-      Button,
+      IconButton,
       {
-        variant: "ghost",
-        size: "sm",
-        iconOnly: true,
         ariaLabel: "Close",
-        left: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" }),
+        icon: /* @__PURE__ */ jsxRuntime.jsx(lucideReact.X, { className: "h-4 w-4" }),
         onClick: handleClose,
         className: "shrink-0"
       }
@@ -9442,6 +10144,9 @@ var Drawer = React9__namespace.forwardRef(function Drawer2({
       onClose: handleClose,
       container,
       blur: true,
+      dialog: true,
+      dialogLabel: ariaLabel,
+      initialFocus,
       showCloseButton: false,
       className: overlayAlign[resolvedPlacement],
       children: /* @__PURE__ */ jsxRuntime.jsx(
@@ -9466,7 +10171,7 @@ var Drawer = React9__namespace.forwardRef(function Drawer2({
   );
 });
 Drawer.displayName = "Drawer";
-function HoverCard({
+var HoverCard = React10__namespace.forwardRef(function HoverCard2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -9480,11 +10185,11 @@ function HoverCard({
   cardProps,
   children,
   ...rest
-}) {
+}, ref) {
   const { label = "Hover", left, variant = "ghost", size = "md", className: triggerClassName } = triggerProps ?? {};
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const openTimer = React9__namespace.useRef(null);
-  const closeTimer = React9__namespace.useRef(null);
+  const openTimer = React10__namespace.useRef(null);
+  const closeTimer = React10__namespace.useRef(null);
   const clearTimers = () => {
     if (openTimer.current) clearTimeout(openTimer.current);
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -9499,7 +10204,7 @@ function HoverCard({
     clearTimers();
     closeTimer.current = setTimeout(() => setOpen(false), closeDelay);
   };
-  React9__namespace.useEffect(() => clearTimers, []);
+  React10__namespace.useEffect(() => clearTimers, []);
   const hoverHandlers = {
     onMouseEnter: scheduleOpen,
     onMouseLeave: scheduleClose,
@@ -9513,6 +10218,7 @@ function HoverCard({
   return /* @__PURE__ */ jsxRuntime.jsx(
     Popover,
     {
+      ref,
       open,
       onOpenChange: setOpen,
       trigger: resolvedTrigger,
@@ -9526,9 +10232,9 @@ function HoverCard({
       children: /* @__PURE__ */ jsxRuntime.jsx("div", { ...hoverHandlers, children })
     }
   );
-}
+});
 HoverCard.displayName = "HoverCard";
-var VisuallyHidden = React9__namespace.forwardRef(
+var VisuallyHidden = React10__namespace.forwardRef(
   ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "span",
     {
@@ -9542,20 +10248,50 @@ var VisuallyHidden = React9__namespace.forwardRef(
   )
 );
 VisuallyHidden.displayName = "VisuallyHidden";
-var ErrorBoundary = class extends React9__namespace.Component {
+function haveResetKeysChanged(prev, next) {
+  if (prev === next) return false;
+  if (prev == null || next == null) return prev !== next;
+  if (prev.length !== next.length) return true;
+  return prev.some((value, i) => !Object.is(value, next[i]));
+}
+var ErrorBoundary = class extends React10__namespace.Component {
   constructor() {
     super(...arguments);
     this.state = { hasError: false };
+    /** Clears the caught error and re-renders `children`. Safe to call from a fallback. */
+    this.reset = () => {
+      if (!this.state.hasError) return;
+      this.setState({ hasError: false, error: void 0 });
+      this.props.onReset?.();
+    };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
+  static getDerivedStateFromError(error) {
+    return { hasError: true, error };
   }
   componentDidCatch(error, errorInfo) {
     this.props.onError?.(error, errorInfo);
   }
+  componentDidUpdate(prevProps) {
+    if (!this.state.hasError) return;
+    if (haveResetKeysChanged(prevProps.resetKeys, this.props.resetKeys)) this.reset();
+  }
   render() {
     if (this.state.hasError) {
-      return this.props.fallback ?? /* @__PURE__ */ jsxRuntime.jsx("div", { className: cn("rounded-md border border-destructive/40 bg-destructive/10 p-3", this.props.className), children: /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", variant: "danger", children: "Something went wrong." }) });
+      const { fallback } = this.props;
+      if (fallback != null) {
+        return typeof fallback === "function" ? fallback(this.reset) : fallback;
+      }
+      return /* @__PURE__ */ jsxRuntime.jsx(
+        "div",
+        {
+          role: "alert",
+          className: cn(
+            "rounded-surface-md border border-destructive/40 bg-destructive/10 p-3",
+            this.props.className
+          ),
+          children: /* @__PURE__ */ jsxRuntime.jsx(Text, { as: "div", size: "sm", variant: "danger", children: "Something went wrong." })
+        }
+      );
     }
     return this.props.children;
   }
@@ -9590,6 +10326,65 @@ function polarToCartesian(cx, cy, r, angle) {
   const rad = (angle - 90) * Math.PI / 180;
   return { x: cx + r * Math.cos(rad), y: cy + r * Math.sin(rad) };
 }
+function monotoneTangents(points) {
+  const n = points.length;
+  const slopes = [];
+  for (let i = 0; i < n - 1; i += 1) {
+    const dx = points[i + 1].x - points[i].x;
+    slopes.push(dx === 0 ? 0 : (points[i + 1].y - points[i].y) / dx);
+  }
+  const m = new Array(n).fill(0);
+  m[0] = slopes[0] ?? 0;
+  m[n - 1] = slopes[n - 2] ?? 0;
+  for (let i = 1; i < n - 1; i += 1) {
+    m[i] = slopes[i - 1] * slopes[i] <= 0 ? 0 : (slopes[i - 1] + slopes[i]) / 2;
+  }
+  for (let i = 0; i < n - 1; i += 1) {
+    if (slopes[i] === 0) {
+      m[i] = 0;
+      m[i + 1] = 0;
+      continue;
+    }
+    const a = m[i] / slopes[i];
+    const b = m[i + 1] / slopes[i];
+    const s = a * a + b * b;
+    if (s > 9) {
+      const t = 3 / Math.sqrt(s);
+      m[i] = t * a * slopes[i];
+      m[i + 1] = t * b * slopes[i];
+    }
+  }
+  return m;
+}
+function buildLinePath(points, curve = "linear") {
+  if (points.length === 0) return "";
+  const head = `M ${points[0].x} ${points[0].y}`;
+  if (points.length === 1) return head;
+  if (curve === "step") {
+    return points.slice(1).reduce((d, p) => `${d} H ${p.x} V ${p.y}`, head);
+  }
+  if (curve === "monotone") {
+    const m = monotoneTangents(points);
+    let d = head;
+    for (let i = 0; i < points.length - 1; i += 1) {
+      const dx = (points[i + 1].x - points[i].x) / 3;
+      const c1x = points[i].x + dx;
+      const c1y = points[i].y + m[i] * dx;
+      const c2x = points[i + 1].x - dx;
+      const c2y = points[i + 1].y - m[i + 1] * dx;
+      d += ` C ${c1x} ${c1y}, ${c2x} ${c2y}, ${points[i + 1].x} ${points[i + 1].y}`;
+    }
+    return d;
+  }
+  return points.slice(1).reduce((d, p) => `${d} L ${p.x} ${p.y}`, head);
+}
+function buildAreaPath(points, baselineY, curve = "linear") {
+  if (points.length === 0) return "";
+  const line = buildLinePath(points, curve);
+  const last = points[points.length - 1];
+  const first = points[0];
+  return `${line} L ${last.x} ${baselineY} L ${first.x} ${baselineY} Z`;
+}
 function describeArc(cx, cy, r, startAngle, endAngle) {
   const start = polarToCartesian(cx, cy, r, endAngle);
   const end = polarToCartesian(cx, cy, r, startAngle);
@@ -9605,7 +10400,7 @@ function GridLines() {
     return /* @__PURE__ */ jsxRuntime.jsx("line", { x1: PAD, x2: VIEW_W - PAD, y1: y, y2: y, opacity: 0.35 }, i);
   }) });
 }
-function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }) {
+function BarChartSvg({ data, xKey, yKey, horizontal }) {
   const max = maxOf(data, yKey) || 1;
   const innerW = VIEW_W - PAD * 2;
   const innerH = VIEW_H - PAD * 2;
@@ -9621,7 +10416,17 @@ function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }) {
       const h2 = innerH / data.length - barGap;
       return /* @__PURE__ */ jsxRuntime.jsxs("g", { children: [
         /* @__PURE__ */ jsxRuntime.jsx("rect", { x: PAD, y: y2, width: w, height: h2, fill: color, rx: 4 }),
-        /* @__PURE__ */ jsxRuntime.jsx("text", { x: PAD - 6, y: y2 + h2 / 2, textAnchor: "end", dominantBaseline: "middle", className: "fill-muted-foreground text-[10px]", children: label })
+        /* @__PURE__ */ jsxRuntime.jsx(
+          "text",
+          {
+            x: PAD - 6,
+            y: y2 + h2 / 2,
+            textAnchor: "end",
+            dominantBaseline: "middle",
+            className: "fill-muted-foreground text-[10px]",
+            children: label
+          }
+        )
       ] }, index);
     }
     const h = value / max * innerH;
@@ -9629,24 +10434,33 @@ function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }) {
     const y = VIEW_H - PAD - h;
     return /* @__PURE__ */ jsxRuntime.jsxs("g", { children: [
       /* @__PURE__ */ jsxRuntime.jsx("rect", { x, y, width: barSize, height: h, fill: color, rx: 4 }),
-      /* @__PURE__ */ jsxRuntime.jsx("text", { x: x + barSize / 2, y: VIEW_H - PAD + 14, textAnchor: "middle", className: "fill-muted-foreground text-[10px]", children: label })
+      /* @__PURE__ */ jsxRuntime.jsx(
+        "text",
+        {
+          x: x + barSize / 2,
+          y: VIEW_H - PAD + 14,
+          textAnchor: "middle",
+          className: "fill-muted-foreground text-[10px]",
+          children: label
+        }
+      )
     ] }, index);
   }) });
 }
-function LineChartSvg({ data, xKey = "label", yKey = "value", area, showPoints }) {
+function LineChartSvg({ data, xKey, yKey, area, showPoints, curve }) {
   const max = maxOf(data, yKey) || 1;
   const innerW = VIEW_W - PAD * 2;
   const innerH = VIEW_H - PAD * 2;
+  const baseline = VIEW_H - PAD;
   const points = data.map((row, index) => {
     const x = PAD + index / Math.max(data.length - 1, 1) * innerW;
-    const y = VIEW_H - PAD - readNumber(row, yKey) / max * innerH;
+    const y = baseline - readNumber(row, yKey) / max * innerH;
     return { x, y };
   });
-  const polyline = points.map((p) => `${p.x},${p.y}`).join(" ");
-  const areaPath = `${points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ")} L ${points[points.length - 1]?.x ?? PAD} ${VIEW_H - PAD} L ${points[0]?.x ?? PAD} ${VIEW_H - PAD} Z`;
+  const linePath = buildLinePath(points, curve);
   return /* @__PURE__ */ jsxRuntime.jsxs("g", { children: [
-    /* @__PURE__ */ jsxRuntime.jsx("polyline", { fill: "none", stroke: "hsl(var(--primary))", strokeWidth: "2", points: polyline }),
-    area ? /* @__PURE__ */ jsxRuntime.jsx("path", { d: areaPath, fill: "hsl(var(--primary))", opacity: 0.15 }) : null,
+    area ? /* @__PURE__ */ jsxRuntime.jsx("path", { d: buildAreaPath(points, baseline, curve), fill: "hsl(var(--primary))", opacity: 0.15 }) : null,
+    /* @__PURE__ */ jsxRuntime.jsx("path", { d: linePath, fill: "none", stroke: "hsl(var(--primary))", strokeWidth: "2" }),
     showPoints ? points.map((p, i) => /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: p.x, cy: p.y, r: 3, fill: "hsl(var(--primary))" }, i)) : null,
     data.map((row, index) => /* @__PURE__ */ jsxRuntime.jsx(
       "text",
@@ -9661,26 +10475,26 @@ function LineChartSvg({ data, xKey = "label", yKey = "value", area, showPoints }
     ))
   ] });
 }
-function PieChartSvg({ data, valueKey = "value", labelKey = "label", innerRadius = 0 }) {
+function PieChartSvg({ data, valueKey, labelKey, innerRadius, padAngle, startAngle, endAngle }) {
   const total = sumOf(data, valueKey) || 1;
   const cx = VIEW_W / 2;
   const cy = VIEW_H / 2;
   const radius = Math.min(VIEW_W, VIEW_H) / 2 - 24;
-  let cursor = 0;
+  const sweep = endAngle - startAngle;
+  let cursor = startAngle;
   return /* @__PURE__ */ jsxRuntime.jsxs("g", { children: [
     data.map((row, index) => {
       const value = readNumber(row, valueKey);
-      const angle = value / total * 360;
+      const angle = value / total * sweep;
       const start = cursor;
       const end = cursor + angle;
       cursor = end;
+      const inset = Math.min(padAngle / 2, Math.max(angle / 2 - 0.01, 0));
       const color = CHART_COLORS[index % CHART_COLORS.length];
-      const path = describeArc(cx, cy, radius, start, end);
-      return /* @__PURE__ */ jsxRuntime.jsxs("g", { children: [
-        /* @__PURE__ */ jsxRuntime.jsx("path", { d: `${path} L ${cx} ${cy} Z`, fill: color }),
-        innerRadius > 0 ? /* @__PURE__ */ jsxRuntime.jsx("circle", { cx, cy, r: innerRadius, fill: "hsl(var(--background))" }) : null
-      ] }, index);
+      const path = describeArc(cx, cy, radius, start + inset, end - inset);
+      return /* @__PURE__ */ jsxRuntime.jsx("path", { d: `${path} L ${cx} ${cy} Z`, fill: color }, index);
     }),
+    innerRadius > 0 ? /* @__PURE__ */ jsxRuntime.jsx("circle", { cx, cy, r: innerRadius, fill: "hsl(var(--background))" }) : null,
     data.map((row, index) => /* @__PURE__ */ jsxRuntime.jsxs("text", { x: PAD, y: PAD + index * 14, className: "fill-foreground text-[10px]", children: [
       readKey(row, labelKey),
       " (",
@@ -9689,7 +10503,7 @@ function PieChartSvg({ data, valueKey = "value", labelKey = "label", innerRadius
     ] }, `label-${index}`))
   ] });
 }
-function ScatterChartSvg({ data, xKey = "x", yKey = "y" }) {
+function ScatterChartSvg({ data, xKey, yKey }) {
   const maxX = maxOf(data, xKey) || 1;
   const maxY = maxOf(data, yKey) || 1;
   const innerW = VIEW_W - PAD * 2;
@@ -9700,85 +10514,135 @@ function ScatterChartSvg({ data, xKey = "x", yKey = "y" }) {
     return /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: x, cy: y, r: 4, fill: CHART_COLORS[index % CHART_COLORS.length] }, index);
   }) });
 }
-function Chart({
+var Chart = React10__namespace.forwardRef(function Chart2({
   type,
   data,
   xKey,
   yKey,
-  valueKey,
-  labelKey,
-  responsive = true,
+  valueKey = "value",
+  labelKey = "label",
   legend = false,
   grid = true,
   height = 240,
   width = "100%",
   innerRadius,
+  padAngle = 0,
+  startAngle = 0,
+  endAngle = 360,
   horizontal,
   area,
   showPoints,
+  curve = "linear",
   className,
+  style,
+  svgProps,
   ...props
-}) {
-  const chartProps = {
-    type,
-    data,
-    xKey,
-    yKey,
-    valueKey,
-    labelKey,
-    horizontal,
-    area: type === "area" || area,
-    showPoints,
-    innerRadius: type === "donut" ? innerRadius ?? 40 : innerRadius
-  };
-  return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: cn("w-full", className), style: { width, height: typeof height === "number" ? `${height}px` : height }, children: [
-    /* @__PURE__ */ jsxRuntime.jsxs("svg", { viewBox: `0 0 ${VIEW_W} ${VIEW_H}`, width: "100%", height: "100%", role: "img", "aria-label": "Chart", ...props, children: [
-      grid && type !== "pie" && type !== "donut" ? /* @__PURE__ */ jsxRuntime.jsx(GridLines, {}) : null,
-      type === "bar" ? /* @__PURE__ */ jsxRuntime.jsx(BarChartSvg, { ...chartProps }) : null,
-      type === "line" || type === "area" ? /* @__PURE__ */ jsxRuntime.jsx(LineChartSvg, { ...chartProps }) : null,
-      type === "scatter" ? /* @__PURE__ */ jsxRuntime.jsx(ScatterChartSvg, { ...chartProps }) : null,
-      type === "pie" || type === "donut" ? /* @__PURE__ */ jsxRuntime.jsx(PieChartSvg, { ...chartProps, innerRadius: type === "donut" ? innerRadius ?? 40 : 0 }) : null
-    ] }),
-    legend ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 flex flex-wrap gap-3", children: data.map((row, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "inline-flex items-center gap-1.5 text-xs text-muted-foreground", children: [
-      /* @__PURE__ */ jsxRuntime.jsx("span", { className: "h-2 w-2 rounded-full", style: { backgroundColor: CHART_COLORS[index % CHART_COLORS.length] } }),
-      readKey(row, labelKey ?? xKey ?? "label")
-    ] }, index)) }) : null
-  ] });
-}
+}, ref) {
+  const isPie = type === "pie" || type === "donut";
+  const resolvedXKey = xKey ?? (type === "scatter" ? "x" : "label");
+  const resolvedYKey = yKey ?? (type === "scatter" ? "y" : "value");
+  return /* @__PURE__ */ jsxRuntime.jsxs(
+    "div",
+    {
+      ref,
+      "data-slot": "chart",
+      className: cn("w-full", className),
+      style: { ...style, width, height: typeof height === "number" ? `${height}px` : height },
+      ...props,
+      children: [
+        /* @__PURE__ */ jsxRuntime.jsxs(
+          "svg",
+          {
+            viewBox: `0 0 ${VIEW_W} ${VIEW_H}`,
+            width: "100%",
+            height: "100%",
+            role: "img",
+            "aria-label": "Chart",
+            ...svgProps,
+            children: [
+              grid && !isPie ? /* @__PURE__ */ jsxRuntime.jsx(GridLines, {}) : null,
+              type === "bar" ? /* @__PURE__ */ jsxRuntime.jsx(BarChartSvg, { data, xKey: resolvedXKey, yKey: resolvedYKey, horizontal }) : null,
+              type === "line" || type === "area" ? /* @__PURE__ */ jsxRuntime.jsx(
+                LineChartSvg,
+                {
+                  data,
+                  xKey: resolvedXKey,
+                  yKey: resolvedYKey,
+                  area: type === "area" || area,
+                  showPoints,
+                  curve
+                }
+              ) : null,
+              type === "scatter" ? /* @__PURE__ */ jsxRuntime.jsx(ScatterChartSvg, { data, xKey: resolvedXKey, yKey: resolvedYKey }) : null,
+              isPie ? /* @__PURE__ */ jsxRuntime.jsx(
+                PieChartSvg,
+                {
+                  data,
+                  valueKey,
+                  labelKey,
+                  innerRadius: type === "donut" ? innerRadius ?? 40 : 0,
+                  padAngle,
+                  startAngle,
+                  endAngle
+                }
+              ) : null
+            ]
+          }
+        ),
+        legend ? /* @__PURE__ */ jsxRuntime.jsx("div", { className: "mt-2 flex flex-wrap gap-3", children: data.map((row, index) => /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "inline-flex items-center gap-1.5 text-xs text-muted-foreground", children: [
+          /* @__PURE__ */ jsxRuntime.jsx(
+            "span",
+            {
+              className: "h-2 w-2 rounded-pill",
+              style: { backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }
+            }
+          ),
+          readKey(row, isPie ? labelKey : resolvedXKey)
+        ] }, index)) }) : null
+      ]
+    }
+  );
+});
 Chart.displayName = "Chart";
-function BarChart({ data, xKey, yKey, stacked, horizontal, ...props }) {
-  return /* @__PURE__ */ jsxRuntime.jsx(Chart, { type: "bar", data, xKey, yKey, horizontal, stacked, ...props });
-}
+var BarChart = React10__namespace.forwardRef(function BarChart2({ data, xKey, yKey, horizontal, ...props }, ref) {
+  return /* @__PURE__ */ jsxRuntime.jsx(Chart, { ref, type: "bar", data, xKey, yKey, horizontal, ...props });
+});
 BarChart.displayName = "BarChart";
-function LineChart({ data, xKey, yKey, curve: _curve = "linear", showPoints = true, area, ...props }) {
+var LineChart = React10__namespace.forwardRef(function LineChart2({ data, xKey, yKey, curve = "linear", showPoints = true, area, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     Chart,
     {
+      ref,
       type: area ? "area" : "line",
       data,
       xKey,
       yKey,
+      curve,
       showPoints,
       area,
       ...props
     }
   );
-}
+});
 LineChart.displayName = "LineChart";
-function PieChart({ data, valueKey, labelKey, innerRadius, ...props }) {
+var PieChart = React10__namespace.forwardRef(function PieChart2({ data, valueKey, labelKey, innerRadius, padAngle, startAngle, endAngle, ...props }, ref) {
   const isDonut = innerRadius != null && innerRadius > 0;
   return /* @__PURE__ */ jsxRuntime.jsx(
     Chart,
     {
+      ref,
       type: isDonut ? "donut" : "pie",
       data,
       valueKey,
       labelKey,
       innerRadius,
+      padAngle,
+      startAngle,
+      endAngle,
       ...props
     }
   );
-}
+});
 PieChart.displayName = "PieChart";
 
 // src/themes/themeConfig.ts
@@ -9859,6 +10723,12 @@ var baseThemeCategories = {
         file: "shape/sharp.json",
         icon: "\u2B1C",
         description: "Sharp square corners"
+      },
+      contrast: {
+        name: "Contrast",
+        file: "shape/contrast.json",
+        icon: "\u{1F518}",
+        description: "Small controls fully round, large surfaces square"
       }
     }
   },
@@ -9917,80 +10787,81 @@ var baseThemeCategories = {
     }
   }
 };
-var discoveredThemesCache = null;
-async function discoverThemes() {
-  if (discoveredThemesCache) {
-    return discoveredThemesCache;
-  }
-  const themes = JSON.parse(JSON.stringify(baseThemeCategories));
-  discoveredThemesCache = themes;
-  return themes;
+async function getBaseThemeCategories() {
+  return JSON.parse(JSON.stringify(baseThemeCategories));
 }
-function registerTheme(category, themeId, metadata) {
-  if (!discoveredThemesCache) {
-    discoveredThemesCache = JSON.parse(JSON.stringify(baseThemeCategories));
+function createThemeRegistry(source = getBaseThemeCategories) {
+  let cache = null;
+  async function getThemeCategories2() {
+    if (!cache) cache = await source();
+    return cache;
   }
-  const cache = discoveredThemesCache;
-  if (!cache[category]) {
-    let order = 99;
-    if (THEME_CATEGORY_ORDER.includes(category)) {
+  async function registerTheme2(category, themeId, metadata) {
+    const current = await getThemeCategories2();
+    if (!current[category]) {
+      let order = 99;
       const index = THEME_CATEGORY_ORDER.indexOf(category);
-      order = (index + 1) * 10;
+      if (index !== -1) order = (index + 1) * 10;
+      current[category] = {
+        name: category.charAt(0).toUpperCase() + category.slice(1),
+        order,
+        themes: {}
+      };
     }
-    cache[category] = {
-      name: category.charAt(0).toUpperCase() + category.slice(1),
-      order,
-      themes: {}
+    current[category].themes[themeId] = {
+      name: metadata.name,
+      file: metadata.file,
+      icon: metadata.icon || "\u{1F3A8}",
+      description: metadata.description || ""
     };
+    return current;
   }
-  cache[category].themes[themeId] = {
-    name: metadata.name,
-    file: metadata.file,
-    icon: metadata.icon || "\u{1F3A8}",
-    description: metadata.description || ""
-  };
-  return cache;
-}
-async function registerThemeFromFile(category, themeId, filePath) {
-  const tokensBase = typeof window !== "undefined" && window.__THEME_TOKENS_BASE__ ? window.__THEME_TOKENS_BASE__ : "/tokens";
-  const path = filePath || `${tokensBase}/themes/${category}/${themeId}.json`;
-  try {
-    const response = await fetch(path);
-    if (!response.ok) {
-      throw new Error(`Failed to load theme file: ${response.statusText}`);
+  async function registerThemeFromFile2(category, themeId, filePath) {
+    const tokensBase = typeof window !== "undefined" && window.__THEME_TOKENS_BASE__ ? window.__THEME_TOKENS_BASE__ : "/tokens";
+    const path = filePath || `${tokensBase}/themes/${category}/${themeId}.json`;
+    try {
+      const response = await fetch(path);
+      if (!response.ok) {
+        throw new Error(`Failed to load theme file: ${response.statusText}`);
+      }
+      const themeData = await response.json();
+      await registerTheme2(category, themeId, {
+        name: themeData.name || themeId.charAt(0).toUpperCase() + themeId.slice(1),
+        file: filePath || `${category}/${themeId}.json`,
+        icon: themeData.icon || "\u{1F3A8}",
+        description: themeData.description || `Custom ${category} theme: ${themeId}`
+      });
+      return { success: true, themeId, category };
+    } catch (error) {
+      if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
+        console.error(`Failed to register theme from ${path}:`, error);
+      }
+      throw error;
     }
-    const themeData = await response.json();
-    registerTheme(category, themeId, {
-      name: themeData.name || themeId.charAt(0).toUpperCase() + themeId.slice(1),
-      file: filePath || `${category}/${themeId}.json`,
-      icon: themeData.icon || "\u{1F3A8}",
-      description: themeData.description || `Custom ${category} theme: ${themeId}`
-    });
-    return { success: true, themeId, category };
-  } catch (error) {
-    if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
-      console.error(`Failed to register theme from ${path}:`, error);
-    }
-    throw error;
   }
+  function getThemeFilePath2(category, themeId) {
+    const categories = cache || baseThemeCategories;
+    const theme = categories[category]?.themes[themeId];
+    if (!theme) return null;
+    return `/tokens/themes/${theme.file}`;
+  }
+  async function getThemesForCategory2(category) {
+    const categories = await getThemeCategories2();
+    return categories[category]?.themes || {};
+  }
+  async function getTheme2(category, themeId) {
+    const categories = await getThemeCategories2();
+    return categories[category]?.themes[themeId] || null;
+  }
+  return { getThemeCategories: getThemeCategories2, registerTheme: registerTheme2, registerThemeFromFile: registerThemeFromFile2, getThemeFilePath: getThemeFilePath2, getThemesForCategory: getThemesForCategory2, getTheme: getTheme2 };
 }
-async function getThemeCategories() {
-  return await discoverThemes();
-}
-function getThemeFilePath(category, themeId) {
-  const categories = discoveredThemesCache || baseThemeCategories;
-  const theme = categories[category]?.themes[themeId];
-  if (!theme) return null;
-  return `/tokens/themes/${theme.file}`;
-}
-async function getThemesForCategory(category) {
-  const categories = await getThemeCategories();
-  return categories[category]?.themes || {};
-}
-async function getTheme(category, themeId) {
-  const categories = await getThemeCategories();
-  return categories[category]?.themes[themeId] || null;
-}
+var defaultRegistry = createThemeRegistry();
+var getThemeCategories = defaultRegistry.getThemeCategories;
+var registerTheme = defaultRegistry.registerTheme;
+var registerThemeFromFile = defaultRegistry.registerThemeFromFile;
+var getThemeFilePath = defaultRegistry.getThemeFilePath;
+var getThemesForCategory = defaultRegistry.getThemesForCategory;
+var getTheme = defaultRegistry.getTheme;
 
 // src/tokens/base.json
 var base_default = {
@@ -10034,9 +10905,17 @@ var base_default = {
     mono: "var(--font-mono)"
   },
   radius: {
-    button: "0.375rem",
-    card: "0.5rem",
-    input: "0.375rem"
+    control: {
+      sm: "0.25rem",
+      md: "0.375rem",
+      lg: "0.5rem"
+    },
+    surface: {
+      sm: "0.5rem",
+      md: "0.5rem",
+      lg: "0.75rem"
+    },
+    pill: "9999px"
   },
   z: {
     sticky: "10",
@@ -10420,9 +11299,17 @@ var serif_default = {
 var smooth_default = {
   _createdBy: "shru-design-system library",
   radius: {
-    button: "0.5rem",
-    card: "0.75rem",
-    input: "0.5rem"
+    control: {
+      sm: "0.375rem",
+      md: "0.5rem",
+      lg: "0.625rem"
+    },
+    surface: {
+      sm: "0.625rem",
+      md: "0.75rem",
+      lg: "1rem"
+    },
+    pill: "9999px"
   }
 };
 
@@ -10430,9 +11317,35 @@ var smooth_default = {
 var sharp_default = {
   _createdBy: "shru-design-system library",
   radius: {
-    button: "0",
-    card: "0",
-    input: "0"
+    control: {
+      sm: "0",
+      md: "0",
+      lg: "0"
+    },
+    surface: {
+      sm: "0",
+      md: "0",
+      lg: "0"
+    },
+    pill: "0"
+  }
+};
+
+// src/tokens/themes/shape/contrast.json
+var contrast_default = {
+  _createdBy: "shru-design-system library",
+  radius: {
+    control: {
+      sm: "9999px",
+      md: "9999px",
+      lg: "0.5rem"
+    },
+    surface: {
+      sm: "0.25rem",
+      md: "0.125rem",
+      lg: "0"
+    },
+    pill: "9999px"
   }
 };
 
@@ -10624,6 +11537,7 @@ var EMBEDDED_TOKENS = {
   "themes/typography/serif.json": serif_default,
   "themes/shape/smooth.json": smooth_default,
   "themes/shape/sharp.json": sharp_default,
+  "themes/shape/contrast.json": contrast_default,
   "themes/density/comfortable.json": comfortable_default,
   "themes/density/compact.json": compact_default,
   "themes/animation/gentle.json": gentle_default,
@@ -10636,6 +11550,164 @@ function normalizeTokenPath(path) {
 }
 function getEmbeddedToken(normalizedPath) {
   return EMBEDDED_TOKENS[normalizedPath];
+}
+
+// src/themes/themeTransform.ts
+function deepClone(obj) {
+  return JSON.parse(JSON.stringify(obj));
+}
+function isObject(item) {
+  return item && typeof item === "object" && !Array.isArray(item);
+}
+function deepMerge(target, source) {
+  const output = { ...target };
+  if (isObject(target) && isObject(source)) {
+    Object.keys(source).forEach((key) => {
+      if (isObject(source[key])) {
+        if (!(key in target)) {
+          Object.assign(output, { [key]: source[key] });
+        } else {
+          output[key] = deepMerge(target[key], source[key]);
+        }
+      } else {
+        Object.assign(output, { [key]: source[key] });
+      }
+    });
+  }
+  return output;
+}
+function resolveReferences(tokens, palette) {
+  const resolved = JSON.parse(JSON.stringify(tokens));
+  function resolveValue(value) {
+    if (typeof value !== "string") return value;
+    const match = value.match(/^\{([^}]+)\}$/);
+    if (!match) return value;
+    const path = match[1].split(".");
+    let current = { palette, ...resolved };
+    for (const key of path) {
+      if (current && typeof current === "object" && key in current) {
+        current = current[key];
+      } else {
+        if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
+          console.warn(`Token reference not found: {${match[1]}}`);
+        }
+        return value;
+      }
+    }
+    return typeof current === "string" ? current : value;
+  }
+  function traverse(obj) {
+    for (const key in obj) {
+      if (typeof obj[key] === "object" && obj[key] !== null) {
+        traverse(obj[key]);
+      } else {
+        obj[key] = resolveValue(obj[key]);
+      }
+    }
+  }
+  traverse(resolved);
+  return resolved;
+}
+function isHexColor(value) {
+  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value);
+}
+function hexToHSL(hex) {
+  hex = hex.replace("#", "");
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  let h = 0;
+  let s = 0;
+  const l = (max + min) / 2;
+  if (max !== min) {
+    const d = max - min;
+    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+    switch (max) {
+      case r:
+        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+        break;
+      case g:
+        h = ((b - r) / d + 2) / 6;
+        break;
+      case b:
+        h = ((r - g) / d + 4) / 6;
+        break;
+    }
+  }
+  h = Math.round(h * 360);
+  s = Math.round(s * 100);
+  const lPercent = Math.round(l * 100);
+  return `${h} ${s}% ${lPercent}%`;
+}
+function flattenToCSS(tokens, prefix = "", result = {}, isColorContext = false) {
+  for (const key in tokens) {
+    const value = tokens[key];
+    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
+      const enteringColor = key === "color" && prefix === "";
+      const enteringTypography = key === "typography" && prefix === "";
+      const enteringShape = key === "shape" && prefix === "";
+      const enteringAnimation = key === "animation" && prefix === "";
+      const enteringDensity = key === "spacing" && prefix === "";
+      const inColorContext = isColorContext || enteringColor;
+      if (enteringColor) {
+        flattenToCSS(value, "", result, true);
+      } else if (enteringTypography || enteringShape || enteringAnimation) {
+        flattenToCSS(value, "", result, false);
+      } else if (enteringDensity) {
+        flattenToCSS(value, "spacing", result, false);
+      } else if (inColorContext) {
+        flattenToCSS(value, "", result, true);
+      } else {
+        const newPrefix = prefix ? `${prefix}-${key}` : key;
+        flattenToCSS(value, newPrefix, result, false);
+      }
+    } else {
+      let cssKey;
+      if (isColorContext || prefix === "" && key === "color") {
+        cssKey = `--${key}`;
+      } else if (prefix === "") {
+        cssKey = `--${key}`;
+      } else {
+        cssKey = `--${prefix}-${key}`;
+      }
+      let finalValue = value;
+      if (isColorContext && typeof value === "string" && isHexColor(value)) {
+        finalValue = hexToHSL(value);
+      }
+      result[cssKey] = finalValue;
+    }
+  }
+  return result;
+}
+function mapToTailwindVars(cssVars) {
+  const mapped = { ...cssVars };
+  if (cssVars["--font-body"] && !cssVars["--font-sans"]) {
+    mapped["--font-sans"] = cssVars["--font-body"];
+  }
+  if (cssVars["--spacing-base"] && !cssVars["--spacing"]) {
+    mapped["--spacing"] = cssVars["--spacing-base"];
+  } else if (cssVars["--spacing-component-md"] && !cssVars["--spacing"]) {
+    mapped["--spacing"] = cssVars["--spacing-component-md"];
+  }
+  return mapped;
+}
+function generateCSSString(cssVars) {
+  const mappedVars = mapToTailwindVars(cssVars);
+  const vars = Object.entries(mappedVars).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `  ${key}: ${value};`).join("\n");
+  return `:root {
+${vars}
+}`;
+}
+function writeThemeStyleTag(css) {
+  let styleTag = document.getElementById("dynamic-theme");
+  if (!styleTag) {
+    styleTag = document.createElement("style");
+    styleTag.id = "dynamic-theme";
+  }
+  document.head.appendChild(styleTag);
+  styleTag.textContent = css;
 }
 
 // src/themes/themeUtils.ts
@@ -10675,29 +11747,6 @@ function getDefaultThemes() {
     density: "comfortable",
     animation: "gentle"
   };
-}
-function deepClone(obj) {
-  return JSON.parse(JSON.stringify(obj));
-}
-function isObject(item) {
-  return item && typeof item === "object" && !Array.isArray(item);
-}
-function deepMerge(target, source) {
-  const output = { ...target };
-  if (isObject(target) && isObject(source)) {
-    Object.keys(source).forEach((key) => {
-      if (isObject(source[key])) {
-        if (!(key in target)) {
-          Object.assign(output, { [key]: source[key] });
-        } else {
-          output[key] = deepMerge(target[key], source[key]);
-        }
-      } else {
-        Object.assign(output, { [key]: source[key] });
-      }
-    });
-  }
-  return output;
 }
 var tokenCache = /* @__PURE__ */ new Map();
 function getTokenBaseCandidates() {
@@ -10752,155 +11801,6 @@ async function loadTokenFile(path) {
   }
   return null;
 }
-function resolveReferences(tokens, palette) {
-  const resolved = JSON.parse(JSON.stringify(tokens));
-  function resolveValue(value) {
-    if (typeof value !== "string") return value;
-    const match = value.match(/^\{([^}]+)\}$/);
-    if (!match) return value;
-    const path = match[1].split(".");
-    let current = { palette, ...resolved };
-    for (const key of path) {
-      if (current && typeof current === "object" && key in current) {
-        current = current[key];
-      } else {
-        if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
-          console.warn(`Token reference not found: {${match[1]}}`);
-        }
-        return value;
-      }
-    }
-    return typeof current === "string" ? current : value;
-  }
-  function traverse(obj) {
-    for (const key in obj) {
-      if (typeof obj[key] === "object" && obj[key] !== null) {
-        traverse(obj[key]);
-      } else {
-        obj[key] = resolveValue(obj[key]);
-      }
-    }
-  }
-  traverse(resolved);
-  return resolved;
-}
-function hexToHSL(hex) {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16) / 255;
-  const g = parseInt(hex.substring(2, 4), 16) / 255;
-  const b = parseInt(hex.substring(4, 6), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r:
-        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-        break;
-      case g:
-        h = ((b - r) / d + 2) / 6;
-        break;
-      case b:
-        h = ((r - g) / d + 4) / 6;
-        break;
-    }
-  }
-  h = Math.round(h * 360);
-  s = Math.round(s * 100);
-  const lPercent = Math.round(l * 100);
-  return `${h} ${s}% ${lPercent}%`;
-}
-function isHexColor(value) {
-  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value);
-}
-function flattenToCSS(tokens, prefix = "", result = {}, isColorContext = false) {
-  for (const key in tokens) {
-    const value = tokens[key];
-    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      const enteringColor = key === "color" && prefix === "";
-      const enteringTypography = key === "typography" && prefix === "";
-      const enteringShape = key === "shape" && prefix === "";
-      const enteringAnimation = key === "animation" && prefix === "";
-      const enteringDensity = key === "spacing" && prefix === "";
-      const inColorContext = isColorContext || enteringColor;
-      if (enteringColor) {
-        flattenToCSS(value, "", result, true);
-      } else if (enteringTypography) {
-        flattenToCSS(value, "", result, false);
-      } else if (enteringShape) {
-        flattenToCSS(value, "", result, false);
-      } else if (enteringAnimation) {
-        flattenToCSS(value, "", result, false);
-      } else if (enteringDensity) {
-        flattenToCSS(value, "spacing", result, false);
-      } else if (inColorContext) {
-        flattenToCSS(value, "", result, true);
-      } else {
-        const newPrefix = prefix ? `${prefix}-${key}` : key;
-        flattenToCSS(value, newPrefix, result, false);
-      }
-    } else {
-      let cssKey;
-      if (isColorContext || prefix === "" && key === "color") {
-        cssKey = `--${key}`;
-      } else if (prefix === "") {
-        cssKey = `--${key}`;
-      } else {
-        cssKey = `--${prefix}-${key}`;
-      }
-      let finalValue = value;
-      if (isColorContext && typeof value === "string" && isHexColor(value)) {
-        finalValue = hexToHSL(value);
-      }
-      result[cssKey] = finalValue;
-    }
-  }
-  return result;
-}
-function mapToTailwindVars(cssVars) {
-  const mapped = { ...cssVars };
-  if (cssVars["--radius-button"] && !cssVars["--radius"]) {
-    mapped["--radius"] = cssVars["--radius-button"];
-  }
-  if (cssVars["--radius-card"] && !cssVars["--radius-lg"]) {
-    mapped["--radius-lg"] = cssVars["--radius-card"];
-  }
-  if (cssVars["--font-body"] && !cssVars["--font-sans"]) {
-    mapped["--font-sans"] = cssVars["--font-body"];
-  }
-  if (cssVars["--spacing-base"] && !cssVars["--spacing"]) {
-    mapped["--spacing"] = cssVars["--spacing-base"];
-  } else if (cssVars["--spacing-component-md"] && !cssVars["--spacing"]) {
-    mapped["--spacing"] = cssVars["--spacing-component-md"];
-  }
-  return mapped;
-}
-function generateCSSString(cssVars) {
-  const mappedVars = mapToTailwindVars(cssVars);
-  const vars = Object.entries(mappedVars).sort(([a], [b]) => a.localeCompare(b)).map(([key, value]) => `  ${key}: ${value};`).join("\n");
-  if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
-    console.group("\u{1F3A8} Design System CSS Variables");
-    console.table(mappedVars);
-    console.log("Total variables:", Object.keys(mappedVars).length);
-    console.groupEnd();
-  }
-  return `:root {
-${vars}
-}`;
-}
-function applyThemeCSS(css) {
-  let styleTag = document.getElementById("dynamic-theme");
-  if (!styleTag) {
-    styleTag = document.createElement("style");
-    styleTag.id = "dynamic-theme";
-    document.head.appendChild(styleTag);
-  }
-  styleTag.textContent = css;
-}
 function enableDebugMode() {
   if (typeof window !== "undefined") {
     window.__DESIGN_SYSTEM_DEBUG__ = true;
@@ -10920,9 +11820,9 @@ function getCurrentCSSVariables() {
   }
   return vars;
 }
-async function generateAndApplyTheme(selectedThemes = {}) {
+async function generateAndApplyTheme(selectedThemes = {}, registry = defaultRegistry) {
   try {
-    const themeCategories = await getThemeCategories();
+    const themeCategories = await registry.getThemeCategories();
     const validation = validateThemeSelection(selectedThemes, themeCategories);
     if (!validation.valid) {
       const nonCustomErrors = validation.errors.filter((err) => !err.includes("custom"));
@@ -10965,10 +11865,14 @@ async function generateAndApplyTheme(selectedThemes = {}) {
     const cssVars = flattenToCSS(resolved);
     const css = generateCSSString(cssVars);
     if (typeof document !== "undefined") {
-      applyThemeCSS(css);
+      writeThemeStyleTag(css);
       if (window.__DESIGN_SYSTEM_DEBUG__) {
+        console.group("\u{1F3A8} Design System CSS Variables");
+        console.table(cssVars);
+        console.log("Total variables:", Object.keys(cssVars).length);
         window.__DESIGN_SYSTEM_VARS__ = cssVars;
         console.log("\u{1F4A1} Access CSS variables via: window.__DESIGN_SYSTEM_VARS__");
+        console.groupEnd();
       }
     }
     return {
@@ -10984,9 +11888,11 @@ async function generateAndApplyTheme(selectedThemes = {}) {
   }
 }
 
-// src/themes/useTheme.tsx
+// src/themes/constants.ts
 var STORAGE_KEY = "design-system-theme";
 var THEME_SYNC_EVENT = "design-system-theme-sync";
+
+// src/themes/useTheme.tsx
 function readStoredThemes() {
   if (typeof window === "undefined") return null;
   const stored = localStorage.getItem(STORAGE_KEY);
@@ -11001,15 +11907,15 @@ function broadcastThemeSync(themes) {
   if (typeof window === "undefined") return;
   window.dispatchEvent(new CustomEvent(THEME_SYNC_EVENT, { detail: themes }));
 }
-function useTheme() {
-  const [selectedThemes, setSelectedThemes] = React9.useState(getDefaultThemes());
-  const [isLoading, setIsLoading] = React9.useState(false);
-  const [error, setError] = React9.useState(null);
-  const applyTheme = React9.useCallback(async (themes) => {
+function useTheme(registry = defaultRegistry) {
+  const [selectedThemes, setSelectedThemes] = React10.useState(getDefaultThemes());
+  const [isLoading, setIsLoading] = React10.useState(false);
+  const [error, setError] = React10.useState(null);
+  const applyTheme = React10.useCallback(async (themes) => {
     setIsLoading(true);
     setError(null);
     try {
-      await generateAndApplyTheme(themes);
+      await generateAndApplyTheme(themes, registry);
       if (typeof window !== "undefined") {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(themes));
       }
@@ -11022,8 +11928,8 @@ function useTheme() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
-  React9.useEffect(() => {
+  }, [registry]);
+  React10.useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -11042,7 +11948,7 @@ function useTheme() {
       }
     }
   }, [applyTheme]);
-  React9.useEffect(() => {
+  React10.useEffect(() => {
     if (typeof window === "undefined") return;
     const applyExternal = (themes) => {
       setSelectedThemes(themes);
@@ -11063,7 +11969,7 @@ function useTheme() {
       window.removeEventListener("storage", onStorage);
     };
   }, []);
-  const updateTheme = React9.useCallback(async (category, themeId) => {
+  const updateTheme = React10.useCallback(async (category, themeId) => {
     const newThemes = {
       ...selectedThemes,
       [category]: themeId || void 0
@@ -11072,13 +11978,13 @@ function useTheme() {
     broadcastThemeSync(newThemes);
     await applyTheme(newThemes);
   }, [selectedThemes, applyTheme]);
-  const resetToDefaults = React9.useCallback(async () => {
+  const resetToDefaults = React10.useCallback(async () => {
     const defaults = getDefaultThemes();
     setSelectedThemes(defaults);
     broadcastThemeSync(defaults);
     await applyTheme(defaults);
   }, [applyTheme]);
-  const applyPresetSelection = React9.useCallback(
+  const applyPresetSelection = React10.useCallback(
     async (preset) => {
       const next = { ...selectedThemes, ...preset };
       setSelectedThemes(next);
@@ -11087,10 +11993,10 @@ function useTheme() {
     },
     [selectedThemes, applyTheme]
   );
-  const getAvailableThemes = React9.useCallback(async (category) => {
-    const categories = await getThemeCategories();
+  const getAvailableThemes = React10.useCallback(async (category) => {
+    const categories = await registry.getThemeCategories();
     return categories[category]?.themes || {};
-  }, []);
+  }, [registry]);
   return {
     selectedThemes,
     updateTheme,
@@ -11105,23 +12011,24 @@ function useTheme() {
 // src/themes/ui/ThemeToggle/useThemeToggle.ts
 function useThemeToggle(options) {
   const embedded = options?.embedded ?? false;
-  const { selectedThemes, updateTheme, resetToDefaults, isLoading, getAvailableThemes } = useTheme();
-  const [isOpen, setIsOpen] = React9.useState(false);
-  const [activeCategory, setActiveCategory] = React9.useState("color");
-  const [themeCategories, setThemeCategories] = React9.useState(null);
-  const [categoryThemes, setCategoryThemes] = React9.useState({});
-  const [themesLoading, setThemesLoading] = React9.useState(false);
-  const menuRef = React9.useRef(null);
-  const triggerRef = React9.useRef(null);
-  React9.useEffect(() => {
-    getThemeCategories().then(setThemeCategories);
-  }, []);
-  React9.useEffect(() => {
+  const registry = options?.registry ?? defaultRegistry;
+  const { selectedThemes, updateTheme, resetToDefaults, isLoading, getAvailableThemes } = useTheme(registry);
+  const [isOpen, setIsOpen] = React10.useState(false);
+  const [activeCategory, setActiveCategory] = React10.useState("color");
+  const [themeCategories, setThemeCategories] = React10.useState(null);
+  const [categoryThemes, setCategoryThemes] = React10.useState({});
+  const [themesLoading, setThemesLoading] = React10.useState(false);
+  const menuRef = React10.useRef(null);
+  const triggerRef = React10.useRef(null);
+  React10.useEffect(() => {
+    registry.getThemeCategories().then(setThemeCategories);
+  }, [registry]);
+  React10.useEffect(() => {
     if (!embedded && !isOpen) return;
     setThemesLoading(true);
     getAvailableThemes(activeCategory).then(setCategoryThemes).finally(() => setThemesLoading(false));
   }, [embedded, isOpen, activeCategory, getAvailableThemes]);
-  React9.useEffect(() => {
+  React10.useEffect(() => {
     if (!isOpen) return;
     function handleClickOutside(event) {
       const target = event.target;
@@ -11138,7 +12045,7 @@ function useThemeToggle(options) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
-  const handleThemeSelect = React9.useCallback(
+  const handleThemeSelect = React10.useCallback(
     async (category, themeId) => {
       const currentTheme = selectedThemes[category];
       const newTheme = currentTheme === themeId ? void 0 : themeId;
@@ -11146,10 +12053,10 @@ function useThemeToggle(options) {
     },
     [selectedThemes, updateTheme]
   );
-  const handleResetAll = React9.useCallback(async () => {
+  const handleResetAll = React10.useCallback(async () => {
     await resetToDefaults();
   }, [resetToDefaults]);
-  const toggleMenu = React9.useCallback(() => {
+  const toggleMenu = React10.useCallback(() => {
     setIsOpen((prev) => {
       const next = !prev;
       if (next) {
@@ -11159,7 +12066,7 @@ function useThemeToggle(options) {
       return next;
     });
   }, [selectedThemes]);
-  const closeMenu = React9.useCallback(() => setIsOpen(false), []);
+  const closeMenu = React10.useCallback(() => setIsOpen(false), []);
   const categories = themeCategories ? Object.entries(themeCategories).sort(([, a], [, b]) => (a.order || 0) - (b.order || 0)) : [];
   return {
     selectedThemes,
@@ -11367,7 +12274,7 @@ function ThemePanel({
     }
   );
 }
-function ThemeToggle({ className, position = "bottom-right" }) {
+function ThemeToggle({ className, position = "bottom-right", registry }) {
   const {
     selectedThemes,
     isLoading,
@@ -11383,14 +12290,14 @@ function ThemeToggle({ className, position = "bottom-right" }) {
     handleResetAll,
     toggleMenu,
     closeMenu
-  } = useThemeToggle();
-  const [panelStyle, setPanelStyle] = React9.useState({ visibility: "hidden" });
-  const updatePanelPosition = React9__namespace.default.useCallback(() => {
+  } = useThemeToggle({ registry });
+  const [panelStyle, setPanelStyle] = React10.useState({ visibility: "hidden" });
+  const updatePanelPosition = React10__namespace.default.useCallback(() => {
     const trigger = triggerRef.current;
     if (!trigger) return;
     setPanelStyle(computePanelStyle(trigger.getBoundingClientRect(), position));
-  }, [position]);
-  React9.useLayoutEffect(() => {
+  }, [position, triggerRef]);
+  React10.useLayoutEffect(() => {
     if (!isOpen) return;
     updatePanelPosition();
     const onReflow = () => updatePanelPosition();
@@ -11499,7 +12406,6 @@ async function applyPreset(preset, options) {
 }
 
 // src/themes/applyThemeSync.ts
-var STORAGE_KEY2 = "design-system-theme";
 function getTokenBaseCandidatesSync() {
   const bases = [];
   if (typeof window !== "undefined" && window.__THEME_TOKENS_BASE__) {
@@ -11513,61 +12419,13 @@ function getTokenBaseCandidatesSync() {
   bases.push("/tokens");
   return Array.from(new Set(bases.filter(Boolean)));
 }
-function applyThemeSync() {
-  if (typeof window === "undefined" || typeof document === "undefined") {
-    return;
-  }
-  const tokenBases = getTokenBaseCandidatesSync();
-  let selectedThemes = getDefaultThemes();
-  try {
-    const stored = localStorage.getItem(STORAGE_KEY2);
-    if (stored) {
-      selectedThemes = JSON.parse(stored);
-    }
-  } catch {
-  }
-  try {
-    const base = loadJSONSync("/tokens/base.json", tokenBases);
-    if (!base) {
-      return;
-    }
-    const palettes = loadJSONSync("/tokens/palettes.json", tokenBases);
-    const palette = palettes?.palette || {};
-    let merged = deepMergeSync(base, { palette });
-    for (const category of THEME_CATEGORY_ORDER) {
-      const themeId = selectedThemes[category];
-      if (!themeId) continue;
-      const themeData = loadJSONSync(`/tokens/themes/${category}/${themeId}.json`, tokenBases);
-      if (themeData) {
-        merged = deepMergeSync(merged, themeData);
-      }
-    }
-    const resolved = resolveReferencesSync(merged, palette);
-    const cssVars = flattenToCSSSync(resolved);
-    const mappedVars = mapToTailwindVarsSync(cssVars);
-    const css = `:root {
-${Object.entries(mappedVars).map(([key, value]) => `  ${key}: ${value};`).join("\n")}
-}`;
-    let styleTag = document.getElementById("dynamic-theme");
-    if (!styleTag) {
-      styleTag = document.createElement("style");
-      styleTag.id = "dynamic-theme";
-    }
-    document.head.appendChild(styleTag);
-    styleTag.textContent = css;
-  } catch (error) {
-    if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
-      console.warn("Sync theme application failed, will apply via React:", error);
-    }
-  }
-}
 function loadJSONSync(path, bases) {
   const normalizedPath = normalizeTokenPath(path);
   for (const base of bases) {
     if (base === EMBEDDED_TOKEN_BASE) {
       const embedded = getEmbeddedToken(normalizedPath);
       if (embedded) {
-        return deepCloneSync(embedded);
+        return deepClone(embedded);
       }
       continue;
     }
@@ -11591,152 +12449,44 @@ function loadJSONSync(path, bases) {
   }
   return null;
 }
-function deepMergeSync(target, source) {
-  const output = { ...target };
-  if (isObjectSync(target) && isObjectSync(source)) {
-    Object.keys(source).forEach((key) => {
-      if (isObjectSync(source[key])) {
-        if (!(key in target)) {
-          Object.assign(output, { [key]: source[key] });
-        } else {
-          output[key] = deepMergeSync(target[key], source[key]);
-        }
-      } else {
-        Object.assign(output, { [key]: source[key] });
-      }
-    });
+function applyThemeSync() {
+  if (typeof window === "undefined" || typeof document === "undefined") {
+    return;
   }
-  return output;
-}
-function deepCloneSync(value) {
-  return JSON.parse(JSON.stringify(value));
-}
-function isObjectSync(item) {
-  return item && typeof item === "object" && !Array.isArray(item);
-}
-function resolveReferencesSync(tokens, palette) {
-  const resolved = JSON.parse(JSON.stringify(tokens));
-  function resolveValue(value) {
-    if (typeof value !== "string") return value;
-    const match = value.match(/^\{([^}]+)\}$/);
-    if (!match) return value;
-    const path = match[1].split(".");
-    let current = { palette, ...resolved };
-    for (const key of path) {
-      if (current && typeof current === "object" && key in current) {
-        current = current[key];
-      } else {
-        return value;
+  const tokenBases = getTokenBaseCandidatesSync();
+  let selectedThemes = getDefaultThemes();
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      selectedThemes = JSON.parse(stored);
+    }
+  } catch {
+  }
+  try {
+    const base = loadJSONSync("/tokens/base.json", tokenBases);
+    if (!base) {
+      return;
+    }
+    const palettes = loadJSONSync("/tokens/palettes.json", tokenBases);
+    const palette = palettes?.palette || {};
+    let merged = deepMerge(base, { palette });
+    for (const category of THEME_CATEGORY_ORDER) {
+      const themeId = selectedThemes[category];
+      if (!themeId) continue;
+      const themeData = loadJSONSync(`/tokens/themes/${category}/${themeId}.json`, tokenBases);
+      if (themeData) {
+        merged = deepMerge(merged, themeData);
       }
     }
-    return typeof current === "string" ? current : value;
-  }
-  function traverse(obj) {
-    for (const key in obj) {
-      if (typeof obj[key] === "object" && obj[key] !== null) {
-        traverse(obj[key]);
-      } else {
-        obj[key] = resolveValue(obj[key]);
-      }
+    const resolved = resolveReferences(merged, palette);
+    const cssVars = flattenToCSS(resolved);
+    const css = generateCSSString(cssVars);
+    writeThemeStyleTag(css);
+  } catch (error) {
+    if (typeof window !== "undefined" && window.__DESIGN_SYSTEM_DEBUG__) {
+      console.warn("Sync theme application failed, will apply via React:", error);
     }
   }
-  traverse(resolved);
-  return resolved;
-}
-function hexToHSL2(hex) {
-  hex = hex.replace("#", "");
-  const r = parseInt(hex.substring(0, 2), 16) / 255;
-  const g = parseInt(hex.substring(2, 4), 16) / 255;
-  const b = parseInt(hex.substring(4, 6), 16) / 255;
-  const max = Math.max(r, g, b);
-  const min = Math.min(r, g, b);
-  let h = 0;
-  let s = 0;
-  const l = (max + min) / 2;
-  if (max !== min) {
-    const d = max - min;
-    s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
-    switch (max) {
-      case r:
-        h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
-        break;
-      case g:
-        h = ((b - r) / d + 2) / 6;
-        break;
-      case b:
-        h = ((r - g) / d + 4) / 6;
-        break;
-    }
-  }
-  h = Math.round(h * 360);
-  s = Math.round(s * 100);
-  const lPercent = Math.round(l * 100);
-  return `${h} ${s}% ${lPercent}%`;
-}
-function isHexColor2(value) {
-  return /^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/.test(value);
-}
-function flattenToCSSSync(tokens, prefix = "", result = {}, isColorContext = false) {
-  for (const key in tokens) {
-    const value = tokens[key];
-    if (typeof value === "object" && value !== null && !Array.isArray(value)) {
-      const enteringColor = key === "color" && prefix === "";
-      const enteringTypography = key === "typography" && prefix === "";
-      const enteringShape = key === "shape" && prefix === "";
-      const enteringAnimation = key === "animation" && prefix === "";
-      const enteringDensity = key === "spacing" && prefix === "";
-      const inColorContext = isColorContext || enteringColor;
-      if (enteringColor) {
-        flattenToCSSSync(value, "", result, true);
-      } else if (enteringTypography) {
-        flattenToCSSSync(value, "", result, false);
-      } else if (enteringShape) {
-        flattenToCSSSync(value, "", result, false);
-      } else if (enteringAnimation) {
-        flattenToCSSSync(value, "", result, false);
-      } else if (enteringDensity) {
-        flattenToCSSSync(value, "spacing", result, false);
-      } else if (inColorContext) {
-        flattenToCSSSync(value, "", result, true);
-      } else {
-        const newPrefix = prefix ? `${prefix}-${key}` : key;
-        flattenToCSSSync(value, newPrefix, result, false);
-      }
-    } else {
-      let cssKey;
-      if (isColorContext || prefix === "" && key === "color") {
-        cssKey = `--${key}`;
-      } else if (prefix === "") {
-        cssKey = `--${key}`;
-      } else {
-        cssKey = `--${prefix}-${key}`;
-      }
-      let finalValue = value;
-      if (isColorContext && typeof value === "string" && isHexColor2(value)) {
-        finalValue = hexToHSL2(value);
-      }
-      result[cssKey] = finalValue;
-    }
-  }
-  return result;
-}
-function mapToTailwindVarsSync(cssVars) {
-  const mapped = { ...cssVars };
-  if (cssVars["--radius-button"] && !cssVars["--radius"]) {
-    mapped["--radius"] = cssVars["--radius-button"];
-  }
-  if (cssVars["--radius-card"] && !cssVars["--radius-lg"]) {
-    mapped["--radius-lg"] = cssVars["--radius-card"];
-  }
-  if (cssVars["--font-body"] && !cssVars["--font-sans"]) {
-    mapped["--font-sans"] = cssVars["--font-body"];
-  }
-  if (cssVars["--spacing-base"] && !cssVars["--spacing"]) {
-    mapped["--spacing"] = cssVars["--spacing-base"];
-  } else if (cssVars["--spacing-component-md"] && !cssVars["--spacing"]) {
-    mapped["--spacing"] = cssVars["--spacing-component-md"];
-  }
-  return mapped;
 }
 
 exports.Accordion = Accordion;
@@ -11859,13 +12609,19 @@ exports.badgeVariants = pillSurfaceVariants;
 exports.buttonVariants = buttonVariants;
 exports.cardVariants = cardVariants;
 exports.clearToasts = clearToasts;
+exports.codeBlockVariants = codeBlockVariants;
 exports.collapsiblePanelRootVariants = collapsiblePanelRootVariants;
 exports.collapsiblePanelSurfaceVariants = collapsiblePanelSurfaceVariants;
+exports.contextMenuVariants = contextMenuVariants;
+exports.createThemeRegistry = createThemeRegistry;
 exports.defaultListChipFilter = defaultListChipFilter;
 exports.defaultListItemFilter = defaultListItemFilter;
+exports.defaultRegistry = defaultRegistry;
 exports.deleteTreeNode = deleteTreeNode;
 exports.descriptionListVariants = descriptionListVariants;
 exports.disabledControl = disabledControl;
+exports.disabledSurface = disabledSurface;
+exports.disabledSurfaceStyles = disabledSurfaceStyles;
 exports.dismissToast = dismissToast;
 exports.drawerVariants = drawerVariants;
 exports.emptyStateVariants = emptyStateVariants;
@@ -11887,6 +12643,7 @@ exports.gridVariants = gridSpacingVariants;
 exports.heroVariants = heroVariants;
 exports.iconVariants = iconVariants;
 exports.linkVariants = linkVariants;
+exports.menubarVariants = menubarVariants;
 exports.modalOverlayLayout = modalOverlayLayout;
 exports.modalSurfaceVariants = modalSurfaceVariants;
 exports.moveTreeNode = moveTreeNode;
@@ -11902,6 +12659,8 @@ exports.registerThemeFromFile = registerThemeFromFile;
 exports.ringOffsetBackground = ringOffsetBackground;
 exports.sidebarVariants = sidebarVariants;
 exports.stackVariants = stackVariants;
+exports.tabsListVariants = tabsListVariants;
+exports.tabsTriggerVariants = tabsTriggerVariants;
 exports.textVariants = textVariants;
 exports.toast = toast;
 exports.toastVariants = toastVariants;

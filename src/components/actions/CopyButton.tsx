@@ -44,7 +44,7 @@ export const CopyButton = React.forwardRef<HTMLButtonElement, CopyButtonProps>(
       copyIcon = defaultCopyIcon,
       copiedIcon = defaultCopiedIcon,
       timeout = 2000,
-      tooltip = true,
+      tooltip = false,
       tooltipLabel,
       tooltipCopiedLabel,
       tooltipContent,

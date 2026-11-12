@@ -2,10 +2,11 @@ import * as React from "react"
 import { createPortal } from "react-dom"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { clampToViewport, fitsInViewport } from "../../utils/floatingPosition"
 
 const tooltipContentVariants = cva(
   [
-    "z-toast overflow-visible rounded-md px-3 py-1.5 text-xs shadow-md",
+    "z-toast overflow-visible rounded-control-md px-3 py-1.5 text-xs shadow-md",
     "transition-opacity ease-out",
   ].join(" "),
   {
@@ -100,27 +101,6 @@ const HIDDEN: Coords = { top: -9999, left: -9999 }
 /** Time to move through the gap between trigger and portaled tooltip before we close. */
 const CONTENT_HOVER_CLOSE_DELAY_MS = 160
 
-const VIEWPORT_PADDING = 8
-
-function clampToViewport(left: number, top: number, w: number, h: number): Coords {
-  const p = VIEWPORT_PADDING
-  const vw = window.innerWidth
-  const vh = window.innerHeight
-  const maxLeft = Math.max(p, vw - w - p)
-  const maxTop = Math.max(p, vh - h - p)
-  return {
-    left: Math.min(Math.max(left, p), maxLeft),
-    top: Math.min(Math.max(top, p), maxTop),
-  }
-}
-
-function fitsInViewport(left: number, top: number, w: number, h: number): boolean {
-  const p = VIEWPORT_PADDING
-  const vw = typeof window !== "undefined" ? window.innerWidth : 0
-  const vh = typeof window !== "undefined" ? window.innerHeight : 0
-  return left >= p && top >= p && left + w <= vw - p && top + h <= vh - p
-}
-
 function flipPlacement(p: TooltipPlacement): TooltipPlacement {
   switch (p) {
     case "top":
@@ -207,21 +187,25 @@ function mergeRefs<T>(...refs: Array<React.Ref<T> | undefined>) {
   }
 }
 
-export function Tooltip({
-  content,
-  disabled,
-  children,
-  placement = "top",
-  transitionDuration = 200,
-  className,
-  variant,
-  keepOpenOnContentHover = true,
-  autoPlacement = false,
-  xOffset = 0,
-  yOffset = 0,
-  maxWidth,
-  showArrow = true,
-}: TooltipProps) {
+/** The forwarded ref lands on the **trigger** — the tooltip itself is portaled and transient. */
+export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tooltip(
+  {
+    content,
+    disabled,
+    children,
+    placement = "top",
+    transitionDuration = 200,
+    className,
+    variant,
+    keepOpenOnContentHover = true,
+    autoPlacement = false,
+    xOffset = 0,
+    yOffset = 0,
+    maxWidth,
+    showArrow = true,
+  },
+  forwardedRef
+) {
   const triggerRef = React.useRef<HTMLElement | null>(null)
   const floatingRef = React.useRef<HTMLDivElement | null>(null)
   const hideTimeoutRef = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -335,6 +319,7 @@ export function Tooltip({
       React.cloneElement(children as React.ReactElement<Record<string, unknown>>, {
         ref: mergeRefs(
           bindTrigger,
+          forwardedRef,
           (children as React.ReactElement & { ref?: React.Ref<HTMLElement> }).ref
         ),
         onPointerEnter: (e: React.PointerEvent) => {
@@ -359,7 +344,7 @@ export function Tooltip({
       } as Record<string, unknown>)
     ) : (
       <span
-        ref={bindTrigger}
+        ref={mergeRefs<HTMLSpanElement>(bindTrigger, forwardedRef as React.Ref<HTMLSpanElement>)}
         className="inline-flex"
         onPointerEnter={show}
         onPointerLeave={(e) => onTriggerPointerLeave(e)}
@@ -410,11 +395,11 @@ export function Tooltip({
       {portal}
     </>
   )
-}
+})
 
-/** No-op wrapper kept for apps that still wrap trees with a provider. */
 Tooltip.displayName = "Tooltip"
 
+/** No-op wrapper kept for apps that still wrap trees with a provider. */
 export function TooltipProvider({ children }: { children?: React.ReactNode }) {
   return <>{children}</>
 }

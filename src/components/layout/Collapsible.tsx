@@ -2,6 +2,7 @@ import * as React from "react"
 import { ChevronRight } from "lucide-react"
 import { cn } from "../../utils"
 import { Button } from "../actions/Button"
+import { useControllableOpen } from "../overlays/useControllableOpen"
 
 export interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   open?: boolean
@@ -18,29 +19,25 @@ export interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLDivEleme
   className?: string
 }
 
-export function Collapsible({
-  open: controlledOpen,
-  defaultOpen = false,
-  onOpenChange,
-  trigger,
-  children,
-  disabled,
-  footer,
-  showContentDivider = true,
-  className,
-  ...props
-}: CollapsibleProps) {
-  const [internal, setInternal] = React.useState(defaultOpen)
-  const isControlled = controlledOpen !== undefined
-  const open = isControlled ? controlledOpen : internal
-
-  const setOpen = (next: boolean) => {
-    if (!isControlled) setInternal(next)
-    onOpenChange?.(next)
-  }
+export const Collapsible = React.forwardRef<HTMLDivElement, CollapsibleProps>(function Collapsible(
+  {
+    open: openProp,
+    defaultOpen = false,
+    onOpenChange,
+    trigger,
+    children,
+    disabled,
+    footer,
+    showContentDivider = true,
+    className,
+    ...props
+  },
+  ref
+) {
+  const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
 
   return (
-    <div className={cn("w-full", className)} {...props}>
+    <div ref={ref} data-slot="collapsible" data-state={open ? "open" : "closed"} className={cn("w-full", className)} {...props}>
       <Button
         variant="ghost"
         disabled={disabled}
@@ -50,7 +47,7 @@ export function Collapsible({
         right={
           <ChevronRight
             className={cn(
-              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200",
+              "h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-fast",
               open && "rotate-90"
             )}
             aria-hidden
@@ -65,6 +62,6 @@ export function Collapsible({
       {footer ? <div className="text-sm text-muted-foreground">{footer}</div> : null}
     </div>
   )
-}
+})
 
 Collapsible.displayName = "Collapsible"

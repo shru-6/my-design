@@ -1,9 +1,10 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { textVariants } from "../data-display/Text"
 import { Radio, type RadioProps } from "./Radio"
-import { ControlErrorMessage } from "./fieldPieces"
+import { ControlErrorMessage, disabledSurfaceStyles } from "./fieldPieces"
 
 export interface RadioGroupItem {
   label: React.ReactNode
@@ -61,21 +62,18 @@ export const RadioGroup = React.forwardRef<HTMLFieldSetElement, RadioGroupProps>
   ) => {
     const generatedName = React.useId().replace(/:/g, "")
     const name = nameProp ?? `radio-group-${generatedName}`
-    const isControlled = value !== undefined
-    const [internal, setInternal] = React.useState(defaultValue ?? "")
-    const selected = isControlled ? (value ?? "") : internal
-
-    const setValue = (next: string) => {
-      if (!isControlled) setInternal(next)
-      onChange?.(next)
-    }
+    const [selected, setValue] = useControllableValue<string>({
+      value: value === undefined ? undefined : value ?? "",
+      defaultValue: defaultValue ?? "",
+      onChange,
+    })
 
     return (
       <fieldset
         ref={ref}
         className={cn(
           "space-y-2",
-          disabled && "cursor-not-allowed opacity-60",
+          disabled && disabledSurfaceStyles,
           className
         )}
         disabled={disabled}

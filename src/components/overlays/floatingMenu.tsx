@@ -3,11 +3,11 @@ import { cn } from "../../utils"
 
 /** Shared popover shell — list menus (Dropdown, TimePicker options). */
 export const floatingMenuListClass =
-  "z-dropdown overflow-y-auto rounded-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none"
+  "z-dropdown overflow-y-auto rounded-control-md border border-border bg-popover p-1 text-popover-foreground shadow-md outline-none"
 
 /** Shared popover shell — rich panels (Calendar, presets). */
 export const floatingMenuSurfaceClass =
-  "z-dropdown overflow-hidden rounded-md border border-border bg-popover text-popover-foreground shadow-md outline-none"
+  "z-dropdown overflow-hidden rounded-control-md border border-border bg-popover text-popover-foreground shadow-md outline-none"
 
 /** Hover/focus tint for interactive cells inside popover surfaces (menus, calendar days). */
 export const floatingMenuHoverClass =
@@ -15,7 +15,7 @@ export const floatingMenuHoverClass =
 
 /** Shared row styling for selectable menu / listbox options. */
 export const floatingMenuItemClass =
-  "flex w-full cursor-default select-none items-center gap-2 rounded-sm border-0 bg-transparent px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors disabled:pointer-events-none disabled:opacity-50"
+  "flex w-full cursor-default select-none items-center gap-2 rounded-control-sm border-0 bg-transparent px-2 py-1.5 text-left text-sm text-popover-foreground outline-none transition-colors disabled:pointer-events-none disabled:opacity-50"
 
 export const floatingMenuItemSelectedClass = "bg-[hsl(var(--foreground)/0.06)]"
 

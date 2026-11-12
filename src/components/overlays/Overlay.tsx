@@ -3,6 +3,9 @@ import { createPortal } from "react-dom"
 import { X } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { zScoped } from "../../utils/zIndex"
+import { IconButton } from "../actions/IconButton"
+import { useDialogA11y } from "./useDialogA11y"
 
 const overlayVariants = cva(
   "inset-0 bg-background/80 transition-opacity data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:animate-in data-[state=open]:fade-in-0",
@@ -51,7 +54,9 @@ function resolvePortalTarget(
   return container
 }
 
-export interface OverlayProps extends VariantProps<typeof overlayVariants> {
+export interface OverlayProps
+  extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "role" | "onClick">,
+    VariantProps<typeof overlayVariants> {
   open?: boolean
   onClose?: () => void
   /**
@@ -62,6 +67,22 @@ export interface OverlayProps extends VariantProps<typeof overlayVariants> {
   showCloseButton?: boolean
   /** When false, backdrop clicks do not call `onClose` (close button still works if shown). */
   closeOnBackdropClick?: boolean
+  /**
+   * Treat the content surface as a modal dialog: `role` + `aria-modal`, focus
+   * moves in on open, Tab cycles inside it, focus returns to the opener on
+   * close. Off by default — a bare backdrop stays `role="presentation"`.
+   */
+  dialog?: boolean
+  /** `alertdialog` for a confirm / destroy prompt. Ignored unless `dialog`. */
+  dialogRole?: "dialog" | "alertdialog"
+  /** Accessible name for the dialog surface. Ignored unless `dialog`. */
+  dialogLabel?: string
+  /** Escape closes. Ignored unless `dialog`. */
+  closeOnEscape?: boolean
+  /** Focused on open instead of the surface's first tabbable child. Ignored unless `dialog`. */
+  initialFocus?: React.RefObject<HTMLElement | null>
+  /** Applied to the content surface (the panel), not the backdrop. */
+  contentClassName?: string
   className?: string
   children?: React.ReactNode
 }
@@ -86,60 +107,94 @@ export function OverlayPortalScope({
   )
 }
 
-export function Overlay({
-  open = false,
-  onClose,
-  container,
-  blur,
-  showCloseButton = false,
-  closeOnBackdropClick = true,
-  className,
-  children,
-}: OverlayProps) {
+export const Overlay = React.forwardRef<HTMLDivElement, OverlayProps>(function Overlay(
+  {
+    open = false,
+    onClose,
+    container,
+    blur,
+    showCloseButton = false,
+    closeOnBackdropClick = true,
+    dialog = false,
+    dialogRole = "dialog",
+    dialogLabel,
+    closeOnEscape = true,
+    initialFocus,
+    contentClassName,
+    className,
+    style,
+    children,
+    ...rest
+  },
+  ref
+) {
   const parentHost = React.useContext(OverlayPortalParentContext)
   const target = resolvePortalTarget(container, parentHost)
 
   const viewportFixed =
     typeof document !== "undefined" && target !== null && target === document.body
 
+  /**
+   * Only a viewport-level overlay is actually modal. A `container="parent"`
+   * overlay is an embedded panel (gallery cards render several of them open at
+   * once) — it keeps the dialog role, but must not claim `aria-modal`, seize
+   * focus, or swallow Escape for the whole document.
+   */
+  const modal = dialog && viewportFixed
+
+  const surfaceRef = useDialogA11y({
+    open,
+    onClose,
+    closeOnEscape,
+    initialFocus,
+    enabled: modal,
+  })
+
   const node = (
     <div
+      ref={ref}
       role="presentation"
       data-state={open ? "open" : "closed"}
       aria-hidden={!open}
       className={cn(
         overlayVariants({ blur }),
-        viewportFixed ? "fixed z-overlay" : "absolute z-10",
+        // Backdrops read the overlay layer: the token class at viewport scope,
+        // the OverlayPortalScope-local value when mounted inside a card.
+        viewportFixed ? "fixed z-overlay" : "absolute",
         !open && "pointer-events-none opacity-0",
         className
       )}
+      style={viewportFixed ? style : { zIndex: zScoped.overlay, ...style }}
       onClick={(e) => {
         if (closeOnBackdropClick && e.target === e.currentTarget) onClose?.()
       }}
+      {...rest}
     >
       <div
-        className="pointer-events-auto min-h-0 min-w-0 max-w-full"
+        ref={surfaceRef}
+        role={dialog ? dialogRole : undefined}
+        aria-modal={modal ? true : undefined}
+        aria-label={dialog ? dialogLabel : undefined}
+        tabIndex={dialog ? -1 : undefined}
+        className={cn("pointer-events-auto min-h-0 min-w-0 max-w-full outline-none", contentClassName)}
         onClick={(e) => e.stopPropagation()}
         onPointerDown={(e) => e.stopPropagation()}
       >
         {children}
       </div>
       {showCloseButton && onClose ? (
-        <button
-          type="button"
-          aria-label="Close"
-          className={cn(
-            "pointer-events-auto absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full",
-            "border border-border bg-background text-foreground shadow-md",
-            "hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          )}
+        <IconButton
+          variant="outline"
+          shape="round"
+          ariaLabel="Close"
+          icon={<X className="h-4 w-4" strokeWidth={2} aria-hidden />}
+          className="pointer-events-auto absolute right-4 top-4 h-9 w-9 shadow-md"
+          style={{ zIndex: zScoped.surface }}
           onClick={(e) => {
             e.stopPropagation()
             onClose()
           }}
-        >
-          <X className="h-4 w-4" strokeWidth={2} aria-hidden />
-        </button>
+        />
       ) : null}
     </div>
   )
@@ -149,7 +204,7 @@ export function Overlay({
   if (!target) return null
 
   return createPortal(node, target)
-}
+})
 
 Overlay.displayName = "Overlay"
 

@@ -9,7 +9,7 @@ const pageHeaderVariants = cva("w-full", {
   variants: {
     variant: {
       default: "",
-      bordered: "rounded-lg border border-border bg-card/40 px-4 py-3",
+      bordered: "rounded-surface-md border border-border bg-card/40 px-4 py-3",
       minimal: "",
     },
   },
@@ -34,25 +34,29 @@ export interface PageHeaderProps
   children?: React.ReactNode
 }
 
-export function PageHeader({
-  heading,
-  subheading,
-  description,
-  badge,
-  actions,
-  left,
-  right,
-  sticky,
-  separator,
-  variant,
-  className,
-  children,
-  ...props
-}: PageHeaderProps) {
+export const PageHeader = React.forwardRef<HTMLDivElement, PageHeaderProps>(function PageHeader(
+  {
+    heading,
+    subheading,
+    description,
+    badge,
+    actions,
+    left,
+    right,
+    sticky,
+    separator,
+    variant,
+    className,
+    children,
+    ...props
+  },
+  ref
+) {
   const resolvedRight = right ?? actions
 
   return (
     <div
+      ref={ref}
       data-slot="page-header"
       className={cn(
         pageHeaderVariants({ variant }),
@@ -97,7 +101,7 @@ export function PageHeader({
       {separator ? <Separator className="mt-3" /> : null}
     </div>
   )
-}
+})
 
 PageHeader.displayName = "PageHeader"
 

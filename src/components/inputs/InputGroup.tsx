@@ -4,7 +4,13 @@ import { cn } from "../../utils"
 import { Spinner } from "../data-display/Spinner"
 import { Button, type ButtonProps } from "../actions/Button"
 import { Icon } from "../utilities/Icon"
-import { fieldSurfaceVariants, disabledControl } from "./fieldPieces"
+import {
+  fieldSurfaceVariants,
+  disabledControl,
+  disabledSurfaceStyles,
+  controlHeightClass,
+  controlRadiusClass,
+} from "./fieldPieces"
 
 function isNonEmptyLead(node: React.ReactNode): boolean {
   if (node == null || node === false) return false
@@ -47,67 +53,74 @@ export interface InputGroupProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   className?: string
 }
 
-export function InputGroup({
-  children,
-  disabled = false,
-  loading,
-  invalid = false,
-  orientation = "horizontal",
-  attached = true,
-  size = "md",
-  variant = "outline",
-  left,
-  placeholder,
-  className,
-  ...props
-}: InputGroupProps) {
-  const vertical = orientation === "vertical"
-  const ctx = React.useMemo<Ctx>(
-    () => ({
-      attached: attached && !vertical,
-      vertical,
-      size,
-      variant,
-      disabled,
-      invalid,
+export const InputGroup = React.forwardRef<HTMLDivElement, InputGroupProps>(
+  (
+    {
+      children,
+      disabled = false,
+      loading,
+      invalid = false,
+      orientation = "horizontal",
+      attached = true,
+      size = "md",
+      variant = "outline",
       left,
       placeholder,
-    }),
-    [attached, vertical, size, variant, disabled, invalid, left, placeholder]
-  )
+      className,
+      ...props
+    },
+    ref
+  ) => {
+    const vertical = orientation === "vertical"
+    const ctx = React.useMemo<Ctx>(
+      () => ({
+        attached: attached && !vertical,
+        vertical,
+        size,
+        variant,
+        disabled,
+        invalid,
+        left,
+        placeholder,
+      }),
+      [attached, vertical, size, variant, disabled, invalid, left, placeholder]
+    )
 
-  const pillShell = isNonEmptyLead(ctx.left) && ctx.attached && !vertical
+    const pillShell = isNonEmptyLead(ctx.left) && ctx.attached && !vertical
+    const sizeKey = size ?? "md"
 
-  return (
-    <InputGroupContext.Provider value={ctx}>
-      <div
-        data-slot="input-group"
-        data-invalid={invalid || undefined}
-        className={cn(
-          "relative flex w-full",
-          vertical ? "flex-col gap-2" : "flex-row flex-wrap items-stretch",
-          !vertical &&
-            ctx.attached &&
-            cn(
-              "overflow-hidden border bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background [&>*+*]:border-l [&>*+*]:border-border",
-              pillShell ? "rounded-full" : "rounded-md",
-              invalid ? "border-destructive focus-within:ring-destructive" : "border-border"
-            ),
-          disabled && "pointer-events-none opacity-60",
-          className
-        )}
-        {...props}
-      >
-        {loading ? (
-          <span className="pointer-events-none absolute right-3 top-1/2 z-10 -translate-y-1/2">
-            <Spinner size="sm" />
-          </span>
-        ) : null}
-        {children}
-      </div>
-    </InputGroupContext.Provider>
-  )
-}
+    return (
+      <InputGroupContext.Provider value={ctx}>
+        <div
+          ref={ref}
+          data-slot="input-group"
+          data-invalid={invalid || undefined}
+          className={cn(
+            "relative flex w-full",
+            vertical ? "flex-col gap-2" : "flex-row flex-wrap items-stretch",
+            !vertical &&
+              ctx.attached &&
+              cn(
+                "overflow-hidden border bg-background focus-within:ring-2 focus-within:ring-ring focus-within:ring-offset-2 focus-within:ring-offset-background [&>*+*]:border-l [&>*+*]:border-border",
+                pillShell ? "rounded-pill" : controlRadiusClass[sizeKey],
+                invalid ? "border-destructive focus-within:ring-destructive" : "border-border"
+              ),
+            disabled && disabledSurfaceStyles,
+            className
+          )}
+          {...props}
+        >
+          {loading ? (
+            <span className="pointer-events-none absolute right-3 top-1/2 z-sticky -translate-y-1/2">
+              <Spinner size="sm" />
+            </span>
+          ) : null}
+          {children}
+        </div>
+      </InputGroupContext.Provider>
+    )
+  }
+)
 
 InputGroup.displayName = "InputGroup"
 
@@ -156,11 +169,12 @@ export const InputGroupInput = React.forwardRef<HTMLInputElement, InputGroupInpu
           !inGroupShell && "w-full",
           inGroupShell &&
             cn(
-              "min-w-0 flex-1 rounded-none border-0 bg-transparent shadow-none",
+              // Arbitrary zero, not the flat scale's zero utility: that scale is
+              // banned, and a merged shell edge is "no shape", not a themeable radius.
+              "min-w-0 flex-1 rounded-[0] border-0 bg-transparent shadow-none",
               "focus-visible:z-[1] focus-visible:ring-0 focus-visible:ring-offset-0",
               disabledControl
             ),
-          inGroupShell && "rounded-none",
           shellLead && "pl-9",
           className
         )}
@@ -197,24 +211,30 @@ export interface InputGroupAddonProps extends React.HTMLAttributes<HTMLSpanEleme
   children: React.ReactNode
 }
 
-export function InputGroupAddon({ className, children, ...props }: InputGroupAddonProps) {
-  const ctx = useInputGroupContext()
-  const inShell = ctx?.attached && !ctx.vertical
+export const InputGroupAddon = React.forwardRef<HTMLSpanElement, InputGroupAddonProps>(
+  ({ className, children, ...props }, ref) => {
+    const ctx = useInputGroupContext()
+    const inShell = ctx?.attached && !ctx.vertical
+    const size = ctx?.size ?? "md"
 
-  return (
-    <span
-      role="presentation"
-      className={cn(
-        "inline-flex shrink-0 items-center bg-muted/40 px-3 text-sm text-muted-foreground",
-        inShell ? "rounded-none" : "rounded-md border border-border",
-        className
-      )}
-      {...props}
-    >
-      {children}
-    </span>
-  )
-}
+    return (
+      <span
+        ref={ref}
+        role="presentation"
+        className={cn(
+          "inline-flex shrink-0 items-center bg-muted/40 px-3 text-sm text-muted-foreground",
+          // Same height source a bare TextInput reads, so density themes move both.
+          !inShell && controlHeightClass[size],
+          inShell ? "rounded-[0]" : cn(controlRadiusClass[size], "border border-border"),
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </span>
+    )
+  }
+)
 
 InputGroupAddon.displayName = "InputGroupAddon"
 
@@ -234,10 +254,7 @@ export const InputGroupButton = React.forwardRef<HTMLButtonElement, InputGroupBu
         size={size}
         disabled={disabled || groupDisabled}
         className={cn(
-          inShell && "shrink-0 rounded-none border-y-0 border-r-0 border-l border-border shadow-none",
-          inShell && size === "sm" && "h-8",
-          inShell && size === "md" && "h-10",
-          inShell && size === "lg" && "h-11",
+          inShell && "shrink-0 rounded-[0] border-y-0 border-r-0 border-l border-border shadow-none",
           className
         )}
         {...props}

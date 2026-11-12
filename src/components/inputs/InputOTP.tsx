@@ -2,10 +2,12 @@ import * as React from "react"
 import { OTPInput, REGEXP_ONLY_DIGITS } from "input-otp"
 import { type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import {
   FieldLayout,
   fieldControlBlurHandler,
   fieldSurfaceVariants,
+  ringOffsetBackground,
   useSyncStringFieldValidation,
 } from "./fieldPieces"
 
@@ -51,17 +53,11 @@ export const InputOTP = React.forwardRef<HTMLInputElement, InputOTPProps>(
     },
     ref
   ) => {
-    const isControlled = valueProp !== undefined
-    const [internal, setInternal] = React.useState(defaultValue)
-    const value = isControlled ? (valueProp as string) : internal
-
-    const setValue = React.useCallback(
-      (next: string) => {
-        if (!isControlled) setInternal(next)
-        onChange?.(next)
-      },
-      [isControlled, onChange]
-    )
+    const [value, setValue] = useControllableValue<string>({
+      value: valueProp,
+      defaultValue,
+      onChange,
+    })
 
     const { validationOpts, validationError } = useSyncStringFieldValidation(value, {
       validate,
@@ -75,7 +71,10 @@ export const InputOTP = React.forwardRef<HTMLInputElement, InputOTPProps>(
     const showError = errorMessage ?? validationError
     const invalid = Boolean(showError)
 
-    const rootId = id ?? React.useId()
+    // `useId()` must run every render — never behind `??`, which would skip the
+    // hook whenever `id` is supplied and change the hook count between renders.
+    const generatedId = React.useId()
+    const rootId = id ?? generatedId
 
     return (
       <FieldLayout label={label} htmlFor={rootId} size={size} errorMessage={showError}>
@@ -101,16 +100,16 @@ export const InputOTP = React.forwardRef<HTMLInputElement, InputOTPProps>(
                 <div
                   key={i}
                   className={cn(
-                    "relative flex w-10 items-center justify-center rounded-md border font-mono tabular-nums",
+                    "relative flex w-10 items-center justify-center rounded-control-md border font-mono tabular-nums",
                     fieldSurfaceVariants({ control: "input", size, variant, invalid }),
-                    slot.isActive && "ring-2 ring-ring ring-offset-2 ring-offset-background"
+                    slot.isActive && cn("ring-2 ring-ring ring-offset-2", ringOffsetBackground)
                   )}
                 >
                   <span className="text-foreground">
                     {mask && slot.char ? "•" : slot.char}
                     {slot.hasFakeCaret ? (
                       <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                        <span className="h-4 w-px animate-pulse bg-foreground duration-1000" />
+                        <span className="h-4 w-px animate-pulse bg-foreground duration-slow" />
                       </span>
                     ) : null}
                   </span>

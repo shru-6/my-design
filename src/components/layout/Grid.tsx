@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { columnGapScale, gapScale, rowGapScale } from "./shared"
 
 type GridColumnCount = 1 | 2 | 3 | 4 | 6 | 12
 type GridRowCount = 1 | 2 | 3 | 4 | 5 | 6
@@ -25,24 +26,10 @@ const rowClass: Record<GridRowCount, string> = {
 
 const gridSpacingVariants = cva("", {
   variants: {
-    gap: {
-      none: "gap-0",
-      sm: "gap-2",
-      md: "gap-4",
-      lg: "gap-6",
-    },
-    columnGap: {
-      none: "gap-x-0",
-      sm: "gap-x-2",
-      md: "gap-x-4",
-      lg: "gap-x-6",
-    },
-    rowGap: {
-      none: "gap-y-0",
-      sm: "gap-y-2",
-      md: "gap-y-4",
-      lg: "gap-y-6",
-    },
+    // Shared with Stack — see layout/shared.ts.
+    gap: gapScale,
+    columnGap: columnGapScale,
+    rowGap: rowGapScale,
     autoFlow: {
       default: "",
       row: "grid-flow-row",

@@ -2,7 +2,7 @@ import * as React from "react"
 import { X } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
-import { Button } from "../actions/Button"
+import { IconButton } from "../actions/IconButton"
 import { Card, type CardProps } from "../layout/Card"
 import { Overlay, type OverlayPortalContainer } from "./Overlay"
 import { useControllableOpen } from "./useControllableOpen"
@@ -23,15 +23,15 @@ const drawerVariants = cva("relative flex flex-col border-border bg-card shadow-
       full: "",
     },
     variant: {
-      default: "rounded-none",
+      default: "rounded-[0]",
       sheet: "",
     },
   },
   compoundVariants: [
-    { placement: "bottom", variant: "sheet", class: "rounded-t-xl" },
-    { placement: "top", variant: "sheet", class: "rounded-b-xl" },
-    { placement: "left", variant: "sheet", class: "rounded-r-xl" },
-    { placement: "right", variant: "sheet", class: "rounded-l-xl" },
+    { placement: "bottom", variant: "sheet", class: "rounded-t-surface-lg" },
+    { placement: "top", variant: "sheet", class: "rounded-b-surface-lg" },
+    { placement: "left", variant: "sheet", class: "rounded-r-surface-lg" },
+    { placement: "right", variant: "sheet", class: "rounded-l-surface-lg" },
     { placement: ["top", "bottom"], size: "sm", class: "max-h-[30vh]" },
     { placement: ["top", "bottom"], size: "md", class: "max-h-[50vh]" },
     { placement: ["top", "bottom"], size: "lg", class: "max-h-[70vh]" },
@@ -71,6 +71,10 @@ export interface DrawerProps extends VariantProps<typeof drawerVariants> {
   className?: string
   cardProps?: Omit<CardProps, "header" | "footer" | "children">
   container?: OverlayPortalContainer
+  /** Accessible name for the dialog. Supply when `header` is not plain text. */
+  ariaLabel?: string
+  /** Focused when the drawer opens, instead of its first tabbable child. */
+  initialFocus?: React.RefObject<HTMLElement | null>
   children?: React.ReactNode
 }
 
@@ -88,6 +92,8 @@ export const Drawer = React.forwardRef<HTMLDivElement, DrawerProps>(function Dra
     className,
     cardProps,
     container,
+    ariaLabel,
+    initialFocus,
     children,
   },
   ref
@@ -104,12 +110,9 @@ export const Drawer = React.forwardRef<HTMLDivElement, DrawerProps>(function Dra
       <div className="flex items-start justify-between gap-3">
         {header ? <div className="min-w-0 flex-1">{header}</div> : <span />}
         {showClose ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            iconOnly
+          <IconButton
             ariaLabel="Close"
-            left={<X className="h-4 w-4" />}
+            icon={<X className="h-4 w-4" />}
             onClick={handleClose}
             className="shrink-0"
           />
@@ -123,6 +126,9 @@ export const Drawer = React.forwardRef<HTMLDivElement, DrawerProps>(function Dra
       onClose={handleClose}
       container={container}
       blur
+      dialog
+      dialogLabel={ariaLabel}
+      initialFocus={initialFocus}
       showCloseButton={false}
       className={overlayAlign[resolvedPlacement]}
     >

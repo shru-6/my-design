@@ -28,15 +28,15 @@ export interface FormFieldProps {
   disabled?: boolean
   value?: string
   defaultValue?: string
+  /** Called after the field value updates, for every control type. */
   onChange?: (value: string) => void
-  /** Called after the field value updates (select, checkbox, and text inputs). */
-  onValueChange?: (value: string) => void
   validate?: boolean | ((value: string) => string | undefined)
   errorMessage?: string
   touched?: boolean
   showError?: boolean
   /** Select options when `type="select"`. */
   items?: SelectOption[]
+  /** Textarea rows when `type="textarea"`. */
   rows?: number
   /** Upload options when `type="upload"`. */
   accept?: string
@@ -49,9 +49,13 @@ export interface FormFieldProps {
   render?: (props: FormFieldRenderProps) => React.ReactNode
   children?: React.ReactNode
   className?: string
+  /**
+   * Pass-through to the underlying text control. Only the text-like types
+   * (`text` / `email` / `password` / `number` / `url` / `search`) and `textarea`
+   * render a control this shape fits, so it is ignored for `select`,
+   * `checkbox` and `upload`.
+   */
   inputProps?: Partial<TextInputProps>
-  labelProps?: Record<string, unknown>
-  helperTextProps?: Record<string, unknown>
 }
 
 function resolveFieldError(
@@ -83,7 +87,6 @@ export function FormField({
   children,
   className,
   inputProps,
-  onValueChange,
   items,
   rows,
   accept,
@@ -119,7 +122,6 @@ export function FormField({
   const setValue = (next: string) => {
     onChangeProp?.(next)
     form?.setValue(name, next)
-    onValueChange?.(next)
     if (form && validate) {
       const err = resolveFieldError(next, validate, required, errorMessage)
       if (form.validateOn === "change" || form.submitted) {

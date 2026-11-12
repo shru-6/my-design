@@ -1,20 +1,23 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { sizeToCss } from "../layout/shared"
 
 const skeletonVariants = cva("animate-pulse bg-skeleton", {
   variants: {
+    // Radius mirrors the real thing each placeholder stands in for: controls
+    // get `control-*`, cards get `surface-*`, round things get `pill`.
     variant: {
-      text: "h-4 w-12 rounded",
-      avatar: "h-10 w-10 rounded-full",
-      button: "h-9 w-24 rounded-md",
-      badge: "h-5 w-5 rounded-full",
-      card: "h-32 w-32 rounded-lg",
-      input: "h-9 w-24 rounded-md",
-      checkbox: "h-4 w-4 rounded-sm",
-      tableCell: "h-4 w-full rounded",
-      tableRow: "h-10 w-full rounded-md",
-      radio: "h-5 w-5 rounded-full",
+      text: "h-4 w-12 rounded-control-sm",
+      avatar: "h-10 w-10 rounded-pill",
+      button: "h-9 w-24 rounded-control-md",
+      badge: "h-5 w-5 rounded-pill",
+      card: "h-32 w-32 rounded-surface-md",
+      input: "h-9 w-24 rounded-control-md",
+      checkbox: "h-4 w-4 rounded-control-sm",
+      tableCell: "h-4 w-full rounded-control-sm",
+      tableRow: "h-10 w-full rounded-control-md",
+      radio: "h-5 w-5 rounded-pill",
     },
   },
   defaultVariants: {
@@ -27,29 +30,38 @@ export interface SkeletonProps
     VariantProps<typeof skeletonVariants> {
   width?: string | number
   height?: string | number
+  /** Repeat the placeholder N times inside a wrapper. Default 1 (no wrapper). */
   count?: number
   className?: string
   children?: React.ReactNode
 }
 
-function withUnit(value?: string | number): string | number | undefined {
-  if (value == null) return undefined
-  return typeof value === "number" ? `${value}px` : value
-}
-
 export const Skeleton = React.forwardRef<HTMLDivElement, SkeletonProps>(
   ({ variant, width, height, count = 1, className, children, ...props }, ref) => {
-    const items = Array.from({ length: Math.max(1, count) })
+    const shapeClass = cn(skeletonVariants({ variant }), className)
+    const shapeStyle = { width: sizeToCss(width), height: sizeToCss(height) }
+
+    // `count === 1` is the overwhelmingly common case and renders no wrapper at
+    // all, so `id` / `aria-*` / `ref` land on the element the caller styled.
+    if (count <= 1) {
+      return (
+        <div ref={ref} data-slot="skeleton" className={shapeClass} style={shapeStyle} {...props}>
+          {children}
+        </div>
+      )
+    }
+
+    // Repeated: `{...props}` goes on the wrapper exactly once (spreading it on
+    // every line duplicated `id` N times), while `className` still styles each
+    // line — that's what callers pass it for.
     return (
-      <div className={cn("flex flex-col gap-2", count === 1 && "contents")}>
-        {items.map((_, idx) => (
+      <div ref={ref} data-slot="skeleton-group" className="flex flex-col gap-2" {...props}>
+        {Array.from({ length: count }).map((_, idx) => (
           <div
             key={idx}
-            ref={idx === 0 ? ref : undefined}
             data-slot={`skeleton-${idx}`}
-            className={cn(skeletonVariants({ variant }), className)}
-            style={{ width: withUnit(width), height: withUnit(height) }}
-            {...props}
+            className={shapeClass}
+            style={shapeStyle}
           >
             {children}
           </div>
@@ -105,7 +117,7 @@ export function TableSkeleton({
               <Skeleton
                 key={colIndex}
                 className={cn(
-                  "block min-w-0 flex-1 rounded-sm leading-none",
+                  "block min-w-0 flex-1 rounded-control-sm leading-none",
                   cellHeight,
                   width === undefined && colIndex > 0 && "max-w-[12rem]"
                 )}

@@ -3,10 +3,10 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 import { disabledControl, focusRing, focusRingOffset } from "../inputs/fieldPieces"
 import { Spinner } from "../data-display/Spinner"
-import { Icon } from "../utilities/Icon"
+import { Icon, type IconProps } from "../utilities/Icon"
 
 const buttonVariants = cva(
-  `inline-flex items-center justify-center gap-2 rounded-[var(--radius-button,0.375rem)] font-medium transition-colors ${focusRing} ${focusRingOffset} ${disabledControl}`,
+  `inline-flex items-center justify-center gap-2 font-medium transition-colors ${focusRing} ${focusRingOffset} ${disabledControl}`,
   {
     variants: {
       variant: {
@@ -16,10 +16,12 @@ const buttonVariants = cva(
         ghost: "bg-transparent text-foreground hover:bg-muted",
         destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
       },
+      // Radius rides the size tier — the `control` role of the radius scale
+      // (the old `--radius-button` token no longer exists).
       size: {
-        sm: "h-[var(--control-height-sm,2rem)] px-[var(--control-padding-sm,0.625rem)] text-sm",
-        md: "h-[var(--control-height-md,2.5rem)] px-[var(--control-padding-md,0.75rem)] text-sm",
-        lg: "h-[var(--control-height-lg,2.75rem)] px-[var(--control-padding-lg,0.875rem)] text-base",
+        sm: "h-[var(--control-height-sm,2rem)] px-[var(--control-padding-sm,0.625rem)] text-sm rounded-control-sm",
+        md: "h-[var(--control-height-md,2.5rem)] px-[var(--control-padding-md,0.75rem)] text-sm rounded-control-md",
+        lg: "h-[var(--control-height-lg,2.75rem)] px-[var(--control-padding-lg,0.875rem)] text-base rounded-control-lg",
       },
       iconOnly: {
         true: "aspect-square p-0",
@@ -46,6 +48,8 @@ export type ButtonProps = ButtonBaseProps & {
   size?: VariantProps<typeof buttonVariants>["size"]
   left?: React.ReactNode
   right?: React.ReactNode
+  /** `Icon` size for `left` / `right`. Defaults to `sm` (16px) — raise it for oversized controls like `FAB`. */
+  iconSize?: IconProps["size"]
   iconOnly?: boolean
   ariaLabel?: string
   loading?: boolean
@@ -62,6 +66,7 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
     size,
     left,
     right,
+    iconSize = "sm",
     iconOnly,
     ariaLabel,
     loading,
@@ -78,9 +83,9 @@ export const Button = React.forwardRef<HTMLButtonElement | HTMLAnchorElement, Bu
 
   const content = (
     <>
-      {busy ? <Spinner size={size === "lg" ? "md" : "sm"} /> : left ? <Icon node={left} size="sm" /> : null}
+      {busy ? <Spinner size={size === "lg" ? "md" : "sm"} /> : left ? <Icon node={left} size={iconSize} /> : null}
       {!iconOnly ? (children ?? label) : null}
-      {!busy && right ? <Icon node={right} size="sm" /> : null}
+      {!busy && right ? <Icon node={right} size={iconSize} /> : null}
     </>
   )
 

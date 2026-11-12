@@ -1,8 +1,8 @@
 import * as React from "react"
-import { type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
-import { Stack, stackVariants } from "../layout/Stack"
-import { Grid, gridVariants } from "../layout/Grid"
+import { useControllableValue } from "../../utils/useControllableValue"
+import { Stack, type StackProps } from "../layout/Stack"
+import { Grid, type GridProps } from "../layout/Grid"
 import { SearchInput, type SearchInputProps } from "../inputs/SearchInput"
 import { Text } from "./Text"
 import { Icon } from "../utilities/Icon"
@@ -23,6 +23,9 @@ export interface ListItem {
 }
 
 export type ListLayout = "list" | "grid"
+
+/** Stable identity for the uncontrolled chip-selection seed. */
+const EMPTY_CHIP_SELECTION: string[] = []
 
 function reactNodeToSearchText(node: React.ReactNode): string {
   if (node == null || typeof node === "boolean") return ""
@@ -93,10 +96,34 @@ export type ListSearchConfig = Omit<
   filterItems?: boolean
 }
 
-type StackGap = NonNullable<VariantProps<typeof stackVariants>["gap"]>
-type GridGap = NonNullable<VariantProps<typeof gridVariants>["gap"]>
-type GridColumnCount = 1 | 2 | 3 | 4 | 6 | 12
-type GridRowCount = 1 | 2 | 3 | 4 | 5 | 6
+/**
+ * Layout pass-through for `layout="list"`.
+ *
+ * These used to be flattened onto `ListProps` — every `Stack` prop and every
+ * `Grid` prop side by side, half of them inert depending on `layout`, with the
+ * `gap` collision papered over by a second `gridGap` prop. Grouping them as
+ * SlotProps (the convention the project documents) makes it obvious which
+ * layout mode a knob belongs to, and drops `gridGap` entirely: each slot has
+ * its own `gap`.
+ */
+export type ListStackProps = Pick<
+  StackProps,
+  "direction" | "gap" | "align" | "justify" | "wrap"
+>
+
+/** Layout pass-through for `layout="grid"`. */
+export type ListGridProps = Pick<
+  GridProps,
+  | "columns"
+  | "rows"
+  | "minChildWidth"
+  | "gap"
+  | "columnGap"
+  | "rowGap"
+  | "autoFlow"
+  | "alignItems"
+  | "justifyItems"
+>
 
 export interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "onSelect"> {
   items: readonly ListItem[]
@@ -125,25 +152,10 @@ export interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
   header?: React.ReactNode
   /** `true`: default search field + built-in filter. Object: pass `filter` and/or SearchInput props. */
   search?: boolean | ListSearchConfig
-
-  // --- Stack (`layout="list"`) — same tokens as `Stack`
-  direction?: VariantProps<typeof stackVariants>["direction"]
-  gap?: StackGap
-  align?: VariantProps<typeof stackVariants>["align"]
-  justify?: VariantProps<typeof stackVariants>["justify"]
-  wrap?: VariantProps<typeof stackVariants>["wrap"]
-
-  // --- Grid (`layout="grid"`) — same tokens as `Grid`
-  columns?: GridColumnCount
-  rows?: GridRowCount
-  minChildWidth?: string
-  columnGap?: VariantProps<typeof gridVariants>["columnGap"]
-  rowGap?: VariantProps<typeof gridVariants>["rowGap"]
-  autoFlow?: VariantProps<typeof gridVariants>["autoFlow"]
-  alignItems?: VariantProps<typeof gridVariants>["alignItems"]
-  justifyItems?: VariantProps<typeof gridVariants>["justifyItems"]
-  /** Grid gap (and fallback when you only set `gap` in grid mode). */
-  gridGap?: GridGap
+  /** `Stack` pass-through; applies when `layout="list"` (the default). */
+  stackProps?: ListStackProps
+  /** `Grid` pass-through; applies when `layout="grid"`. */
+  gridProps?: ListGridProps
 }
 
 export const List = React.forwardRef<HTMLDivElement, ListProps>(
@@ -153,20 +165,8 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
       items,
       layout = "list",
       listType = "unordered",
-      gap,
-      direction,
-      align,
-      justify,
-      wrap,
-      columns,
-      rows,
-      minChildWidth,
-      columnGap,
-      rowGap,
-      autoFlow,
-      alignItems,
-      justifyItems,
-      gridGap,
+      stackProps,
+      gridProps,
       divider,
       selectable,
       selectedValue: selectedValueProp,
@@ -209,29 +209,18 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
       ...pillGroupProps
     } = filterChips ?? {}
 
-    const isChipControlled = chipValueProp !== undefined
-    const [internalChipSelection, setInternalChipSelection] = React.useState<string[]>(
-      () => chipDefaultValue ?? []
-    )
-    const chipSelection = isChipControlled ? chipValueProp : internalChipSelection
-    const setChipSelection = React.useCallback(
-      (next: string[]) => {
-        if (!isChipControlled) setInternalChipSelection(next)
-        onChipChangeProp?.(next)
-      },
-      [isChipControlled, onChipChangeProp]
-    )
+    // Three controllable values, one pattern — see utils/useControllableValue.
+    const [chipSelection, setChipSelection] = useControllableValue<string[]>({
+      value: chipValueProp,
+      defaultValue: chipDefaultValue ?? EMPTY_CHIP_SELECTION,
+      onChange: onChipChangeProp,
+    })
 
-    const isSearchControlled = searchValueProp !== undefined
-    const [internalSearchQuery, setInternalSearchQuery] = React.useState(() => defaultQuery ?? "")
-    const searchQuery = isSearchControlled ? searchValueProp : internalSearchQuery
-    const setSearchQuery = React.useCallback(
-      (next: string) => {
-        if (!isSearchControlled) setInternalSearchQuery(next)
-        onSearchChangeProp?.(next)
-      },
-      [isSearchControlled, onSearchChangeProp]
-    )
+    const [searchQuery, setSearchQuery] = useControllableValue<string>({
+      value: searchValueProp,
+      defaultValue: defaultQuery ?? "",
+      onChange: onSearchChangeProp,
+    })
 
     const [debouncedQuery, setDebouncedQuery] = React.useState(() => defaultQuery ?? "")
 
@@ -239,9 +228,11 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
       onDebouncedChange?.(debouncedQuery)
     }, [debouncedQuery, onDebouncedChange])
 
-    const isControlled = selectedValueProp !== undefined
-    const [internalSelected, setInternalSelected] = React.useState<string | undefined>(defaultSelectedValue)
-    const selectedValue = isControlled ? selectedValueProp : internalSelected
+    const [selectedValue, setSelectedValue] = useControllableValue<string | undefined>({
+      value: selectedValueProp,
+      defaultValue: defaultSelectedValue,
+      onChange: undefined,
+    })
 
     const filteredItems = React.useMemo(() => {
       let next = [...items]
@@ -269,10 +260,12 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
     const select = React.useCallback(
       (item: ListItem) => {
         if (!selectable || item.disabled || item.value == null) return
-        if (!isControlled) setInternalSelected(item.value)
+        setSelectedValue(item.value)
+        // Not wired as useControllableValue's `onChange` — `onSelect` also
+        // hands back the item, which that signature has no room for.
         onSelect?.(item.value, item)
       },
-      [selectable, isControlled, onSelect]
+      [selectable, setSelectedValue, onSelect]
     )
 
     const renderRow = (item: ListItem, index: number) => {
@@ -287,7 +280,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
               layout === "grid" && "h-full",
               selectable && !item.disabled && "cursor-pointer",
               item.disabled && "cursor-not-allowed opacity-60",
-              selected && layout === "grid" && "ring-2 ring-ring ring-offset-2 ring-offset-background rounded-lg"
+              selected && layout === "grid" && "ring-2 ring-ring ring-offset-2 ring-offset-background rounded-surface-md"
             )}
             role={selectable ? "option" : undefined}
             aria-selected={selectable ? selected : undefined}
@@ -313,7 +306,7 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
       return (
         <div
           className={cn(
-            "flex min-w-0 items-start gap-3 rounded-md px-2 py-2",
+            "flex min-w-0 items-start gap-3 rounded-control-md px-2 py-2",
             layout === "grid" && "border border-border",
             selectable && !item.disabled && "cursor-pointer hover:bg-muted/60",
             item.disabled && "cursor-not-allowed opacity-60",
@@ -355,16 +348,17 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
     const renderWrappedRow = (item: ListItem, index: number) => {
       const row = renderRow(item, index)
       if (listType === "none") {
-        return <div className="min-w-0">{row}</div>
+        return <div className={cn("min-w-0", layout === "grid" && "h-full")}>{row}</div>
       }
-      return <li className="list-none">{row}</li>
+      return <li className={cn("list-none", layout === "grid" && "h-full")}>{row}</li>
     }
 
     const listChrome = listType !== "none" && "list-none pl-0"
 
-    const resolvedGridMin = minChildWidth ?? (columns == null ? "12rem" : undefined)
-    const resolvedColumns = resolvedGridMin ? undefined : (columns ?? 2)
-    const resolvedGridGap = gridGap ?? gap
+    // Auto-fill by default; an explicit `columns` opts back into fixed tracks.
+    const resolvedGridMin =
+      gridProps?.minChildWidth ?? (gridProps?.columns == null ? "12rem" : undefined)
+    const resolvedColumns = resolvedGridMin ? undefined : (gridProps?.columns ?? 2)
 
     const body =
       layout === "list" ? (
@@ -375,11 +369,10 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
           items={filteredItems}
           getItemKey={(item: ListItem, i) => item.value ?? i}
           renderItem={renderWrappedRow}
-          direction={direction}
-          gap={divider ? (gap ?? "none") : gap}
-          align={align}
-          justify={justify}
-          wrap={wrap}
+          {...stackProps}
+          // Dividers supply the visual separation, so the default gap would
+          // only push the rules apart — overrides any `stackProps.gap`.
+          gap={divider ? (stackProps?.gap ?? "none") : stackProps?.gap}
         />
       ) : (
         <Grid
@@ -389,15 +382,10 @@ export const List = React.forwardRef<HTMLDivElement, ListProps>(
           items={filteredItems}
           getItemKey={(item: ListItem, i) => item.value ?? i}
           renderItem={renderWrappedRow}
+          alignItems="stretch"
+          {...gridProps}
           columns={resolvedColumns}
-          rows={rows}
           minChildWidth={resolvedGridMin}
-          gap={resolvedGridGap}
-          columnGap={columnGap}
-          rowGap={rowGap}
-          autoFlow={autoFlow}
-          alignItems={alignItems}
-          justifyItems={justifyItems}
         />
       )
 

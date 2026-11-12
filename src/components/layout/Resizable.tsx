@@ -48,7 +48,7 @@ export function ResizableHandle({ className, withHandle, children, ...props }: R
     >
       {children ??
         (withHandle ? (
-          <span className="z-10 flex h-7 w-4 items-center justify-center rounded-sm border border-border bg-muted">
+          <span className="z-sticky flex h-7 w-4 items-center justify-center rounded-control-sm border border-border bg-muted">
             <GripVertical className="h-3.5 w-3.5 text-muted-foreground" strokeWidth={2} />
           </span>
         ) : null)}

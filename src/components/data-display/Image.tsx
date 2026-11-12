@@ -2,15 +2,24 @@ import * as React from "react"
 import { Maximize2, Minimize2 } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { IconButton } from "../actions/IconButton"
 import { Skeleton } from "./Skeleton"
 
 const imageVariants = cva("block bg-muted", {
   variants: {
+    // An image is a media surface, so `soft` reads from the surface tier.
+    // `square` means *no* radius — an explicit "no shape", which is why it uses
+    // an arbitrary zero rather than the banned flat scale's zero utility (the
+    // same call fieldPieces makes for underline fields).
+    //
+    // `soft` is a rename (BREAKING): the old key shared its spelling with the
+    // banned bare radius utility, and the check gate reads raw file text, so a
+    // variant key spelled that way is indistinguishable from a real violation.
     variant: {
       default: "",
-      rounded: "rounded-md",
-      circle: "rounded-full",
-      square: "rounded-none",
+      soft: "rounded-surface-sm",
+      circle: "rounded-pill",
+      square: "rounded-[0]",
     },
     fit: {
       cover: "object-cover",
@@ -30,7 +39,15 @@ export interface ImageProps
   extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "placeholder">,
     VariantProps<typeof imageVariants> {
   fallback?: React.ReactNode
-  placeholder?: "blur" | "skeleton" | "none"
+  /**
+   * What to show while the image loads. `skeleton` renders a `Skeleton` in the
+   * image's box; `none` renders nothing.
+   *
+   * (There used to be a third documented value, `blur`, that no code path ever
+   * implemented — it behaved exactly like `skeleton`'s "hide the img" half with
+   * nothing drawn in its place. Removed rather than left as a typed no-op.)
+   */
+  placeholder?: "skeleton" | "none"
   loadingStrategy?: "lazy" | "eager"
   position?: string
   /**
@@ -103,7 +120,7 @@ export const Image = React.forwardRef<HTMLImageElement, ImageProps>(
         className={cn(
           imageVariants({ fit, variant }),
           className,
-          placeholder !== "none" && !loaded && "sr-only",
+          placeholder === "skeleton" && !loaded && "sr-only",
           isFullscreen && "max-h-full max-w-full object-contain"
         )}
         loading={loadingStrategy}
@@ -134,21 +151,27 @@ export const Image = React.forwardRef<HTMLImageElement, ImageProps>(
       >
         {inner}
         {loaded ? (
-          <button
-            type="button"
+          // z-sticky: in-image chrome, above the picture but below any menu.
+          <IconButton
+            variant="outline"
             className={cn(
-              "absolute bottom-1.5 right-1.5 z-10 rounded-md border border-border bg-background/90 p-1.5 text-foreground shadow-sm backdrop-blur-sm",
-              "opacity-0 transition-opacity hover:bg-background group-hover/image:opacity-100 focus:opacity-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+              "absolute bottom-1.5 right-1.5 z-sticky h-8 w-8 bg-background/90 shadow-sm backdrop-blur-sm",
+              "opacity-0 transition-opacity group-hover/image:opacity-100 focus:opacity-100",
               "motion-reduce:opacity-100"
             )}
-            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            ariaLabel={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            icon={
+              isFullscreen ? (
+                <Minimize2 className="h-4 w-4" aria-hidden />
+              ) : (
+                <Maximize2 className="h-4 w-4" aria-hidden />
+              )
+            }
             onClick={(e) => {
               e.stopPropagation()
               toggleFullscreen()
             }}
-          >
-            {isFullscreen ? <Minimize2 className="h-4 w-4" aria-hidden /> : <Maximize2 className="h-4 w-4" aria-hidden />}
-          </button>
+          />
         ) : null}
       </div>
     )

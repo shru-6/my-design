@@ -2,8 +2,9 @@ import * as React from "react"
 import { Star } from "lucide-react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { Text } from "../data-display/Text"
-import { ControlErrorMessage } from "./fieldPieces"
+import { ControlErrorMessage, focusRing, focusRingOffset, ringOffsetBackground } from "./fieldPieces"
 
 const ratingVariants = cva("inline-flex items-center gap-0.5", {
   variants: {
@@ -78,17 +79,18 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
     const n = Number(precisionProp)
     const precision: RatingPrecision = n === 0.25 ? 0.25 : n === 0.5 ? 0.5 : 1
 
-    const isControlled = valueProp !== undefined
-    const [internal, setInternal] = React.useState(() => roundToStep(defaultValue, precision))
-    const value = roundToStep(isControlled ? (valueProp as number) : internal, precision)
+    const [rawValue, setRawValue] = useControllableValue<number>({
+      value: valueProp,
+      defaultValue,
+      onChange,
+    })
+    const value = roundToStep(rawValue, precision)
 
     const setValue = React.useCallback(
       (next: number) => {
-        const v = roundToStep(next, precision)
-        if (!isControlled) setInternal(v)
-        onChange?.(v)
+        setRawValue(roundToStep(next, precision))
       },
-      [isControlled, onChange, precision]
+      [setRawValue, precision]
     )
 
     const starRefs = React.useRef<(HTMLButtonElement | null)[]>([])
@@ -122,7 +124,10 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
       }
     }
 
-    const rootId = id ?? React.useId()
+    // `useId()` must run every render — never behind `??`, which would skip the
+    // hook whenever `id` is supplied and change the hook count between renders.
+    const generatedId = React.useId()
+    const rootId = id ?? generatedId
     const interactive = !readOnly && !disabled
 
     return (
@@ -145,7 +150,11 @@ export const Rating = React.forwardRef<HTMLDivElement, RatingProps>(
             aria-valuetext={`${value} of ${max}`}
             tabIndex={interactive ? 0 : undefined}
             onKeyDown={onKeyDown}
-            className={cn(ratingVariants({ size }), interactive && "cursor-pointer rounded-md outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2")}
+            className={cn(
+              ratingVariants({ size }),
+              interactive &&
+                cn("cursor-pointer rounded-control-md", focusRing, focusRingOffset, ringOffsetBackground)
+            )}
           >
             {Array.from({ length: max }, (_, i) => {
               const k = i + 1

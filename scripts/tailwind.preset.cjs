@@ -60,10 +60,19 @@ module.exports = {
         "surface-1": "hsl(var(--surface-1, var(--card)))",
         "surface-2": "hsl(var(--surface-2, var(--muted)))",
       },
+      // Shape is role + size, not one flat value: `control` (buttons, inputs,
+      // checkboxes, selects), `surface` (cards, modals, popovers, panels),
+      // and `pill` (badges, avatars, tags). A theme can make small controls
+      // fully round while large surfaces stay square (see the `contrast`
+      // shape theme) — that's the point of splitting these out.
       borderRadius: {
-        lg: "var(--radius)",
-        md: "calc(var(--radius) - 2px)",
-        sm: "calc(var(--radius) - 4px)",
+        "control-sm": "var(--radius-control-sm)",
+        "control-md": "var(--radius-control-md)",
+        "control-lg": "var(--radius-control-lg)",
+        "surface-sm": "var(--radius-surface-sm)",
+        "surface-md": "var(--radius-surface-md)",
+        "surface-lg": "var(--radius-surface-lg)",
+        pill: "var(--radius-pill)",
       },
       fontFamily: {
         sans: ["var(--font-sans)", "system-ui", "sans-serif"],

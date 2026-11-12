@@ -19,7 +19,7 @@ const textVariants = cva("text-foreground", {
       default: "",
       muted: "text-muted-foreground",
       subtle: "opacity-80",
-      code: "font-mono rounded bg-muted px-1.5 py-0.5",
+      code: "font-mono rounded-control-sm bg-muted px-1.5 py-0.5",
       danger: "text-destructive",
       outline: "border border-border",
     },

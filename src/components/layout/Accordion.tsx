@@ -1,5 +1,7 @@
 import * as React from "react"
 import { cn } from "../../utils"
+import { disabledSurface } from "../inputs/fieldPieces"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { Spinner } from "../data-display/Spinner"
 import { Icon } from "../utilities/Icon"
 import { Collapsible } from "./Collapsible"
@@ -31,20 +33,17 @@ function asArray(multiple: boolean, v: string | string[] | undefined): string[] 
   return []
 }
 
-export function Accordion({
-  items = [],
-  type = "single",
-  value,
-  defaultValue,
-  onChange,
-  className,
-  ...props
-}: AccordionProps) {
+export const Accordion = React.forwardRef<HTMLDivElement, AccordionProps>(function Accordion(
+  { items = [], type = "single", value, defaultValue, onChange, className, ...props },
+  ref
+) {
   const multiple = type === "multiple"
-  const initial = asArray(multiple, defaultValue)
-  const [internal, setInternal] = React.useState<string[]>(initial)
-  const isControlled = value !== undefined
-  const openValues = asArray(multiple, isControlled ? value : internal)
+  const [selection, setSelection] = useControllableValue<string | string[]>({
+    value,
+    defaultValue: defaultValue ?? (multiple ? [] : ""),
+    onChange,
+  })
+  const openValues = asArray(multiple, selection)
 
   const setOpen = (panel: string, nextOpen: boolean) => {
     let next: string[]
@@ -54,12 +53,16 @@ export function Accordion({
     } else {
       next = nextOpen ? [panel] : []
     }
-    if (!isControlled) setInternal(next)
-    onChange?.(multiple ? next : (next[0] ?? ""))
+    setSelection(multiple ? next : (next[0] ?? ""))
   }
 
   return (
-    <div className={cn("w-full divide-y divide-border rounded-md border border-border", className)} {...props}>
+    <div
+      ref={ref}
+      data-slot="accordion"
+      className={cn("w-full divide-y divide-border rounded-surface-md border border-border", className)}
+      {...props}
+    >
       {items.map((item) => {
         const open = openValues.includes(item.value)
         const trigger = (
@@ -71,7 +74,20 @@ export function Accordion({
         )
 
         return (
-          <div key={item.value} className="px-2 py-1 first:pt-2 last:pb-2">
+          <div
+            key={item.value}
+            // A disabled row is a `<div>`, not a `<button disabled>`, so the
+            // whole row (revealed content included) reads its dimming from the
+            // attribute-driven `disabledSurface` token. The trigger inside is
+            // still a real disabled button for keyboard/AT, but it must not
+            // dim a second time — 0.6 × 0.6 is far fainter than either alone.
+            data-disabled={item.disabled ? "true" : undefined}
+            className={cn(
+              "px-2 py-1 first:pt-2 last:pb-2",
+              disabledSurface,
+              "data-[disabled=true]:[&_button]:opacity-100"
+            )}
+          >
             <Collapsible
               open={open}
               onOpenChange={(o) => setOpen(item.value, o)}
@@ -87,6 +103,6 @@ export function Accordion({
       })}
     </div>
   )
-}
+})
 
 Accordion.displayName = "Accordion"

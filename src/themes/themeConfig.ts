@@ -20,13 +20,8 @@ export type ThemeCategory = {
 }
 
 /**
- * Centralized theme category order
- * Used everywhere to ensure consistency
- * Custom category is included but handled specially (optional, user-created files)
- * 
- * ⚠️ IF YOU UPDATE THIS, ALSO UPDATE:
- * 1. scripts/themeConfig.js - THEME_CATEGORY_ORDER (JavaScript version)
- * 2. scripts/apply-theme-sync.js - THEME_CATEGORY_ORDER constant (standalone script, can't import)
+ * Centralized theme category order.
+ * Custom category is included but handled specially (optional, user-created files).
  */
 export const THEME_CATEGORY_ORDER = ['color', 'typography', 'shape', 'density', 'animation', 'custom'] as const
 
@@ -107,6 +102,12 @@ export const baseThemeCategories: Record<string, ThemeCategory> = {
         file: 'shape/sharp.json',
         icon: '⬜',
         description: 'Sharp square corners'
+      },
+      contrast: {
+        name: 'Contrast',
+        file: 'shape/contrast.json',
+        icon: '🔘',
+        description: 'Small controls fully round, large surfaces square'
       }
     }
   },
@@ -166,156 +167,139 @@ export const baseThemeCategories: Record<string, ThemeCategory> = {
   }
 }
 
-// Cache for dynamically discovered themes
-let discoveredThemesCache: Record<string, ThemeCategory> | null = null
-
 /**
- * Discover themes - returns base themes from config
- * For custom themes, use registerTheme() to add them manually
+ * Returns the static base theme categories. Not "discovery" in any dynamic
+ * sense — kept separate from baseThemeCategories only so a registry can treat
+ * it as a swappable async source (see ThemeSource below).
  */
-export async function discoverThemes(): Promise<Record<string, ThemeCategory>> {
-  if (discoveredThemesCache) {
-    return discoveredThemesCache
-  }
+async function getBaseThemeCategories(): Promise<Record<string, ThemeCategory>> {
+  return JSON.parse(JSON.stringify(baseThemeCategories))
+}
 
-  // Return base themes - users can register custom themes with registerTheme()
-  const themes: Record<string, ThemeCategory> = JSON.parse(JSON.stringify(baseThemeCategories))
-  discoveredThemesCache = themes
-  return themes
+/** A pluggable source a registry resolves its categories from. */
+export type ThemeSource = () => Promise<Record<string, ThemeCategory>>
+
+export type ThemeRegistry = {
+  getThemeCategories(): Promise<Record<string, ThemeCategory>>
+  registerTheme(category: string, themeId: string, metadata: ThemeMetadata): Promise<Record<string, ThemeCategory>>
+  registerThemeFromFile(category: string, themeId: string, filePath?: string): Promise<{ success: boolean; themeId: string; category: string }>
+  getThemeFilePath(category: string, themeId: string): string | null
+  getThemesForCategory(category: string): Promise<Record<string, ThemeMetadata>>
+  getTheme(category: string, themeId: string): Promise<ThemeMetadata | null>
 }
 
 /**
- * Register a custom theme dynamically
- * Use this to add custom themes after creating theme files in public/tokens/themes/
- * 
- * Example:
- * ```ts
- * import { registerTheme } from 'shru-design-system'
- * 
- * // After creating public/tokens/themes/color/ocean.json
- * registerTheme('color', 'ocean', {
- *   name: 'Ocean',
- *   file: 'color/ocean.json',
- *   icon: '🌊',
- *   description: 'Ocean color theme'
- * })
- * ```
+ * Creates an isolated theme registry with its own cache and registered themes.
+ * The module-level default export below (a single shared registry) is fine for
+ * a single-tenant app. Create a dedicated instance with a custom `source` when
+ * isolation matters — e.g. a CMS backend serving a different theme set per
+ * tenant/site, where a shared cache would leak one tenant's themes into another's.
  */
-export function registerTheme(category: string, themeId: string, metadata: ThemeMetadata): Record<string, ThemeCategory> {
-  if (!discoveredThemesCache) {
-    discoveredThemesCache = JSON.parse(JSON.stringify(baseThemeCategories))
+export function createThemeRegistry(source: ThemeSource = getBaseThemeCategories): ThemeRegistry {
+  let cache: Record<string, ThemeCategory> | null = null
+
+  async function getThemeCategories(): Promise<Record<string, ThemeCategory>> {
+    if (!cache) cache = await source()
+    return cache
   }
-  
-  // TypeScript now knows discoveredThemesCache is not null after the check above
-  const cache: Record<string, ThemeCategory> = discoveredThemesCache!
-  
-  // Create category if it doesn't exist (for completely new categories)
-  if (!cache[category]) {
-    // Determine order based on category
-    let order = 99 // Default for new categories
-    if (THEME_CATEGORY_ORDER.includes(category as any)) {
-      const index = THEME_CATEGORY_ORDER.indexOf(category as any)
-      order = (index + 1) * 10 // Use order from THEME_CATEGORY_ORDER
+
+  async function registerTheme(category: string, themeId: string, metadata: ThemeMetadata): Promise<Record<string, ThemeCategory>> {
+    // Async so it always seeds from the real `source` (base categories, or a
+    // custom one) before adding to it — never silently falls back to the base
+    // set just because nothing had resolved the cache yet.
+    const current = await getThemeCategories()
+
+    if (!current[category]) {
+      let order = 99 // Default for new categories
+      const index = (THEME_CATEGORY_ORDER as readonly string[]).indexOf(category)
+      if (index !== -1) order = (index + 1) * 10
+
+      current[category] = {
+        name: category.charAt(0).toUpperCase() + category.slice(1),
+        order,
+        themes: {}
+      }
     }
-    
-    cache[category] = {
-      name: category.charAt(0).toUpperCase() + category.slice(1),
-      order,
-      themes: {}
+
+    current[category].themes[themeId] = {
+      name: metadata.name,
+      file: metadata.file,
+      icon: metadata.icon || '🎨',
+      description: metadata.description || ''
+    }
+
+    return current
+  }
+
+  async function registerThemeFromFile(
+    category: string,
+    themeId: string,
+    filePath?: string
+  ): Promise<{ success: boolean; themeId: string; category: string }> {
+    const tokensBase = typeof window !== 'undefined' && (window as any).__THEME_TOKENS_BASE__
+      ? (window as any).__THEME_TOKENS_BASE__
+      : '/tokens'
+
+    const path = filePath || `${tokensBase}/themes/${category}/${themeId}.json`
+
+    try {
+      const response = await fetch(path)
+      if (!response.ok) {
+        throw new Error(`Failed to load theme file: ${response.statusText}`)
+      }
+
+      const themeData = await response.json()
+
+      await registerTheme(category, themeId, {
+        name: themeData.name || themeId.charAt(0).toUpperCase() + themeId.slice(1),
+        file: filePath || `${category}/${themeId}.json`,
+        icon: themeData.icon || '🎨',
+        description: themeData.description || `Custom ${category} theme: ${themeId}`
+      })
+
+      return { success: true, themeId, category }
+    } catch (error) {
+      if (typeof window !== 'undefined' && (window as any).__DESIGN_SYSTEM_DEBUG__) {
+        console.error(`Failed to register theme from ${path}:`, error)
+      }
+      throw error
     }
   }
-  
-  // Register the theme
-  cache[category].themes[themeId] = {
-    name: metadata.name,
-    file: metadata.file,
-    icon: metadata.icon || '🎨',
-    description: metadata.description || ''
+
+  function getThemeFilePath(category: string, themeId: string): string | null {
+    const categories = cache || baseThemeCategories
+    const theme = categories[category]?.themes[themeId]
+    if (!theme) return null
+    return `/tokens/themes/${theme.file}`
   }
-  
-  return cache
+
+  async function getThemesForCategory(category: string): Promise<Record<string, ThemeMetadata>> {
+    const categories = await getThemeCategories()
+    return categories[category]?.themes || {}
+  }
+
+  async function getTheme(category: string, themeId: string): Promise<ThemeMetadata | null> {
+    const categories = await getThemeCategories()
+    return categories[category]?.themes[themeId] || null
+  }
+
+  return { getThemeCategories, registerTheme, registerThemeFromFile, getThemeFilePath, getThemesForCategory, getTheme }
 }
 
-/**
- * Register a theme from a token file
- * Helper function that loads the theme file and registers it automatically
- * 
- * Example:
- * ```ts
- * import { registerThemeFromFile } from 'shru-design-system'
- * 
- * // After creating public/tokens/themes/color/ocean.json
- * await registerThemeFromFile('color', 'ocean')
- * ```
- */
-export async function registerThemeFromFile(
-  category: string, 
-  themeId: string, 
-  filePath?: string
-): Promise<{ success: boolean; themeId: string; category: string }> {
-  const tokensBase = typeof window !== 'undefined' && (window as any).__THEME_TOKENS_BASE__ 
-    ? (window as any).__THEME_TOKENS_BASE__ 
-    : '/tokens'
-  
-  const path = filePath || `${tokensBase}/themes/${category}/${themeId}.json`
-  
-  try {
-    const response = await fetch(path)
-    if (!response.ok) {
-      throw new Error(`Failed to load theme file: ${response.statusText}`)
-    }
-    
-    const themeData = await response.json()
-    
-    registerTheme(category, themeId, {
-      name: themeData.name || themeId.charAt(0).toUpperCase() + themeId.slice(1),
-      file: filePath || `${category}/${themeId}.json`,
-      icon: themeData.icon || '🎨',
-      description: themeData.description || `Custom ${category} theme: ${themeId}`
-    })
-    
-    return { success: true, themeId, category }
-  } catch (error) {
-    if (typeof window !== 'undefined' && (window as any).__DESIGN_SYSTEM_DEBUG__) {
-      console.error(`Failed to register theme from ${path}:`, error)
-    }
-    throw error
-  }
-}
-
-/**
- * Get merged theme categories (base + discovered)
- */
-export async function getThemeCategories(): Promise<Record<string, ThemeCategory>> {
-  return await discoverThemes()
-}
+// Default shared registry — used by useTheme()/useThemeToggle() and the
+// top-level exports below. Fine for a single-tenant app; see createThemeRegistry
+// for when a dedicated, isolated instance is needed instead. Exported so a
+// consumer can build a custom registry (see createThemeRegistry) and pass it
+// into useTheme()/useThemeToggle()/ThemeToggle as an alternative to this one.
+export const defaultRegistry = createThemeRegistry()
 
 // For backward compatibility, export baseThemeCategories as themeCategories
 export const themeCategories = baseThemeCategories
 
-/**
- * Get theme file path
- */
-export function getThemeFilePath(category: string, themeId: string): string | null {
-  const categories: Record<string, ThemeCategory> = discoveredThemesCache || baseThemeCategories
-  const theme = categories[category]?.themes[themeId]
-  if (!theme) return null
-  return `/tokens/themes/${theme.file}`
-}
-
-/**
- * Get all themes for a category
- */
-export async function getThemesForCategory(category: string): Promise<Record<string, ThemeMetadata>> {
-  const categories = await getThemeCategories()
-  return categories[category]?.themes || {}
-}
-
-/**
- * Get theme by ID
- */
-export async function getTheme(category: string, themeId: string): Promise<ThemeMetadata | null> {
-  const categories = await getThemeCategories()
-  return categories[category]?.themes[themeId] || null
-}
+export const getThemeCategories = defaultRegistry.getThemeCategories
+export const registerTheme = defaultRegistry.registerTheme
+export const registerThemeFromFile = defaultRegistry.registerThemeFromFile
+export const getThemeFilePath = defaultRegistry.getThemeFilePath
+export const getThemesForCategory = defaultRegistry.getThemesForCategory
+export const getTheme = defaultRegistry.getTheme
 

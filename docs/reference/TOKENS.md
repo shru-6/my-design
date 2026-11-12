@@ -86,7 +86,7 @@ Color themes define **success**, **warning**, **info**, **destructive** separate
 ## Registration & embed
 
 1. Add JSON under `scripts/tokens/themes/{category}/`
-2. Register in `src/themes/themeConfig.ts` and `scripts/themeConfig.js`
+2. Register in `src/themes/themeConfig.ts`
 3. Add to `EMBEDDED_TOKENS` in `src/themes/tokenLoader.ts` for bundle embed
 4. `npm run build`
 
@@ -118,7 +118,6 @@ Density themes set control heights. `fieldPieces.tsx` reads `--control-height-*`
 [ ] scripts/tokens/themes/color/your-theme.json
 [ ] palettes.json (if new palette refs)
 [ ] src/themes/themeConfig.ts
-[ ] scripts/themeConfig.js
 [ ] src/themes/tokenLoader.ts EMBEDDED_TOKENS
 [ ] node scripts/copy-tokens.js && npm run build
 [ ] Verify in gallery: Alert tones, Button variants, Pill semantic colors

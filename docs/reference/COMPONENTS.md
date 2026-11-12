@@ -60,13 +60,13 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
 - ✓ TextInput
   - Props: `type? enum: text|password|number|email|url|search`, `value?`, `defaultValue?`, `onChange?`, `placeholder?`, `disabled?`, `readOnly?`, `required?`, `left?`, `right?`, `rightInteractive?` (use when `right` is a button; adornments are otherwise non-interactive), `label?`, `errorMessage?`, `maxLength?`, `minLength?`, `autoFocus?`, `autoComplete?`, `validate?`, `onValidate?`
   - StyleProps: `size? enum: sm|md|lg`, `variant? enum: outline|filled|ghost|underline`, `className?`
-  - SlotProps: `inputProps?`, `labelProps?`, `helperTextProps?`
+  - SlotProps: none — remaining props spread onto the `<input>`
   - Sub-components: Label, HelperText, Icon
 
 - ✓ Textarea
   - Props: `value?`, `defaultValue?`, `onChange?`, `placeholder?`, `disabled?`, `readOnly?`, `required?`, `rows?`, `maxLength?`, `minLength?`, `autoFocus?`, `resize? enum: none|vertical|horizontal|both`, `label?`, `errorMessage?`, `validate?`, `onValidate?`
   - StyleProps: `size? enum: sm|md|lg`, `variant? enum: outline|filled|ghost|underline`, `className?`
-  - SlotProps: `textareaProps?`, `labelProps?`, `helperTextProps?`
+  - SlotProps: none — remaining props spread onto the `<textarea>`
   - Sub-components: Label, HelperText
 
 - ✓ InputOTP
@@ -90,9 +90,9 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Sub-components: InputGroupInput, InputGroupButton, InputGroupAddon
 
 - ✓ Command (Combobox / Command Palette)
-  - Props: `items? CommandItem[]`, `value?`, `defaultValue?`, `onValueChange?`, `inputValue?`, `defaultInputValue?`, `onInputValueChange?`, `onSelect?`, `placeholder?`, `emptyState?`, `loading?`, `disabled?`, `loop?`, `debounceMs?`, `filterFn?`, `children?`
+  - Props: `items? CommandItem[]`, `value?`, `defaultValue?`, `onChange?`, `inputValue?`, `defaultInputValue?`, `onInputValueChange?`, `onSelect?`, `placeholder?`, `emptyState?`, `loading?`, `disabled?`, `loop?`, `debounceMs?`, `filterFn?`, `children?`
   - StyleProps: `maxHeight?`, `className?`
-  - SlotProps: `searchInputProps?`, `dropdownProps?`
+  - SlotProps: `searchInputProps?`
   - `CommandItem: { label, value, left?, group?, disabled?, keywords? }`
   - Note: Fuzzy-matching searchable list. Use for autocomplete, command palette, and search-with-results scenarios.
   - Sub-components: TextInput, Dropdown
@@ -124,11 +124,13 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Sub-components: Text, HelperText
 
 - ✓ Select
-  - Props: `items SelectItem[]`, `value?`, `defaultValue?`, `onChange?`, `multiple?`, `placeholder?`, `searchable?`, `searchPlaceholder?`, `onSearchChange?`, `emptyState?`, `clearable?`, `label?`, `errorMessage?`, `disabled?`, `loading?`, `closeOnSelect?`, `children?`
-  - StyleProps: `size? enum: sm|md|lg`, `variant? enum: outline|filled|ghost`, `className?`
-  - SlotProps: `inputProps?`, `dropdownProps?`, `searchInputProps?`, `listProps?`
-  - `SelectItem: { label, value, disabled?, group?, left? }`
-  - Sub-components: TextInput, Dropdown
+  - Props: `items SelectOption[]`, `value?`, `defaultValue?`, `onValueChange?`, `onChange?`, `left?`, `placeholder?`, `label?`, `errorMessage?`, `required?`, `disabled?`, plus the native `<select>` attributes
+  - StyleProps: `size? enum: sm|md|lg`, `variant? enum: outline|filled|ghost|underline`, `className?`
+  - `SelectOption: { label, value, disabled?, group? (renders an <optgroup>), left? (replaces the field-level left adornment while selected) }`
+  - `onValueChange(value: string)` is the value-typed handler; `onChange(event)` is the native `<select>` event. Both fire, native first.
+  - `contentClassName` is accepted and ignored (no separate popover) — deprecated.
+  - Note: This is a **native `<select>`**, not a popover combobox — no `multiple`, `searchable`, `clearable`, `emptyState`, or slot props. For a searchable/rich picker use `Command`.
+  - Sub-components: none (native select + Icon adornment)
 
 - ✓ Slider
   - Props: `value?`, `defaultValue?`, `onChange?`, `min?`, `max?`, `step?`, `range?`, `disabled?`, `orientation? enum: horizontal|vertical`, `showValue?`, `valueFormatter?`, `marks? Mark[]`, `label?`, `errorMessage?`
@@ -192,9 +194,9 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Sub-components: Label, HelperText (via `ControlErrorMessage`)
 
 - ✓ FormField — wraps any input with label, error, and layout context
-  - Props: `name`, `type?`, `label?`, `placeholder?`, `required?`, `disabled?`, `value?`, `defaultValue?`, `onChange?`, `validate?`, `errorMessage?`, `touched?`, `showError?`, `render?`, `children?`
+  - Props: `name`, `type?`, `label?`, `placeholder?`, `required?`, `disabled?`, `value?`, `defaultValue?`, `onChange?`, `validate?`, `errorMessage?`, `touched?`, `showError?`, `render?`, `children?`; per-type extras — `items?` (select), `rows?` (textarea), `accept? dragAndDrop? multiple? maxSize? maxFiles? loading? onUpload?` (upload)
   - StyleProps: `className?`
-  - SlotProps: `inputProps?`, `labelProps?`, `helperTextProps?`
+  - SlotProps: `inputProps?` — text-like types and `textarea` only; ignored for `select` / `checkbox` / `upload`
   - Sub-components: Label, HelperText, any input component
 
 - ✓ Form — provides form state, validation context, and layout
@@ -237,41 +239,42 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
 ### 3️⃣ Navigation
 
 - ✓ Sidebar
-  - Props: `items SidebarItem[]`, `value?`, `defaultValue?`, `onChange?`, `side? enum: left|right`, `collapsible?`, `defaultCollapsed?`, `onCollapsedChange?`, `collapsed?`, `container? enum: screen|parent`, `heightMode? enum: viewport|parent|content`, `header?`, `footer?`, `children?`
+  - Props: `items SidebarItem[]`, `value?`, `defaultValue?`, `onChange?`, `side? enum: left|right`, `collapsible?`, `defaultCollapsed?`, `onCollapsedChange?`, `collapsed?`, `container? enum: screen|parent`, `heightMode? enum: viewport|parent|content`, `header?`, `footer?`, `onNavigate?`, `children?`
   - StyleProps: `variant? enum: default|floating|inset`, `width?`, `collapsedWidth?`, `className?`
   - SlotProps: `toggleButtonProps?`, `itemProps?`
   - `SidebarItem: { label, href?, left?, badge?, disabled?, children?: SidebarItem[] }`
   - Sub-components: Button, Text, Separator, Collapsible
 
 - ✓ Navbar
-  - Props: `logo?`, `items NavItem[]`, `left?`, `right?`, `sticky?`, `separator?`, `children?`
+  - Props: `logo?`, `items NavItem[]`, `left?`, `right?`, `sticky?`, `separator?`, `onNavigate?`, `children?`
   - StyleProps: `variant? enum: default|bordered|floating`, `className?`
   - `NavItem: { label, href?, left?, active?, disabled?, children?: NavItem[] }`
   - Sub-components: Button, Text, Dropdown, Separator
 
 - ✓ NavigationMenu
-  - Props: `items NavMenuItem[]`, `value?`, `defaultValue?`, `onChange?`, `orientation? enum: horizontal|vertical`, `children?`
+  - Props: `items NavMenuItem[]`, `value?`, `defaultValue?`, `onChange?`, `orientation? enum: horizontal|vertical`, `onNavigate?`, `children?`
   - StyleProps: `className?`
   - `NavMenuItem: { label, href?, left?, description?, children?: NavMenuItem[] }`
+  - `onNavigate?: (href, item) => void` — Sidebar / Navbar / NavigationMenu all take it. Given one, the component hands navigation to your router instead of doing a full page load; omit it and the standalone behavior (`location.assign`, or the plain anchor) is unchanged.
   - Sub-components: Button, Text, Icon, Popover
 
 - ✓ Dropdown (Menu)
-  - Props: `items DropdownItem[]`, `triggerProps`, `open?`, `defaultOpen?`, `onOpenChange?`, `onItemSelect?`, `closeOnSelect?`, `closeOnOutsideClick?`, `emptyState?`, `loading?`, `disabled?`, `portal?`, `children?`
-  - StyleProps: `placement?`, `offset?`, `matchTriggerWidth?`, `className?`
-  - SlotProps: `searchInputProps?`, `listProps?`, `contentProps?`
+  - Props: `items DropdownItem[]`, `triggerProps?`, `trigger?`, `open?`, `defaultOpen?`, `onOpenChange?`
+  - StyleProps: `align? enum: start|center|end`, `sideOffset?`, `contentClassName?`, `className?`
   - `DropdownItem: { label, value?, onClick?, left?, disabled?, separator?, children?: DropdownItem[] }`
-  - `triggerProps: { label?, left?, variant?, className? }`
-  - Sub-components: List, Button
+  - `triggerProps: { label?, left?, variant?, size?, className? }` — ignored when `trigger` is supplied
+  - Selection is per-item via `DropdownItem.onClick`; there is no `onItemSelect`, `closeOnSelect`, `closeOnOutsideClick`, `emptyState`, `loading`, `disabled`, `portal`, or slot props. The menu always closes on outside click and always portals to `document.body`.
+  - Sub-components: Button, Icon
 
 - ✓ ContextMenu
   - Props: `items DropdownItem[]`, `open?`, `defaultOpen?`, `onOpenChange?`, `children?`
-  - StyleProps: `className?`
-  - Uses same `DropdownItem` shape as Dropdown. Triggered by right-click.
+  - StyleProps: `size? enum: sm|md`, `className?`, `contentClassName?`
+  - Uses same `DropdownItem` shape as Dropdown. Triggered by right-click; clamped into the viewport near screen edges, arrow-key navigable, and it composes any `onContextMenu` you pass rather than being replaced by it.
   - Sub-components: Dropdown
 
 - ✓ Menubar
   - Props: `menus MenubarMenu[]`, `value?`, `defaultValue?`, `onChange?`
-  - StyleProps: `className?`
+  - StyleProps: `variant? enum: default|ghost`, `className?`
   - `MenubarMenu: { label, items: DropdownItem[] }`
   - Sub-components: Button, Dropdown
 
@@ -448,18 +451,19 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
 ### 6️⃣ Overlays & Surfaces
 
 - ✓ Overlay (backdrop primitive)
-  - Props: `open?`, `onClose?`, `showCloseButton?`, `closeOnBackdropClick?`, `container?`, `children?`
-  - StyleProps: `blur?`, `className?`
+  - Props: `open?`, `onClose?`, `showCloseButton?`, `closeOnBackdropClick?`, `container?`, `dialog?`, `dialogRole? enum: dialog|alertdialog`, `dialogLabel?`, `closeOnEscape?`, `initialFocus?`, `children?`
+  - StyleProps: `blur?`, `className?`, `contentClassName?`
+  - Note: `dialog` marks the **content surface** (not the backdrop) as a dialog — role, `aria-modal`, focus moves in on open, Tab cycles inside, Escape closes, focus returns to the opener. Modal / Drawer / AlertDialog set it for you. A `container="parent"` overlay is not a viewport takeover, so it keeps the role but does not trap focus or swallow Escape.
 
 - ✓ Modal
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `onClose?`, `header?`, `footer?`, `showClose?`, `loading?`, `children?`
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `onClose?`, `header?`, `footer?`, `showClose?`, `loading?`, `ariaLabel?`, `initialFocus?`, `children?`
   - StyleProps: `size? enum: sm|md|lg|xl|full`, `align? enum: center|top`, `minHeight?`, `maxHeight?`, `className?`, `overlayClassName?`
   - SlotProps: `cardProps?`
   - Sub-components: Overlay, Card
   - Note: No built-in trigger — compose `Button` + controlled `open`, or use `TriggerModal`.
 
 - ✓ AlertDialog
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `title`, `description?`, `variant? enum: default|destructive|warning`, `confirmProps`, `cancelProps?`, `loading?`
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `title`, `description?`, `variant? enum: default|destructive|warning`, `confirmProps`, `cancelProps?`, `loading?`, `initialFocus?`
   - StyleProps: `className?`
   - `confirmProps: { label, onClick, loading? }`
   - `cancelProps: { label, onClick }`
@@ -467,13 +471,13 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
   - Sub-components: Overlay, Text, Button
 
 - ✓ Drawer
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `showClose?`, `header?`, `footer?`, `initialFocus?`, `children?`
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `showClose?`, `header?`, `footer?`, `ariaLabel?`, `initialFocus?`, `children?`
   - StyleProps: `placement? enum: top|bottom|left|right`, `size? enum: sm|md|lg|xl|full`, `variant? enum: default|sheet`, `className?`
   - Note: `variant="sheet"` replaces the separate Sheet component (bottom slide-up with rounded corners).
   - Sub-components: Overlay, Card, Button, Portal
 
 - ✓ Popover
-  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `triggerProps?`, `closeOnOutsideClick?`, `initialFocus?`, `children?`
+  - Props: `open?`, `defaultOpen?`, `onOpenChange?`, `triggerProps?`, `closeOnOutsideClick?`, `closeOnEscape?`, `children?`
   - StyleProps: `placement?`, `offset?`, `className?`
   - SlotProps: `cardProps?`
   - `triggerProps: { label?, left?, variant?, className? }`
@@ -561,25 +565,25 @@ When `container="parent"`, overlays use local stacking inside `OverlayPortalScop
 ### 9️⃣ Data Visualization
 
 - ✓ Chart
-  - Props: `type enum: bar|line|area|pie|donut|scatter`, `data`, `xKey?`, `yKey?`, `valueKey?`, `labelKey?`, `responsive?`, `legend?`, `tooltip?`, `grid?`, `config?`
+  - Props: `type enum: bar|line|area|pie|donut|scatter`, `data`, `xKey?`, `yKey?`, `valueKey?`, `labelKey?`, `legend?`, `grid?`, `horizontal?`, `area?`, `showPoints?`, `curve? enum: linear|monotone|step`, `innerRadius?`, `padAngle?`, `startAngle?`, `endAngle?`, `svgProps?`
   - StyleProps: `height?`, `width?`, `className?`
-  - Note: Base chart engine used internally by specialized chart components and available for direct advanced use.
+  - Note: Base chart engine used internally by specialized chart components and available for direct advanced use. Dispatches on `type`, so it accepts the union of every renderer's options; the specialized wrappers expose only their own subset.
   - Sub-components: SVG
 
 - ✓ BarChart
-  - Props: `data`, `xKey`, `yKey`, `stacked?`, `horizontal?`, `responsive?`, `legend?`, `tooltip?`, `grid?`
+  - Props: `data`, `xKey`, `yKey`, `horizontal?`, `legend?`, `grid?`, `svgProps?`
   - StyleProps: `height?`, `width?`, `className?`
-  - Note: Specialized chart component for bar/column visuals. Uses `Chart` internally.
+  - Note: Specialized chart component for bar/column visuals. Uses `Chart` internally. Single-series only — there is no `stacked`.
   - Sub-components: Chart
 
 - ✓ LineChart
-  - Props: `data`, `xKey`, `yKey`, `curve? enum: linear|monotone|step`, `showPoints?`, `area?`, `responsive?`, `legend?`, `tooltip?`, `grid?`
+  - Props: `data`, `xKey`, `yKey`, `curve? enum: linear|monotone|step`, `showPoints?`, `area?`, `legend?`, `grid?`, `svgProps?`
   - StyleProps: `height?`, `width?`, `className?`
   - Note: Specialized chart component for line/time-series visuals. Uses `Chart` internally.
   - Sub-components: Chart
 
 - ✓ PieChart
-  - Props: `data`, `valueKey`, `labelKey?`, `innerRadius?`, `padAngle?`, `startAngle?`, `endAngle?`, `responsive?`, `legend?`, `tooltip?`
+  - Props: `data`, `valueKey`, `labelKey?`, `innerRadius?`, `padAngle?`, `startAngle?`, `endAngle?`, `legend?`, `svgProps?`
   - StyleProps: `height?`, `width?`, `className?`
   - Note: Specialized chart component for pie/donut visuals. Uses `Chart` internally.
   - Sub-components: Chart

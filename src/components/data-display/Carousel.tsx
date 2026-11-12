@@ -1,7 +1,7 @@
 import * as React from "react"
 import { ChevronLeft, ChevronRight } from "lucide-react"
 import { cn } from "../../utils"
-import { Button } from "../actions/Button"
+import { IconButton } from "../actions/IconButton"
 import { Image } from "./Image"
 import { Text } from "./Text"
 
@@ -22,17 +22,20 @@ export interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string
 }
 
-export function Carousel({
-  items = [],
-  autoPlay = false,
-  loop = true,
-  interval = 4000,
-  showIndicators = true,
-  showArrows = true,
-  orientation = "horizontal",
-  className,
-  ...rest
-}: CarouselProps) {
+export const Carousel = React.forwardRef<HTMLDivElement, CarouselProps>(function Carousel(
+  {
+    items = [],
+    autoPlay = false,
+    loop = true,
+    interval = 4000,
+    showIndicators = true,
+    showArrows = true,
+    orientation = "horizontal",
+    className,
+    ...props
+  },
+  ref
+) {
   const [index, setIndex] = React.useState(0)
   const count = items.length
 
@@ -57,12 +60,13 @@ export function Carousel({
 
   return (
     <div
+      ref={ref}
       className={cn(
-        "relative overflow-hidden rounded-xl border border-border bg-card",
+        "relative overflow-hidden rounded-surface-lg border border-border bg-card",
         orientation === "vertical" ? "h-72" : "w-full",
         className
       )}
-      {...rest}
+      {...props}
     >
       <div className={cn(orientation === "vertical" ? "h-full" : "w-full")}>
         <Image src={item.image} alt={item.imageAlt ?? ""} className="h-48 w-full md:h-56" fit="cover" variant="square" />
@@ -71,36 +75,31 @@ export function Carousel({
 
       {showArrows && count > 1 ? (
         <>
-          <Button
-            variant="ghost"
-            size="sm"
-            iconOnly
-            aria-label="Previous slide"
-            className="absolute left-2 top-1/2 z-10 -translate-y-1/2 bg-background/80"
-            left={<ChevronLeft className="h-4 w-4" />}
+          {/* z-sticky: in-page chrome floating over the slide, below any menu/overlay. */}
+          <IconButton
+            ariaLabel="Previous slide"
+            className="absolute left-2 top-1/2 z-sticky -translate-y-1/2 bg-background/80"
+            icon={<ChevronLeft className="h-4 w-4" />}
             onClick={() => go(index - 1)}
           />
-          <Button
-            variant="ghost"
-            size="sm"
-            iconOnly
-            aria-label="Next slide"
-            className="absolute right-2 top-1/2 z-10 -translate-y-1/2 bg-background/80"
-            left={<ChevronRight className="h-4 w-4" />}
+          <IconButton
+            ariaLabel="Next slide"
+            className="absolute right-2 top-1/2 z-sticky -translate-y-1/2 bg-background/80"
+            icon={<ChevronRight className="h-4 w-4" />}
             onClick={() => go(index + 1)}
           />
         </>
       ) : null}
 
       {showIndicators && count > 1 ? (
-        <div className="absolute bottom-3 left-1/2 z-10 flex -translate-x-1/2 gap-1.5">
+        <div className="absolute bottom-3 left-1/2 z-sticky flex -translate-x-1/2 gap-1.5">
           {items.map((_, i) => (
             <button
               key={i}
               type="button"
               aria-label={`Go to slide ${i + 1}`}
               className={cn(
-                "h-2 w-2 rounded-full transition-colors",
+                "h-2 w-2 rounded-pill transition-colors",
                 i === index ? "bg-primary" : "bg-muted-foreground/40"
               )}
               onClick={() => setIndex(i)}
@@ -114,6 +113,6 @@ export function Carousel({
       </Text>
     </div>
   )
-}
+})
 
 Carousel.displayName = "Carousel"

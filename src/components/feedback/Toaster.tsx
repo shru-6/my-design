@@ -34,13 +34,56 @@ export function Toaster({ position = "bottom-right", maxVisible = 5, className }
 
   const visible = items.slice(-maxVisible)
 
+  /**
+   * Dismiss timers, keyed by toast id and owned across renders.
+   *
+   * The previous version built a fresh timer array inside an effect that
+   * depended on `visible` — a newly sliced array on every render — so pushing
+   * one new toast tore down and restarted the countdown of every toast already
+   * on screen. A toast could sit there indefinitely as long as new ones kept
+   * arriving. Timers are now created once per toast and only cleared when that
+   * toast actually leaves the queue.
+   */
+  const timers = React.useRef(new Map<string, number>())
+  const visibleRef = React.useRef(visible)
+  visibleRef.current = visible
+
+  // Keyed on membership, not array identity — a re-render that produces the
+  // same ids in the same order is a no-op.
+  const visibleKey = visible.map((item) => item.id).join("|")
+
   React.useEffect(() => {
-    const timers = visible.map((item) => {
-      if (!item.duration || item.duration <= 0) return null
-      return window.setTimeout(() => dismissToast(item.id), item.duration)
-    })
-    return () => timers.forEach((t) => t != null && clearTimeout(t))
-  }, [visible])
+    const current = visibleRef.current
+    const liveIds = new Set(current.map((item) => item.id))
+
+    for (const [id, handle] of timers.current) {
+      if (!liveIds.has(id)) {
+        clearTimeout(handle)
+        timers.current.delete(id)
+      }
+    }
+
+    for (const item of current) {
+      if (!item.duration || item.duration <= 0) continue
+      if (timers.current.has(item.id)) continue
+      timers.current.set(
+        item.id,
+        window.setTimeout(() => {
+          timers.current.delete(item.id)
+          dismissToast(item.id)
+        }, item.duration)
+      )
+    }
+  }, [visibleKey])
+
+  // Unmount only — the per-toast cleanup above handles everything else.
+  React.useEffect(() => {
+    const handles = timers.current
+    return () => {
+      handles.forEach((handle) => clearTimeout(handle))
+      handles.clear()
+    }
+  }, [])
 
   if (typeof document === "undefined") return null
 

@@ -8,7 +8,7 @@
 const fs = require("fs")
 const path = require("path")
 
-const root = path.join(__dirname, "..")
+const root = path.join(__dirname, "..", "..")
 const indexPath = path.join(root, "src", "index.ts")
 const specPath = path.join(root, "docs", "reference", "COMPONENTS.md")
 const propSchemasPath = path.join(root, "test", "src", "utils", "metadata", "propSchemas.ts")

@@ -3,6 +3,8 @@ import { createPortal } from "react-dom"
 import { Clock, X } from "lucide-react"
 import { type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
+import { IconButton } from "../actions/IconButton"
 import { useFloatingMenu } from "../overlays/useFloatingMenu"
 import { FloatingMenuItem, floatingMenuListClass } from "../overlays/floatingMenu"
 import { fieldSurfaceVariants } from "./fieldPieces"
@@ -43,110 +45,114 @@ function buildTimeOptions(format: "12h" | "24h", step: number): string[] {
   return options
 }
 
-export function TimePicker({
-  value,
-  defaultValue,
-  onChange,
-  disabled,
-  required,
-  placeholder = "Pick a time",
-  label,
-  errorMessage,
-  format = "24h",
-  step = 30,
-  closeOnSelect = true,
-  clearable = true,
-  size = "md",
-  variant = "outline",
-  inputProps,
-  className,
-  ...rest
-}: TimePickerProps) {
-  const [internal, setInternal] = React.useState<Date | null>(defaultValue ?? null)
-  const [open, setOpen] = React.useState(false)
-  const [inputText, setInputText] = React.useState("")
-  const triggerRef = React.useRef<HTMLDivElement>(null)
-  const menuRef = React.useRef<HTMLDivElement>(null)
+export const TimePicker = React.forwardRef<HTMLDivElement, TimePickerProps>(
+  (
+    {
+      value,
+      defaultValue,
+      onChange,
+      disabled,
+      required,
+      placeholder = "Pick a time",
+      label,
+      errorMessage,
+      format = "24h",
+      step = 30,
+      closeOnSelect = true,
+      clearable = true,
+      size = "md",
+      variant = "outline",
+      inputProps,
+      className,
+      ...rest
+    },
+    ref
+  ) => {
+    const [open, setOpen] = React.useState(false)
+    const [inputText, setInputText] = React.useState("")
+    const triggerRef = React.useRef<HTMLDivElement>(null)
+    const menuRef = React.useRef<HTMLDivElement>(null)
 
-  const isControlled = value !== undefined
-  const selected = isControlled ? value ?? null : internal
-  const options = React.useMemo(() => buildTimeOptions(format, step), [format, step])
+    const [selected, setSelectedValue] = useControllableValue<Date | null>({
+      value,
+      defaultValue: defaultValue ?? null,
+      onChange,
+    })
+    const options = React.useMemo(() => buildTimeOptions(format, step), [format, step])
 
-  const { menuStyle } = useFloatingMenu({
-    open,
-    onOpenChange: setOpen,
-    triggerRef,
-    menuRef,
-    maxHeight: 224,
-  })
+    const { menuStyle } = useFloatingMenu({
+      open,
+      onOpenChange: setOpen,
+      triggerRef,
+      menuRef,
+      maxHeight: 224,
+    })
 
-  const setSelected = (next: Date | null) => {
-    if (!isControlled) setInternal(next)
-    onChange?.(next)
-    setInputText(next ? formatTime(next, format) : "")
-    if (closeOnSelect) setOpen(false)
-  }
+    const setSelected = (next: Date | null) => {
+      setSelectedValue(next)
+      setInputText(next ? formatTime(next, format) : "")
+      if (closeOnSelect) setOpen(false)
+    }
 
-  React.useEffect(() => {
-    setInputText(selected ? formatTime(selected, format) : "")
-  }, [selected, format])
+    React.useEffect(() => {
+      setInputText(selected ? formatTime(selected, format) : "")
+    }, [selected, format])
 
-  const menu = open ? (
-    <div ref={menuRef} role="listbox" style={menuStyle} className={floatingMenuListClass}>
-      {options.map((option) => (
-        <FloatingMenuItem
-          key={option}
-          role="option"
-          selected={inputText === option}
-          onClick={() => setSelected(parseTimeInput(option, format))}
-        >
-          {option}
-        </FloatingMenuItem>
-      ))}
-    </div>
-  ) : null
-
-  return (
-    <div className={cn("relative w-full", className)} {...rest}>
-      <div ref={triggerRef}>
-        <TextInput
-          label={label}
-          required={required}
-          errorMessage={errorMessage}
-          size={size}
-          variant={variant}
-          disabled={disabled}
-          placeholder={placeholder}
-          value={inputText}
-          left={<Clock className="h-4 w-4" strokeWidth={2} />}
-          right={
-            clearable && selected && !disabled ? (
-              <button
-                type="button"
-                tabIndex={-1}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-                aria-label="Clear time"
-                onClick={() => setSelected(null)}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            ) : undefined
-          }
-          rightInteractive={clearable && Boolean(selected)}
-          onFocus={() => !disabled && setOpen(true)}
-          onChange={(e) => {
-            const nextText = e.target.value
-            setInputText(nextText)
-            const parsed = parseTimeInput(nextText, format)
-            if (parsed) setSelected(parsed)
-            if (!nextText) setSelected(null)
-          }}
-          {...inputProps}
-        />
+    const menu = open ? (
+      <div ref={menuRef} role="listbox" style={menuStyle} className={floatingMenuListClass}>
+        {options.map((option) => (
+          <FloatingMenuItem
+            key={option}
+            role="option"
+            selected={inputText === option}
+            onClick={() => setSelected(parseTimeInput(option, format))}
+          >
+            {option}
+          </FloatingMenuItem>
+        ))}
       </div>
-      {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
-    </div>
-  )
-}
+    ) : null
+
+    return (
+      <div ref={ref} className={cn("relative w-full", className)} {...rest}>
+        <div ref={triggerRef}>
+          <TextInput
+            label={label}
+            required={required}
+            errorMessage={errorMessage}
+            size={size}
+            variant={variant}
+            disabled={disabled}
+            placeholder={placeholder}
+            value={inputText}
+            left={<Clock className="h-4 w-4" strokeWidth={2} />}
+            right={
+              clearable && selected && !disabled ? (
+                <IconButton
+                  tabIndex={-1}
+                  tone="muted"
+                  icon={<X />}
+                  ariaLabel="Clear time"
+                  onClick={() => setSelected(null)}
+                />
+              ) : undefined
+            }
+            rightInteractive={clearable && Boolean(selected)}
+            onFocus={() => !disabled && setOpen(true)}
+            onChange={(e) => {
+              const nextText = e.target.value
+              setInputText(nextText)
+              const parsed = parseTimeInput(nextText, format)
+              if (parsed) setSelected(parsed)
+              if (!nextText) setSelected(null)
+            }}
+            {...inputProps}
+          />
+        </div>
+        {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
+      </div>
+    )
+  }
+)
 
 TimePicker.displayName = "TimePicker"

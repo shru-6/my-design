@@ -2,36 +2,82 @@ import * as React from "react"
 import { cn } from "../../utils"
 import {
   CHART_COLORS,
+  buildAreaPath,
+  buildLinePath,
   describeArc,
   maxOf,
   readKey,
   readNumber,
   sumOf,
   type ChartDatum,
+  type ChartPoint,
+  type LineCurve,
 } from "./chartUtils"
 
 export type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "scatter"
 
-export interface ChartProps extends React.SVGAttributes<SVGSVGElement> {
-  type: ChartType
+/**
+ * Everything every chart type shares. The root element is the wrapper `<div>`,
+ * so `...props` (and `className`) land there; anything meant for the `<svg>`
+ * goes through `svgProps` rather than falling through onto the element as an
+ * unknown DOM attribute.
+ */
+export interface ChartBaseProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
   data: ChartDatum[]
-  xKey?: string
-  yKey?: string
-  valueKey?: string
-  labelKey?: string
-  responsive?: boolean
-  legend?: boolean
-  tooltip?: boolean
+  /** Draw horizontal grid rules behind cartesian charts. Ignored by pie / donut. */
   grid?: boolean
-  config?: Record<string, { label?: string; color?: string }>
+  /** Render a swatch + label row under the plot. */
+  legend?: boolean
   height?: number | string
   width?: number | string
-  innerRadius?: number
+  className?: string
+  /** Pass-through to the underlying `<svg>` (e.g. a better `aria-label`). */
+  svgProps?: React.SVGAttributes<SVGSVGElement>
+}
+
+/** Keys for the charts plotted on an x / y pair. */
+export interface CartesianKeyProps {
+  xKey?: string
+  yKey?: string
+}
+
+export interface BarChartOptions {
+  /** Lay the bars out along the x axis instead of up the y axis. */
   horizontal?: boolean
-  stacked?: boolean
+}
+
+export interface LineChartOptions {
+  /** Fill the region under the line. Implied by `type="area"`. */
   area?: boolean
   showPoints?: boolean
-  className?: string
+  /** Interpolation between points. `monotone` smooths without overshooting. */
+  curve?: LineCurve
+}
+
+export interface PieChartOptions {
+  valueKey?: string
+  labelKey?: string
+  /** Radius of the hole, in viewBox units. Anything above 0 makes it a donut. */
+  innerRadius?: number
+  /** Gap between adjacent slices, in degrees. */
+  padAngle?: number
+  /** Sweep the slices between these two angles (degrees, 0 = 12 o'clock). */
+  startAngle?: number
+  endAngle?: number
+}
+
+/**
+ * The polymorphic entry point. `Chart` dispatches on `type`, so it accepts the
+ * union of every renderer's options; the type-specific wrappers (`BarChart`,
+ * `LineChart`, `PieChart`) expose only the subset that applies to them.
+ */
+export interface ChartProps
+  extends ChartBaseProps,
+    CartesianKeyProps,
+    BarChartOptions,
+    LineChartOptions,
+    PieChartOptions {
+  type: ChartType
 }
 
 const VIEW_W = 400
@@ -49,7 +95,15 @@ function GridLines() {
   )
 }
 
-function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }: ChartProps) {
+/* -------------------------------------------------------------------------
+ * Renderers. Each takes only the props it actually reads, and none of them
+ * extends an SVG attribute type or spreads a rest object — a renderer has no
+ * DOM surface of its own, so there is nothing to leak onto the elements.
+ * ---------------------------------------------------------------------- */
+
+type BarSvgProps = { data: ChartDatum[]; xKey: string; yKey: string; horizontal?: boolean }
+
+function BarChartSvg({ data, xKey, yKey, horizontal }: BarSvgProps) {
   const max = maxOf(data, yKey) || 1
   const innerW = VIEW_W - PAD * 2
   const innerH = VIEW_H - PAD * 2
@@ -69,7 +123,13 @@ function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }: Chart
           return (
             <g key={index}>
               <rect x={PAD} y={y} width={w} height={h} fill={color} rx={4} />
-              <text x={PAD - 6} y={y + h / 2} textAnchor="end" dominantBaseline="middle" className="fill-muted-foreground text-[10px]">
+              <text
+                x={PAD - 6}
+                y={y + h / 2}
+                textAnchor="end"
+                dominantBaseline="middle"
+                className="fill-muted-foreground text-[10px]"
+              >
                 {label}
               </text>
             </g>
@@ -81,7 +141,12 @@ function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }: Chart
         return (
           <g key={index}>
             <rect x={x} y={y} width={barSize} height={h} fill={color} rx={4} />
-            <text x={x + barSize / 2} y={VIEW_H - PAD + 14} textAnchor="middle" className="fill-muted-foreground text-[10px]">
+            <text
+              x={x + barSize / 2}
+              y={VIEW_H - PAD + 14}
+              textAnchor="middle"
+              className="fill-muted-foreground text-[10px]"
+            >
               {label}
             </text>
           </g>
@@ -91,22 +156,31 @@ function BarChartSvg({ data, xKey = "label", yKey = "value", horizontal }: Chart
   )
 }
 
-function LineChartSvg({ data, xKey = "label", yKey = "value", area, showPoints }: ChartProps) {
+type LineSvgProps = {
+  data: ChartDatum[]
+  xKey: string
+  yKey: string
+  area?: boolean
+  showPoints?: boolean
+  curve: LineCurve
+}
+
+function LineChartSvg({ data, xKey, yKey, area, showPoints, curve }: LineSvgProps) {
   const max = maxOf(data, yKey) || 1
   const innerW = VIEW_W - PAD * 2
   const innerH = VIEW_H - PAD * 2
-  const points = data.map((row, index) => {
+  const baseline = VIEW_H - PAD
+  const points: ChartPoint[] = data.map((row, index) => {
     const x = PAD + (index / Math.max(data.length - 1, 1)) * innerW
-    const y = VIEW_H - PAD - (readNumber(row, yKey) / max) * innerH
+    const y = baseline - (readNumber(row, yKey) / max) * innerH
     return { x, y }
   })
-  const polyline = points.map((p) => `${p.x},${p.y}`).join(" ")
-  const areaPath = `${points.map((p, i) => `${i === 0 ? "M" : "L"} ${p.x} ${p.y}`).join(" ")} L ${points[points.length - 1]?.x ?? PAD} ${VIEW_H - PAD} L ${points[0]?.x ?? PAD} ${VIEW_H - PAD} Z`
+  const linePath = buildLinePath(points, curve)
 
   return (
     <g>
-      <polyline fill="none" stroke="hsl(var(--primary))" strokeWidth="2" points={polyline} />
-      {area ? <path d={areaPath} fill="hsl(var(--primary))" opacity={0.15} /> : null}
+      {area ? <path d={buildAreaPath(points, baseline, curve)} fill="hsl(var(--primary))" opacity={0.15} /> : null}
+      <path d={linePath} fill="none" stroke="hsl(var(--primary))" strokeWidth="2" />
       {showPoints
         ? points.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={3} fill="hsl(var(--primary))" />)
         : null}
@@ -125,30 +199,40 @@ function LineChartSvg({ data, xKey = "label", yKey = "value", area, showPoints }
   )
 }
 
-function PieChartSvg({ data, valueKey = "value", labelKey = "label", innerRadius = 0 }: ChartProps) {
+type PieSvgProps = {
+  data: ChartDatum[]
+  valueKey: string
+  labelKey: string
+  innerRadius: number
+  padAngle: number
+  startAngle: number
+  endAngle: number
+}
+
+function PieChartSvg({ data, valueKey, labelKey, innerRadius, padAngle, startAngle, endAngle }: PieSvgProps) {
   const total = sumOf(data, valueKey) || 1
   const cx = VIEW_W / 2
   const cy = VIEW_H / 2
   const radius = Math.min(VIEW_W, VIEW_H) / 2 - 24
-  let cursor = 0
+  const sweep = endAngle - startAngle
+  let cursor = startAngle
 
   return (
     <g>
       {data.map((row, index) => {
         const value = readNumber(row, valueKey)
-        const angle = (value / total) * 360
+        const angle = (value / total) * sweep
         const start = cursor
         const end = cursor + angle
         cursor = end
+        // Halve the pad at each edge so the visible gap between two slices is
+        // `padAngle`, and never let it eat a slice smaller than the gap.
+        const inset = Math.min(padAngle / 2, Math.max(angle / 2 - 0.01, 0))
         const color = CHART_COLORS[index % CHART_COLORS.length]
-        const path = describeArc(cx, cy, radius, start, end)
-        return (
-          <g key={index}>
-            <path d={`${path} L ${cx} ${cy} Z`} fill={color} />
-            {innerRadius > 0 ? <circle cx={cx} cy={cy} r={innerRadius} fill="hsl(var(--background))" /> : null}
-          </g>
-        )
+        const path = describeArc(cx, cy, radius, start + inset, end - inset)
+        return <path key={index} d={`${path} L ${cx} ${cy} Z`} fill={color} />
       })}
+      {innerRadius > 0 ? <circle cx={cx} cy={cy} r={innerRadius} fill="hsl(var(--background))" /> : null}
       {data.map((row, index) => (
         <text key={`label-${index}`} x={PAD} y={PAD + index * 14} className="fill-foreground text-[10px]">
           {readKey(row, labelKey)} ({readNumber(row, valueKey)})
@@ -158,7 +242,9 @@ function PieChartSvg({ data, valueKey = "value", labelKey = "label", innerRadius
   )
 }
 
-function ScatterChartSvg({ data, xKey = "x", yKey = "y" }: ChartProps) {
+type ScatterSvgProps = { data: ChartDatum[]; xKey: string; yKey: string }
+
+function ScatterChartSvg({ data, xKey, yKey }: ScatterSvgProps) {
   const maxX = maxOf(data, xKey) || 1
   const maxY = maxOf(data, yKey) || 1
   const innerW = VIEW_W - PAD * 2
@@ -174,59 +260,97 @@ function ScatterChartSvg({ data, xKey = "x", yKey = "y" }: ChartProps) {
   )
 }
 
-export function Chart({
-  type,
-  data,
-  xKey,
-  yKey,
-  valueKey,
-  labelKey,
-  responsive = true,
-  legend = false,
-  grid = true,
-  height = 240,
-  width = "100%",
-  innerRadius,
-  horizontal,
-  area,
-  showPoints,
-  className,
-  ...props
-}: ChartProps) {
-  const chartProps: ChartProps = {
+export const Chart = React.forwardRef<HTMLDivElement, ChartProps>(function Chart(
+  {
     type,
     data,
     xKey,
     yKey,
-    valueKey,
-    labelKey,
+    valueKey = "value",
+    labelKey = "label",
+    legend = false,
+    grid = true,
+    height = 240,
+    width = "100%",
+    innerRadius,
+    padAngle = 0,
+    startAngle = 0,
+    endAngle = 360,
     horizontal,
-    area: type === "area" || area,
+    area,
     showPoints,
-    innerRadius: type === "donut" ? innerRadius ?? 40 : innerRadius,
-  }
+    curve = "linear",
+    className,
+    style,
+    svgProps,
+    ...props
+  },
+  ref
+) {
+  const isPie = type === "pie" || type === "donut"
+  // Scatter plots default to numeric x / y keys; the categorical charts read a
+  // label column. Resolved here so every renderer gets a concrete string.
+  const resolvedXKey = xKey ?? (type === "scatter" ? "x" : "label")
+  const resolvedYKey = yKey ?? (type === "scatter" ? "y" : "value")
 
   return (
-    <div className={cn("w-full", className)} style={{ width, height: typeof height === "number" ? `${height}px` : height }}>
-      <svg viewBox={`0 0 ${VIEW_W} ${VIEW_H}`} width="100%" height="100%" role="img" aria-label="Chart" {...props}>
-        {grid && type !== "pie" && type !== "donut" ? <GridLines /> : null}
-        {type === "bar" ? <BarChartSvg {...chartProps} /> : null}
-        {type === "line" || type === "area" ? <LineChartSvg {...chartProps} /> : null}
-        {type === "scatter" ? <ScatterChartSvg {...chartProps} /> : null}
-        {type === "pie" || type === "donut" ? <PieChartSvg {...chartProps} innerRadius={type === "donut" ? innerRadius ?? 40 : 0} /> : null}
+    <div
+      ref={ref}
+      data-slot="chart"
+      className={cn("w-full", className)}
+      style={{ ...style, width, height: typeof height === "number" ? `${height}px` : height }}
+      {...props}
+    >
+      <svg
+        viewBox={`0 0 ${VIEW_W} ${VIEW_H}`}
+        width="100%"
+        height="100%"
+        role="img"
+        aria-label="Chart"
+        {...svgProps}
+      >
+        {grid && !isPie ? <GridLines /> : null}
+        {type === "bar" ? (
+          <BarChartSvg data={data} xKey={resolvedXKey} yKey={resolvedYKey} horizontal={horizontal} />
+        ) : null}
+        {type === "line" || type === "area" ? (
+          <LineChartSvg
+            data={data}
+            xKey={resolvedXKey}
+            yKey={resolvedYKey}
+            area={type === "area" || area}
+            showPoints={showPoints}
+            curve={curve}
+          />
+        ) : null}
+        {type === "scatter" ? <ScatterChartSvg data={data} xKey={resolvedXKey} yKey={resolvedYKey} /> : null}
+        {isPie ? (
+          <PieChartSvg
+            data={data}
+            valueKey={valueKey}
+            labelKey={labelKey}
+            innerRadius={type === "donut" ? innerRadius ?? 40 : 0}
+            padAngle={padAngle}
+            startAngle={startAngle}
+            endAngle={endAngle}
+          />
+        ) : null}
       </svg>
       {legend ? (
         <div className="mt-2 flex flex-wrap gap-3">
           {data.map((row, index) => (
             <div key={index} className="inline-flex items-center gap-1.5 text-xs text-muted-foreground">
-              <span className="h-2 w-2 rounded-full" style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }} />
-              {readKey(row, labelKey ?? xKey ?? "label")}
+              <span
+                className="h-2 w-2 rounded-pill"
+                style={{ backgroundColor: CHART_COLORS[index % CHART_COLORS.length] }}
+              />
+              {readKey(row, isPie ? labelKey : resolvedXKey)}
             </div>
           ))}
         </div>
       ) : null}
     </div>
   )
-}
+})
 
 Chart.displayName = "Chart"

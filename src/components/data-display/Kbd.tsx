@@ -3,7 +3,8 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 
 const kbdVariants = cva(
-  "inline-flex items-center rounded border border-border bg-muted font-mono text-muted-foreground shadow-sm",
+  // A key cap is control-shaped, not a surface.
+  "inline-flex items-center rounded-control-sm border border-border bg-muted font-mono text-muted-foreground shadow-sm",
   {
     variants: {
       size: {

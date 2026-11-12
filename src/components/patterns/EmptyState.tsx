@@ -9,12 +9,12 @@ const emptyStateVariants = cva("mx-auto flex flex-col items-center justify-cente
   variants: {
     variant: {
       default:
-        "rounded-xl border border-border bg-card/40 px-6 py-8 shadow-sm ring-1 ring-border/60",
-      minimal: "rounded-md border-0 bg-transparent py-4 text-muted-foreground",
+        "rounded-surface-lg border border-border bg-card/40 px-6 py-8 shadow-sm ring-1 ring-border/60",
+      minimal: "rounded-surface-sm border-0 bg-transparent py-4 text-muted-foreground",
       spacious:
-        "max-w-2xl rounded-2xl border-2 border-dashed border-muted-foreground/30 bg-muted/20 px-10 py-16",
+        "max-w-2xl rounded-surface-lg border-2 border-dashed border-muted-foreground/30 bg-muted/20 px-10 py-16",
       error:
-        "rounded-xl border-2 border-destructive/45 bg-destructive/[0.07] px-6 py-8 text-destructive shadow-sm",
+        "rounded-surface-lg border-2 border-destructive/45 bg-destructive/[0.07] px-6 py-8 text-destructive shadow-sm",
     },
     size: {
       sm: "max-w-sm gap-2",

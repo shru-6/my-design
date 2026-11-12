@@ -1,11 +1,12 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { disabledControl, peerFocusRing, ringOffsetBackground } from "./fieldPieces"
 import { ControlErrorMessage, ControlLabelStack } from "./fieldPieces"
 
 const checkboxVariants = cva(
-  `inline-flex items-center justify-center rounded border border-border bg-background text-primary ${ringOffsetBackground} transition-colors ${disabledControl}`,
+  `inline-flex items-center justify-center rounded-control-sm border border-border bg-background text-primary ${ringOffsetBackground} transition-colors ${disabledControl}`,
   {
     variants: {
       size: {
@@ -50,10 +51,11 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
   ) => {
     const generatedId = React.useId()
     const checkboxId = id ?? generatedId
-    const isControlled = checked !== undefined && onChange != null
-    const resolvedDefault = Boolean(defaultState ?? checked)
-    const [internalChecked, setInternalChecked] = React.useState(resolvedDefault)
-    const resolvedChecked = isControlled ? Boolean(checked) : internalChecked
+    const [resolvedChecked, setChecked] = useControllableValue<boolean>({
+      value: checked === undefined ? undefined : Boolean(checked),
+      defaultValue: Boolean(defaultState),
+      onChange,
+    })
     const inputRef = React.useRef<HTMLInputElement | null>(null)
 
     React.useEffect(() => {
@@ -73,14 +75,8 @@ export const Checkbox = React.forwardRef<HTMLInputElement, CheckboxProps>(
               id={checkboxId}
               type="checkbox"
               className="peer sr-only"
-              checked={isControlled ? Boolean(checked) : undefined}
-              defaultChecked={isControlled ? undefined : resolvedDefault}
-              onChange={(event) => {
-                if (!isControlled) {
-                  setInternalChecked(event.target.checked)
-                }
-                onChange?.(event.target.checked)
-              }}
+              checked={resolvedChecked}
+              onChange={(event) => setChecked(event.target.checked)}
               {...props}
             />
             <span

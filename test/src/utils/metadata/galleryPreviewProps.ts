@@ -45,10 +45,7 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
     { name: "fallback", type: "string" }
   ),
 
-  BarChart: own(
-    { name: "stacked", type: "boolean", defaultValue: false },
-    { name: "horizontal", type: "boolean", defaultValue: false }
-  ),
+  BarChart: own({ name: "horizontal", type: "boolean", defaultValue: false }),
 
   Breadcrumb: own({ name: "maxItems", type: "number", defaultValue: 4 }),
 
@@ -241,7 +238,8 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
 
   LineChart: own(
     { name: "area", type: "boolean", defaultValue: false },
-    { name: "showPoints", type: "boolean", defaultValue: true }
+    { name: "showPoints", type: "boolean", defaultValue: true },
+    { name: "curve", type: "select", options: ["linear", "monotone", "step"], defaultValue: "linear" }
   ),
 
   List: own(
@@ -303,7 +301,10 @@ export const galleryPreviewProps: Record<string, PropDefinition[]> = {
     { name: "validate", type: "boolean", defaultValue: false }
   ),
 
-  PieChart: own({ name: "innerRadius", type: "number", defaultValue: 0 }),
+  PieChart: own(
+    { name: "innerRadius", type: "number", defaultValue: 0 },
+    { name: "padAngle", type: "number", defaultValue: 0 }
+  ),
 
   Pill: own(
     { name: "selected", type: "boolean", defaultValue: false },

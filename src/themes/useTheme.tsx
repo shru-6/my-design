@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react'
 import { generateAndApplyTheme, getDefaultThemes } from './themeUtils'
-import { getThemeCategories } from './themeConfig'
+import { defaultRegistry, type ThemeRegistry } from './themeConfig'
+import { STORAGE_KEY, THEME_SYNC_EVENT } from './constants'
 
 export type ThemeSelection = {
   color?: string
@@ -19,17 +20,6 @@ export type ThemeMetadata = {
   icon: string
   description: string
 }
-
-/**
- * LocalStorage key for storing theme selections
- * 
- * ⚠️ IF YOU UPDATE THIS, ALSO UPDATE:
- * 1. src/themes/applyThemeSync.ts - STORAGE_KEY constant
- * 2. scripts/apply-theme-sync.js - STORAGE_KEY constant (standalone script, can't import)
- * 3. scripts/applyThemeSync.js - STORAGE_KEY constant
- */
-const STORAGE_KEY = 'design-system-theme'
-const THEME_SYNC_EVENT = 'design-system-theme-sync'
 
 function readStoredThemes(): ThemeSelection | null {
   if (typeof window === 'undefined') return null
@@ -48,9 +38,12 @@ function broadcastThemeSync(themes: ThemeSelection) {
 }
 
 /**
- * Hook for managing design system theme switching
+ * Hook for managing design system theme switching.
+ * `registry` defaults to the shared singleton — pass a custom one (see
+ * createThemeRegistry) so this hook validates/applies against a
+ * consumer-defined theme set instead of just the base categories.
  */
-export function useTheme() {
+export function useTheme(registry: Pick<ThemeRegistry, 'getThemeCategories'> = defaultRegistry) {
   // Initialize with defaults (for SSR compatibility)
   const [selectedThemes, setSelectedThemes] = useState<ThemeSelection>(getDefaultThemes())
   const [isLoading, setIsLoading] = useState(false)
@@ -60,9 +53,9 @@ export function useTheme() {
   const applyTheme = useCallback(async (themes: ThemeSelection) => {
     setIsLoading(true)
     setError(null)
-    
+
     try {
-      await generateAndApplyTheme(themes)
+      await generateAndApplyTheme(themes, registry)
       
       // Save to localStorage
       if (typeof window !== 'undefined') {
@@ -78,7 +71,7 @@ export function useTheme() {
     } finally {
       setIsLoading(false)
     }
-  }, [])
+  }, [registry])
 
   // Load from localStorage on client mount (after hydration)
   useEffect(() => {
@@ -159,11 +152,11 @@ export function useTheme() {
     [selectedThemes, applyTheme]
   )
 
-  // Get available themes for a category (with dynamic discovery)
+  // Get available themes for a category (from whichever registry this hook was given)
   const getAvailableThemes = useCallback(async (category: string): Promise<Record<string, ThemeMetadata>> => {
-    const categories = await getThemeCategories()
+    const categories = await registry.getThemeCategories()
     return (categories[category]?.themes || {}) as Record<string, ThemeMetadata>
-  }, [])
+  }, [registry])
 
   return {
     selectedThemes,

@@ -2,18 +2,28 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { ChevronDown, PanelLeftClose, PanelLeftOpen } from "lucide-react"
 import { cn } from "../../utils"
-import { Button, type ButtonProps } from "../actions/Button"
+import { useControllableValue } from "../../utils/useControllableValue"
+import { type ButtonProps } from "../actions/Button"
+import { IconButton } from "../actions/IconButton"
 import { Link } from "../data-display/Link"
 import { Separator } from "../layout/Separator"
 import { Icon } from "../utilities/Icon"
+import { focusRing } from "../inputs/fieldPieces"
 import { useControllableOpen } from "../overlays/useControllableOpen"
+import {
+  firstEnabledValue,
+  handleNavLinkClick,
+  itemIdentity,
+  navigateToHref,
+  type NavigateHandler,
+} from "./shared"
 
-export const sidebarVariants = cva("flex flex-col border-border bg-background transition-[width] duration-200", {
+export const sidebarVariants = cva("flex flex-col border-border bg-background transition-[width] duration-normal", {
   variants: {
     variant: {
       default: "border-r",
-      floating: "m-2 rounded-xl border shadow-sm",
-      inset: "m-2 rounded-xl border bg-muted/30",
+      floating: "m-2 rounded-surface-lg border shadow-sm",
+      inset: "m-2 rounded-surface-lg border bg-muted/30",
     },
     side: {
       left: "",
@@ -56,6 +66,12 @@ export interface SidebarProps
   collapsedWidth?: string | number
   toggleButtonProps?: Partial<ButtonProps>
   itemProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
+  /**
+   * Called instead of a full page load when an item with an `href` is
+   * activated — wire a client router here. Omit and the Sidebar navigates on
+   * its own (`location.assign` for button rows, the plain anchor for link rows).
+   */
+  onNavigate?: NavigateHandler<SidebarItem>
   className?: string
 }
 
@@ -64,47 +80,37 @@ function toCssSize(value: string | number | undefined, fallback: string): string
   return typeof value === "number" ? `${value}px` : value
 }
 
-function itemValue(item: SidebarItem, index: number, prefix = ""): string {
-  return item.value ?? `${prefix}item-${index}`
-}
-
-function firstEnabledValue(items: SidebarItem[]): string | undefined {
-  for (let i = 0; i < items.length; i++) {
-    const item = items[i]
-    if (!item.disabled) return itemValue(item, i)
-    if (item.children?.length) {
-      const nested = firstEnabledValue(item.children)
-      if (nested) return nested
-    }
-  }
-  return undefined
-}
-
 function SidebarNavItem({
   item,
   index,
   depth,
+  pathPrefix,
   collapsed,
   activeValue,
   onSelect,
+  onNavigate,
   itemProps,
 }: {
   item: SidebarItem
   index: number
   depth: number
+  /** Full path from the root — the render `key` and the selection identity read from this same string. */
+  pathPrefix: string
   collapsed: boolean
   activeValue?: string
   onSelect: (value: string) => void
+  onNavigate?: NavigateHandler<SidebarItem>
   itemProps?: React.ButtonHTMLAttributes<HTMLButtonElement>
 }) {
-  const value = itemValue(item, index, depth > 0 ? `${depth}-` : "")
+  const value = itemIdentity(item, index, pathPrefix)
   const isActive = activeValue === value
   const hasChildren = Boolean(item.children?.length)
   const [nestedOpen, setNestedOpen] = React.useState(false)
 
   const rowClass = cn(
-    "flex w-full items-center gap-2 rounded-md px-2 py-2 text-sm font-medium transition-colors",
-    "hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+    "flex w-full items-center gap-2 rounded-control-md px-2 py-2 text-sm font-medium transition-colors",
+    "hover:bg-muted/80",
+    focusRing,
     isActive && "bg-muted text-foreground",
     !isActive && "text-muted-foreground hover:text-foreground",
     item.disabled && "pointer-events-none opacity-50",
@@ -138,7 +144,7 @@ function SidebarNavItem({
       return
     }
     onSelect(value)
-    if (item.href && typeof window !== "undefined") window.location.assign(item.href)
+    navigateToHref(item.href, item, onNavigate)
   }
 
   return (
@@ -148,7 +154,10 @@ function SidebarNavItem({
           href={item.href}
           className={rowClass}
           aria-current={isActive ? "page" : undefined}
-          onClick={() => onSelect(value)}
+          onClick={(e) => {
+            onSelect(value)
+            handleNavLinkClick(e, item.href, item, onNavigate)
+          }}
         >
           {content}
         </Link>
@@ -161,13 +170,15 @@ function SidebarNavItem({
         <div className="mt-0.5 space-y-0.5 border-l border-border pl-2">
           {item.children!.map((child, childIndex) => (
             <SidebarNavItem
-              key={itemValue(child, childIndex, `${value}-`)}
+              key={itemIdentity(child, childIndex, `${value}-`)}
               item={child}
               index={childIndex}
               depth={depth + 1}
+              pathPrefix={`${value}-`}
               collapsed={collapsed}
               activeValue={activeValue}
               onSelect={onSelect}
+              onNavigate={onNavigate}
               itemProps={itemProps}
             />
           ))}
@@ -177,33 +188,39 @@ function SidebarNavItem({
   )
 }
 
-export function Sidebar({
-  items = [],
-  value,
-  defaultValue,
-  onChange,
-  side = "left",
-  variant = "default",
-  collapsible = false,
-  defaultCollapsed = false,
-  collapsed: collapsedProp,
-  onCollapsedChange,
-  container = "parent",
-  heightMode = "parent",
-  header,
-  footer,
-  children,
-  width = "16rem",
-  collapsedWidth = "3.5rem",
-  toggleButtonProps,
-  itemProps,
-  className,
-  ...rest
-}: SidebarProps) {
+export const Sidebar = React.forwardRef<HTMLElement, SidebarProps>(function Sidebar(
+  {
+    items = [],
+    value,
+    defaultValue,
+    onChange,
+    side = "left",
+    variant = "default",
+    collapsible = false,
+    defaultCollapsed = false,
+    collapsed: collapsedProp,
+    onCollapsedChange,
+    container = "parent",
+    heightMode = "parent",
+    header,
+    footer,
+    children,
+    width = "16rem",
+    collapsedWidth = "3.5rem",
+    toggleButtonProps,
+    itemProps,
+    onNavigate,
+    className,
+    ...rest
+  },
+  ref
+) {
   const autoDefault = value === undefined && defaultValue === undefined ? firstEnabledValue(items) : undefined
-  const [internalValue, setInternalValue] = React.useState(defaultValue ?? autoDefault ?? "")
-  const isValueControlled = value !== undefined
-  const activeValue = isValueControlled ? value : internalValue
+  const [activeValue, handleSelect] = useControllableValue<string>({
+    value,
+    defaultValue: defaultValue ?? autoDefault ?? "",
+    onChange,
+  })
 
   const [collapsed, setCollapsed] = useControllableOpen({
     open: collapsedProp,
@@ -214,13 +231,9 @@ export function Sidebar({
   const isCollapsed = collapsible ? collapsed : false
   const resolvedWidth = isCollapsed ? toCssSize(collapsedWidth, "3.5rem") : toCssSize(width, "16rem")
 
-  const handleSelect = (next: string) => {
-    if (!isValueControlled) setInternalValue(next)
-    onChange?.(next)
-  }
-
   return (
     <aside
+      ref={ref}
       aria-label="Sidebar"
       style={{ width: resolvedWidth }}
       className={cn(
@@ -238,12 +251,9 @@ export function Sidebar({
         <div className={cn("flex items-center gap-2 p-3", isCollapsed && "justify-center")}>
           {!isCollapsed && header ? <div className="min-w-0 flex-1">{header}</div> : null}
           {collapsible ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              iconOnly
-              aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
-              left={isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
+            <IconButton
+              ariaLabel={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+              icon={isCollapsed ? <PanelLeftOpen className="h-4 w-4" /> : <PanelLeftClose className="h-4 w-4" />}
               onClick={() => setCollapsed(!isCollapsed)}
               {...toggleButtonProps}
             />
@@ -254,13 +264,15 @@ export function Sidebar({
       <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-2 py-1">
         {items.map((item, index) => (
           <SidebarNavItem
-            key={itemValue(item, index)}
+            key={itemIdentity(item, index)}
             item={item}
             index={index}
             depth={0}
+            pathPrefix=""
             collapsed={isCollapsed}
             activeValue={activeValue}
             onSelect={handleSelect}
+            onNavigate={onNavigate}
             itemProps={itemProps}
           />
         ))}
@@ -276,6 +288,6 @@ export function Sidebar({
       ) : null}
     </aside>
   )
-}
+})
 
 Sidebar.displayName = "Sidebar"

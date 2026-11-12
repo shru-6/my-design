@@ -2,7 +2,7 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 
-const separatorVariants = cva("shrink-0 bg-border ", {
+const separatorVariants = cva("shrink-0 bg-border", {
   variants: {
     variant: {
       solid: "",

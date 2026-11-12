@@ -4,3 +4,4 @@ dist
 *.log
 test/node_modules
 old-repo/
+coverage

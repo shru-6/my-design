@@ -2,11 +2,16 @@
 
 import { useState, useRef, useEffect, useCallback } from "react"
 import { useTheme, type ThemeSelection, type ThemeMetadata } from "../../useTheme"
-import { getThemeCategories } from "../../themeConfig"
+import { defaultRegistry, type ThemeRegistry } from "../../themeConfig"
 
-export function useThemeToggle(options?: { embedded?: boolean }) {
+export function useThemeToggle(options?: {
+  embedded?: boolean
+  /** Custom registry (see createThemeRegistry) — defaults to the shared singleton. */
+  registry?: Pick<ThemeRegistry, "getThemeCategories">
+}) {
   const embedded = options?.embedded ?? false
-  const { selectedThemes, updateTheme, resetToDefaults, isLoading, getAvailableThemes } = useTheme()
+  const registry = options?.registry ?? defaultRegistry
+  const { selectedThemes, updateTheme, resetToDefaults, isLoading, getAvailableThemes } = useTheme(registry)
   const [isOpen, setIsOpen] = useState(false)
   const [activeCategory, setActiveCategory] = useState<string>("color")
   const [themeCategories, setThemeCategories] = useState<any>(null)
@@ -16,8 +21,8 @@ export function useThemeToggle(options?: { embedded?: boolean }) {
   const triggerRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
-    getThemeCategories().then(setThemeCategories)
-  }, [])
+    registry.getThemeCategories().then(setThemeCategories)
+  }, [registry])
 
   useEffect(() => {
     if (!embedded && !isOpen) return

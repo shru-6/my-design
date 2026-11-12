@@ -1,6 +1,7 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { gapScale } from "./shared"
 
 const stackVariants = cva("flex", {
   variants: {
@@ -8,12 +9,8 @@ const stackVariants = cva("flex", {
       row: "flex-row",
       column: "flex-col",
     },
-    gap: {
-      none: "gap-0",
-      sm: "gap-2",
-      md: "gap-4",
-      lg: "gap-6",
-    },
+    // Shared with Grid — see layout/shared.ts.
+    gap: gapScale,
     align: {
       start: "items-start",
       center: "items-center",

@@ -2,12 +2,13 @@ import * as React from "react"
 import * as SliderPrimitive from "@radix-ui/react-slider"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { disabledControl, focusRing } from "./fieldPieces"
 import { Text } from "../data-display/Text"
 import { Label } from "./Label"
 import { ControlErrorMessage } from "./fieldPieces"
 
-const sliderThumbClassName = `block h-4 w-4 rounded-full border border-primary/60 bg-background shadow ${focusRing} ${disabledControl}`
+const sliderThumbClassName = `block h-4 w-4 rounded-pill border border-primary/60 bg-background shadow ${focusRing} ${disabledControl}`
 
 const sliderVariants = cva("relative flex w-full touch-none select-none items-center", {
   variants: {
@@ -67,14 +68,11 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
       [range]
     )
 
-    const initialValue = React.useMemo(() => {
-      const seed = value ?? defaultValue
-      return normalizeValue(seed)
-    }, [defaultValue, normalizeValue, value])
-
-    const [internalValue, setInternalValue] = React.useState<number | [number, number]>(initialValue)
-    const isControlled = value !== undefined && onChange != null
-    const current = isControlled ? value : internalValue
+    const [current, setCurrent] = useControllableValue<number | [number, number]>({
+      value: value === undefined ? undefined : normalizeValue(value),
+      defaultValue: normalizeValue(defaultValue),
+      onChange,
+    })
     const currentDisplay = valueFormatter
       ? valueFormatter(current)
       : Array.isArray(current)
@@ -99,12 +97,12 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
         <SliderPrimitive.Root
           ref={ref}
           value={toRadix(current)}
+          orientation={orientation}
           onValueChange={(next) => {
             const nextValue = range
               ? ([next[0] ?? 0, next[1] ?? next[0] ?? 0] as [number, number])
               : (next[0] ?? 0)
-            if (!isControlled) setInternalValue(nextValue)
-            onChange?.(nextValue)
+            setCurrent(nextValue)
           }}
           className={cn(
             sliderVariants({ size }),
@@ -113,8 +111,8 @@ export const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.R
           )}
           {...props}
         >
-          <SliderPrimitive.Track className="relative h-1.5 w-full grow overflow-hidden rounded-full bg-muted">
-            <SliderPrimitive.Range className="absolute h-full bg-primary" />
+          <SliderPrimitive.Track className="relative grow overflow-hidden rounded-pill bg-muted data-[orientation=horizontal]:h-1.5 data-[orientation=horizontal]:w-full data-[orientation=vertical]:h-full data-[orientation=vertical]:w-1.5">
+            <SliderPrimitive.Range className="absolute bg-primary data-[orientation=horizontal]:h-full data-[orientation=vertical]:w-full" />
           </SliderPrimitive.Track>
           <SliderPrimitive.Thumb className={sliderThumbClassName} />
           {range ? <SliderPrimitive.Thumb className={sliderThumbClassName} /> : null}

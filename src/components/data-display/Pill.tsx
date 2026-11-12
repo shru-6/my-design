@@ -4,7 +4,20 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 import { focusRing, focusRingOffset, disabledControl } from "../inputs/fieldPieces"
 import { Spinner } from "./Spinner"
+import { IconButton } from "../actions/IconButton"
 import { Text, type TextProps, textVariants } from "./Text"
+
+/**
+ * Shared by both pill shells below so they can't drift apart.
+ *
+ * `soft` is a rename (BREAKING): the old key shared its spelling with the
+ * banned bare radius utility, and the check gate reads raw file text, so a
+ * variant key spelled that way is indistinguishable from a real violation.
+ */
+const pillShapeRadius = {
+  soft: "rounded-control-md",
+  pill: "rounded-pill",
+} as const
 
 const pillSurfaceVariants = cva("inline-flex w-fit max-w-full items-center", {
   variants: {
@@ -25,10 +38,7 @@ const pillSurfaceVariants = cva("inline-flex w-fit max-w-full items-center", {
       warning: "",
       danger: "",
     },
-    shape: {
-      rounded: "rounded-md",
-      pill: "rounded-full",
-    },
+    shape: pillShapeRadius,
     selected: {
       true: "ring-2 ring-primary/40",
       false: "",
@@ -80,10 +90,7 @@ const toggleSurfaceVariants = cva(
         sm: "h-5 px-2",
         md: "h-6 px-2.5",
       },
-      shape: {
-        rounded: "rounded-md",
-        pill: "rounded-full",
-      },
+      shape: pillShapeRadius,
     },
     defaultVariants: {
       toggleSurface: "secondary",
@@ -111,6 +118,12 @@ export interface PillProps
   right?: React.ReactNode
   /** Renders a dismiss control (e.g. filter chips). */
   onRemove?: () => void
+  /**
+   * Names the dismiss control for screen readers — `Remove {removeLabel}`.
+   * Needed because `children` is a `ReactNode` and can't be stringified.
+   * Falls back to a bare "Remove".
+   */
+  removeLabel?: string
   dot?: boolean
   selected?: boolean
   disabled?: boolean
@@ -134,6 +147,7 @@ export const Pill = React.forwardRef<HTMLElement, PillProps>(
       left,
       right,
       onRemove,
+      removeLabel,
       dot,
       disabled,
       toggleSurface,
@@ -151,21 +165,19 @@ export const Pill = React.forwardRef<HTMLElement, PillProps>(
     const isDisabled = disabled || busy
     const removeBtn =
       onRemove && !isDisabled ? (
-        <button
-          type="button"
+        // IconButton at pill scale: `h-5 w-5` overrides Button's control-height
+        // sizing (twmerge keeps the last of each utility group), and the
+        // hover/bg overrides keep the chip's flat look.
+        <IconButton
+          shape="round"
           onClick={(e) => {
             e.stopPropagation()
             onRemove()
           }}
-          className={cn(
-            "-mr-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full",
-            "text-current opacity-70 hover:opacity-100",
-            "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
-          )}
-          aria-label="Remove"
-        >
-          <X className="h-3.5 w-3.5" strokeWidth={2} />
-        </button>
+          className="-mr-0.5 h-5 w-5 shrink-0 bg-transparent text-current opacity-70 hover:bg-transparent hover:opacity-100"
+          ariaLabel={removeLabel ? `Remove ${removeLabel}` : "Remove"}
+          icon={<X className="h-3.5 w-3.5" strokeWidth={2} />}
+        />
       ) : undefined
 
     const spinnerSize = resolvedSize === "sm" ? "xs" : "sm"
@@ -201,7 +213,7 @@ export const Pill = React.forwardRef<HTMLElement, PillProps>(
       >
         {dot ? (
           <span
-            className="mr-1.5 inline-block h-1.5 w-1.5 shrink-0 align-middle rounded-full bg-current"
+            className="mr-1.5 inline-block h-1.5 w-1.5 shrink-0 align-middle rounded-pill bg-current"
             aria-hidden
           />
         ) : null}

@@ -7,6 +7,7 @@ import { Button, type ButtonProps } from "../actions/Button"
 import { Card, type CardProps } from "../layout/Card"
 import { Icon } from "../utilities/Icon"
 import { useControllableOpen } from "./useControllableOpen"
+import { usePositionedPortal, withPortalVisibility } from "./usePositionedPortal"
 
 export type PopoverPlacement = "top" | "bottom" | "left" | "right"
 
@@ -27,6 +28,8 @@ export interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>,
   /** When false, trigger click does not toggle (e.g. HoverCard). */
   openOnClick?: boolean
   closeOnOutsideClick?: boolean
+  /** Escape closes the panel. Independent of `closeOnOutsideClick`. */
+  closeOnEscape?: boolean
   placement?: PopoverPlacement
   offset?: number
   className?: string
@@ -82,28 +85,31 @@ function computePopoverStyle(
   }
 }
 
-export function Popover({
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  triggerProps,
-  trigger,
-  openOnClick = true,
-  closeOnOutsideClick = true,
-  placement = "bottom",
-  offset = 8,
-  className,
-  cardProps,
-  children,
-  ...rest
-}: PopoverProps) {
+export const Popover = React.forwardRef<HTMLDivElement, PopoverProps>(function Popover(
+  {
+    open: openProp,
+    defaultOpen,
+    onOpenChange,
+    triggerProps,
+    trigger,
+    openOnClick = true,
+    closeOnOutsideClick = true,
+    closeOnEscape = true,
+    placement = "bottom",
+    offset = 8,
+    className,
+    cardProps,
+    children,
+    ...rest
+  },
+  ref
+) {
   const { label = "Open", left, variant = "outline", size = "md", className: triggerClassName } = triggerProps ?? {}
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
 
   const triggerRef = React.useRef<HTMLDivElement>(null)
   const contentRef = React.useRef<HTMLDivElement>(null)
   const [contentStyle, setContentStyle] = React.useState<React.CSSProperties>({ visibility: "hidden" })
-  const [positioned, setPositioned] = React.useState(false)
 
   const updatePosition = React.useCallback(() => {
     const el = triggerRef.current
@@ -112,28 +118,8 @@ export function Popover({
     setContentStyle(computePopoverStyle(el, panel, placement, offset))
   }, [placement, offset])
 
-  React.useLayoutEffect(() => {
-    if (!open) {
-      setPositioned(false)
-      return
-    }
-    setPositioned(false)
-    updatePosition()
-    let raf2 = 0
-    const raf1 = requestAnimationFrame(() => {
-      updatePosition()
-      raf2 = requestAnimationFrame(() => setPositioned(true))
-    })
-    const onReflow = () => updatePosition()
-    window.addEventListener("scroll", onReflow, true)
-    window.addEventListener("resize", onReflow)
-    return () => {
-      cancelAnimationFrame(raf1)
-      cancelAnimationFrame(raf2)
-      window.removeEventListener("scroll", onReflow, true)
-      window.removeEventListener("resize", onReflow)
-    }
-  }, [open, updatePosition])
+  /** Shared with `useFloatingMenu` — Popover only differs in its placement math. */
+  const positioned = usePositionedPortal(open, updatePosition)
 
   React.useEffect(() => {
     if (!open || !closeOnOutsideClick) return
@@ -142,24 +128,23 @@ export function Popover({
       if (triggerRef.current?.contains(t) || contentRef.current?.contains(t)) return
       setOpen(false)
     }
+    document.addEventListener("pointerdown", onPointerDown, true)
+    return () => document.removeEventListener("pointerdown", onPointerDown, true)
+  }, [open, closeOnOutsideClick, setOpen])
+
+  React.useEffect(() => {
+    if (!open || !closeOnEscape) return
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setOpen(false)
     }
-    document.addEventListener("pointerdown", onPointerDown, true)
     document.addEventListener("keydown", onKeyDown, true)
-    return () => {
-      document.removeEventListener("pointerdown", onPointerDown, true)
-      document.removeEventListener("keydown", onKeyDown, true)
-    }
-  }, [open, closeOnOutsideClick, setOpen])
+    return () => document.removeEventListener("keydown", onKeyDown, true)
+  }, [open, closeOnEscape, setOpen])
 
   const content = open ? (
     <div
       ref={contentRef}
-      style={{
-        ...contentStyle,
-        visibility: positioned ? contentStyle.visibility ?? "visible" : "hidden",
-      }}
+      style={withPortalVisibility(contentStyle, positioned)}
       className="w-max max-w-xs"
     >
       <Card variant="surface-1" size="sm" {...cardProps} className={cn("shadow-md", cardProps?.className)}>
@@ -169,7 +154,7 @@ export function Popover({
   ) : null
 
   return (
-    <div className={cn("relative inline-block", className)} {...rest}>
+    <div ref={ref} className={cn("relative inline-block", className)} {...rest}>
       <div ref={triggerRef}>
         {trigger ? (
           React.isValidElement(trigger) ? (
@@ -199,6 +184,6 @@ export function Popover({
       {typeof document !== "undefined" && content ? createPortal(content, document.body) : null}
     </div>
   )
-}
+})
 
 Popover.displayName = "Popover"

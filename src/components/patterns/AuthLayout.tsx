@@ -12,9 +12,17 @@ export interface AuthLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElemen
   className?: string
 }
 
-export function AuthLayout({ title, subtitle, logo, footer, children, className, ...props }: AuthLayoutProps) {
+export const AuthLayout = React.forwardRef<HTMLDivElement, AuthLayoutProps>(function AuthLayout(
+  { title, subtitle, logo, footer, children, className, ...props },
+  ref
+) {
   return (
-    <div className={cn("flex min-h-screen items-center justify-center bg-muted/30 p-4", className)} {...props}>
+    <div
+      ref={ref}
+      data-slot="auth-layout"
+      className={cn("flex min-h-screen items-center justify-center bg-muted/30 p-4", className)}
+      {...props}
+    >
       <Card className="w-full max-w-md p-6 shadow-sm">
         <div className="mb-6 space-y-2 text-center">
           {logo ? <div className="mb-2 flex justify-center">{logo}</div> : null}
@@ -31,11 +39,13 @@ export function AuthLayout({ title, subtitle, logo, footer, children, className,
         </div>
         <div className="space-y-4">{children}</div>
         {footer ? (
-          <div className="mt-6 border-t border-border pt-4 text-center text-sm text-muted-foreground">{footer}</div>
+          <Text as="div" size="sm" variant="muted" className="mt-6 border-t border-border pt-4 text-center">
+            {footer}
+          </Text>
         ) : null}
       </Card>
     </div>
   )
-}
+})
 
 AuthLayout.displayName = "AuthLayout"

@@ -185,7 +185,7 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "validate", type: "boolean", defaultValue: true },
     { name: "errorMessage", type: "string" },
     { name: "items", type: "array", description: "SelectOption[] when type=select" },
-    { name: "onValueChange", type: "callback", description: "(value: string) => void" },
+    { name: "onChange", type: "callback", description: "(value: string) => void" },
     { name: "rows", type: "number", description: "Textarea rows" },
     { name: "accept", type: "string", description: "Upload accept filter when type=upload" },
     { name: "dragAndDrop", type: "boolean", description: "Upload drag-and-drop when type=upload" },
@@ -195,9 +195,7 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "loading", type: "boolean", description: "Upload loading state" },
     { name: "onUpload", type: "callback", description: "(files: File[]) => void | Promise<void>" },
     { name: "render", type: "callback", description: "(field) => ReactNode" },
-    { name: "inputProps", type: "object" },
-    { name: "labelProps", type: "object" },
-    { name: "helperTextProps", type: "object" },
+    { name: "inputProps", type: "object", description: "Text / textarea types only" },
     { name: "className", type: "string" }
   ),
 
@@ -376,8 +374,12 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
   CodeBlock: own(
     { name: "code", type: "string", defaultValue: 'const x = 1;\nconsole.log(x);' },
     { name: "language", type: "string", defaultValue: "typescript" },
+    { name: "variant", type: "select", options: ["default", "surface", "inset", "ghost"], defaultValue: "default" },
     { name: "showLineNumbers", type: "boolean", defaultValue: false },
     { name: "showCopy", type: "boolean", defaultValue: true },
+    { name: "showWrapToggle", type: "boolean", defaultValue: false },
+    { name: "wrap", type: "boolean", defaultValue: false },
+    { name: "defaultWrap", type: "boolean", defaultValue: false },
     { name: "filename", type: "string" },
     { name: "className", type: "string" }
   ),
@@ -435,6 +437,7 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "size", type: "size", options: ["sm", "md", "lg", "xl", "full"], defaultValue: "md" },
     { name: "align", type: "select", options: ["center", "top"], defaultValue: "center" },
     { name: "showClose", type: "boolean", defaultValue: true },
+    { name: "closeOnBackdropClick", type: "boolean", description: "Defaults to !showClose && !loading when omitted" },
     { name: "loading", type: "boolean", defaultValue: false },
     { name: "overlayClassName", type: "string" },
     { name: "className", type: "string" }
@@ -553,6 +556,7 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
       { name: "header", type: "reactNode" },
       { name: "footer", type: "reactNode" },
       { name: "showClose", type: "boolean", defaultValue: true },
+      { name: "closeOnBackdropClick", type: "boolean", description: "Defaults to !showClose && !loading when omitted" },
       { name: "trigger", type: "reactNode" },
       { name: "cardProps", type: "object" },
       { name: "maxHeight", type: "string" },
@@ -594,6 +598,7 @@ export const enrichedPropSchemas: Record<string, PropDefinition[]> = {
       { name: "header", type: "reactNode" },
       { name: "footer", type: "reactNode" },
       { name: "showClose", type: "boolean", defaultValue: false },
+      { name: "closeOnBackdropClick", type: "boolean", description: "Defaults to !showClose && !loading when omitted" },
       { name: "trigger", type: "reactNode" },
       { name: "cardProps", type: "object" },
       { name: "maxHeight", type: "string" },

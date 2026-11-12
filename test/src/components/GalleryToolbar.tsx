@@ -29,9 +29,7 @@ export function GalleryToolbar({
       <div className="mx-auto max-w-[1500px] px-4 py-4 md:px-8">
         <List
           listType="none"
-          direction="row"
-          gap="sm"
-          wrap
+          stackProps={{ direction: "row", gap: "sm", wrap: true }}
           divider={false}
           selectable
           selectedValue={category}

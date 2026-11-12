@@ -1,11 +1,12 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
-import { disabledControl } from "./fieldPieces"
+import { useControllableValue } from "../../utils/useControllableValue"
+import { disabledControl, disabledSurfaceStyles } from "./fieldPieces"
 import { ControlErrorMessage, ControlLabelStack } from "./fieldPieces"
 
 const radioVariants = cva(
-  `inline-flex items-center justify-center rounded-full border border-border bg-background transition-colors ${disabledControl}`,
+  `inline-flex items-center justify-center rounded-pill border border-border bg-background transition-colors ${disabledControl}`,
   {
     variants: {
       size: {
@@ -55,16 +56,17 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
   ) => {
     const generatedId = React.useId()
     const radioId = id ?? generatedId
-    const resolvedDefault = defaultState ?? defaultChecked
-    const [internalChecked, setInternalChecked] = React.useState(Boolean(checked ?? resolvedDefault))
-    const isControlled = checked !== undefined && onChange != null
-    const resolvedChecked = isControlled ? checked : internalChecked
+    const [resolvedChecked, setChecked] = useControllableValue<boolean>({
+      value: checked === undefined ? undefined : Boolean(checked),
+      defaultValue: Boolean(defaultState ?? defaultChecked),
+      onChange,
+    })
 
     return (
       <div className="space-y-1">
         <label
           htmlFor={radioId}
-          className={cn("flex items-start gap-2", disabled && "cursor-not-allowed opacity-60")}
+          className={cn("flex items-start gap-2", disabled && disabledSurfaceStyles)}
         >
           <span className={cn(radioVariants({ size, selected: resolvedChecked }), className)}>
             <input
@@ -72,18 +74,12 @@ export const Radio = React.forwardRef<HTMLInputElement, RadioProps>(
               id={radioId}
               type="radio"
               className="sr-only"
-              checked={isControlled ? checked : undefined}
-              defaultChecked={isControlled ? undefined : Boolean(checked ?? resolvedDefault)}
-              onChange={(event) => {
-                if (!isControlled) {
-                  setInternalChecked(event.target.checked)
-                }
-                onChange?.(event.target.checked)
-              }}
+              checked={resolvedChecked}
+              onChange={(event) => setChecked(event.target.checked)}
               {...props}
               disabled={disabled}
             />
-            {resolvedChecked ? <span className="h-2 w-2 rounded-full bg-primary" /> : null}
+            {resolvedChecked ? <span className="h-2 w-2 rounded-pill bg-primary" /> : null}
           </span>
           <ControlLabelStack label={label} description={description} />
         </label>

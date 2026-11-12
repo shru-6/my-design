@@ -3,7 +3,7 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 import { Text } from "./Text"
 
-const progressVariants = cva("relative w-full overflow-hidden rounded-full bg-muted", {
+const progressVariants = cva("relative w-full overflow-hidden rounded-pill bg-muted", {
   variants: {
     size: {
       sm: "h-1.5",
@@ -55,12 +55,12 @@ export const Progress = React.forwardRef<HTMLDivElement, ProgressProps>(
           <div className="relative h-full w-full overflow-hidden rounded-[inherit]">
             {isLoading ? (
               <span
-                className="absolute inset-y-0 left-0 w-[32%] min-w-[3rem] rounded-full bg-primary shadow-sm ring-1 ring-primary/25 animate-progress-indeterminate motion-reduce:animate-none"
+                className="absolute inset-y-0 left-0 w-[32%] min-w-[3rem] rounded-pill bg-primary shadow-sm ring-1 ring-primary/25 animate-progress-indeterminate motion-reduce:animate-none"
                 aria-hidden
               />
             ) : (
               <div
-                className="h-full rounded-[inherit] bg-primary transition-[width] duration-300 ease-out"
+                className="h-full rounded-[inherit] bg-primary transition-[width] duration-normal ease-out"
                 style={{ width: `${percent}%` }}
               />
             )}

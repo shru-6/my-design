@@ -3,7 +3,36 @@ import { zLayerValue } from "./zIndex"
 
 export type FloatingAlign = "start" | "center" | "end"
 
-const VIEWPORT_MARGIN = 8
+/**
+ * Gap kept between a floating surface and the window edge. Single source —
+ * `Tooltip` used to carry its own identically-valued constant plus its own
+ * copy of the clamp/fit math below.
+ */
+export const VIEWPORT_MARGIN = 8
+
+/** Pull a `w × h` box fully inside the viewport, keeping `VIEWPORT_MARGIN` at every edge. */
+export function clampToViewport(
+  left: number,
+  top: number,
+  width: number,
+  height: number
+): { left: number; top: number } {
+  const p = VIEWPORT_MARGIN
+  const vw = typeof window !== "undefined" ? window.innerWidth : 0
+  const vh = typeof window !== "undefined" ? window.innerHeight : 0
+  return {
+    left: Math.min(Math.max(left, p), Math.max(p, vw - width - p)),
+    top: Math.min(Math.max(top, p), Math.max(p, vh - height - p)),
+  }
+}
+
+/** True when a `w × h` box at (left, top) sits fully inside the viewport margin. */
+export function fitsInViewport(left: number, top: number, width: number, height: number): boolean {
+  const p = VIEWPORT_MARGIN
+  const vw = typeof window !== "undefined" ? window.innerWidth : 0
+  const vh = typeof window !== "undefined" ? window.innerHeight : 0
+  return left >= p && top >= p && left + width <= vw - p && top + height <= vh - p
+}
 
 export function computeFloatingMenuStyle(
   trigger: HTMLElement,

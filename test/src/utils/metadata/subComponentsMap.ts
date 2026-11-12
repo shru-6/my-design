@@ -69,7 +69,7 @@ const subComponentsMap: Record<string, string[]> = {
   ContextMenu: ["Dropdown", "Icon"],
   Stepper: ["Button", "Text", "Icon"],
   Table: ["Checkbox", "Button", "Text", "Skeleton", "Pagination", "EmptyState"],
-  CodeBlock: ["CopyButton", "Text"],
+  CodeBlock: ["Button", "CopyButton", "Text"],
   CopyButton: ["Button", "Tooltip"],
   SplitButton: ["Button", "Dropdown"],
   RadioGroup: ["Radio"],

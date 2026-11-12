@@ -4,7 +4,8 @@ import { cn } from "../../utils"
 import { focusRing, focusRingOffset } from "../inputs/fieldPieces"
 
 const linkVariants = cva(
-  "inline-flex items-center rounded-sm transition-colors focus-visible:outline-none",
+  // Radius only ever shows on the focus ring — control tier.
+  "inline-flex items-center rounded-control-sm transition-colors focus-visible:outline-none",
   {
     variants: {
       variant: {

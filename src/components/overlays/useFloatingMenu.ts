@@ -1,6 +1,7 @@
 import * as React from "react"
 import { zLayerValue } from "../../utils/zIndex"
 import { computeFloatingMenuStyle, type FloatingAlign } from "../../utils/floatingPosition"
+import { usePositionedPortal, withPortalVisibility } from "./usePositionedPortal"
 
 export type { FloatingAlign } from "../../utils/floatingPosition"
 
@@ -28,7 +29,6 @@ export function useFloatingMenu({
   zIndex = zLayerValue("dropdown"),
 }: UseFloatingMenuOptions) {
   const [menuStyle, setMenuStyle] = React.useState<React.CSSProperties>({ visibility: "hidden" })
-  const [positioned, setPositioned] = React.useState(false)
 
   const updatePosition = React.useCallback(() => {
     const trigger = triggerRef.current
@@ -45,30 +45,7 @@ export function useFloatingMenu({
     )
   }, [align, maxHeightCap, minWidth, sideOffset, triggerRef, menuRef, zIndex])
 
-  React.useLayoutEffect(() => {
-    if (!open) {
-      setPositioned(false)
-      return
-    }
-    setPositioned(false)
-    updatePosition()
-    let raf2 = 0
-    const raf1 = requestAnimationFrame(() => {
-      updatePosition()
-      raf2 = requestAnimationFrame(() => setPositioned(true))
-    })
-    const fallback = window.setTimeout(() => setPositioned(true), 48)
-    const onReposition = () => updatePosition()
-    window.addEventListener("scroll", onReposition, true)
-    window.addEventListener("resize", onReposition)
-    return () => {
-      cancelAnimationFrame(raf1)
-      cancelAnimationFrame(raf2)
-      window.clearTimeout(fallback)
-      window.removeEventListener("scroll", onReposition, true)
-      window.removeEventListener("resize", onReposition)
-    }
-  }, [open, updatePosition])
+  const positioned = usePositionedPortal(open, updatePosition)
 
   React.useEffect(() => {
     if (!open) return
@@ -89,10 +66,7 @@ export function useFloatingMenu({
   }, [open, onOpenChange, triggerRef, menuRef])
 
   const resolvedStyle = React.useMemo<React.CSSProperties>(
-    () => ({
-      ...menuStyle,
-      visibility: positioned ? menuStyle.visibility ?? "visible" : "hidden",
-    }),
+    () => withPortalVisibility(menuStyle, positioned),
     [menuStyle, positioned]
   )
 

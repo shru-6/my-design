@@ -11,6 +11,8 @@ export { Textarea, type TextareaProps } from "./components/inputs/Textarea"
 export {
   FieldLayout,
   disabledControl,
+  disabledSurface,
+  disabledSurfaceStyles,
   fieldSurfaceVariants,
   focusRing,
   focusRingDestructive,
@@ -57,7 +59,7 @@ export {
   type InputGroupAddonProps,
   type InputGroupButtonProps,
 } from "./components/inputs/InputGroup"
-export { Card, cardVariants, type CardProps, type CardVariant, type CardColor } from "./components/layout/Card"
+export { Card, cardVariants, type CardProps, type CardVariant } from "./components/layout/Card"
 export { Separator, type SeparatorProps } from "./components/layout/Separator"
 export { Stack, stackVariants, type StackProps, type StackRootTag } from "./components/layout/Stack"
 export { Grid, gridVariants, type GridProps, type GridRootTag } from "./components/layout/Grid"
@@ -86,13 +88,13 @@ export { ResizeContainer, type ResizeContainerProps } from "./components/layout/
 export { Breadcrumb, type BreadcrumbProps, type BreadcrumbItem } from "./components/navigation/Breadcrumb"
 export { Sidebar, sidebarVariants, type SidebarProps, type SidebarItem } from "./components/navigation/Sidebar"
 export { NavigationMenu, type NavigationMenuProps, type NavMenuItem } from "./components/navigation/NavigationMenu"
-export { Menubar, type MenubarProps, type MenubarMenu } from "./components/navigation/Menubar"
-export { ContextMenu, type ContextMenuProps } from "./components/navigation/ContextMenu"
+export { Menubar, menubarVariants, type MenubarProps, type MenubarMenu } from "./components/navigation/Menubar"
+export { ContextMenu, contextMenuVariants, type ContextMenuProps } from "./components/navigation/ContextMenu"
 export { Dropdown, type DropdownProps, type DropdownItem } from "./components/navigation/Dropdown"
 export { Navbar, navbarVariants, type NavbarProps, type NavItem } from "./components/navigation/Navbar"
 export { Pagination, type PaginationProps } from "./components/navigation/Pagination"
 export { Stepper, type StepperProps, type StepItem, type StepStatus } from "./components/navigation/Stepper"
-export { Tabs, type TabsProps, type TabItem } from "./components/navigation/Tabs"
+export { Tabs, tabsListVariants, tabsTriggerVariants, type TabsProps, type TabItem } from "./components/navigation/Tabs"
 export { Alert, alertVariants, type AlertProps } from "./components/feedback/Alert"
 export { Toast, toastVariants, type ToastProps, type ToastTone, type ToastVariant, type ToastAction } from "./components/feedback/Toast"
 export {
@@ -191,7 +193,7 @@ export {
   type TreeMovePosition,
 } from "./components/data-display/TreeView"
 export { Carousel, type CarouselProps, type CarouselItem } from "./components/data-display/Carousel"
-export { CodeBlock, type CodeBlockProps } from "./components/data-display/CodeBlock"
+export { CodeBlock, codeBlockVariants, type CodeBlockProps, type CodeBlockVariant } from "./components/data-display/CodeBlock"
 export {
   Overlay,
   OverlayPortalScope,
@@ -230,7 +232,17 @@ export { Icon, iconVariants, type IconProps } from "./components/utilities/Icon"
 export { VisuallyHidden, type VisuallyHiddenProps } from "./components/utilities/VisuallyHidden"
 export { ErrorBoundary, type ErrorBoundaryProps } from "./components/utilities/ErrorBoundary"
 
-export { Chart, type ChartProps, type ChartType } from "./components/data-viz/Chart"
+export {
+  Chart,
+  type ChartProps,
+  type ChartType,
+  type ChartBaseProps,
+  type CartesianKeyProps,
+  type BarChartOptions,
+  type LineChartOptions,
+  type PieChartOptions,
+} from "./components/data-viz/Chart"
+export type { ChartDatum, LineCurve } from "./components/data-viz/chartUtils"
 export { BarChart, type BarChartProps } from "./components/data-viz/BarChart"
 export { LineChart, type LineChartProps } from "./components/data-viz/LineChart"
 export { PieChart, type PieChartProps } from "./components/data-viz/PieChart"
@@ -247,6 +259,10 @@ export {
   getThemesForCategory,
   getTheme,
   THEME_CATEGORY_ORDER,
+  createThemeRegistry,
+  defaultRegistry,
+  type ThemeSource,
+  type ThemeRegistry,
 } from "./themes/themeConfig"
 export { enableDebugMode, getCurrentCSSVariables } from "./themes/themeUtils"
 export { applyThemeSync } from "./themes/applyThemeSync"

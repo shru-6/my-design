@@ -1,8 +1,9 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { hasNonEmptyChildren, resolveSectionBorders, sizeToCss } from "./shared"
 
-const cardVariants = cva("rounded-[var(--radius-card,0.5rem)] border text-foreground", {
+const cardVariants = cva("border text-foreground", {
   variants: {
     variant: {
       transparent: "border-transparent bg-transparent shadow-none",
@@ -10,10 +11,11 @@ const cardVariants = cva("rounded-[var(--radius-card,0.5rem)] border text-foregr
       "surface-2": "border-border bg-muted/40 shadow-md",
       outlined: "border-border bg-background shadow-none",
     },
+    // A Card is a surface, not a control — radius tier follows its own size.
     size: {
-      sm: "text-sm",
-      md: "text-base",
-      lg: "text-base",
+      sm: "text-sm rounded-surface-sm",
+      md: "text-base rounded-surface-md",
+      lg: "text-base rounded-surface-lg",
     },
   },
   defaultVariants: {
@@ -23,17 +25,11 @@ const cardVariants = cva("rounded-[var(--radius-card,0.5rem)] border text-foregr
 })
 
 export type CardVariant = VariantProps<typeof cardVariants>["variant"]
-export type CardColor = never
 
 const sectionPad: Record<NonNullable<VariantProps<typeof cardVariants>["size"]>, string> = {
   sm: "px-3 py-2",
   md: "px-4 py-3",
   lg: "px-6 py-4",
-}
-
-function withUnit(value?: string | number): string | number | undefined {
-  if (value == null) return undefined
-  return typeof value === "number" ? `${value}px` : value
 }
 
 export interface CardProps
@@ -49,30 +45,48 @@ export interface CardProps
 export const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ variant, size = "md", header, footer, minHeight, maxHeight, className, children, style, ...props }, ref) => {
     const effectiveSize: NonNullable<VariantProps<typeof cardVariants>["size"]> = size ?? "md"
+    const hasContent = hasNonEmptyChildren(children)
+    const hasHeader = Boolean(header)
+    const hasFooter = Boolean(footer)
+    const { headerBorderBottom, footerBorderTop } = resolveSectionBorders({
+      hasHeader,
+      hasContent,
+      hasFooter,
+    })
 
     return (
       <div
         ref={ref}
         data-slot="card"
         className={cn("relative flex flex-col overflow-hidden", cardVariants({ variant, size: effectiveSize }), className)}
-        style={{ minHeight: withUnit(minHeight), maxHeight: withUnit(maxHeight), ...style }}
+        style={{ minHeight: sizeToCss(minHeight), maxHeight: sizeToCss(maxHeight), ...style }}
         {...props}
       >
-        {header ? (
+        {hasHeader ? (
           <div
             data-slot="card-header"
-            className={cn("sticky top-0 shrink-0 border-b border-border bg-inherit", sectionPad[effectiveSize])}
+            className={cn(
+              "sticky top-0 shrink-0 bg-inherit",
+              headerBorderBottom && "border-b border-border",
+              sectionPad[effectiveSize]
+            )}
           >
             {header}
           </div>
         ) : null}
-        <div data-slot="card-content" className={cn("min-h-0 flex-1 overflow-y-auto", sectionPad[effectiveSize])}>
-          {children}
-        </div>
-        {footer ? (
+        {hasContent ? (
+          <div data-slot="card-content" className={cn("min-h-0 flex-1 overflow-y-auto", sectionPad[effectiveSize])}>
+            {children}
+          </div>
+        ) : null}
+        {hasFooter ? (
           <div
             data-slot="card-footer"
-            className={cn("sticky bottom-0 shrink-0 border-t border-border bg-inherit", sectionPad[effectiveSize])}
+            className={cn(
+              "sticky bottom-0 shrink-0 bg-inherit",
+              footerBorderTop && "border-t border-border",
+              sectionPad[effectiveSize]
+            )}
           >
             {footer}
           </div>

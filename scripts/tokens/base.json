@@ -39,9 +39,17 @@
     "mono": "var(--font-mono)"
   },
   "radius": {
-    "button": "0.375rem",
-    "card": "0.5rem",
-    "input": "0.375rem"
+    "control": {
+      "sm": "0.25rem",
+      "md": "0.375rem",
+      "lg": "0.5rem"
+    },
+    "surface": {
+      "sm": "0.5rem",
+      "md": "0.5rem",
+      "lg": "0.75rem"
+    },
+    "pill": "9999px"
   },
   "z": {
     "sticky": "10",

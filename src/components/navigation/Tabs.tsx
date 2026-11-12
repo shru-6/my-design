@@ -1,10 +1,13 @@
 import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import { Text } from "../data-display/Text"
 import { Icon } from "../utilities/Icon"
+import { disabledControl, focusRing, focusRingOffset, ringOffsetBackground } from "../inputs/fieldPieces"
+import { firstEnabledValue } from "./shared"
 
-const tabsListVariants = cva("inline-flex h-10 items-center gap-1 rounded-md text-muted-foreground", {
+export const tabsListVariants = cva("inline-flex h-10 items-center gap-1 rounded-control-md text-muted-foreground", {
   variants: {
     variant: {
       default: "bg-muted/50 p-1",
@@ -17,17 +20,23 @@ const tabsListVariants = cva("inline-flex h-10 items-center gap-1 rounded-md tex
   },
 })
 
-const tabsTriggerVariants = cva(
-  "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50",
+export const tabsTriggerVariants = cva(
+  cn(
+    "inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-control-sm px-3 py-1.5 text-sm font-medium text-muted-foreground transition-colors hover:text-foreground",
+    focusRing,
+    focusRingOffset,
+    `focus-visible:${ringOffsetBackground}`,
+    disabledControl
+  ),
   {
     variants: {
       variant: {
         default:
           "aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm",
         underline:
-          "rounded-none border-b-2 border-transparent px-3 pb-2 pt-1 aria-selected:border-primary aria-selected:text-foreground",
+          "rounded-[0] border-b-2 border-transparent px-3 pb-2 pt-1 aria-selected:border-primary aria-selected:text-foreground",
         pill:
-          "rounded-full border border-transparent px-3 py-1.5 aria-selected:border-border aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm",
+          "rounded-pill border border-transparent px-3 py-1.5 aria-selected:border-border aria-selected:bg-background aria-selected:text-foreground aria-selected:shadow-sm",
       },
     },
     defaultVariants: {
@@ -60,10 +69,6 @@ export interface TabsProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
   contentClassName?: string
 }
 
-function firstEnabledValue(items: TabItem[]): string | undefined {
-  return items.find((i) => !i.disabled)?.value ?? items[0]?.value
-}
-
 export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
   (
     {
@@ -82,15 +87,11 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
     ref
   ) => {
     const autoDefault = value === undefined && defaultValue === undefined ? firstEnabledValue(items) : undefined
-    const initial = defaultValue ?? autoDefault ?? ""
-    const [internal, setInternal] = React.useState(initial)
-    const isControlled = value !== undefined
-    const active = isControlled ? value! : internal
-
-    const setTab = (next: string) => {
-      if (!isControlled) setInternal(next)
-      onValueChange?.(next)
-    }
+    const [active, setTab] = useControllableValue<string>({
+      value,
+      defaultValue: defaultValue ?? autoDefault ?? "",
+      onChange: onValueChange,
+    })
 
     const enabledValues = React.useMemo(() => items.filter((i) => !i.disabled).map((i) => i.value), [items])
     const tabIds = React.useId()
@@ -174,7 +175,9 @@ export const Tabs = React.forwardRef<HTMLDivElement, TabsProps>(
               id={`${tabIds}-panel-${item.value}`}
               aria-labelledby={`${tabIds}-tab-${item.value}`}
               className={cn(
-                "mt-3 min-h-0 outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
+                "mt-3 min-h-0 outline-none",
+                focusRing,
+                focusRingOffset,
                 orientation === "vertical" && "mt-0 flex-1",
                 panelClassName
               )}

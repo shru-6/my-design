@@ -9,9 +9,23 @@ export interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
   className?: string
 }
 
-export function AppShell({ sidebar, header, footer, children, className, ...props }: AppShellProps) {
+/**
+ * Fixed-slot application chrome. Deliberately raw `div`s rather than
+ * `Stack`/`Grid`: those are list renderers (`items` + `renderItem`), and the
+ * shell's regions are named slots with individual sizing constraints, not a
+ * homogeneous list.
+ */
+export const AppShell = React.forwardRef<HTMLDivElement, AppShellProps>(function AppShell(
+  { sidebar, header, footer, children, className, ...props },
+  ref
+) {
   return (
-    <div className={cn("flex h-full min-h-0 w-full max-w-full overflow-hidden bg-background", className)} {...props}>
+    <div
+      ref={ref}
+      data-slot="app-shell"
+      className={cn("flex h-full min-h-0 w-full max-w-full overflow-hidden bg-background", className)}
+      {...props}
+    >
       {sidebar ? <div className="flex h-full min-h-0 shrink-0 flex-col">{sidebar}</div> : null}
       <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col">
         {header ? <div className="shrink-0">{header}</div> : null}
@@ -20,6 +34,6 @@ export function AppShell({ sidebar, header, footer, children, className, ...prop
       </div>
     </div>
   )
-}
+})
 
 AppShell.displayName = "AppShell"

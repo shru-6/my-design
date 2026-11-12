@@ -17,16 +17,17 @@ export interface TriggerModalProps extends ModalProps {
   triggerProps?: ModalTriggerProps
 }
 
-/** Modal with an optional trigger — base for ConfirmModal and FormModal. */
-export function TriggerModal({
-  trigger,
-  triggerProps,
-  showClose = true,
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  ...modalProps
-}: TriggerModalProps) {
+/**
+ * Modal with an optional trigger — base for ConfirmModal and FormModal.
+ *
+ * Everything `Modal` accepts flows straight through, including the dialog
+ * a11y props (`ariaLabel`, `initialFocus`) — the wrapper adds a trigger, it
+ * does not narrow the surface.
+ */
+export const TriggerModal = React.forwardRef<HTMLDivElement, TriggerModalProps>(function TriggerModal(
+  { trigger, triggerProps, showClose = true, open: openProp, defaultOpen, onOpenChange, ...modalProps },
+  ref
+) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
 
   const triggerNode =
@@ -48,9 +49,9 @@ export function TriggerModal({
   return (
     <>
       {triggerNode}
-      <Modal open={open} onOpenChange={setOpen} showClose={showClose} {...modalProps} />
+      <Modal ref={ref} open={open} onOpenChange={setOpen} showClose={showClose} {...modalProps} />
     </>
   )
-}
+})
 
 TriggerModal.displayName = "TriggerModal"

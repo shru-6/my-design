@@ -9,9 +9,11 @@ export interface DescriptionItem {
 
 const descriptionListVariants = cva("", {
   variants: {
+    // These used to be two empty strings with the real classes living in a
+    // ternary at the call site — the cva claimed to own a variant it didn't.
     layout: {
-      horizontal: "",
-      vertical: "",
+      horizontal: "grid grid-cols-[minmax(8rem,auto)_1fr] sm:grid-cols-[minmax(10rem,auto)_1fr]",
+      vertical: "flex flex-col",
     },
     size: {
       sm: "gap-x-4 gap-y-1 text-sm",
@@ -38,11 +40,7 @@ export const DescriptionList = React.forwardRef<HTMLDListElement, DescriptionLis
       <dl
         ref={ref}
         data-slot="description-list"
-        className={cn(
-          descriptionListVariants({ layout, size }),
-          isHorizontal ? "grid grid-cols-[minmax(8rem,auto)_1fr] sm:grid-cols-[minmax(10rem,auto)_1fr]" : "flex flex-col",
-          className
-        )}
+        className={cn(descriptionListVariants({ layout, size }), className)}
         {...props}
       >
         {items.map((item, index) => (

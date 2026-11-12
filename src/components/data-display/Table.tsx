@@ -79,11 +79,18 @@ function alignClass(a?: TableColumnAlign) {
   return "text-left"
 }
 
-/** Stable id using the row's index in the original `data` array (sort-safe). */
-function resolveRowId<T>(data: T[], row: T, getRowId: (row: T, index: number) => string | number) {
-  const i = data.indexOf(row)
-  return getRowId(row, i === -1 ? 0 : i)
-}
+/**
+ * A row plus the identity that follows it through sorting.
+ *
+ * `id` used to be resolved per render with `data.indexOf(row)` — O(n²) over the
+ * table, and wrong for any table whose rows are primitives or structurally
+ * shared: every duplicate collapsed onto the first match's index, so with the
+ * default `getRowId` (the index) selecting one duplicate selected them all.
+ * Ids are computed once, in source order, and carried alongside the row.
+ */
+type TableRow<T> = { row: T; index: number; id: string | number }
+
+const defaultGetRowId = (_row: unknown, index: number): string | number => index
 
 function nextDirection(current: SortDirection | undefined, sameKey: boolean): SortDirection {
   if (!sameKey) return "asc"
@@ -129,31 +136,57 @@ function stickyRightOffset<T>(columns: TableColumn<T>[], columnIndex: number): s
   return `calc(${parts.join(" + ")})`
 }
 
-/** Opaque surface + inset shade on the edge that meets scrolling content. */
+/**
+ * Opaque surface + a rule on the edge that meets scrolling content.
+ *
+ * The rule used to be doubled by a hand-written inset box-shadow whose colour
+ * was a raw 14%-opacity black literal — it stayed black in every theme, so on a dark
+ * surface it read as a smear rather than a shade. It was purely decorative on
+ * top of a border that already marks the seam, so it's gone; the `border-r` /
+ * `border-l` uses `border-border` and follows the theme.
+ */
 function stickyColumnClasses(side: "left" | "right"): string {
   return cn(
     "bg-background",
-    side === "left" &&
-      "border-r border-border shadow-[inset_-10px_0_14px_-10px_rgba(0,0,0,0.14)]",
-    side === "right" &&
-      "border-l border-border shadow-[inset_10px_0_14px_-10px_rgba(0,0,0,0.14)]"
+    side === "left" && "border-r border-border",
+    side === "right" && "border-l border-border"
   )
 }
 
 function stickyCheckboxEdgeClasses(): string {
-  return cn(
-    "bg-background border-r border-border shadow-[inset_-10px_0_14px_-10px_rgba(0,0,0,0.14)]"
-  )
+  return "bg-background border-r border-border"
 }
 
-function stickyCellZ(header: boolean, stickyHeaderRow: boolean, columnSticky: boolean): number {
-  if (header) {
-    if (stickyHeaderRow && columnSticky) return 5
-    if (stickyHeaderRow) return 4
-    if (columnSticky) return 3
-    return 0
+/**
+ * Sticky layering, expressed against the `--z-sticky` token instead of the
+ * literal 2..6 ladder this used to inline.
+ *
+ * Three tiers is all the layering actually needs — the old six were mostly
+ * distinctions without a difference:
+ *  - a sticky *body* cell is `position: sticky`, and positioned elements
+ *    already paint over the static cells beside them, so it only needs to sit
+ *    on the base sticky rung;
+ *  - a sticky header row must beat every body cell, sticky or not;
+ *  - a header cell that is also a sticky column must beat the rest of its own
+ *    header row (it comes first in DOM order, so it would otherwise lose).
+ */
+const stickyZ = {
+  column: "var(--z-sticky, 10)",
+  header: "calc(var(--z-sticky, 10) + 1)",
+  headerColumn: "calc(var(--z-sticky, 10) + 2)",
+} as const
+
+function stickyCellZ(
+  isHeader: boolean,
+  stickyHeaderRow: boolean,
+  columnSticky: boolean
+): string | undefined {
+  if (isHeader) {
+    if (columnSticky) return stickyZ.headerColumn
+    if (stickyHeaderRow) return stickyZ.header
+    return undefined
   }
-  return columnSticky ? 2 : 0
+  return columnSticky ? stickyZ.column : undefined
 }
 
 export function Table<T>({
@@ -169,7 +202,7 @@ export function Table<T>({
   selectedRows: selectedRowsProp,
   defaultSelectedRows,
   onSelectionChange,
-  getRowId = (_row, index) => index,
+  getRowId = defaultGetRowId,
   stickyHeader,
   onRowClick,
   loading,
@@ -194,15 +227,21 @@ export function Table<T>({
     return new Set(list)
   }, [selectionControlled, selectedRowsProp, internalSelected])
 
-  const sortedData = React.useMemo(() => {
-    if (!tableSortable || !sortKey) return data
+  // Ids resolved once, in source order — see TableRow above.
+  const rows = React.useMemo<TableRow<T>[]>(
+    () => data.map((row, index) => ({ row, index, id: getRowId(row, index) })),
+    [data, getRowId]
+  )
+
+  const sortedRows = React.useMemo(() => {
+    if (!tableSortable || !sortKey) return rows
     const col = columns.find((c) => c.key === sortKey)
-    if (!col?.sortable) return data
-    const copy = [...data]
+    if (!col?.sortable) return rows
+    const copy = [...rows]
     const mult = sortDir === "asc" ? 1 : -1
     copy.sort((a, b) => {
-      const ai = (a as Record<string, unknown>)[sortKey]
-      const bi = (b as Record<string, unknown>)[sortKey]
+      const ai = (a.row as Record<string, unknown>)[sortKey]
+      const bi = (b.row as Record<string, unknown>)[sortKey]
       if (ai == null && bi == null) return 0
       if (ai == null) return 1
       if (bi == null) return -1
@@ -210,7 +249,11 @@ export function Table<T>({
       return String(ai).localeCompare(String(bi), undefined, { numeric: true }) * mult
     })
     return copy
-  }, [data, columns, tableSortable, sortKey, sortDir])
+  }, [rows, columns, tableSortable, sortKey, sortDir])
+
+  const allSelected =
+    sortedRows.length > 0 && sortedRows.every((entry) => selectedSet.has(entry.id))
+  const someSelected = sortedRows.some((entry) => selectedSet.has(entry.id))
 
   const toggleSort = (key: string, columnSortable?: boolean) => {
     if (!tableSortable || !columnSortable) return
@@ -231,16 +274,17 @@ export function Table<T>({
   }
 
   const toggleAll = () => {
-    const allIds = sortedData.map((row) => resolveRowId(data, row, getRowId))
-    const allSelected = allIds.length > 0 && allIds.every((id) => selectedSet.has(id))
-    const next = allSelected ? [] : allIds
+    const next = allSelected ? [] : sortedRows.map((entry) => entry.id)
     if (!selectionControlled) setInternalSelected(next)
     onSelectionChange?.(next)
   }
 
-  const showEmpty = !loading && sortedData.length === 0
+  const showEmpty = !loading && sortedRows.length === 0
   const skeletonRowCount = loadingRows ?? (data.length > 0 ? data.length : 5)
-  const skeletonLineClass = size === "sm" ? "h-5.5" : size === "lg" ? "h-7" : "h-6"
+  // `h-5.5` is not a Tailwind class (the default spacing scale has no 5.5), so
+  // `size="sm"` loading rows collapsed to zero height and the skeleton was
+  // invisible. `h-5` is the real neighbour of the md/lg steps below.
+  const skeletonLineClass = size === "sm" ? "h-5" : size === "lg" ? "h-7" : "h-6"
   const hasCheckbox = Boolean(selectable)
 
   const scrollStyle: React.CSSProperties = {
@@ -254,7 +298,7 @@ export function Table<T>({
   return (
     <div className={cn("w-full space-y-3", className)} {...props}>
       <div
-        className="relative w-full overflow-auto rounded-[var(--radius-input,0.375rem)] border border-border"
+        className="relative w-full overflow-auto rounded-surface-md border border-border"
         style={scrollStyle}
       >
         <table className={cn(tableVariants({ variant, size }))}>
@@ -268,19 +312,13 @@ export function Table<T>({
                     position: "sticky",
                     left: 0,
                     ...(stickyHeader ? { top: 0 } : {}),
-                    zIndex: stickyHeader ? 6 : 3,
+                    zIndex: stickyZ.headerColumn,
                   }}
                 >
                   <Checkbox
                     aria-label="Select all rows"
-                    checked={
-                      sortedData.length > 0 &&
-                      sortedData.every((row) => selectedSet.has(resolveRowId(data, row, getRowId)))
-                    }
-                    indeterminate={
-                      sortedData.some((row) => selectedSet.has(resolveRowId(data, row, getRowId))) &&
-                      !sortedData.every((row) => selectedSet.has(resolveRowId(data, row, getRowId)))
-                    }
+                    checked={allSelected}
+                    indeterminate={someSelected && !allSelected}
                     onChange={toggleAll}
                   />
                 </th>
@@ -345,7 +383,7 @@ export function Table<T>({
                     {selectable ? (
                       <td
                         className={cn(stickyCheckboxEdgeClasses(), variant === "striped" && "bg-inherit")}
-                        style={{ position: "sticky", left: 0, zIndex: 3 }}
+                        style={{ position: "sticky", left: 0, zIndex: stickyZ.column }}
                       >
                         <Skeleton variant="checkbox" />
                       </td>
@@ -376,7 +414,7 @@ export function Table<T>({
                         >
                           <Skeleton
                             className={cn(
-                              "block w-full max-w-full rounded-sm leading-none",
+                              "block w-full max-w-full rounded-control-sm leading-none",
                               skeletonLineClass,
                               col.width === undefined && colIndex > 0 && "max-w-[12rem]"
                             )}
@@ -387,9 +425,7 @@ export function Table<T>({
                     })}
                   </tr>
                 ))
-              : sortedData.map((row, rowIndex) => {
-                  const id = resolveRowId(data, row, getRowId)
-                  const sourceIndex = data.indexOf(row)
+              : sortedRows.map(({ row, index: sourceIndex, id }, rowIndex) => {
                   const clickable = Boolean(onRowClick)
                   return (
                     <tr
@@ -398,13 +434,13 @@ export function Table<T>({
                         "border-b border-border/80 transition-colors",
                         clickable && "cursor-pointer hover:bg-muted/40"
                       )}
-                      onClick={clickable ? () => onRowClick!(row, sourceIndex === -1 ? rowIndex : sourceIndex) : undefined}
+                      onClick={clickable ? () => onRowClick!(row, sourceIndex) : undefined}
                     >
                       {selectable ? (
                         <td
                           onClick={(e) => e.stopPropagation()}
                           className={cn(stickyCheckboxEdgeClasses(), variant === "striped" && "bg-inherit")}
-                          style={{ position: "sticky", left: 0, zIndex: 3 }}
+                          style={{ position: "sticky", left: 0, zIndex: stickyZ.column }}
                         >
                           <Checkbox
                             aria-label={`Select row ${rowIndex + 1}`}

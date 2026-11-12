@@ -1,29 +1,30 @@
 import * as React from "react"
-import { Chart, type ChartProps } from "./Chart"
-import type { ChartDatum } from "./chartUtils"
+import { Chart, type ChartBaseProps, type PieChartOptions } from "./Chart"
 
-export interface PieChartProps extends Omit<ChartProps, "type" | "data"> {
-  data: ChartDatum[]
+/** Only what a pie / donut chart actually reads — no cartesian keys. */
+export interface PieChartProps extends ChartBaseProps, Omit<PieChartOptions, "valueKey"> {
   valueKey: string
-  labelKey?: string
-  innerRadius?: number
-  padAngle?: number
-  startAngle?: number
-  endAngle?: number
 }
 
-export function PieChart({ data, valueKey, labelKey, innerRadius, ...props }: PieChartProps) {
+export const PieChart = React.forwardRef<HTMLDivElement, PieChartProps>(function PieChart(
+  { data, valueKey, labelKey, innerRadius, padAngle, startAngle, endAngle, ...props },
+  ref
+) {
   const isDonut = innerRadius != null && innerRadius > 0
   return (
     <Chart
+      ref={ref}
       type={isDonut ? "donut" : "pie"}
       data={data}
       valueKey={valueKey}
       labelKey={labelKey}
       innerRadius={innerRadius}
+      padAngle={padAngle}
+      startAngle={startAngle}
+      endAngle={endAngle}
       {...props}
     />
   )
-}
+})
 
 PieChart.displayName = "PieChart"

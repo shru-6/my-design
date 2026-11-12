@@ -6,6 +6,22 @@ import * as SliderPrimitive from '@radix-ui/react-slider';
 import { OTPInput } from 'input-otp';
 import { PanelGroupProps, ImperativePanelGroupHandle, PanelProps, ImperativePanelHandle, PanelResizeHandleProps } from 'react-resizable-panels';
 
+declare const iconVariants: (props?: ({
+    size?: "xs" | "sm" | "md" | "lg" | "xl" | null | undefined;
+    variant?: "default" | "muted" | null | undefined;
+    shape?: "default" | "circle" | "square" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type Status$1 = "online" | "offline" | "away" | "busy";
+type StatusPosition = "top-right" | "bottom-right";
+interface IconProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children">, VariantProps<typeof iconVariants> {
+    node?: React.ReactNode;
+    alt?: string;
+    status?: Status$1;
+    statusPosition?: StatusPosition;
+    fallback?: React.ReactNode;
+}
+declare const Icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<HTMLSpanElement>>;
+
 declare const buttonVariants: (props?: ({
     variant?: "outline" | "ghost" | "primary" | "secondary" | "destructive" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
@@ -17,6 +33,8 @@ type ButtonProps = ButtonBaseProps & {
     size?: VariantProps<typeof buttonVariants>["size"];
     left?: React.ReactNode;
     right?: React.ReactNode;
+    /** `Icon` size for `left` / `right`. Defaults to `sm` (16px) — raise it for oversized controls like `FAB`. */
+    iconSize?: IconProps["size"];
     iconOnly?: boolean;
     ariaLabel?: string;
     loading?: boolean;
@@ -31,6 +49,8 @@ declare const Button: React.ForwardRefExoticComponent<ButtonBaseProps & {
     size?: VariantProps<typeof buttonVariants>["size"];
     left?: React.ReactNode;
     right?: React.ReactNode;
+    /** `Icon` size for `left` / `right`. Defaults to `sm` (16px) — raise it for oversized controls like `FAB`. */
+    iconSize?: IconProps["size"];
     iconOnly?: boolean;
     ariaLabel?: string;
     loading?: boolean;
@@ -41,12 +61,18 @@ declare const Button: React.ForwardRefExoticComponent<ButtonBaseProps & {
     type?: "button" | "submit" | "reset";
 } & React.RefAttributes<HTMLButtonElement | HTMLAnchorElement>>;
 
+/**
+ * `position: fixed` chrome that floats above page content *and* above the
+ * dropdowns/popovers a page renders inline — hence `z-dropdown` rather than
+ * `z-sticky`, which left it under every menu on the page.
+ */
 declare const fabVariants: (props?: ({
     variant?: "primary" | "secondary" | null | undefined;
     size?: "sm" | "md" | "lg" | null | undefined;
     position?: "bottom-right" | "bottom-left" | "bottom-center" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
-interface FABProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children">, VariantProps<typeof fabVariants> {
+interface FABProps extends Omit<React.ButtonHTMLAttributes<HTMLButtonElement>, "children">, Pick<VariantProps<typeof fabVariants>, "variant" | "size" | "position"> {
+    /** The glyph. Named `left` for parity with `Button`'s adornment slot. */
     left: React.ReactNode;
     ariaLabel: string;
 }
@@ -80,15 +106,26 @@ interface CopyButtonProps extends Omit<ButtonProps, "onClick" | "children" | "on
 }
 declare const CopyButton: React.ForwardRefExoticComponent<CopyButtonProps & React.RefAttributes<HTMLButtonElement>>;
 
-interface DropdownItem {
+/**
+ * Internal shared primitive: the one menu row renderer + roving keyboard model
+ * for `Dropdown` and `ContextMenu`. ContextMenu previously carried a partial,
+ * `<div role="menuitem">`-based copy of Dropdown's loop with no keyboard
+ * handling at all; keeping the keyboard model attached to the renderer is what
+ * stops that from drifting apart again.
+ */
+/** One row in a menu. `separator: true` renders a rule and ignores every other field. */
+interface MenuItemSpec {
     label: React.ReactNode;
     value?: string;
     onClick?: () => void;
     left?: React.ReactNode;
     disabled?: boolean;
     separator?: boolean;
-    children?: DropdownItem[];
+    children?: MenuItemSpec[];
 }
+
+/** One row in a menu — shared with `ContextMenu` via `menuItemRow.tsx`. */
+type DropdownItem = MenuItemSpec;
 interface DropdownProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
     items: DropdownItem[];
     triggerProps?: {
@@ -107,10 +144,7 @@ interface DropdownProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "chil
     defaultOpen?: boolean;
     onOpenChange?: (open: boolean) => void;
 }
-declare function Dropdown({ items, triggerProps, trigger, contentClassName, align, sideOffset, open: openProp, defaultOpen, onOpenChange, className, ...rest }: DropdownProps): react_jsx_runtime.JSX.Element;
-declare namespace Dropdown {
-    var displayName: string;
-}
+declare const Dropdown: React.ForwardRefExoticComponent<DropdownProps & React.RefAttributes<HTMLDivElement>>;
 
 type SplitButtonMenuItem = {
     label: React.ReactNode;
@@ -125,31 +159,12 @@ interface SplitButtonProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
     disabled?: boolean;
     loading?: boolean;
     children?: React.ReactNode;
-    variant?: Exclude<ButtonProps["variant"], "destructive">;
+    variant?: ButtonProps["variant"];
     size?: ButtonProps["size"];
     buttonProps?: Partial<Omit<ButtonProps, "variant" | "size" | "children" | "iconOnly">>;
     dropdownProps?: Partial<Omit<DropdownProps, "items" | "trigger">>;
 }
-declare function SplitButton({ onClick, menuItems, disabled, loading, children, variant, size, buttonProps, dropdownProps, className, ...rest }: SplitButtonProps): react_jsx_runtime.JSX.Element;
-declare namespace SplitButton {
-    var displayName: string;
-}
-
-declare const iconVariants: (props?: ({
-    size?: "xs" | "sm" | "md" | "lg" | "xl" | null | undefined;
-    variant?: "default" | "muted" | null | undefined;
-    shape?: "default" | "circle" | "square" | null | undefined;
-} & class_variance_authority_types.ClassProp) | undefined) => string;
-type Status$1 = "online" | "offline" | "away" | "busy";
-type StatusPosition = "top-right" | "bottom-right";
-interface IconProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "children">, VariantProps<typeof iconVariants> {
-    node?: React.ReactNode;
-    alt?: string;
-    status?: Status$1;
-    statusPosition?: StatusPosition;
-    fallback?: React.ReactNode;
-}
-declare const Icon: React.ForwardRefExoticComponent<IconProps & React.RefAttributes<HTMLSpanElement>>;
+declare const SplitButton: React.ForwardRefExoticComponent<SplitButtonProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const labelVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
@@ -166,6 +181,16 @@ declare const focusRingDestructive = "focus-visible:ring-destructive";
 declare const peerFocusRing = "peer-focus-visible:outline-none peer-focus-visible:ring-2 peer-focus-visible:ring-ring";
 /** Unified disabled: no pointer, dimmed, not-allowed cursor (fields, buttons, thumbs). */
 declare const disabledControl = "disabled:cursor-not-allowed disabled:opacity-60 disabled:pointer-events-none";
+/**
+ * `disabledControl`'s sibling for things that are NOT real form controls —
+ * rows, list items, panels, chips, wrappers. A `<div>` has no `:disabled`
+ * pseudo-class, so this keys off the accessible/state attributes instead:
+ * set `data-disabled="true"` and/or `aria-disabled="true"` on the same element.
+ * Use `disabledSurfaceStyles` when the call site already branches in JS.
+ */
+declare const disabledSurface: string;
+/** Same look as `disabledSurface`, applied unconditionally — for `cond && …`. */
+declare const disabledSurfaceStyles = "cursor-not-allowed opacity-60 pointer-events-none";
 declare const ringOffsetBackground = "ring-offset-background";
 type StringFieldValidateOpts = {
     validate?: boolean | ((value: string) => string | undefined);
@@ -352,10 +377,7 @@ interface PhoneInputProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "on
     dropdownProps?: Partial<DropdownProps>;
     className?: string;
 }
-declare function PhoneInput({ value, defaultValue, onChange, defaultCountry, allowedCountries, placeholder, disabled, required, label, errorMessage, validate, onValidate, size, variant, inputProps, dropdownProps, className, ...rest }: PhoneInputProps): react_jsx_runtime.JSX.Element;
-declare namespace PhoneInput {
-    var displayName: string;
-}
+declare const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps & React.RefAttributes<HTMLDivElement>>;
 
 type CommandItem = {
     label: React.ReactNode;
@@ -365,11 +387,12 @@ type CommandItem = {
     disabled?: boolean;
     keywords?: string[];
 };
-interface CommandProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect"> {
+interface CommandProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSelect" | "onChange" | "defaultValue"> {
     items?: CommandItem[];
     value?: string;
     defaultValue?: string;
-    onValueChange?: (value: string) => void;
+    /** Selected item's value changed. (`onChange`, not `onValueChange` — category convention.) */
+    onChange?: (value: string) => void;
     inputValue?: string;
     defaultInputValue?: string;
     onInputValueChange?: (value: string) => void;
@@ -386,10 +409,7 @@ interface CommandProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSel
     className?: string;
     children?: React.ReactNode;
 }
-declare function Command({ items, value, defaultValue, onValueChange, inputValue, defaultInputValue, onInputValueChange, onSelect, placeholder, emptyState, loading, disabled, loop, debounceMs, filterFn, maxHeight, searchInputProps, className, children, ...rest }: CommandProps): react_jsx_runtime.JSX.Element;
-declare namespace Command {
-    var displayName: string;
-}
+declare const Command: React.ForwardRefExoticComponent<CommandProps & React.RefAttributes<HTMLDivElement>>;
 
 type DateRangeValue = {
     from: Date | null;
@@ -416,10 +436,7 @@ interface CalendarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onCh
     locale?: string;
     className?: string;
 }
-declare function Calendar({ value, defaultValue, onChange, minDate, maxDate, minRangeDays, maxRangeDays, disabled, selectionMode, showOutsideDays, weekStartsOn, disabledDates, highlightedDates, locale, className, ...rest }: CalendarProps): react_jsx_runtime.JSX.Element;
-declare namespace Calendar {
-    var displayName: string;
-}
+declare const Calendar: React.ForwardRefExoticComponent<CalendarProps & React.RefAttributes<HTMLDivElement>>;
 
 interface DatePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
     value?: Date | null;
@@ -442,10 +459,7 @@ interface DatePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "on
     calendarProps?: Partial<CalendarProps>;
     className?: string;
 }
-declare function DatePicker({ value, defaultValue, onChange, minDate, maxDate, disabled, required, placeholder, label, errorMessage, format, locale, closeOnSelect, clearable, size, variant, inputProps, calendarProps, className, ...rest }: DatePickerProps): react_jsx_runtime.JSX.Element;
-declare namespace DatePicker {
-    var displayName: string;
-}
+declare const DatePicker: React.ForwardRefExoticComponent<DatePickerProps & React.RefAttributes<HTMLDivElement>>;
 
 interface TimePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
     value?: Date | null;
@@ -467,10 +481,7 @@ interface TimePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "on
     inputProps?: Partial<TextInputProps>;
     className?: string;
 }
-declare function TimePicker({ value, defaultValue, onChange, disabled, required, placeholder, label, errorMessage, format, step, closeOnSelect, clearable, size, variant, inputProps, className, ...rest }: TimePickerProps): react_jsx_runtime.JSX.Element;
-declare namespace TimePicker {
-    var displayName: string;
-}
+declare const TimePicker: React.ForwardRefExoticComponent<TimePickerProps & React.RefAttributes<HTMLDivElement>>;
 
 type DatePreset = {
     label: React.ReactNode;
@@ -507,10 +518,7 @@ interface DateRangePickerProps extends Omit<React.HTMLAttributes<HTMLDivElement>
     calendarProps?: Partial<CalendarProps>;
     className?: string;
 }
-declare function DateRangePicker({ value, defaultValue, onChange, minDate, maxDate, minRangeDays, maxRangeDays, disabled, required, placeholder, label, errorMessage, format, locale, showApplyButton, applyLabel, cancelLabel, clearable, presets, size, variant, inputProps, calendarProps, className, ...rest }: DateRangePickerProps): react_jsx_runtime.JSX.Element;
-declare namespace DateRangePicker {
-    var displayName: string;
-}
+declare const DateRangePicker: React.ForwardRefExoticComponent<DateRangePickerProps & React.RefAttributes<HTMLDivElement>>;
 
 interface UploadProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "defaultValue"> {
     onUpload: (files: File[]) => void | Promise<void>;
@@ -534,10 +542,7 @@ interface UploadProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChan
     className?: string;
     children?: React.ReactNode;
 }
-declare function Upload({ onUpload, onRemove, value, defaultValue, onChange, multiple, maxFiles, accept, maxSize, disabled, loading, dragAndDrop, preview, label, errorMessage, showFileList, size, variant, className, children, ...rest }: UploadProps): react_jsx_runtime.JSX.Element;
-declare namespace Upload {
-    var displayName: string;
-}
+declare const Upload: React.ForwardRefExoticComponent<UploadProps & React.RefAttributes<HTMLDivElement>>;
 
 interface InlineEditProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "onChange" | "defaultValue"> {
     value?: string;
@@ -557,10 +562,7 @@ interface InlineEditProps extends Omit<React.HTMLAttributes<HTMLSpanElement>, "o
     cancelButtonProps?: Partial<ButtonProps>;
     className?: string;
 }
-declare function InlineEdit({ value, defaultValue, onSave, onCancel, placeholder, disabled, loading, required, validate, editTrigger, saveOnBlur, saveOnEnter, saveButtonProps, cancelButtonProps, className, ...rest }: InlineEditProps): react_jsx_runtime.JSX.Element;
-declare namespace InlineEdit {
-    var displayName: string;
-}
+declare const InlineEdit: React.ForwardRefExoticComponent<InlineEditProps & React.RefAttributes<HTMLSpanElement>>;
 
 interface SelectOption {
     label: React.ReactNode;
@@ -585,6 +587,11 @@ interface SelectProps extends Omit<React.ComponentPropsWithoutRef<"select">, "si
     contentClassName?: string;
     value?: string;
     defaultValue?: string;
+    /**
+     * Value-typed change handler. `onChange` is taken by the native `<select>`
+     * event handler (same as TextInput / Textarea), so the value form keeps this
+     * name; both fire, native first.
+     */
     onValueChange?: (value: string) => void;
 }
 declare const Select: React.ForwardRefExoticComponent<SelectProps & React.RefAttributes<HTMLSelectElement>>;
@@ -676,10 +683,7 @@ interface FormProps extends Omit<React.FormHTMLAttributes<HTMLFormElement>, "onS
     children?: React.ReactNode;
     className?: string;
 }
-declare function Form({ onSubmit, onCancel, initialValues, values: valuesProp, onValuesChange, validate, errors: errorsProp, validateOn, submitted: submittedProp, onSubmittedChange, resetSubmittedAfterMs, layout, columns, submitLabel, cancelLabel, footer, disabled, loading, submitButtonProps, cancelButtonProps, children, className, ...props }: FormProps): react_jsx_runtime.JSX.Element;
-declare namespace Form {
-    var displayName: string;
-}
+declare const Form: React.ForwardRefExoticComponent<FormProps & React.RefAttributes<HTMLFormElement>>;
 
 type FormFieldType = "text" | "email" | "password" | "number" | "url" | "search" | "textarea" | "select" | "checkbox" | "upload";
 interface FormFieldProps {
@@ -691,15 +695,15 @@ interface FormFieldProps {
     disabled?: boolean;
     value?: string;
     defaultValue?: string;
+    /** Called after the field value updates, for every control type. */
     onChange?: (value: string) => void;
-    /** Called after the field value updates (select, checkbox, and text inputs). */
-    onValueChange?: (value: string) => void;
     validate?: boolean | ((value: string) => string | undefined);
     errorMessage?: string;
     touched?: boolean;
     showError?: boolean;
     /** Select options when `type="select"`. */
     items?: SelectOption[];
+    /** Textarea rows when `type="textarea"`. */
     rows?: number;
     /** Upload options when `type="upload"`. */
     accept?: string;
@@ -712,11 +716,15 @@ interface FormFieldProps {
     render?: (props: FormFieldRenderProps) => React.ReactNode;
     children?: React.ReactNode;
     className?: string;
+    /**
+     * Pass-through to the underlying text control. Only the text-like types
+     * (`text` / `email` / `password` / `number` / `url` / `search`) and `textarea`
+     * render a control this shape fits, so it is ignored for `select`,
+     * `checkbox` and `upload`.
+     */
     inputProps?: Partial<TextInputProps>;
-    labelProps?: Record<string, unknown>;
-    helperTextProps?: Record<string, unknown>;
 }
-declare function FormField({ name, type, label, placeholder, required, disabled, value: valueProp, defaultValue, onChange: onChangeProp, validate, errorMessage, touched: touchedProp, showError, render, children, className, inputProps, onValueChange, items, rows, accept, dragAndDrop, multiple, maxSize, maxFiles, loading, onUpload, }: FormFieldProps): react_jsx_runtime.JSX.Element;
+declare function FormField({ name, type, label, placeholder, required, disabled, value: valueProp, defaultValue, onChange: onChangeProp, validate, errorMessage, touched: touchedProp, showError, render, children, className, inputProps, items, rows, accept, dragAndDrop, multiple, maxSize, maxFiles, loading, onUpload, }: FormFieldProps): react_jsx_runtime.JSX.Element;
 declare namespace FormField {
     var displayName: string;
 }
@@ -737,23 +745,20 @@ interface InputGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "ch
     placeholder?: string;
     className?: string;
 }
-declare function InputGroup({ children, disabled, loading, invalid, orientation, attached, size, variant, left, placeholder, className, ...props }: InputGroupProps): react_jsx_runtime.JSX.Element;
-declare namespace InputGroup {
-    var displayName: string;
-}
+declare const InputGroup: React.ForwardRefExoticComponent<InputGroupProps & React.RefAttributes<HTMLDivElement>>;
 interface InputGroupInputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "size">, VariantProps<typeof fieldSurfaceVariants> {
 }
 declare const InputGroupInput: React.ForwardRefExoticComponent<InputGroupInputProps & React.RefAttributes<HTMLInputElement>>;
 interface InputGroupAddonProps extends React.HTMLAttributes<HTMLSpanElement> {
     children: React.ReactNode;
 }
-declare function InputGroupAddon({ className, children, ...props }: InputGroupAddonProps): react_jsx_runtime.JSX.Element;
-declare namespace InputGroupAddon {
-    var displayName: string;
-}
+declare const InputGroupAddon: React.ForwardRefExoticComponent<InputGroupAddonProps & React.RefAttributes<HTMLSpanElement>>;
 type InputGroupButtonProps = ButtonProps;
 /** Outline-style trigger sized for horizontal attached groups. */
 declare const InputGroupButton: React.ForwardRefExoticComponent<{
+    content?: string | undefined | undefined;
+    translate?: "yes" | "no" | undefined | undefined;
+    prefix?: string | undefined | undefined;
     defaultChecked?: boolean | undefined | undefined;
     defaultValue?: string | number | readonly string[] | undefined;
     suppressContentEditableWarning?: boolean | undefined | undefined;
@@ -776,14 +781,11 @@ declare const InputGroupButton: React.ForwardRefExoticComponent<{
     style?: React.CSSProperties | undefined;
     tabIndex?: number | undefined | undefined;
     title?: string | undefined | undefined;
-    translate?: "yes" | "no" | undefined | undefined;
     radioGroup?: string | undefined | undefined;
     role?: React.AriaRole | undefined;
     about?: string | undefined | undefined;
-    content?: string | undefined | undefined;
     datatype?: string | undefined | undefined;
     inlist?: any;
-    prefix?: string | undefined | undefined;
     property?: string | undefined | undefined;
     rel?: string | undefined | undefined;
     resource?: string | undefined | undefined;
@@ -1041,6 +1043,7 @@ declare const InputGroupButton: React.ForwardRefExoticComponent<{
     } & class_variance_authority_types.ClassProp) | undefined) => string>["size"];
     left?: React.ReactNode;
     right?: React.ReactNode;
+    iconSize?: IconProps["size"];
     iconOnly?: boolean;
     ariaLabel?: string;
     loading?: boolean;
@@ -1056,7 +1059,6 @@ declare const cardVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type CardVariant = VariantProps<typeof cardVariants>["variant"];
-type CardColor = never;
 interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">, VariantProps<typeof cardVariants> {
     header?: React.ReactNode;
     footer?: React.ReactNode;
@@ -1078,8 +1080,8 @@ declare const Separator: React.ForwardRefExoticComponent<SeparatorProps & React.
 declare const stackVariants: (props?: ({
     direction?: "row" | "column" | null | undefined;
     gap?: "sm" | "md" | "lg" | "none" | null | undefined;
-    align?: "center" | "end" | "baseline" | "start" | "stretch" | null | undefined;
-    justify?: "center" | "end" | "start" | "between" | "around" | "evenly" | null | undefined;
+    align?: "end" | "start" | "center" | "baseline" | "stretch" | null | undefined;
+    justify?: "end" | "start" | "center" | "between" | "around" | "evenly" | null | undefined;
     wrap?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type StackRootTag = "div" | "ul" | "ol";
@@ -1095,15 +1097,15 @@ declare const Stack: (<T>(props: StackProps<T> & React.RefAttributes<HTMLElement
     displayName: string;
 };
 
-type GridColumnCount$1 = 1 | 2 | 3 | 4 | 6 | 12;
-type GridRowCount$1 = 1 | 2 | 3 | 4 | 5 | 6;
+type GridColumnCount = 1 | 2 | 3 | 4 | 6 | 12;
+type GridRowCount = 1 | 2 | 3 | 4 | 5 | 6;
 declare const gridSpacingVariants: (props?: ({
     gap?: "sm" | "md" | "lg" | "none" | null | undefined;
     columnGap?: "sm" | "md" | "lg" | "none" | null | undefined;
     rowGap?: "sm" | "md" | "lg" | "none" | null | undefined;
     autoFlow?: "default" | "row" | "column" | "dense" | "rowDense" | "colDense" | null | undefined;
-    alignItems?: "center" | "end" | "start" | "stretch" | null | undefined;
-    justifyItems?: "center" | "end" | "start" | "stretch" | null | undefined;
+    alignItems?: "end" | "start" | "center" | "stretch" | null | undefined;
+    justifyItems?: "end" | "start" | "center" | "stretch" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 /**
  * **autoFlow** → CSS `grid-auto-flow`: `default` (no class, browser row); `row` (explicit);
@@ -1114,9 +1116,9 @@ interface GridProps<T = unknown> extends Omit<React.HTMLAttributes<HTMLElement>,
     /** Semantic wrapper (`ul` / `ol` for lists). Default `div`. */
     as?: GridRootTag;
     /** Fixed column count; ignored when `minChildWidth` is set. */
-    columns?: GridColumnCount$1;
+    columns?: GridColumnCount;
     /** Fixed row count (implicit tracks). */
-    rows?: GridRowCount$1;
+    rows?: GridRowCount;
     /** When set, uses auto-fill columns with this min track width (e.g. `12rem`, `200px`). */
     minChildWidth?: string;
     className?: string;
@@ -1164,10 +1166,7 @@ interface CollapsibleProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
     showContentDivider?: boolean;
     className?: string;
 }
-declare function Collapsible({ open: controlledOpen, defaultOpen, onOpenChange, trigger, children, disabled, footer, showContentDivider, className, ...props }: CollapsibleProps): react_jsx_runtime.JSX.Element;
-declare namespace Collapsible {
-    var displayName: string;
-}
+declare const Collapsible: React.ForwardRefExoticComponent<CollapsibleProps & React.RefAttributes<HTMLDivElement>>;
 
 /** Side the panel shrinks toward when closed. */
 type CollapsiblePanelCloseDirection = "left" | "right" | "top" | "bottom";
@@ -1176,16 +1175,17 @@ type CollapsiblePanelVariant = "default" | "inset";
 type CollapsiblePanelTriggerPlacement = "none" | "header" | "floater";
 type CollapsiblePanelTriggerVariant = "default" | "pill";
 declare const collapsiblePanelRootVariants: (props?: ({
-    closeDirection?: "left" | "right" | "top" | "bottom" | null | undefined;
+    closeDirection?: "bottom" | "left" | "right" | "top" | null | undefined;
     crossAxis?: "full" | "parent" | "viewport" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const collapsiblePanelSurfaceVariants: (props?: ({
-    closeDirection?: "left" | "right" | "top" | "bottom" | null | undefined;
-    variant?: "default" | "inset" | null | undefined;
+    closeDirection?: "bottom" | "left" | "right" | "top" | null | undefined;
+    variant?: "inset" | "default" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
-/** Seam-adjacent floater — derived from close direction + cross-axis centering. */
+/** Seam-adjacent floater — centered on the seam when open; nudged outside when collapsed. */
 declare const floaterTriggerVariants: (props?: ({
-    closeDirection?: "left" | "right" | "top" | "bottom" | null | undefined;
+    closeDirection?: "bottom" | "left" | "right" | "top" | null | undefined;
+    open?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface CollapsiblePanelProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
     open?: boolean;
@@ -1236,19 +1236,27 @@ interface AccordionProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "chi
     onChange?: (next: string | string[]) => void;
     className?: string;
 }
-declare function Accordion({ items, type, value, defaultValue, onChange, className, ...props }: AccordionProps): react_jsx_runtime.JSX.Element;
-declare namespace Accordion {
-    var displayName: string;
-}
+declare const Accordion: React.ForwardRefExoticComponent<AccordionProps & React.RefAttributes<HTMLDivElement>>;
 
-interface ResizeContainerProps extends React.HTMLAttributes<HTMLDivElement> {
-    direction?: "horizontal" | "vertical" | "both";
+/**
+ * `direction` had been accepted and then dropped on the floor (`_direction`)
+ * while still being advertised in the gallery props panel. It now does the
+ * one thing it can honestly mean here: which axis the viewport scrolls when
+ * the scaled content outgrows it.
+ */
+declare const resizeViewportVariants: (props?: ({
+    direction?: "both" | "horizontal" | "vertical" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+declare const resizeContentVariants: (props?: ({
+    fit?: "fill" | "contain" | "cover" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface ResizeContainerProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">, Pick<VariantProps<typeof resizeViewportVariants>, "direction"> {
     minScale?: number;
     maxScale?: number;
     defaultScale?: number;
     scale?: number;
     onScaleChange?: (scale: number) => void;
-    fit?: "contain" | "cover" | "fill";
+    fit?: NonNullable<VariantProps<typeof resizeContentVariants>["fit"]>;
     showControls?: boolean;
     disabled?: boolean;
     maxWidth?: string | number;
@@ -1258,10 +1266,7 @@ interface ResizeContainerProps extends React.HTMLAttributes<HTMLDivElement> {
     children?: React.ReactNode;
     className?: string;
 }
-declare function ResizeContainer({ direction: _direction, minScale, maxScale, defaultScale, scale: scaleProp, onScaleChange, fit, showControls, disabled, maxWidth, maxHeight, containerProps, contentProps, children, className, ...rest }: ResizeContainerProps): react_jsx_runtime.JSX.Element;
-declare namespace ResizeContainer {
-    var displayName: string;
-}
+declare const ResizeContainer: React.ForwardRefExoticComponent<ResizeContainerProps & React.RefAttributes<HTMLDivElement>>;
 
 interface BreadcrumbItem {
     label: React.ReactNode;
@@ -1279,8 +1284,15 @@ interface BreadcrumbProps extends Omit<React.ComponentPropsWithoutRef<"nav">, "c
 }
 declare const Breadcrumb: React.ForwardRefExoticComponent<BreadcrumbProps & React.RefAttributes<HTMLElement>>;
 
+/**
+ * Consumer hook for navigation out of the design system's own nav chrome.
+ * Given one, the component hands the click over instead of doing a full page
+ * load, so React Router / Next.js links keep working.
+ */
+type NavigateHandler<TItem> = (href: string, item: TItem) => void;
+
 declare const sidebarVariants: (props?: ({
-    variant?: "default" | "inset" | "floating" | null | undefined;
+    variant?: "inset" | "default" | "floating" | null | undefined;
     side?: "left" | "right" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type SidebarItem = {
@@ -1310,12 +1322,15 @@ interface SidebarProps extends Omit<React.HTMLAttributes<HTMLElement>, "children
     collapsedWidth?: string | number;
     toggleButtonProps?: Partial<ButtonProps>;
     itemProps?: React.ButtonHTMLAttributes<HTMLButtonElement>;
+    /**
+     * Called instead of a full page load when an item with an `href` is
+     * activated — wire a client router here. Omit and the Sidebar navigates on
+     * its own (`location.assign` for button rows, the plain anchor for link rows).
+     */
+    onNavigate?: NavigateHandler<SidebarItem>;
     className?: string;
 }
-declare function Sidebar({ items, value, defaultValue, onChange, side, variant, collapsible, defaultCollapsed, collapsed: collapsedProp, onCollapsedChange, container, heightMode, header, footer, children, width, collapsedWidth, toggleButtonProps, itemProps, className, ...rest }: SidebarProps): react_jsx_runtime.JSX.Element;
-declare namespace Sidebar {
-    var displayName: string;
-}
+declare const Sidebar: React.ForwardRefExoticComponent<SidebarProps & React.RefAttributes<HTMLElement>>;
 
 type NavMenuItem = {
     label: React.ReactNode;
@@ -1332,32 +1347,38 @@ interface NavigationMenuProps extends Omit<React.HTMLAttributes<HTMLElement>, "c
     defaultValue?: string;
     onChange?: (value: string) => void;
     orientation?: "horizontal" | "vertical";
+    /**
+     * Called instead of a full page load when an item with an `href` is
+     * activated — wire a client router here. Omit and the menu navigates on its
+     * own (`location.assign` for submenu rows, the plain anchor for link rows).
+     */
+    onNavigate?: NavigateHandler<NavMenuItem>;
     children?: React.ReactNode;
     className?: string;
 }
-declare function NavigationMenu({ items, value, defaultValue, onChange, orientation, children, className, ...rest }: NavigationMenuProps): react_jsx_runtime.JSX.Element;
-declare namespace NavigationMenu {
-    var displayName: string;
-}
+declare const NavigationMenu: React.ForwardRefExoticComponent<NavigationMenuProps & React.RefAttributes<HTMLElement>>;
 
+declare const menubarVariants: (props?: ({
+    variant?: "default" | "ghost" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
 type MenubarMenu = {
     label: React.ReactNode;
     value?: string;
     items: DropdownItem[];
 };
-interface MenubarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange"> {
+interface MenubarProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange">, VariantProps<typeof menubarVariants> {
     menus: MenubarMenu[];
     value?: string;
     defaultValue?: string;
     onChange?: (value: string) => void;
     className?: string;
 }
-declare function Menubar({ menus, value, defaultValue, onChange, className, ...rest }: MenubarProps): react_jsx_runtime.JSX.Element;
-declare namespace Menubar {
-    var displayName: string;
-}
+declare const Menubar: React.ForwardRefExoticComponent<MenubarProps & React.RefAttributes<HTMLDivElement>>;
 
-interface ContextMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+declare const contextMenuVariants: (props?: ({
+    size?: "sm" | "md" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+interface ContextMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">, VariantProps<typeof contextMenuVariants> {
     items: DropdownItem[];
     open?: boolean;
     defaultOpen?: boolean;
@@ -1366,10 +1387,7 @@ interface ContextMenuProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
     className?: string;
     contentClassName?: string;
 }
-declare function ContextMenu({ items, open: openProp, defaultOpen, onOpenChange, children, className, contentClassName, ...rest }: ContextMenuProps): react_jsx_runtime.JSX.Element;
-declare namespace ContextMenu {
-    var displayName: string;
-}
+declare const ContextMenu: React.ForwardRefExoticComponent<ContextMenuProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const linkVariants: (props?: ({
     variant?: "default" | "muted" | "underline" | null | undefined;
@@ -1402,11 +1420,14 @@ interface NavbarProps extends Omit<React.HTMLAttributes<HTMLElement>, "children"
     children?: React.ReactNode;
     /** Passed to top-level nav links (not submenus). */
     linkVariant?: React.ComponentProps<typeof Link>["variant"];
+    /**
+     * Called instead of a full page load when a nav item with an `href` is
+     * activated — wire a client router here. Omit and the Navbar navigates on its
+     * own (`location.assign` for submenu rows, the plain anchor for link rows).
+     */
+    onNavigate?: NavigateHandler<NavItem>;
 }
-declare function Navbar({ logo, items, left, right, sticky, separator, variant, className, children, linkVariant, ...rest }: NavbarProps): react_jsx_runtime.JSX.Element;
-declare namespace Navbar {
-    var displayName: string;
-}
+declare const Navbar: React.ForwardRefExoticComponent<NavbarProps & React.RefAttributes<HTMLElement>>;
 
 interface PaginationProps extends Omit<React.ComponentPropsWithoutRef<"nav">, "children" | "onChange"> {
     /** Total number of records (not pages). */
@@ -1449,7 +1470,10 @@ interface StepperProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onCha
 declare const Stepper: React.ForwardRefExoticComponent<StepperProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const tabsListVariants: (props?: ({
-    variant?: "default" | "underline" | "pill" | null | undefined;
+    variant?: "pill" | "default" | "underline" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+declare const tabsTriggerVariants: (props?: ({
+    variant?: "pill" | "default" | "underline" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface TabItem {
     label: React.ReactNode;
@@ -1523,10 +1547,19 @@ type ToastAction = {
     label: string;
     onClick?: () => void;
 };
-interface ToastProps extends FeedbackSurfaceVariantProps {
-    id?: string;
+interface ToastProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title" | "children">, FeedbackSurfaceVariantProps {
     title?: React.ReactNode;
     description?: React.ReactNode;
+    /**
+     * Auto-dismiss delay in ms.
+     *
+     * **Only `Toaster` reads this.** It is part of the queue record (`toast()`
+     * defaults it to 5000) and `Toaster` owns the timer that calls
+     * `dismissToast`. A standalone `<Toast duration={1000} />` rendered outside
+     * `Toaster` does nothing with it — the component has no timer of its own,
+     * deliberately, so the queue stays the single owner of toast lifetime. Drive
+     * a standalone toast's lifetime from the parent instead.
+     */
     duration?: number;
     action?: ToastAction;
     left?: React.ReactNode;
@@ -1534,10 +1567,7 @@ interface ToastProps extends FeedbackSurfaceVariantProps {
     onClose?: () => void;
     className?: string;
 }
-declare function Toast({ tone, variant, title, description, action, left, dismissible, onClose, className, }: ToastProps): react_jsx_runtime.JSX.Element;
-declare namespace Toast {
-    var displayName: string;
-}
+declare const Toast: React.ForwardRefExoticComponent<ToastProps & React.RefAttributes<HTMLDivElement>>;
 
 declare function dismissToast(id: string): void;
 declare function toast(input: Omit<ToastProps, "id">): string;
@@ -1567,7 +1597,7 @@ declare const overlayVariants: (props?: ({
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 /** Portal mount target for `Overlay`: viewport body, scoped parent from `OverlayPortalScope`, a DOM node, or a ref to one. */
 type OverlayPortalContainer = "body" | "parent" | HTMLElement | React.RefObject<HTMLElement | null>;
-interface OverlayProps extends VariantProps<typeof overlayVariants> {
+interface OverlayProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "role" | "onClick">, VariantProps<typeof overlayVariants> {
     open?: boolean;
     onClose?: () => void;
     /**
@@ -1578,6 +1608,22 @@ interface OverlayProps extends VariantProps<typeof overlayVariants> {
     showCloseButton?: boolean;
     /** When false, backdrop clicks do not call `onClose` (close button still works if shown). */
     closeOnBackdropClick?: boolean;
+    /**
+     * Treat the content surface as a modal dialog: `role` + `aria-modal`, focus
+     * moves in on open, Tab cycles inside it, focus returns to the opener on
+     * close. Off by default — a bare backdrop stays `role="presentation"`.
+     */
+    dialog?: boolean;
+    /** `alertdialog` for a confirm / destroy prompt. Ignored unless `dialog`. */
+    dialogRole?: "dialog" | "alertdialog";
+    /** Accessible name for the dialog surface. Ignored unless `dialog`. */
+    dialogLabel?: string;
+    /** Escape closes. Ignored unless `dialog`. */
+    closeOnEscape?: boolean;
+    /** Focused on open instead of the surface's first tabbable child. Ignored unless `dialog`. */
+    initialFocus?: React.RefObject<HTMLElement | null>;
+    /** Applied to the content surface (the panel), not the backdrop. */
+    contentClassName?: string;
     className?: string;
     children?: React.ReactNode;
 }
@@ -1588,10 +1634,7 @@ declare function OverlayPortalScope({ children, className, }: {
     children: React.ReactNode;
     className?: string;
 }): react_jsx_runtime.JSX.Element;
-declare function Overlay({ open, onClose, container, blur, showCloseButton, closeOnBackdropClick, className, children, }: OverlayProps): React.ReactPortal | null;
-declare namespace Overlay {
-    var displayName: string;
-}
+declare const Overlay: React.ForwardRefExoticComponent<OverlayProps & React.RefAttributes<HTMLDivElement>>;
 
 interface LoadingOverlayProps {
     open: boolean;
@@ -1643,10 +1686,7 @@ interface PageHeaderProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "ti
     className?: string;
     children?: React.ReactNode;
 }
-declare function PageHeader({ heading, subheading, description, badge, actions, left, right, sticky, separator, variant, className, children, ...props }: PageHeaderProps): react_jsx_runtime.JSX.Element;
-declare namespace PageHeader {
-    var displayName: string;
-}
+declare const PageHeader: React.ForwardRefExoticComponent<PageHeaderProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const pageFooterVariants: (props?: ({
     variant?: "default" | "minimal" | null | undefined;
@@ -1659,13 +1699,10 @@ interface PageFooterProps extends React.HTMLAttributes<HTMLElement>, VariantProp
     children?: React.ReactNode;
     className?: string;
 }
-declare function PageFooter({ left, right, sticky, separator, variant, className, children, ...props }: PageFooterProps): react_jsx_runtime.JSX.Element;
-declare namespace PageFooter {
-    var displayName: string;
-}
+declare const PageFooter: React.ForwardRefExoticComponent<PageFooterProps & React.RefAttributes<HTMLElement>>;
 
 declare const heroVariants: (props?: ({
-    variant?: "default" | "split" | "centered" | null | undefined;
+    variant?: "split" | "default" | "centered" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type HeroActions = {
     primary?: ButtonProps;
@@ -1680,10 +1717,7 @@ interface HeroProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title">,
     children?: React.ReactNode;
     className?: string;
 }
-declare function Hero({ title, description, image, badge, actions, variant, className, children, ...props }: HeroProps): react_jsx_runtime.JSX.Element;
-declare namespace Hero {
-    var displayName: string;
-}
+declare const Hero: React.ForwardRefExoticComponent<HeroProps & React.RefAttributes<HTMLElement>>;
 
 interface AuthLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> {
     title?: React.ReactNode;
@@ -1693,10 +1727,7 @@ interface AuthLayoutProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "ti
     children?: React.ReactNode;
     className?: string;
 }
-declare function AuthLayout({ title, subtitle, logo, footer, children, className, ...props }: AuthLayoutProps): react_jsx_runtime.JSX.Element;
-declare namespace AuthLayout {
-    var displayName: string;
-}
+declare const AuthLayout: React.ForwardRefExoticComponent<AuthLayoutProps & React.RefAttributes<HTMLDivElement>>;
 
 interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
     sidebar?: React.ReactNode;
@@ -1705,10 +1736,13 @@ interface AppShellProps extends React.HTMLAttributes<HTMLDivElement> {
     children?: React.ReactNode;
     className?: string;
 }
-declare function AppShell({ sidebar, header, footer, children, className, ...props }: AppShellProps): react_jsx_runtime.JSX.Element;
-declare namespace AppShell {
-    var displayName: string;
-}
+/**
+ * Fixed-slot application chrome. Deliberately raw `div`s rather than
+ * `Stack`/`Grid`: those are list renderers (`items` + `renderItem`), and the
+ * shell's regions are named slots with individual sizing constraints, not a
+ * homogeneous list.
+ */
+declare const AppShell: React.ForwardRefExoticComponent<AppShellProps & React.RefAttributes<HTMLDivElement>>;
 
 interface HistoryControlButtonsProps extends React.HTMLAttributes<HTMLDivElement> {
     canUndo?: boolean;
@@ -1721,6 +1755,7 @@ interface HistoryControlButtonsProps extends React.HTMLAttributes<HTMLDivElement
     showUndo?: boolean;
     /** When false, hides the redo control. Default true. */
     showRedo?: boolean;
+    /** Render visible text labels next to each icon instead of icon-only controls. Default false. */
     showLabels?: boolean;
     /** When false, icon-only buttons render without hover tooltips. Default true. */
     showTooltips?: boolean;
@@ -1729,16 +1764,13 @@ interface HistoryControlButtonsProps extends React.HTMLAttributes<HTMLDivElement
     resetButtonProps?: Partial<ButtonProps>;
     className?: string;
 }
-declare function HistoryControlButtons({ canUndo, canRedo, canReset, onUndo, onRedo, onReset, showUndo, showRedo, showLabels, showTooltips, undoButtonProps, redoButtonProps, resetButtonProps, className, ...rest }: HistoryControlButtonsProps): react_jsx_runtime.JSX.Element;
-declare namespace HistoryControlButtons {
-    var displayName: string;
-}
+declare const HistoryControlButtons: React.ForwardRefExoticComponent<HistoryControlButtonsProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const positionVariants: (props?: ({
     position?: "top-right" | "bottom-right" | "bottom-left" | "top-left" | "left-center" | "right-center" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const slideVariants: (props?: ({
-    slideFrom?: "left" | "right" | "top" | "bottom" | null | undefined;
+    slideFrom?: "bottom" | "left" | "right" | "top" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type FixedScreenWidgetPosition = NonNullable<VariantProps<typeof positionVariants>["position"]>;
 type FixedScreenWidgetSlideFrom = NonNullable<VariantProps<typeof slideVariants>["slideFrom"]>;
@@ -1759,16 +1791,13 @@ interface FixedScreenWidgetProps extends React.HTMLAttributes<HTMLDivElement> {
     children?: React.ReactNode;
     className?: string;
 }
-declare function FixedScreenWidget({ open: openProp, defaultOpen, onOpenChange, position, slideFrom, trigger, triggerProps, panelProps, offsetX, offsetY, pointerEvents, closeOnOutsideClick, closeOnEscape, children, className, ...rest }: FixedScreenWidgetProps): react_jsx_runtime.JSX.Element;
-declare namespace FixedScreenWidget {
-    var displayName: string;
-}
+declare const FixedScreenWidget: React.ForwardRefExoticComponent<FixedScreenWidgetProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const modalSurfaceVariants: (props?: ({
     size?: "sm" | "md" | "lg" | "xl" | "full" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 declare const modalOverlayLayout: (props?: ({
-    align?: "center" | "top" | null | undefined;
+    align?: "top" | "center" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 type ModalSize = NonNullable<VariantProps<typeof modalSurfaceVariants>["size"]>;
 type ModalAlign = NonNullable<VariantProps<typeof modalOverlayLayout>["align"]>;
@@ -1782,6 +1811,8 @@ interface ModalProps extends VariantProps<typeof modalSurfaceVariants>, VariantP
     showClose?: boolean;
     /** When true, backdrop clicks do not close the dialog. */
     loading?: boolean;
+    /** Override backdrop-close behavior. Defaults to closing only when there is no close icon. */
+    closeOnBackdropClick?: boolean;
     minHeight?: string | number;
     maxHeight?: string | number;
     className?: string;
@@ -1789,6 +1820,10 @@ interface ModalProps extends VariantProps<typeof modalSurfaceVariants>, VariantP
     cardProps?: Omit<CardProps, "header" | "footer" | "children" | "minHeight" | "maxHeight">;
     /** Portal target for the backdrop — use `parent` inside `OverlayPortalScope` for scoped previews. */
     container?: OverlayPortalContainer;
+    /** Accessible name for the dialog. Supply when `header` is not plain text. */
+    ariaLabel?: string;
+    /** Focused when the dialog opens, instead of its first tabbable child. */
+    initialFocus?: React.RefObject<HTMLElement | null>;
     children?: React.ReactNode;
 }
 declare const Modal: React.ForwardRefExoticComponent<ModalProps & React.RefAttributes<HTMLDivElement>>;
@@ -1802,12 +1837,26 @@ interface TriggerModalProps extends ModalProps {
     trigger?: React.ReactNode;
     triggerProps?: ModalTriggerProps;
 }
-/** Modal with an optional trigger — base for ConfirmModal and FormModal. */
-declare function TriggerModal({ trigger, triggerProps, showClose, open: openProp, defaultOpen, onOpenChange, ...modalProps }: TriggerModalProps): react_jsx_runtime.JSX.Element;
-declare namespace TriggerModal {
-    var displayName: string;
-}
+/**
+ * Modal with an optional trigger — base for ConfirmModal and FormModal.
+ *
+ * Everything `Modal` accepts flows straight through, including the dialog
+ * a11y props (`ariaLabel`, `initialFocus`) — the wrapper adds a trigger, it
+ * does not narrow the surface.
+ */
+declare const TriggerModal: React.ForwardRefExoticComponent<TriggerModalProps & React.RefAttributes<HTMLDivElement>>;
 
+/**
+ * What the confirm button is for. Each intent has its own look:
+ *
+ * - `default` — brand primary, neutral confirmation.
+ * - `save` — solid success tone, a commit that creates or persists something.
+ * - `warning` — solid warning tone, reversible but consequential (discard drafts,
+ *   overwrite, sign everyone out).
+ * - `destructive` — solid destructive, data loss.
+ * - `delete` — documented alias of `destructive`, for the common "delete this
+ *   record" case. Identical styling on purpose; both are the loudest stop.
+ */
 type ConfirmModalIntent = "default" | "destructive" | "delete" | "save" | "warning";
 type ConfirmModalConfirmProps = {
     label: string;
@@ -1831,10 +1880,7 @@ interface ConfirmModalProps extends Omit<TriggerModalProps, "header" | "footer" 
     triggerModalProps?: Partial<TriggerModalProps>;
     className?: string;
 }
-declare function ConfirmModal({ open: openProp, defaultOpen, onOpenChange, triggerProps, heading, description, left, intent, confirmProps, cancelProps, loading, container, triggerModalProps, className, size, ...rest }: ConfirmModalProps): react_jsx_runtime.JSX.Element;
-declare namespace ConfirmModal {
-    var displayName: string;
-}
+declare const ConfirmModal: React.ForwardRefExoticComponent<ConfirmModalProps & React.RefAttributes<HTMLDivElement>>;
 
 type FormModalMode = "create" | "edit";
 type FormFieldChangeHelpers = {
@@ -1908,10 +1954,7 @@ interface FormModalProps extends Omit<TriggerModalProps, "header" | "footer" | "
     className?: string;
     children?: React.ReactNode;
 }
-declare function FormModal({ open: openProp, defaultOpen, onOpenChange, triggerProps, heading, subheading, left, mode, fields, formProps, onSubmit, onSubmitSuccess, onSubmitError, submitLabel, submittingLabel, cancelLabel, loading, submitDisabled, onCancel, validateOnSubmit, container, submitButtonProps, cancelButtonProps, triggerModalProps, className, children, size, ...rest }: FormModalProps): react_jsx_runtime.JSX.Element;
-declare namespace FormModal {
-    var displayName: string;
-}
+declare const FormModal: React.ForwardRefExoticComponent<FormModalProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const textVariants: (props?: ({
     size?: "xs" | "sm" | "md" | "lg" | "xl" | "base" | "2xs" | "2xl" | null | undefined;
@@ -1935,6 +1978,7 @@ declare const skeletonVariants: (props?: ({
 interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement>, VariantProps<typeof skeletonVariants> {
     width?: string | number;
     height?: string | number;
+    /** Repeat the placeholder N times inside a wrapper. Default 1 (no wrapper). */
     count?: number;
     className?: string;
     children?: React.ReactNode;
@@ -1959,14 +2003,14 @@ declare const pillSurfaceVariants: (props?: ({
     appearance?: "subtle" | "outline" | "ghost" | "solid" | null | undefined;
     size?: "sm" | "md" | null | undefined;
     tone?: "danger" | "info" | "neutral" | "success" | "warning" | null | undefined;
-    shape?: "rounded" | "pill" | null | undefined;
+    shape?: "pill" | "soft" | null | undefined;
     selected?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 /** Button-like chip surfaces (same palette as the old action Toggle). */
 declare const toggleSurfaceVariants: (props?: ({
     toggleSurface?: "outline" | "ghost" | "primary" | "secondary" | null | undefined;
     size?: "sm" | "md" | null | undefined;
-    shape?: "rounded" | "pill" | null | undefined;
+    shape?: "pill" | "soft" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface PillProps extends Omit<React.HTMLAttributes<HTMLElement>, "children">, VariantProps<typeof pillSurfaceVariants> {
     as?: "span" | "button";
@@ -1979,6 +2023,12 @@ interface PillProps extends Omit<React.HTMLAttributes<HTMLElement>, "children">,
     right?: React.ReactNode;
     /** Renders a dismiss control (e.g. filter chips). */
     onRemove?: () => void;
+    /**
+     * Names the dismiss control for screen readers — `Remove {removeLabel}`.
+     * Needed because `children` is a `ReactNode` and can't be stringified.
+     * Falls back to a bare "Remove".
+     */
+    removeLabel?: string;
     dot?: boolean;
     selected?: boolean;
     disabled?: boolean;
@@ -2023,10 +2073,7 @@ interface AvatarGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "c
     max?: number;
     size?: AvatarProps["size"];
 }
-declare function AvatarGroup({ items, max, size, className, ...rest }: AvatarGroupProps): react_jsx_runtime.JSX.Element;
-declare namespace AvatarGroup {
-    var displayName: string;
-}
+declare const AvatarGroup: React.ForwardRefExoticComponent<AvatarGroupProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const progressVariants: (props?: ({
     size?: "sm" | "md" | "lg" | null | undefined;
@@ -2052,12 +2099,20 @@ interface KbdGroupProps extends React.HTMLAttributes<HTMLDivElement> {
 declare const KbdGroup: React.ForwardRefExoticComponent<KbdGroupProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const imageVariants: (props?: ({
-    variant?: "default" | "circle" | "square" | "rounded" | null | undefined;
+    variant?: "default" | "circle" | "square" | "soft" | null | undefined;
     fit?: "fill" | "none" | "contain" | "cover" | "scale-down" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface ImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, "placeholder">, VariantProps<typeof imageVariants> {
     fallback?: React.ReactNode;
-    placeholder?: "blur" | "skeleton" | "none";
+    /**
+     * What to show while the image loads. `skeleton` renders a `Skeleton` in the
+     * image's box; `none` renders nothing.
+     *
+     * (There used to be a third documented value, `blur`, that no code path ever
+     * implemented — it behaved exactly like `skeleton`'s "hide the img" half with
+     * nothing drawn in its place. Removed rather than left as a typed no-op.)
+     */
+    placeholder?: "skeleton" | "none";
     loadingStrategy?: "lazy" | "eager";
     position?: string;
     /**
@@ -2077,12 +2132,23 @@ interface PillItem {
     selected?: boolean;
     dot?: boolean;
     loading?: boolean;
+    /**
+     * Plain-text name for the remove control (`Remove {removeLabel}`). Needed
+     * whenever `label` is not a string — it used to be `String(item.label)`,
+     * which announced "Remove [object Object]" for any `ReactNode` label.
+     * Defaults to `label` when it is a string/number, otherwise to `value`.
+     */
+    removeLabel?: string;
 }
 declare const groupVariants: (props?: ({
     gap?: "sm" | "md" | "lg" | null | undefined;
     wrap?: boolean | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
 interface PillGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onChange" | "onSelect">, VariantProps<typeof groupVariants> {
+    /**
+     * The rendered pills. `PillGroup` treats this as the single source of truth
+     * and never removes from it itself — see `onRemove`.
+     */
     items: PillItem[];
     value?: string[];
     defaultValue?: string[];
@@ -2091,7 +2157,15 @@ interface PillGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onC
     onSelect?: (item: PillItem, selected: boolean) => void;
     multiple?: boolean;
     removable?: boolean;
-    onRemove?: (value: string) => void;
+    /**
+     * Fired when a pill's dismiss control is used. **The parent must apply it** —
+     * `next` is `items` with that pill dropped, ready to hand back as `items`.
+     *
+     * This used to be handled by mirroring `items` into local state; any parent
+     * re-render with a fresh array identity resurrected every removed pill, and
+     * the removal never reached the parent's data at all.
+     */
+    onRemove?: (value: string, next: PillItem[]) => void;
     maxVisible?: number;
     overflowLabel?: string;
     children?: React.ReactNode;
@@ -2103,10 +2177,7 @@ interface PillGroupProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onC
     /** Disables all pills and shows a trailing spinner. */
     loading?: boolean;
 }
-declare function PillGroup({ items, value, defaultValue, onChange, selectable, onSelect, multiple, removable, onRemove, maxVisible, overflowLabel, children, size, variant, toggleSurface, loading: groupLoading, gap, wrap, className, ...props }: PillGroupProps): react_jsx_runtime.JSX.Element;
-declare namespace PillGroup {
-    var displayName: string;
-}
+declare const PillGroup: React.ForwardRefExoticComponent<PillGroupProps & React.RefAttributes<HTMLDivElement>>;
 
 interface DescriptionItem {
     label: React.ReactNode;
@@ -2161,10 +2232,19 @@ type ListSearchConfig = Omit<Partial<SearchInputProps>, "value" | "defaultValue"
     /** When false, search UI does not filter list items (e.g. filters external data). Default true. */
     filterItems?: boolean;
 };
-type StackGap = NonNullable<VariantProps<typeof stackVariants>["gap"]>;
-type GridGap = NonNullable<VariantProps<typeof gridSpacingVariants>["gap"]>;
-type GridColumnCount = 1 | 2 | 3 | 4 | 6 | 12;
-type GridRowCount = 1 | 2 | 3 | 4 | 5 | 6;
+/**
+ * Layout pass-through for `layout="list"`.
+ *
+ * These used to be flattened onto `ListProps` — every `Stack` prop and every
+ * `Grid` prop side by side, half of them inert depending on `layout`, with the
+ * `gap` collision papered over by a second `gridGap` prop. Grouping them as
+ * SlotProps (the convention the project documents) makes it obvious which
+ * layout mode a knob belongs to, and drops `gridGap` entirely: each slot has
+ * its own `gap`.
+ */
+type ListStackProps = Pick<StackProps, "direction" | "gap" | "align" | "justify" | "wrap">;
+/** Layout pass-through for `layout="grid"`. */
+type ListGridProps = Pick<GridProps, "columns" | "rows" | "minChildWidth" | "gap" | "columnGap" | "rowGap" | "autoFlow" | "alignItems" | "justifyItems">;
 interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children" | "onSelect"> {
     items: readonly ListItem[];
     listType?: "unordered" | "ordered" | "none";
@@ -2192,21 +2272,10 @@ interface ListProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children
     header?: React.ReactNode;
     /** `true`: default search field + built-in filter. Object: pass `filter` and/or SearchInput props. */
     search?: boolean | ListSearchConfig;
-    direction?: VariantProps<typeof stackVariants>["direction"];
-    gap?: StackGap;
-    align?: VariantProps<typeof stackVariants>["align"];
-    justify?: VariantProps<typeof stackVariants>["justify"];
-    wrap?: VariantProps<typeof stackVariants>["wrap"];
-    columns?: GridColumnCount;
-    rows?: GridRowCount;
-    minChildWidth?: string;
-    columnGap?: VariantProps<typeof gridSpacingVariants>["columnGap"];
-    rowGap?: VariantProps<typeof gridSpacingVariants>["rowGap"];
-    autoFlow?: VariantProps<typeof gridSpacingVariants>["autoFlow"];
-    alignItems?: VariantProps<typeof gridSpacingVariants>["alignItems"];
-    justifyItems?: VariantProps<typeof gridSpacingVariants>["justifyItems"];
-    /** Grid gap (and fallback when you only set `gap` in grid mode). */
-    gridGap?: GridGap;
+    /** `Stack` pass-through; applies when `layout="list"` (the default). */
+    stackProps?: ListStackProps;
+    /** `Grid` pass-through; applies when `layout="grid"`. */
+    gridProps?: ListGridProps;
 }
 declare const List: React.ForwardRefExoticComponent<ListProps & React.RefAttributes<HTMLDivElement>>;
 
@@ -2275,6 +2344,8 @@ type TreeItem = {
     id: string;
     label: React.ReactNode;
     left?: React.ReactNode;
+    /** Row actions rendered outside the select control (buttons, menus, etc.). */
+    actions?: React.ReactNode;
     kind?: TreeItemKind;
     children?: TreeItem[];
 };
@@ -2308,10 +2379,7 @@ interface TreeViewProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "onSe
     onDelete?: (id: string) => void;
     className?: string;
 }
-declare function TreeView({ items, selectedId, defaultSelectedId, onSelect, expandedIds, defaultExpandedIds, onExpandedChange, showIndentGuides, loading, emptyState, indent, draggable, onMove, allowAddSibling, allowAddChild, allowDelete, onAdd, onDelete, className, ...rest }: TreeViewProps): react_jsx_runtime.JSX.Element;
-declare namespace TreeView {
-    var displayName: string;
-}
+declare const TreeView: React.ForwardRefExoticComponent<TreeViewProps & React.RefAttributes<HTMLDivElement>>;
 
 type CarouselItem = {
     image: string;
@@ -2328,22 +2396,25 @@ interface CarouselProps extends React.HTMLAttributes<HTMLDivElement> {
     orientation?: "horizontal" | "vertical";
     className?: string;
 }
-declare function Carousel({ items, autoPlay, loop, interval, showIndicators, showArrows, orientation, className, ...rest }: CarouselProps): react_jsx_runtime.JSX.Element | null;
-declare namespace Carousel {
-    var displayName: string;
-}
+declare const Carousel: React.ForwardRefExoticComponent<CarouselProps & React.RefAttributes<HTMLDivElement>>;
 
-interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
+declare const codeBlockVariants: (props?: ({
+    variant?: "inset" | "default" | "ghost" | "surface" | null | undefined;
+} & class_variance_authority_types.ClassProp) | undefined) => string;
+type CodeBlockVariant = NonNullable<VariantProps<typeof codeBlockVariants>["variant"]>;
+interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">, VariantProps<typeof codeBlockVariants> {
     code: string;
     language?: string;
     showLineNumbers?: boolean;
     showCopy?: boolean;
+    /** Renders a wrap toggle beside copy — when on, long lines wrap instead of scrolling horizontally. */
+    showWrapToggle?: boolean;
+    wrap?: boolean;
+    defaultWrap?: boolean;
+    onWrapChange?: (wrap: boolean) => void;
     filename?: string;
 }
-declare function CodeBlock({ code, language, showLineNumbers, showCopy, filename, className, ...rest }: CodeBlockProps): react_jsx_runtime.JSX.Element;
-declare namespace CodeBlock {
-    var displayName: string;
-}
+declare const CodeBlock: React.ForwardRefExoticComponent<CodeBlockProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const alertDialogVariants: (props?: ({
     variant?: "default" | "destructive" | "warning" | null | undefined;
@@ -2368,14 +2439,13 @@ interface AlertDialogProps extends VariantProps<typeof alertDialogVariants> {
     loading?: boolean;
     className?: string;
     container?: OverlayPortalContainer;
+    /** Focused when the prompt opens, instead of its first tabbable child. */
+    initialFocus?: React.RefObject<HTMLElement | null>;
 }
-declare function AlertDialog({ open: openProp, defaultOpen, onOpenChange, title, description, variant, confirmProps, cancelProps, loading, className, container, }: AlertDialogProps): react_jsx_runtime.JSX.Element;
-declare namespace AlertDialog {
-    var displayName: string;
-}
+declare const AlertDialog: React.ForwardRefExoticComponent<AlertDialogProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const drawerVariants: (props?: ({
-    placement?: "left" | "right" | "top" | "bottom" | null | undefined;
+    placement?: "bottom" | "left" | "right" | "top" | null | undefined;
     size?: "sm" | "md" | "lg" | "xl" | "full" | null | undefined;
     variant?: "default" | "sheet" | null | undefined;
 } & class_variance_authority_types.ClassProp) | undefined) => string;
@@ -2392,6 +2462,10 @@ interface DrawerProps extends VariantProps<typeof drawerVariants> {
     className?: string;
     cardProps?: Omit<CardProps, "header" | "footer" | "children">;
     container?: OverlayPortalContainer;
+    /** Accessible name for the dialog. Supply when `header` is not plain text. */
+    ariaLabel?: string;
+    /** Focused when the drawer opens, instead of its first tabbable child. */
+    initialFocus?: React.RefObject<HTMLElement | null>;
     children?: React.ReactNode;
 }
 declare const Drawer: React.ForwardRefExoticComponent<DrawerProps & React.RefAttributes<HTMLDivElement>>;
@@ -2413,16 +2487,15 @@ interface PopoverProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "child
     /** When false, trigger click does not toggle (e.g. HoverCard). */
     openOnClick?: boolean;
     closeOnOutsideClick?: boolean;
+    /** Escape closes the panel. Independent of `closeOnOutsideClick`. */
+    closeOnEscape?: boolean;
     placement?: PopoverPlacement;
     offset?: number;
     className?: string;
     cardProps?: Omit<CardProps, "children">;
     children?: React.ReactNode;
 }
-declare function Popover({ open: openProp, defaultOpen, onOpenChange, triggerProps, trigger, openOnClick, closeOnOutsideClick, placement, offset, className, cardProps, children, ...rest }: PopoverProps): react_jsx_runtime.JSX.Element;
-declare namespace Popover {
-    var displayName: string;
-}
+declare const Popover: React.ForwardRefExoticComponent<PopoverProps & React.RefAttributes<HTMLDivElement>>;
 
 type HoverCardTriggerProps = {
     label?: React.ReactNode;
@@ -2438,10 +2511,7 @@ interface HoverCardProps extends Omit<PopoverProps, "triggerProps" | "trigger" |
     closeDelay?: number;
     placement?: PopoverPlacement;
 }
-declare function HoverCard({ open: openProp, defaultOpen, onOpenChange, triggerProps, trigger, openDelay, closeDelay, placement, offset, className, cardProps, children, ...rest }: HoverCardProps): react_jsx_runtime.JSX.Element;
-declare namespace HoverCard {
-    var displayName: string;
-}
+declare const HoverCard: React.ForwardRefExoticComponent<HoverCardProps & React.RefAttributes<HTMLDivElement>>;
 
 declare const tooltipContentVariants: (props?: ({
     variant?: "default" | "inverted" | "info" | null | undefined;
@@ -2477,10 +2547,9 @@ interface TooltipProps {
     /** When false, hides the placement arrow. */
     showArrow?: boolean;
 }
-declare function Tooltip({ content, disabled, children, placement, transitionDuration, className, variant, keepOpenOnContentHover, autoPlacement, xOffset, yOffset, maxWidth, showArrow, }: TooltipProps): react_jsx_runtime.JSX.Element;
-declare namespace Tooltip {
-    var displayName: string;
-}
+/** The forwarded ref lands on the **trigger** — the tooltip itself is portaled and transient. */
+declare const Tooltip: React.ForwardRefExoticComponent<TooltipProps & React.RefAttributes<HTMLElement>>;
+/** No-op wrapper kept for apps that still wrap trees with a provider. */
 declare function TooltipProvider({ children }: {
     children?: React.ReactNode;
 }): react_jsx_runtime.JSX.Element;
@@ -2497,99 +2566,190 @@ declare const VisuallyHidden: React.ForwardRefExoticComponent<VisuallyHiddenProp
 
 interface ErrorBoundaryProps {
     children: React.ReactNode;
-    fallback?: React.ReactNode;
+    /**
+     * Replacement UI. As a function it receives `reset`, so a fallback can offer
+     * a "Try again" control without the consumer having to remount via `key`.
+     */
+    fallback?: React.ReactNode | ((reset: () => void) => React.ReactNode);
     onError?: (error: Error, errorInfo: React.ErrorInfo) => void;
+    /**
+     * Values that identify the render this boundary caught. When any of them
+     * changes (`Object.is`, shallow) the boundary clears its error and retries —
+     * the usual case being route or entity id.
+     */
+    resetKeys?: readonly unknown[];
+    /** Called whenever the boundary leaves its error state. */
+    onReset?: () => void;
     className?: string;
 }
 interface ErrorBoundaryState {
     hasError: boolean;
+    error?: Error;
 }
 declare class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoundaryState> {
     static displayName: string;
     state: ErrorBoundaryState;
-    static getDerivedStateFromError(): {
+    static getDerivedStateFromError(error: Error): {
         hasError: boolean;
+        error: Error;
     };
     componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void;
+    componentDidUpdate(prevProps: ErrorBoundaryProps): void;
+    /** Clears the caught error and re-renders `children`. Safe to call from a fallback. */
+    reset: () => void;
     render(): string | number | boolean | Iterable<React.ReactNode> | react_jsx_runtime.JSX.Element | null | undefined;
 }
 
 type ChartDatum = Record<string, unknown>;
+type LineCurve = "linear" | "monotone" | "step";
 
 type ChartType = "bar" | "line" | "area" | "pie" | "donut" | "scatter";
-interface ChartProps extends React.SVGAttributes<SVGSVGElement> {
-    type: ChartType;
+/**
+ * Everything every chart type shares. The root element is the wrapper `<div>`,
+ * so `...props` (and `className`) land there; anything meant for the `<svg>`
+ * goes through `svgProps` rather than falling through onto the element as an
+ * unknown DOM attribute.
+ */
+interface ChartBaseProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children"> {
     data: ChartDatum[];
-    xKey?: string;
-    yKey?: string;
-    valueKey?: string;
-    labelKey?: string;
-    responsive?: boolean;
-    legend?: boolean;
-    tooltip?: boolean;
+    /** Draw horizontal grid rules behind cartesian charts. Ignored by pie / donut. */
     grid?: boolean;
-    config?: Record<string, {
-        label?: string;
-        color?: string;
-    }>;
+    /** Render a swatch + label row under the plot. */
+    legend?: boolean;
     height?: number | string;
     width?: number | string;
-    innerRadius?: number;
-    horizontal?: boolean;
-    stacked?: boolean;
-    area?: boolean;
-    showPoints?: boolean;
     className?: string;
+    /** Pass-through to the underlying `<svg>` (e.g. a better `aria-label`). */
+    svgProps?: React.SVGAttributes<SVGSVGElement>;
 }
-declare function Chart({ type, data, xKey, yKey, valueKey, labelKey, responsive, legend, grid, height, width, innerRadius, horizontal, area, showPoints, className, ...props }: ChartProps): react_jsx_runtime.JSX.Element;
-declare namespace Chart {
-    var displayName: string;
+/** Keys for the charts plotted on an x / y pair. */
+interface CartesianKeyProps {
+    xKey?: string;
+    yKey?: string;
 }
-
-interface BarChartProps extends Omit<ChartProps, "type" | "data"> {
-    data: ChartDatum[];
-    xKey: string;
-    yKey: string;
-    stacked?: boolean;
+interface BarChartOptions {
+    /** Lay the bars out along the x axis instead of up the y axis. */
     horizontal?: boolean;
 }
-declare function BarChart({ data, xKey, yKey, stacked, horizontal, ...props }: BarChartProps): react_jsx_runtime.JSX.Element;
-declare namespace BarChart {
-    var displayName: string;
-}
-
-interface LineChartProps extends Omit<ChartProps, "type" | "data"> {
-    data: ChartDatum[];
-    xKey: string;
-    yKey: string;
-    curve?: "linear" | "monotone" | "step";
-    showPoints?: boolean;
+interface LineChartOptions {
+    /** Fill the region under the line. Implied by `type="area"`. */
     area?: boolean;
+    showPoints?: boolean;
+    /** Interpolation between points. `monotone` smooths without overshooting. */
+    curve?: LineCurve;
 }
-declare function LineChart({ data, xKey, yKey, curve: _curve, showPoints, area, ...props }: LineChartProps): react_jsx_runtime.JSX.Element;
-declare namespace LineChart {
-    var displayName: string;
-}
-
-interface PieChartProps extends Omit<ChartProps, "type" | "data"> {
-    data: ChartDatum[];
-    valueKey: string;
+interface PieChartOptions {
+    valueKey?: string;
     labelKey?: string;
+    /** Radius of the hole, in viewBox units. Anything above 0 makes it a donut. */
     innerRadius?: number;
+    /** Gap between adjacent slices, in degrees. */
     padAngle?: number;
+    /** Sweep the slices between these two angles (degrees, 0 = 12 o'clock). */
     startAngle?: number;
     endAngle?: number;
 }
-declare function PieChart({ data, valueKey, labelKey, innerRadius, ...props }: PieChartProps): react_jsx_runtime.JSX.Element;
-declare namespace PieChart {
-    var displayName: string;
+/**
+ * The polymorphic entry point. `Chart` dispatches on `type`, so it accepts the
+ * union of every renderer's options; the type-specific wrappers (`BarChart`,
+ * `LineChart`, `PieChart`) expose only the subset that applies to them.
+ */
+interface ChartProps extends ChartBaseProps, CartesianKeyProps, BarChartOptions, LineChartOptions, PieChartOptions {
+    type: ChartType;
 }
+declare const Chart: React.ForwardRefExoticComponent<ChartProps & React.RefAttributes<HTMLDivElement>>;
+
+/**
+ * Only what a bar chart actually reads — no pie geometry, no line options.
+ *
+ * There is deliberately no `stacked`: the data model is one value column
+ * (`yKey`) per row, so there is no second series to stack. The prop existed on
+ * the shared type and was never read by the renderer; real stacking needs a
+ * multi-series data shape, which is a bigger change than a prop fix.
+ */
+interface BarChartProps extends ChartBaseProps, BarChartOptions {
+    xKey: string;
+    yKey: string;
+}
+declare const BarChart: React.ForwardRefExoticComponent<BarChartProps & React.RefAttributes<HTMLDivElement>>;
+
+/** Only what a line / area chart actually reads. */
+interface LineChartProps extends ChartBaseProps, LineChartOptions {
+    xKey: string;
+    yKey: string;
+}
+declare const LineChart: React.ForwardRefExoticComponent<LineChartProps & React.RefAttributes<HTMLDivElement>>;
+
+/** Only what a pie / donut chart actually reads — no cartesian keys. */
+interface PieChartProps extends ChartBaseProps, Omit<PieChartOptions, "valueKey"> {
+    valueKey: string;
+}
+declare const PieChart: React.ForwardRefExoticComponent<PieChartProps & React.RefAttributes<HTMLDivElement>>;
+
+/**
+ * Theme Configuration
+ * Registry of all available themes organized by category
+ *
+ * Base themes are defined here. For custom themes, use registerTheme() to add them.
+ * Create theme files in public/tokens/themes/{category}/{themeId}.json and register them.
+ */
+type ThemeMetadata$1 = {
+    name: string;
+    file: string;
+    icon: string;
+    description: string;
+};
+type ThemeCategory = {
+    name: string;
+    order: number;
+    themes: Record<string, ThemeMetadata$1>;
+};
+/**
+ * Centralized theme category order.
+ * Custom category is included but handled specially (optional, user-created files).
+ */
+declare const THEME_CATEGORY_ORDER: readonly ["color", "typography", "shape", "density", "animation", "custom"];
+/** A pluggable source a registry resolves its categories from. */
+type ThemeSource = () => Promise<Record<string, ThemeCategory>>;
+type ThemeRegistry = {
+    getThemeCategories(): Promise<Record<string, ThemeCategory>>;
+    registerTheme(category: string, themeId: string, metadata: ThemeMetadata$1): Promise<Record<string, ThemeCategory>>;
+    registerThemeFromFile(category: string, themeId: string, filePath?: string): Promise<{
+        success: boolean;
+        themeId: string;
+        category: string;
+    }>;
+    getThemeFilePath(category: string, themeId: string): string | null;
+    getThemesForCategory(category: string): Promise<Record<string, ThemeMetadata$1>>;
+    getTheme(category: string, themeId: string): Promise<ThemeMetadata$1 | null>;
+};
+/**
+ * Creates an isolated theme registry with its own cache and registered themes.
+ * The module-level default export below (a single shared registry) is fine for
+ * a single-tenant app. Create a dedicated instance with a custom `source` when
+ * isolation matters — e.g. a CMS backend serving a different theme set per
+ * tenant/site, where a shared cache would leak one tenant's themes into another's.
+ */
+declare function createThemeRegistry(source?: ThemeSource): ThemeRegistry;
+declare const defaultRegistry: ThemeRegistry;
+declare const getThemeCategories: () => Promise<Record<string, ThemeCategory>>;
+declare const registerTheme: (category: string, themeId: string, metadata: ThemeMetadata$1) => Promise<Record<string, ThemeCategory>>;
+declare const registerThemeFromFile: (category: string, themeId: string, filePath?: string) => Promise<{
+    success: boolean;
+    themeId: string;
+    category: string;
+}>;
+declare const getThemeFilePath: (category: string, themeId: string) => string | null;
+declare const getThemesForCategory: (category: string) => Promise<Record<string, ThemeMetadata$1>>;
+declare const getTheme: (category: string, themeId: string) => Promise<ThemeMetadata$1 | null>;
 
 interface ThemeToggleProps {
     className?: string;
     position?: "bottom-right" | "bottom-left" | "top-right" | "top-left";
+    /** Custom registry (see createThemeRegistry) — defaults to the shared singleton. */
+    registry?: Pick<ThemeRegistry, "getThemeCategories">;
 }
-declare function ThemeToggle({ className, position }: ThemeToggleProps): react_jsx_runtime.JSX.Element;
+declare function ThemeToggle({ className, position, registry }: ThemeToggleProps): react_jsx_runtime.JSX.Element;
 
 type ThemeSelection = {
     color?: string;
@@ -2599,35 +2759,38 @@ type ThemeSelection = {
     animation?: string;
     custom?: string;
 };
-type ThemeMetadata$1 = {
+type ThemeMetadata = {
     name: string;
     file: string;
     icon: string;
     description: string;
 };
 /**
- * Hook for managing design system theme switching
+ * Hook for managing design system theme switching.
+ * `registry` defaults to the shared singleton — pass a custom one (see
+ * createThemeRegistry) so this hook validates/applies against a
+ * consumer-defined theme set instead of just the base categories.
  */
-declare function useTheme(): {
+declare function useTheme(registry?: Pick<ThemeRegistry, 'getThemeCategories'>): {
     selectedThemes: ThemeSelection;
     updateTheme: (category: keyof ThemeSelection, themeId: string | undefined) => Promise<void>;
     resetToDefaults: () => Promise<void>;
     applyPreset: (preset: Partial<ThemeSelection>) => Promise<void>;
     isLoading: boolean;
     error: string | null;
-    getAvailableThemes: (category: string) => Promise<Record<string, ThemeMetadata$1>>;
+    getAvailableThemes: (category: string) => Promise<Record<string, ThemeMetadata>>;
 };
 
 interface ThemePanelProps {
     categories: Array<[string, {
         name: string;
-        themes: Record<string, ThemeMetadata$1>;
+        themes: Record<string, ThemeMetadata>;
         order?: number;
     }]>;
     selectedThemes: ThemeSelection;
     activeCategory: string;
     onCategoryChange: (category: string) => void;
-    categoryThemes: Record<string, ThemeMetadata$1>;
+    categoryThemes: Record<string, ThemeMetadata>;
     themesLoading: boolean;
     isApplying: boolean;
     onThemeSelect: (category: keyof ThemeSelection, themeId: string) => void;
@@ -2641,12 +2804,14 @@ declare function ThemePanel({ categories, selectedThemes, activeCategory, onCate
 
 declare function useThemeToggle(options?: {
     embedded?: boolean;
+    /** Custom registry (see createThemeRegistry) — defaults to the shared singleton. */
+    registry?: Pick<ThemeRegistry, "getThemeCategories">;
 }): {
     selectedThemes: ThemeSelection;
     isLoading: boolean;
     isOpen: boolean;
     activeCategory: string;
-    categoryThemes: Record<string, ThemeMetadata$1>;
+    categoryThemes: Record<string, ThemeMetadata>;
     themesLoading: boolean;
     categories: [string, {
         name: string;
@@ -2674,89 +2839,11 @@ declare function applyPreset(preset: ThemePreset, options?: {
 }): Promise<ThemeSelection>;
 
 /**
- * Theme Configuration
- * Registry of all available themes organized by category
- *
- * Base themes are defined here. For custom themes, use registerTheme() to add them.
- * Create theme files in public/tokens/themes/{category}/{themeId}.json and register them.
- */
-type ThemeMetadata = {
-    name: string;
-    file: string;
-    icon: string;
-    description: string;
-};
-type ThemeCategory = {
-    name: string;
-    order: number;
-    themes: Record<string, ThemeMetadata>;
-};
-/**
- * Centralized theme category order
- * Used everywhere to ensure consistency
- * Custom category is included but handled specially (optional, user-created files)
- *
- * ⚠️ IF YOU UPDATE THIS, ALSO UPDATE:
- * 1. scripts/themeConfig.js - THEME_CATEGORY_ORDER (JavaScript version)
- * 2. scripts/apply-theme-sync.js - THEME_CATEGORY_ORDER constant (standalone script, can't import)
- */
-declare const THEME_CATEGORY_ORDER: readonly ["color", "typography", "shape", "density", "animation", "custom"];
-/**
- * Register a custom theme dynamically
- * Use this to add custom themes after creating theme files in public/tokens/themes/
- *
- * Example:
- * ```ts
- * import { registerTheme } from 'shru-design-system'
- *
- * // After creating public/tokens/themes/color/ocean.json
- * registerTheme('color', 'ocean', {
- *   name: 'Ocean',
- *   file: 'color/ocean.json',
- *   icon: '🌊',
- *   description: 'Ocean color theme'
- * })
- * ```
- */
-declare function registerTheme(category: string, themeId: string, metadata: ThemeMetadata): Record<string, ThemeCategory>;
-/**
- * Register a theme from a token file
- * Helper function that loads the theme file and registers it automatically
- *
- * Example:
- * ```ts
- * import { registerThemeFromFile } from 'shru-design-system'
- *
- * // After creating public/tokens/themes/color/ocean.json
- * await registerThemeFromFile('color', 'ocean')
- * ```
- */
-declare function registerThemeFromFile(category: string, themeId: string, filePath?: string): Promise<{
-    success: boolean;
-    themeId: string;
-    category: string;
-}>;
-/**
- * Get merged theme categories (base + discovered)
- */
-declare function getThemeCategories(): Promise<Record<string, ThemeCategory>>;
-/**
- * Get theme file path
- */
-declare function getThemeFilePath(category: string, themeId: string): string | null;
-/**
- * Get all themes for a category
- */
-declare function getThemesForCategory(category: string): Promise<Record<string, ThemeMetadata>>;
-/**
- * Get theme by ID
- */
-declare function getTheme(category: string, themeId: string): Promise<ThemeMetadata | null>;
-
-/**
  * Theme Utilities
- * Pure utility functions for theme management
- * Note: generateAndApplyTheme has side effects (modifies DOM) but is the main theme application utility
+ * Loads token JSON (async, with caching) and orchestrates the resolve → apply
+ * pipeline for the runtime (React) path. The pure transform steps themselves
+ * live in themeTransform.ts, shared with the blocking pre-hydration path in
+ * applyThemeSync.ts.
  */
 
 /**
@@ -2770,8 +2857,11 @@ declare function enableDebugMode(): void;
 declare function getCurrentCSSVariables(): Record<string, string>;
 
 /**
- * Synchronous theme application for blocking script execution
- * This runs before React hydrates to prevent theme flash
+ * Synchronous theme application for blocking script execution.
+ * Runs before React hydrates to prevent a flash of unstyled content.
+ * Loads tokens with blocking XHR (the one thing that has to be sync here);
+ * the merge → resolve → flatten pipeline itself is shared with themeUtils.ts
+ * via themeTransform.ts.
  */
 /**
  * Apply theme synchronously using blocking XMLHttpRequest
@@ -2779,4 +2869,4 @@ declare function getCurrentCSSVariables(): Record<string, string>;
  */
 declare function applyThemeSync(): void;
 
-export { Accordion, type AccordionItem, type AccordionProps, Alert, AlertDialog, type AlertDialogCancelProps, type AlertDialogConfirmProps, type AlertDialogProps, type AlertProps, AppShell, type AppShellProps, AspectRatio, type AspectRatioProps, AuthLayout, type AuthLayoutProps, Avatar, AvatarGroup, type AvatarGroupProps, type AvatarProps, Badge, type BadgeProps, BarChart, type BarChartProps, Breadcrumb, type BreadcrumbItem, type BreadcrumbProps, Button, type ButtonProps, Calendar, type CalendarProps, type CalendarSelectionMode, Card, type CardColor, type CardProps, type CardVariant, Carousel, type CarouselItem, type CarouselProps, Chart, type ChartProps, type ChartType, Checkbox, type CheckboxProps, CodeBlock, type CodeBlockProps, Collapsible, CollapsiblePanel, type CollapsiblePanelCloseDirection, type CollapsiblePanelCrossAxis, type CollapsiblePanelProps, type CollapsiblePanelTriggerPlacement, type CollapsiblePanelTriggerVariant, type CollapsiblePanelVariant, type CollapsibleProps, Command, type CommandItem, type CommandProps, ConfirmModal, type ConfirmModalCancelProps, type ConfirmModalConfirmProps, type ConfirmModalIntent, type ConfirmModalProps, ContextMenu, type ContextMenuProps, CopyButton, type CopyButtonProps, DatePicker, type DatePickerProps, type DatePreset, DateRangePicker, type DateRangePickerProps, type DescriptionItem, DescriptionList, type DescriptionListProps, Drawer, type DrawerPlacement, type DrawerProps, type DrawerSize, type DrawerVariant, Dropdown, type DropdownItem, type DropdownProps, EmptyState, type EmptyStateAction, type EmptyStateProps, ErrorBoundary, type ErrorBoundaryProps, FAB, type FABProps, FieldLayout, type FieldLayoutProps, type FieldSurfaceProps, FixedScreenWidget, type FixedScreenWidgetPosition, type FixedScreenWidgetProps, type FixedScreenWidgetSlideFrom, Form, FormField, type FormFieldChangeHelpers, type FormFieldProps, type FormFieldRenderProps, type FormFieldSchema, type FormFieldSchemaRenderHelpers, type FormFieldType, FormModal, type FormModalMode, type FormModalProps, type FormProps, type FormValues, Grid, type GridProps, type GridRootTag, HelperText, type HelperTextProps, Hero, type HeroActions, type HeroProps, HistoryControlButtons, type HistoryControlButtonsProps, HoverCard, type HoverCardProps, type HoverCardTriggerProps, Icon, type IconProps, Image, type ImageProps, InlineEdit, type InlineEditProps, InputGroup, InputGroupAddon, type InputGroupAddonProps, InputGroupButton, type InputGroupButtonProps, InputGroupInput, type InputGroupInputProps, type InputGroupProps, InputOTP, type InputOTPProps, Kbd, KbdGroup, type KbdGroupProps, type KbdProps, Label, type LabelProps, LineChart, type LineChartProps, Link, type LinkProps, List, type ListFilterChipsConfig, type ListItem, type ListLayout, type ListProps, type ListSearchConfig, LoadingOverlay, type LoadingOverlayProps, Menubar, type MenubarMenu, type MenubarProps, Modal, type ModalAlign, type ModalProps, type ModalSize, type ModalTriggerProps, type NavItem, type NavMenuItem, Navbar, type NavbarProps, NavigationMenu, type NavigationMenuProps, Overlay, type OverlayPortalContainer, OverlayPortalScope, type OverlayProps, PageFooter, type PageFooterProps, PageHeader, type PageHeaderProps, Pagination, type PaginationProps, PhoneInput, type PhoneInputProps, type PhoneValue, PieChart, type PieChartProps, Pill, PillGroup, type PillGroupProps, type PillItem, type PillProps, Popover, type PopoverPlacement, type PopoverProps, type PopoverTriggerProps, Progress, type ProgressProps, Radio, RadioGroup, type RadioGroupItem, type RadioGroupProps, type RadioProps, Rating, type RatingPrecision, type RatingProps, ResizableHandle, type ResizableHandleProps, ResizablePanel, ResizablePanelGroup, ResizeContainer, type ResizeContainerProps, SearchInput, type SearchInputProps, Select, type SelectOption, type SelectProps, Separator, type SeparatorProps, Sidebar, type SidebarItem, type SidebarProps, Skeleton, type SkeletonProps, Slider, type SliderProps, type SortDirection, Spinner, type SpinnerProps, type SpinnerSize, SplitButton, type SplitButtonMenuItem, type SplitButtonProps, Stack, type StackProps, type StackRootTag, type StepItem, type StepStatus, Stepper, type StepperProps, type StringFieldValidateOpts, THEME_CATEGORY_ORDER, type TabItem, Table, type TableColumn, type TableColumnAlign, type TableProps, TableSkeleton, type TableSkeletonProps, Tabs, type TabsProps, Tag, type TagProps, type TagSurfaceVariant, Text, TextInput, type TextInputProps, type TextProps, Textarea, type TextareaProps, type ThemeMetadata$1 as ThemeMetadata, ThemePanel, type ThemePanelProps, type ThemePreset, type ThemeSelection, ThemeToggle, type ThemeToggleProps, TimePicker, type TimePickerProps, Toast, type ToastAction, type ToastProps, type ToastTone, type ToastVariant, Toaster, type ToasterPosition, type ToasterProps, Toggle, type ToggleProps, Tooltip, type TooltipPlacement, type TooltipProps, TooltipProvider, type TooltipProviderProps, type TreeAddRelation, type TreeItem, type TreeItemKind, type TreeMovePosition, TreeView, type TreeViewProps, TriggerModal, type TriggerModalProps, Upload, type UploadProps, Video, type VideoProps, VisuallyHidden, type VisuallyHiddenProps, addTreeNodeChild, addTreeNodeSibling, alertDialogVariants, alertVariants, applyPreset, applyThemeSync, pillSurfaceVariants as badgeVariants, buttonVariants, cardVariants, clearToasts, collapsiblePanelRootVariants, collapsiblePanelSurfaceVariants, defaultListChipFilter, defaultListItemFilter, deleteTreeNode, descriptionListVariants, disabledControl, dismissToast, drawerVariants, emptyStateVariants, enableDebugMode, fieldSurfaceVariants, floaterTriggerVariants, focusRing, focusRingDestructive, focusRingOffset, formatAspectRatioLabel, getCurrentCSSVariables, getPhoneDialCode, getStringFieldValidationError, getTheme, getThemeCategories, getThemeFilePath, getThemesForCategory, gridSpacingVariants as gridVariants, heroVariants, iconVariants, linkVariants, modalOverlayLayout, modalSurfaceVariants, moveTreeNode, navbarVariants, overlayVariants, pageFooterVariants, pageHeaderVariants, peerFocusRing, pillSurfaceVariants as pillVariants, ratingVariants, registerTheme, registerThemeFromFile, ringOffsetBackground, sidebarVariants, stackVariants, textVariants, toast, toastVariants, toggleThumbVariants, toggleVariants, tooltipArrowVariants, tooltipContentVariants, useFormContext, useTheme, useThemeToggle };
+export { Accordion, type AccordionItem, type AccordionProps, Alert, AlertDialog, type AlertDialogCancelProps, type AlertDialogConfirmProps, type AlertDialogProps, type AlertProps, AppShell, type AppShellProps, AspectRatio, type AspectRatioProps, AuthLayout, type AuthLayoutProps, Avatar, AvatarGroup, type AvatarGroupProps, type AvatarProps, Badge, type BadgeProps, BarChart, type BarChartOptions, type BarChartProps, Breadcrumb, type BreadcrumbItem, type BreadcrumbProps, Button, type ButtonProps, Calendar, type CalendarProps, type CalendarSelectionMode, Card, type CardProps, type CardVariant, Carousel, type CarouselItem, type CarouselProps, type CartesianKeyProps, Chart, type ChartBaseProps, type ChartDatum, type ChartProps, type ChartType, Checkbox, type CheckboxProps, CodeBlock, type CodeBlockProps, type CodeBlockVariant, Collapsible, CollapsiblePanel, type CollapsiblePanelCloseDirection, type CollapsiblePanelCrossAxis, type CollapsiblePanelProps, type CollapsiblePanelTriggerPlacement, type CollapsiblePanelTriggerVariant, type CollapsiblePanelVariant, type CollapsibleProps, Command, type CommandItem, type CommandProps, ConfirmModal, type ConfirmModalCancelProps, type ConfirmModalConfirmProps, type ConfirmModalIntent, type ConfirmModalProps, ContextMenu, type ContextMenuProps, CopyButton, type CopyButtonProps, DatePicker, type DatePickerProps, type DatePreset, DateRangePicker, type DateRangePickerProps, type DescriptionItem, DescriptionList, type DescriptionListProps, Drawer, type DrawerPlacement, type DrawerProps, type DrawerSize, type DrawerVariant, Dropdown, type DropdownItem, type DropdownProps, EmptyState, type EmptyStateAction, type EmptyStateProps, ErrorBoundary, type ErrorBoundaryProps, FAB, type FABProps, FieldLayout, type FieldLayoutProps, type FieldSurfaceProps, FixedScreenWidget, type FixedScreenWidgetPosition, type FixedScreenWidgetProps, type FixedScreenWidgetSlideFrom, Form, FormField, type FormFieldChangeHelpers, type FormFieldProps, type FormFieldRenderProps, type FormFieldSchema, type FormFieldSchemaRenderHelpers, type FormFieldType, FormModal, type FormModalMode, type FormModalProps, type FormProps, type FormValues, Grid, type GridProps, type GridRootTag, HelperText, type HelperTextProps, Hero, type HeroActions, type HeroProps, HistoryControlButtons, type HistoryControlButtonsProps, HoverCard, type HoverCardProps, type HoverCardTriggerProps, Icon, type IconProps, Image, type ImageProps, InlineEdit, type InlineEditProps, InputGroup, InputGroupAddon, type InputGroupAddonProps, InputGroupButton, type InputGroupButtonProps, InputGroupInput, type InputGroupInputProps, type InputGroupProps, InputOTP, type InputOTPProps, Kbd, KbdGroup, type KbdGroupProps, type KbdProps, Label, type LabelProps, LineChart, type LineChartOptions, type LineChartProps, type LineCurve, Link, type LinkProps, List, type ListFilterChipsConfig, type ListItem, type ListLayout, type ListProps, type ListSearchConfig, LoadingOverlay, type LoadingOverlayProps, Menubar, type MenubarMenu, type MenubarProps, Modal, type ModalAlign, type ModalProps, type ModalSize, type ModalTriggerProps, type NavItem, type NavMenuItem, Navbar, type NavbarProps, NavigationMenu, type NavigationMenuProps, Overlay, type OverlayPortalContainer, OverlayPortalScope, type OverlayProps, PageFooter, type PageFooterProps, PageHeader, type PageHeaderProps, Pagination, type PaginationProps, PhoneInput, type PhoneInputProps, type PhoneValue, PieChart, type PieChartOptions, type PieChartProps, Pill, PillGroup, type PillGroupProps, type PillItem, type PillProps, Popover, type PopoverPlacement, type PopoverProps, type PopoverTriggerProps, Progress, type ProgressProps, Radio, RadioGroup, type RadioGroupItem, type RadioGroupProps, type RadioProps, Rating, type RatingPrecision, type RatingProps, ResizableHandle, type ResizableHandleProps, ResizablePanel, ResizablePanelGroup, ResizeContainer, type ResizeContainerProps, SearchInput, type SearchInputProps, Select, type SelectOption, type SelectProps, Separator, type SeparatorProps, Sidebar, type SidebarItem, type SidebarProps, Skeleton, type SkeletonProps, Slider, type SliderProps, type SortDirection, Spinner, type SpinnerProps, type SpinnerSize, SplitButton, type SplitButtonMenuItem, type SplitButtonProps, Stack, type StackProps, type StackRootTag, type StepItem, type StepStatus, Stepper, type StepperProps, type StringFieldValidateOpts, THEME_CATEGORY_ORDER, type TabItem, Table, type TableColumn, type TableColumnAlign, type TableProps, TableSkeleton, type TableSkeletonProps, Tabs, type TabsProps, Tag, type TagProps, type TagSurfaceVariant, Text, TextInput, type TextInputProps, type TextProps, Textarea, type TextareaProps, type ThemeMetadata, ThemePanel, type ThemePanelProps, type ThemePreset, type ThemeRegistry, type ThemeSelection, type ThemeSource, ThemeToggle, type ThemeToggleProps, TimePicker, type TimePickerProps, Toast, type ToastAction, type ToastProps, type ToastTone, type ToastVariant, Toaster, type ToasterPosition, type ToasterProps, Toggle, type ToggleProps, Tooltip, type TooltipPlacement, type TooltipProps, TooltipProvider, type TooltipProviderProps, type TreeAddRelation, type TreeItem, type TreeItemKind, type TreeMovePosition, TreeView, type TreeViewProps, TriggerModal, type TriggerModalProps, Upload, type UploadProps, Video, type VideoProps, VisuallyHidden, type VisuallyHiddenProps, addTreeNodeChild, addTreeNodeSibling, alertDialogVariants, alertVariants, applyPreset, applyThemeSync, pillSurfaceVariants as badgeVariants, buttonVariants, cardVariants, clearToasts, codeBlockVariants, collapsiblePanelRootVariants, collapsiblePanelSurfaceVariants, contextMenuVariants, createThemeRegistry, defaultListChipFilter, defaultListItemFilter, defaultRegistry, deleteTreeNode, descriptionListVariants, disabledControl, disabledSurface, disabledSurfaceStyles, dismissToast, drawerVariants, emptyStateVariants, enableDebugMode, fieldSurfaceVariants, floaterTriggerVariants, focusRing, focusRingDestructive, focusRingOffset, formatAspectRatioLabel, getCurrentCSSVariables, getPhoneDialCode, getStringFieldValidationError, getTheme, getThemeCategories, getThemeFilePath, getThemesForCategory, gridSpacingVariants as gridVariants, heroVariants, iconVariants, linkVariants, menubarVariants, modalOverlayLayout, modalSurfaceVariants, moveTreeNode, navbarVariants, overlayVariants, pageFooterVariants, pageHeaderVariants, peerFocusRing, pillSurfaceVariants as pillVariants, ratingVariants, registerTheme, registerThemeFromFile, ringOffsetBackground, sidebarVariants, stackVariants, tabsListVariants, tabsTriggerVariants, textVariants, toast, toastVariants, toggleThumbVariants, toggleVariants, tooltipArrowVariants, tooltipContentVariants, useFormContext, useTheme, useThemeToggle };

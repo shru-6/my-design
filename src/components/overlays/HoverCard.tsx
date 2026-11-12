@@ -21,21 +21,24 @@ export interface HoverCardProps extends Omit<PopoverProps, "triggerProps" | "tri
   placement?: PopoverPlacement
 }
 
-export function HoverCard({
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  triggerProps,
-  trigger,
-  openDelay = 200,
-  closeDelay = 100,
-  placement = "bottom",
-  offset,
-  className,
-  cardProps,
-  children,
-  ...rest
-}: HoverCardProps) {
+export const HoverCard = React.forwardRef<HTMLDivElement, HoverCardProps>(function HoverCard(
+  {
+    open: openProp,
+    defaultOpen,
+    onOpenChange,
+    triggerProps,
+    trigger,
+    openDelay = 200,
+    closeDelay = 100,
+    placement = "bottom",
+    offset,
+    className,
+    cardProps,
+    children,
+    ...rest
+  },
+  ref
+) {
   const { label = "Hover", left, variant = "ghost", size = "md", className: triggerClassName } = triggerProps ?? {}
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
   const openTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null)
@@ -80,6 +83,7 @@ export function HoverCard({
 
   return (
     <Popover
+      ref={ref}
       open={open}
       onOpenChange={setOpen}
       trigger={resolvedTrigger}
@@ -94,6 +98,6 @@ export function HoverCard({
       <div {...hoverHandlers}>{children}</div>
     </Popover>
   )
-}
+})
 
 HoverCard.displayName = "HoverCard"

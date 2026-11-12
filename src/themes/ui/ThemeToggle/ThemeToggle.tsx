@@ -7,13 +7,16 @@ import { ThemePanel } from "./ThemePanel"
 import { computePanelStyle, positionClasses } from "./themeToggleConfig"
 import { cn } from "../../../utils"
 import { Tooltip } from "../../../components/overlays/Tooltip"
+import type { ThemeRegistry } from "../../themeConfig"
 
 export interface ThemeToggleProps {
   className?: string
   position?: "bottom-right" | "bottom-left" | "top-right" | "top-left"
+  /** Custom registry (see createThemeRegistry) — defaults to the shared singleton. */
+  registry?: Pick<ThemeRegistry, "getThemeCategories">
 }
 
-export function ThemeToggle({ className, position = "bottom-right" }: ThemeToggleProps) {
+export function ThemeToggle({ className, position = "bottom-right", registry }: ThemeToggleProps) {
   const {
     selectedThemes,
     isLoading,
@@ -29,7 +32,7 @@ export function ThemeToggle({ className, position = "bottom-right" }: ThemeToggl
     handleResetAll,
     toggleMenu,
     closeMenu,
-  } = useThemeToggle()
+  } = useThemeToggle({ registry })
 
   const [panelStyle, setPanelStyle] = useState<React.CSSProperties>({ visibility: "hidden" })
 
@@ -37,7 +40,7 @@ export function ThemeToggle({ className, position = "bottom-right" }: ThemeToggl
     const trigger = triggerRef.current
     if (!trigger) return
     setPanelStyle(computePanelStyle(trigger.getBoundingClientRect(), position))
-  }, [position])
+  }, [position, triggerRef])
 
   useLayoutEffect(() => {
     if (!isOpen) return

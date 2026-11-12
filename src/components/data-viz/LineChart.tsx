@@ -1,28 +1,29 @@
 import * as React from "react"
-import { Chart, type ChartProps } from "./Chart"
-import type { ChartDatum } from "./chartUtils"
+import { Chart, type ChartBaseProps, type LineChartOptions } from "./Chart"
 
-export interface LineChartProps extends Omit<ChartProps, "type" | "data"> {
-  data: ChartDatum[]
+/** Only what a line / area chart actually reads. */
+export interface LineChartProps extends ChartBaseProps, LineChartOptions {
   xKey: string
   yKey: string
-  curve?: "linear" | "monotone" | "step"
-  showPoints?: boolean
-  area?: boolean
 }
 
-export function LineChart({ data, xKey, yKey, curve: _curve = "linear", showPoints = true, area, ...props }: LineChartProps) {
+export const LineChart = React.forwardRef<HTMLDivElement, LineChartProps>(function LineChart(
+  { data, xKey, yKey, curve = "linear", showPoints = true, area, ...props },
+  ref
+) {
   return (
     <Chart
+      ref={ref}
       type={area ? "area" : "line"}
       data={data}
       xKey={xKey}
       yKey={yKey}
+      curve={curve}
       showPoints={showPoints}
       area={area}
       {...props}
     />
   )
-}
+})
 
 LineChart.displayName = "LineChart"

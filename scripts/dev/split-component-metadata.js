@@ -2,13 +2,13 @@
 
 /**
  * Split test/src/utils/componentMetadata.ts into category modules.
- * Run after editing the monolith: node scripts/split-component-metadata.js
+ * Run after editing the monolith: node scripts/dev/split-component-metadata.js
  */
 
 const fs = require("fs")
 const path = require("path")
 
-const root = path.join(__dirname, "..")
+const root = path.join(__dirname, "..", "..")
 const sourcePath = path.join(root, "test", "src", "utils", "componentMetadata.ts")
 const outDir = path.join(root, "test", "src", "utils", "metadata")
 

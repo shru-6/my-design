@@ -25,6 +25,7 @@ import typographySans from "../tokens/themes/typography/sans.json"
 import typographySerif from "../tokens/themes/typography/serif.json"
 import shapeSmooth from "../tokens/themes/shape/smooth.json"
 import shapeSharp from "../tokens/themes/shape/sharp.json"
+import shapeContrast from "../tokens/themes/shape/contrast.json"
 import densityComfortable from "../tokens/themes/density/comfortable.json"
 import densityCompact from "../tokens/themes/density/compact.json"
 import animationGentle from "../tokens/themes/animation/gentle.json"
@@ -49,6 +50,7 @@ export const EMBEDDED_TOKENS: Record<string, any> = {
   "themes/typography/serif.json": typographySerif,
   "themes/shape/smooth.json": shapeSmooth,
   "themes/shape/sharp.json": shapeSharp,
+  "themes/shape/contrast.json": shapeContrast,
   "themes/density/comfortable.json": densityComfortable,
   "themes/density/compact.json": densityCompact,
   "themes/animation/gentle.json": animationGentle,

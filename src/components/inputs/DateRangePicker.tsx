@@ -3,6 +3,8 @@ import { createPortal } from "react-dom"
 import { Calendar as CalendarIcon, X } from "lucide-react"
 import { type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
+import { IconButton } from "../actions/IconButton"
 import { useFloatingMenu } from "../overlays/useFloatingMenu"
 import { floatingMenuSurfaceClass } from "../overlays/floatingMenu"
 import { Button } from "../actions/Button"
@@ -64,197 +66,215 @@ function normalizeRangeInput(next: DateRangeValue | null): DateRangeValue | null
   }
 }
 
-export function DateRangePicker({
-  value,
-  defaultValue,
-  onChange,
-  minDate,
-  maxDate,
-  minRangeDays,
-  maxRangeDays,
-  disabled,
-  required,
-  placeholder = "Pick a date range",
-  label,
-  errorMessage,
-  format = "PP",
-  locale,
-  showApplyButton = false,
-  applyLabel = "Apply",
-  cancelLabel = "Cancel",
-  clearable = true,
-  presets = [],
-  size = "md",
-  variant = "outline",
-  inputProps,
-  calendarProps,
-  className,
-  ...rest
-}: DateRangePickerProps) {
-  const [internal, setInternal] = React.useState<DateRangeValue | null>(
-    normalizeRangeInput(defaultValue ?? null)
-  )
-  const [open, setOpen] = React.useState(false)
-  const [draft, setDraft] = React.useState<DateRangeValue | null>(EMPTY_RANGE)
-  const triggerRef = React.useRef<HTMLDivElement>(null)
-  const menuRef = React.useRef<HTMLDivElement>(null)
+export const DateRangePicker = React.forwardRef<HTMLDivElement, DateRangePickerProps>(
+  (
+    {
+      value,
+      defaultValue,
+      onChange,
+      minDate,
+      maxDate,
+      minRangeDays,
+      maxRangeDays,
+      disabled,
+      required,
+      placeholder = "Pick a date range",
+      label,
+      errorMessage,
+      format = "PP",
+      locale,
+      showApplyButton = false,
+      applyLabel = "Apply",
+      cancelLabel = "Cancel",
+      clearable = true,
+      presets = [],
+      size = "md",
+      variant = "outline",
+      inputProps,
+      calendarProps,
+      className,
+      ...rest
+    },
+    ref
+  ) => {
+    const [open, setOpen] = React.useState(false)
+    const [draft, setDraft] = React.useState<DateRangeValue | null>(EMPTY_RANGE)
+    const triggerRef = React.useRef<HTMLDivElement>(null)
+    const menuRef = React.useRef<HTMLDivElement>(null)
 
-  const isControlled = value !== undefined
-  const selected = isControlled ? normalizeRangeInput(value ?? null) : internal
+    const [rawSelected, setRawSelected] = useControllableValue<DateRangeValue | null>({
+      value,
+      defaultValue: normalizeRangeInput(defaultValue ?? null),
+      onChange,
+    })
 
-  const limits = React.useMemo(
-    () => ({ minDate, maxDate, minRangeDays, maxRangeDays }),
-    [minDate, maxDate, minRangeDays, maxRangeDays]
-  )
+    // `normalizeRangeInput` mints a fresh object on every call, so depending on it
+    // by reference re-runs the draft effect forever while the panel is open and a
+    // controlled range is set. Key the identity off the endpoint timestamps instead.
+    const hasRange = rawSelected != null
+    const fromTime = rawSelected?.from ? rawSelected.from.getTime() : null
+    const toTime = rawSelected?.to ? rawSelected.to.getTime() : null
+    const selected = React.useMemo<DateRangeValue | null>(
+      () =>
+        hasRange
+          ? {
+              from: fromTime === null ? null : startOfDay(new Date(fromTime)),
+              to: toTime === null ? null : startOfDay(new Date(toTime)),
+            }
+          : null,
+      [hasRange, fromTime, toTime]
+    )
 
-  const { menuStyle } = useFloatingMenu({
-    open,
-    onOpenChange: setOpen,
-    triggerRef,
-    menuRef,
-    maxHeight: 420,
-  })
+    const limits = React.useMemo(
+      () => ({ minDate, maxDate, minRangeDays, maxRangeDays }),
+      [minDate, maxDate, minRangeDays, maxRangeDays]
+    )
 
-  React.useEffect(() => {
-    if (!open) return
-    setDraft(selected ?? EMPTY_RANGE)
-  }, [open, selected])
+    const { menuStyle } = useFloatingMenu({
+      open,
+      onOpenChange: setOpen,
+      triggerRef,
+      menuRef,
+      maxHeight: 420,
+    })
 
-  const commitRange = (next: DateRangeValue | null) => {
-    const normalized = normalizeRangeInput(next)
-    if (!isControlled) setInternal(normalized)
-    onChange?.(normalized)
-  }
+    React.useEffect(() => {
+      if (!open) return
+      setDraft(selected ?? EMPTY_RANGE)
+    }, [open, selected])
 
-  const setSelected = (next: DateRangeValue | null) => {
-    const normalized = normalizeRangeInput(next)
-    if (showApplyButton) {
-      setDraft(normalized ?? EMPTY_RANGE)
-      return
+    const commitRange = (next: DateRangeValue | null) => {
+      setRawSelected(normalizeRangeInput(next))
     }
-    commitRange(normalized)
-    if (
-      !showApplyButton &&
-      normalized?.from &&
-      normalized?.to &&
-      isRangeWithinLimits(normalized, limits)
-    ) {
+
+    const setSelected = (next: DateRangeValue | null) => {
+      const normalized = normalizeRangeInput(next)
+      if (showApplyButton) {
+        setDraft(normalized ?? EMPTY_RANGE)
+        return
+      }
+      commitRange(normalized)
+      if (
+        !showApplyButton &&
+        normalized?.from &&
+        normalized?.to &&
+        isRangeWithinLimits(normalized, limits)
+      ) {
+        setOpen(false)
+      }
+    }
+
+    const applyDraft = () => {
+      if (!draft?.from || !draft?.to || !isRangeWithinLimits(draft, limits)) return
+      commitRange(draft)
       setOpen(false)
     }
-  }
 
-  const applyDraft = () => {
-    if (!draft?.from || !draft?.to || !isRangeWithinLimits(draft, limits)) return
-    commitRange(draft)
-    setOpen(false)
-  }
+    const cancelDraft = () => {
+      setDraft(selected ?? EMPTY_RANGE)
+      setOpen(false)
+    }
 
-  const cancelDraft = () => {
-    setDraft(selected ?? EMPTY_RANGE)
-    setOpen(false)
-  }
+    const calendarValue = showApplyButton && open ? draft : selected ?? EMPTY_RANGE
+    const canApply = Boolean(draft?.from && draft?.to && isRangeWithinLimits(draft, limits))
 
-  const calendarValue = showApplyButton && open ? draft : selected ?? EMPTY_RANGE
-  const canApply = Boolean(draft?.from && draft?.to && isRangeWithinLimits(draft, limits))
+    const display = selected ? formatDateRange(selected, format) : ""
 
-  const display = selected ? formatDateRange(selected, format) : ""
-
-  const menu = open ? (
-    <div ref={menuRef} style={menuStyle} className={floatingMenuSurfaceClass}>
-      {presets.length ? (
-        <div className="flex flex-wrap gap-1 border-b border-border p-2">
-          {presets.map((preset, index) => {
-            const next = normalizeRangeInput(preset.value)
-            const valid = next && isRangeWithinLimits(next, limits)
-            return (
-              <Button
-                key={index}
-                variant="outline"
-                size="sm"
-                disabled={!valid}
-                onClick={() => {
-                  if (!next || !valid) return
-                  if (showApplyButton) setDraft(next)
-                  else setSelected(next)
-                }}
-              >
-                {preset.label}
-              </Button>
-            )
-          })}
-        </div>
-      ) : null}
-      <Calendar
-        value={calendarValue}
-        onChange={(next) => {
-          if (next && typeof next === "object" && !Array.isArray(next) && !(next instanceof Date)) {
-            setSelected({
-              from: next.from ? startOfDay(next.from) : null,
-              to: next.to ? startOfDay(next.to) : null,
-            })
-          }
-        }}
-        minDate={minDate}
-        maxDate={maxDate}
-        minRangeDays={minRangeDays}
-        maxRangeDays={maxRangeDays}
-        disabled={disabled}
-        locale={locale}
-        selectionMode="range"
-        {...calendarProps}
-      />
-      {showApplyButton ? (
-        <div className="flex justify-end gap-2 border-t border-border p-2">
-          <Button variant="ghost" size="sm" onClick={cancelDraft}>
-            {cancelLabel}
-          </Button>
-          <Button variant="primary" size="sm" disabled={!canApply} onClick={applyDraft}>
-            {applyLabel}
-          </Button>
-        </div>
-      ) : null}
-    </div>
-  ) : null
-
-  return (
-    <div className={cn("relative w-full", className)} {...rest}>
-      <div ref={triggerRef}>
-        <TextInput
-          label={label}
-          required={required}
-          errorMessage={errorMessage}
-          size={size}
-          variant={variant}
+    const menu = open ? (
+      <div ref={menuRef} style={menuStyle} className={floatingMenuSurfaceClass}>
+        {presets.length ? (
+          <div className="flex flex-wrap gap-1 border-b border-border p-2">
+            {presets.map((preset, index) => {
+              const next = normalizeRangeInput(preset.value)
+              const valid = next && isRangeWithinLimits(next, limits)
+              return (
+                <Button
+                  key={index}
+                  variant="outline"
+                  size="sm"
+                  disabled={!valid}
+                  onClick={() => {
+                    if (!next || !valid) return
+                    if (showApplyButton) setDraft(next)
+                    else setSelected(next)
+                  }}
+                >
+                  {preset.label}
+                </Button>
+              )
+            })}
+          </div>
+        ) : null}
+        <Calendar
+          value={calendarValue}
+          onChange={(next) => {
+            if (next && typeof next === "object" && !Array.isArray(next) && !(next instanceof Date)) {
+              setSelected({
+                from: next.from ? startOfDay(next.from) : null,
+                to: next.to ? startOfDay(next.to) : null,
+              })
+            }
+          }}
+          minDate={minDate}
+          maxDate={maxDate}
+          minRangeDays={minRangeDays}
+          maxRangeDays={maxRangeDays}
           disabled={disabled}
-          placeholder={placeholder}
-          readOnly
-          value={display}
-          left={<CalendarIcon className="h-4 w-4" strokeWidth={2} />}
-          right={
-            clearable && selected?.from && !disabled ? (
-              <button
-                type="button"
-                tabIndex={-1}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-md text-muted-foreground hover:text-foreground"
-                aria-label="Clear range"
-                onClick={() => {
-                  if (showApplyButton) setDraft(EMPTY_RANGE)
-                  commitRange(null)
-                }}
-              >
-                <X className="h-4 w-4" />
-              </button>
-            ) : undefined
-          }
-          rightInteractive={clearable && Boolean(selected?.from)}
-          onFocus={() => !disabled && setOpen(true)}
-          onClick={() => !disabled && setOpen(true)}
-          {...inputProps}
+          locale={locale}
+          selectionMode="range"
+          {...calendarProps}
         />
+        {showApplyButton ? (
+          <div className="flex justify-end gap-2 border-t border-border p-2">
+            <Button variant="ghost" size="sm" onClick={cancelDraft}>
+              {cancelLabel}
+            </Button>
+            <Button variant="primary" size="sm" disabled={!canApply} onClick={applyDraft}>
+              {applyLabel}
+            </Button>
+          </div>
+        ) : null}
       </div>
-      {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
-    </div>
-  )
-}
+    ) : null
+
+    return (
+      <div ref={ref} className={cn("relative w-full", className)} {...rest}>
+        <div ref={triggerRef}>
+          <TextInput
+            label={label}
+            required={required}
+            errorMessage={errorMessage}
+            size={size}
+            variant={variant}
+            disabled={disabled}
+            placeholder={placeholder}
+            readOnly
+            value={display}
+            left={<CalendarIcon className="h-4 w-4" strokeWidth={2} />}
+            right={
+              clearable && selected?.from && !disabled ? (
+                <IconButton
+                  tabIndex={-1}
+                  tone="muted"
+                  icon={<X />}
+                  ariaLabel="Clear range"
+                  onClick={() => {
+                    if (showApplyButton) setDraft(EMPTY_RANGE)
+                    commitRange(null)
+                  }}
+                />
+              ) : undefined
+            }
+            rightInteractive={clearable && Boolean(selected?.from)}
+            onFocus={() => !disabled && setOpen(true)}
+            onClick={() => !disabled && setOpen(true)}
+            {...inputProps}
+          />
+        </div>
+        {typeof document !== "undefined" && menu ? createPortal(menu, document.body) : null}
+      </div>
+    )
+  }
+)
 
 DateRangePicker.displayName = "DateRangePicker"

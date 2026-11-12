@@ -42,21 +42,27 @@ export interface AlertDialogProps extends VariantProps<typeof alertDialogVariant
   loading?: boolean
   className?: string
   container?: OverlayPortalContainer
+  /** Focused when the prompt opens, instead of its first tabbable child. */
+  initialFocus?: React.RefObject<HTMLElement | null>
 }
 
-export function AlertDialog({
-  open: openProp,
-  defaultOpen,
-  onOpenChange,
-  title,
-  description,
-  variant,
-  confirmProps,
-  cancelProps,
-  loading,
-  className,
-  container,
-}: AlertDialogProps) {
+export const AlertDialog = React.forwardRef<HTMLDivElement, AlertDialogProps>(function AlertDialog(
+  {
+    open: openProp,
+    defaultOpen,
+    onOpenChange,
+    title,
+    description,
+    variant,
+    confirmProps,
+    cancelProps,
+    loading,
+    className,
+    container,
+    initialFocus,
+  },
+  ref
+) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
   const busy = Boolean(loading || confirmProps?.loading)
 
@@ -74,10 +80,16 @@ export function AlertDialog({
       onClose={handleClose}
       container={container}
       blur
+      dialog
+      dialogRole="alertdialog"
+      dialogLabel={title}
+      initialFocus={initialFocus}
+      closeOnEscape={!busy}
       closeOnBackdropClick={!busy}
       className="flex items-center justify-center p-4"
     >
       <Card
+        ref={ref}
         data-slot="alert-dialog"
         variant="surface-1"
         size="md"
@@ -118,7 +130,7 @@ export function AlertDialog({
       </Card>
     </Overlay>
   )
-}
+})
 
 AlertDialog.displayName = "AlertDialog"
 

@@ -17,8 +17,8 @@ export const iconVariants = cva("inline-flex items-center justify-center shrink-
     },
     shape: {
       default: "",
-      circle: "rounded-full",
-      square: "rounded-md",
+      circle: "rounded-pill",
+      square: "rounded-control-md",
     },
   },
   defaultVariants: {
@@ -87,14 +87,13 @@ export const Icon = React.forwardRef<HTMLSpanElement, IconProps>(
       >
         {React.isValidElement(resolvedContent)
           ? React.cloneElement(resolvedContent as React.ReactElement, {
-              className: cn((resolvedContent as React.ReactElement<{ className?: string }>).props.className),
               "aria-hidden": alt ? undefined : true,
             })
           : resolvedContent}
         {status && (
           <span
             className={cn(
-              "absolute h-2.5 w-2.5 rounded-full border border-background",
+              "absolute h-2.5 w-2.5 rounded-pill border border-background",
               statusPosition === "top-right" ? "-right-0.5 -top-0.5" : "-bottom-0.5 -right-0.5",
               statusTone[status]
             )}

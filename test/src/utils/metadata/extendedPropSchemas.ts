@@ -204,20 +204,17 @@ export const extendedPropSchemas: Record<string, PropDefinition[]> = {
     { name: "onSelect", type: "callback", description: "(value, item) => void" },
     { name: "renderItem", type: "callback" },
     { name: "header", type: "reactNode" },
-    { name: "direction", type: "select", options: ["row", "column"], defaultValue: "column" },
-    { name: "gap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"], defaultValue: "md" },
-    { name: "align", type: "select", options: ["start", "center", "end", "stretch", "baseline"] },
-    { name: "justify", type: "select", options: ["start", "center", "end", "between", "around", "evenly"] },
-    { name: "wrap", type: "select", options: ["nowrap", "wrap", "wrap-reverse"] },
-    { name: "columns", type: "number" },
-    { name: "rows", type: "number" },
-    { name: "minChildWidth", type: "string" },
-    { name: "columnGap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"] },
-    { name: "rowGap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"] },
-    { name: "autoFlow", type: "select", options: ["row", "column", "dense", "row-dense", "column-dense"] },
-    { name: "alignItems", type: "select", options: ["start", "center", "end", "stretch", "baseline"] },
-    { name: "justifyItems", type: "select", options: ["start", "center", "end", "stretch"] },
-    { name: "gridGap", type: "select", options: ["none", "xs", "sm", "md", "lg", "xl"] },
+    {
+      name: "stackProps",
+      type: "object",
+      description: "Stack pass-through for layout=\"list\": direction, gap, align, justify, wrap",
+    },
+    {
+      name: "gridProps",
+      type: "object",
+      description:
+        "Grid pass-through for layout=\"grid\": columns, rows, minChildWidth, gap, columnGap, rowGap, autoFlow, alignItems, justifyItems",
+    },
     { name: "className", type: "string" }
   ),
 

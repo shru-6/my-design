@@ -7,8 +7,16 @@
 const fs = require("fs")
 const path = require("path")
 const { execSync } = require("child_process")
+const {
+  RAW_COLOR_RE,
+  DARK_PREFIX_RE,
+  RAW_RGBA_RE,
+  RAW_RADIUS_RE,
+  RAW_DURATION_RE,
+  RAW_ZINDEX_RE,
+} = require("../lib/rawColorPattern.cjs")
 
-const root = path.join(__dirname, "..")
+const root = path.join(__dirname, "..", "..")
 const specPath = path.join(root, "docs", "reference", "COMPONENTS.md")
 const indexPath = path.join(root, "src", "index.ts")
 const metadataDir = path.join(root, "test", "src", "utils", "metadata")
@@ -134,11 +142,19 @@ function checkTokenSync() {
   return mismatches
 }
 
+// One pattern per token axis a component is expected to read instead of
+// hardcode. Same patterns eslint.config.mjs uses live, via scripts/lib/rawColorPattern.cjs.
+const TOKEN_CHECKS = [
+  { re: RAW_COLOR_RE, label: "raw color" },
+  { re: DARK_PREFIX_RE, label: "dark: prefix (use theme tokens)" },
+  { re: RAW_RGBA_RE, label: "raw rgb()/rgba() color" },
+  { re: RAW_RADIUS_RE, label: "raw radius (use rounded-control-*/rounded-surface-*/rounded-pill)" },
+  { re: RAW_DURATION_RE, label: "raw duration (use duration-fast/normal/slow)" },
+  { re: RAW_ZINDEX_RE, label: "raw z-index (use the z-sticky/dropdown/overlay/modal/toast classes)" },
+]
+
 function checkRawColors() {
   const violations = []
-  const rawColorRe =
-    /\b(?:bg|text|border|ring|fill|stroke)-(?:slate|gray|zinc|neutral|stone|red|orange|amber|yellow|lime|green|emerald|teal|cyan|sky|blue|indigo|violet|purple|fuchsia|pink|rose)-\d{2,3}\b/g
-  const darkPrefixRe = /\bdark:/g
 
   function walk(dir) {
     for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
@@ -147,12 +163,12 @@ function checkRawColors() {
       else if (entry.name.endsWith(".tsx") || entry.name.endsWith(".ts")) {
         const content = fs.readFileSync(full, "utf8")
         const rel = path.relative(root, full)
-        let m
-        while ((m = rawColorRe.exec(content)) !== null) {
-          violations.push(`${rel}: raw color "${m[0]}"`)
-        }
-        while ((m = darkPrefixRe.exec(content)) !== null) {
-          violations.push(`${rel}: dark: prefix (use theme tokens)`)
+        for (const { re, label } of TOKEN_CHECKS) {
+          re.lastIndex = 0
+          let m
+          while ((m = re.exec(content)) !== null) {
+            violations.push(`${rel}: ${label} "${m[0]}"`)
+          }
         }
       }
     }
@@ -178,7 +194,7 @@ try {
 
 // 2. Copy styles
 try {
-  execSync("node scripts/copy-styles.js", { cwd: root, stdio: "pipe" })
+  execSync("node scripts/dev/copy-styles.js", { cwd: root, stdio: "pipe" })
   log("styles.css copied to dist/", true)
 } catch (e) {
   log("styles.css copy", false)
@@ -246,7 +262,7 @@ if (tokenMismatches.length) {
   log("Token sync (scripts/tokens matches src/tokens)", true)
 }
 
-// 6. Raw colors
+// 6. Raw utilities (color, radius, duration, z-index — everything token_checks covers)
 const colorViolations = checkRawColors()
 if (colorViolations.length) {
   log(`Semantic tokens (${colorViolations.length} violations)`, false)
@@ -256,7 +272,7 @@ if (colorViolations.length) {
   }
   failed = true
 } else {
-  log("Semantic tokens (no raw Tailwind colors)", true)
+  log("Semantic tokens (no raw color/radius/duration/z-index)", true)
 }
 
 console.log("")

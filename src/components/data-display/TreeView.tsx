@@ -10,8 +10,13 @@ import {
   Trash2,
 } from "lucide-react"
 import { cn } from "../../utils"
+import { IconButton } from "../actions/IconButton"
+import { focusRing } from "../inputs/fieldPieces"
 import { Spinner } from "./Spinner"
 import { Icon } from "../utilities/Icon"
+
+/** Row controls sit inside a 30px row, well under `Button`'s smallest control height. */
+const treeRowControl = "h-6 w-6 shrink-0"
 
 export type TreeItemKind = "folder" | "file"
 
@@ -19,6 +24,8 @@ export type TreeItem = {
   id: string
   label: React.ReactNode
   left?: React.ReactNode
+  /** Row actions rendered outside the select control (buttons, menus, etc.). */
+  actions?: React.ReactNode
   kind?: TreeItemKind
   children?: TreeItem[]
 }
@@ -166,16 +173,16 @@ function TreeRow({
         }}
         onDragEnd={onDragEnd}
         className={cn(
-          "group relative flex min-h-[30px] items-center rounded-sm text-sm transition-colors",
+          "group relative flex min-h-[30px] w-max min-w-full items-center rounded-control-sm text-sm transition-colors",
           selected && "bg-primary/10 text-foreground",
           !selected && "hover:bg-muted/70",
           dropInside && "bg-muted/60 ring-1 ring-inset ring-primary/40",
           showIndentGuides && depth > 0 && "border-l border-border/60"
         )}
-        style={{ paddingLeft: depth * indent + 4 }}
+        style={{ marginLeft: depth * indent, paddingLeft: 4 }}
       >
-        {dropBefore ? <span className="absolute inset-x-1 top-0 h-0.5 rounded-full bg-primary" aria-hidden /> : null}
-        {dropAfter ? <span className="absolute inset-x-1 bottom-0 h-0.5 rounded-full bg-primary" aria-hidden /> : null}
+        {dropBefore ? <span className="absolute inset-x-1 top-0 h-0.5 rounded-pill bg-primary" aria-hidden /> : null}
+        {dropAfter ? <span className="absolute inset-x-1 bottom-0 h-0.5 rounded-pill bg-primary" aria-hidden /> : null}
 
         {draggable ? (
           <span
@@ -186,80 +193,101 @@ function TreeRow({
           </span>
         ) : null}
 
-        <button
-          type="button"
-          className={cn(
-            "flex h-6 w-5 shrink-0 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted",
-            !hasChildren && "invisible"
-          )}
-          aria-label={expanded ? "Collapse" : "Expand"}
+        <IconButton
+          className={cn("h-6 w-5 shrink-0 text-muted-foreground", !hasChildren && "invisible")}
+          ariaLabel={expanded ? "Collapse" : "Expand"}
+          icon={
+            expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />
+          }
           onClick={(event) => {
             event.stopPropagation()
             if (hasChildren) onToggle(item.id)
           }}
-        >
-          {hasChildren ? (
-            expanded ? <ChevronDown className="h-3.5 w-3.5" /> : <ChevronRight className="h-3.5 w-3.5" />
-          ) : null}
-        </button>
+        />
 
-        <button
-          type="button"
-          className="flex min-w-0 flex-1 items-center gap-2 rounded-sm py-1 pr-1 text-left"
+        <div
+          role="button"
+          tabIndex={0}
+          className={cn(
+            "flex min-w-0 flex-1 cursor-pointer items-center gap-2 rounded-control-sm py-1 pr-1 text-left outline-none",
+            focusRing
+          )}
           onClick={() => onSelect(item.id)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter" || event.key === " ") {
+              event.preventDefault()
+              onSelect(item.id)
+            }
+          }}
         >
           <span className="shrink-0 text-muted-foreground">
             {item.left ? <Icon node={item.left} size="sm" /> : defaultIcon(item, expanded)}
           </span>
-          <span className="min-w-0 flex-1 truncate">{item.label}</span>
-        </button>
+          <span
+            className={cn(
+              "flex-1",
+              typeof item.label === "string" || typeof item.label === "number"
+                ? "min-w-0 truncate"
+                : "min-w-max"
+            )}
+          >
+            {item.label}
+          </span>
+        </div>
+
+        {item.actions ? (
+          <div
+            className="flex shrink-0 items-center gap-0.5 pr-1"
+            onClick={(event) => event.stopPropagation()}
+            onKeyDown={(event) => event.stopPropagation()}
+          >
+            {item.actions}
+          </div>
+        ) : null}
 
         {hasActions ? (
           <div className="flex shrink-0 items-center gap-0.5 pr-1 opacity-70 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
             {showAddSibling ? (
-              <button
-                type="button"
+              <IconButton
+                tone="muted"
                 disabled={!onAdd}
-                className="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Add sibling"
+                className={treeRowControl}
+                ariaLabel="Add sibling"
                 title="Add sibling"
+                icon={<Plus className="h-3.5 w-3.5" />}
                 onClick={(event) => {
                   event.stopPropagation()
                   onAdd?.({ targetId: item.id, relation: "sibling" })
                 }}
-              >
-                <Plus className="h-3.5 w-3.5" />
-              </button>
+              />
             ) : null}
             {showAddChild ? (
-              <button
-                type="button"
+              <IconButton
+                tone="muted"
                 disabled={!onAdd}
-                className="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-muted hover:text-foreground disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Add child"
+                className={treeRowControl}
+                ariaLabel="Add child"
                 title="Add folder or request"
+                icon={<Folder className="h-3.5 w-3.5" />}
                 onClick={(event) => {
                   event.stopPropagation()
                   onAdd?.({ targetId: item.id, relation: "child" })
                 }}
-              >
-                <Folder className="h-3.5 w-3.5" />
-              </button>
+              />
             ) : null}
             {showDelete ? (
-              <button
-                type="button"
+              <IconButton
+                tone="muted"
                 disabled={!onDelete}
-                className="flex h-6 w-6 items-center justify-center rounded-sm text-muted-foreground hover:bg-destructive/10 hover:text-destructive disabled:cursor-not-allowed disabled:opacity-40"
-                aria-label="Delete"
+                className={cn(treeRowControl, "hover:bg-destructive/10 hover:text-destructive")}
+                ariaLabel="Delete"
                 title="Delete"
+                icon={<Trash2 className="h-3.5 w-3.5" />}
                 onClick={(event) => {
                   event.stopPropagation()
                   onDelete?.(item.id)
                 }}
-              >
-                <Trash2 className="h-3.5 w-3.5" />
-              </button>
+              />
             ) : null}
           </div>
         ) : null}
@@ -296,9 +324,10 @@ function TreeRow({
   )
 }
 
-export function TreeView({
-  items,
-  selectedId,
+export const TreeView = React.forwardRef<HTMLDivElement, TreeViewProps>(function TreeView(
+  {
+    items,
+    selectedId,
   defaultSelectedId,
   onSelect,
   expandedIds,
@@ -313,11 +342,13 @@ export function TreeView({
   allowAddSibling = false,
   allowAddChild = false,
   allowDelete = false,
-  onAdd,
-  onDelete,
-  className,
-  ...rest
-}: TreeViewProps) {
+    onAdd,
+    onDelete,
+    className,
+    ...props
+  },
+  ref
+) {
   const [internalSelected, setInternalSelected] = React.useState(defaultSelectedId)
   const [internalExpanded, setInternalExpanded] = React.useState<string[]>(defaultExpandedIds)
   const [draggedId, setDraggedId] = React.useState<string | null>(null)
@@ -368,9 +399,12 @@ export function TreeView({
     setDropHint(null)
   }
 
+  // All three branches spread `{...props}` and take `ref` — the loading branch
+  // used to drop both, so `id` / `aria-*` vanished for exactly as long as the
+  // tree was loading, which is when a label matters most.
   if (loading) {
     return (
-      <div className={cn("flex items-center justify-center p-6", className)}>
+      <div ref={ref} className={cn("flex items-center justify-center p-6", className)} {...props}>
         <Spinner size="sm" />
       </div>
     )
@@ -378,7 +412,7 @@ export function TreeView({
 
   if (!normalizedItems.length) {
     return (
-      <div className={cn("p-4 text-sm text-muted-foreground", className)} {...rest}>
+      <div ref={ref} className={cn("p-4 text-sm text-muted-foreground", className)} {...props}>
         {emptyState}
       </div>
     )
@@ -386,9 +420,13 @@ export function TreeView({
 
   return (
     <div
+      ref={ref}
       role="tree"
-      className={cn("w-full select-none space-y-px rounded-md border border-border/60 bg-background p-1", className)}
-      {...rest}
+      className={cn(
+        "w-max min-w-full select-none space-y-px rounded-surface-sm border border-border/60 bg-background p-1",
+        className
+      )}
+      {...props}
     >
       {normalizedItems.map((item, index) => (
         <TreeRow
@@ -417,7 +455,7 @@ export function TreeView({
       ))}
     </div>
   )
-}
+})
 
 TreeView.displayName = "TreeView"
 

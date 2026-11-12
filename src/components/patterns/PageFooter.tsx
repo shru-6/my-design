@@ -26,18 +26,14 @@ export interface PageFooterProps
   className?: string
 }
 
-export function PageFooter({
-  left,
-  right,
-  sticky,
-  separator,
-  variant,
-  className,
-  children,
-  ...props
-}: PageFooterProps) {
+export const PageFooter = React.forwardRef<HTMLElement, PageFooterProps>(function PageFooter(
+  { left, right, sticky, separator, variant, className, children, ...props },
+  ref
+) {
   return (
     <footer
+      ref={ref}
+      data-slot="page-footer"
       className={cn(
         pageFooterVariants({ variant }),
         sticky && "sticky bottom-0 z-sticky bg-background/95 backdrop-blur",
@@ -53,6 +49,6 @@ export function PageFooter({
       </div>
     </footer>
   )
-}
+})
 
 PageFooter.displayName = "PageFooter"

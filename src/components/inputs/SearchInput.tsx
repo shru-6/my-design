@@ -1,6 +1,7 @@
 import * as React from "react"
 import { Search, X } from "lucide-react"
-import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
+import { IconButton } from "../actions/IconButton"
 import { Spinner } from "../data-display/Spinner"
 import { TextInput, type TextInputProps } from "./TextInput"
 
@@ -37,17 +38,11 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     },
     ref
   ) => {
-    const isControlled = valueProp !== undefined
-    const [internal, setInternal] = React.useState(String(defaultValue ?? ""))
-    const value = isControlled ? String(valueProp ?? "") : internal
-
-    const setValue = React.useCallback(
-      (next: string) => {
-        if (!isControlled) setInternal(next)
-        onChange?.(next)
-      },
-      [isControlled, onChange]
-    )
+    const [value, setValue] = useControllableValue<string>({
+      value: valueProp === undefined ? undefined : String(valueProp ?? ""),
+      defaultValue: String(defaultValue ?? ""),
+      onChange,
+    })
 
     React.useEffect(() => {
       if (!onSearch) return
@@ -86,28 +81,18 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
           loading ? (
             <Spinner size="sm" className="pointer-events-none" />
           ) : showClear ? (
-            <button
-              type="button"
+            <IconButton
               tabIndex={-1}
               disabled={disabled}
               onClick={handleClear}
-              className={cn(
-                "inline-flex h-8 w-8 items-center justify-center rounded-md",
-                "text-muted-foreground hover:text-foreground",
-                "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-              )}
-              aria-label="Clear search"
-            >
-              <X className="h-4 w-4" strokeWidth={2} />
-            </button>
+              tone="muted"
+              icon={<X strokeWidth={2} />}
+              ariaLabel="Clear search"
+            />
           ) : undefined
         }
         rightInteractive={showClear}
-        onChange={(e) => {
-          const next = e.target.value
-          if (!isControlled) setInternal(next)
-          onChange?.(next)
-        }}
+        onChange={(e) => setValue(e.target.value)}
         {...props}
       />
     )

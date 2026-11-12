@@ -2,6 +2,7 @@ import * as React from "react"
 import { ChevronDown } from "lucide-react"
 import { type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
+import { useControllableValue } from "../../utils/useControllableValue"
 import {
   FieldLayout,
   fieldSurfaceVariants,
@@ -36,6 +37,11 @@ export interface SelectProps extends Omit<React.ComponentPropsWithoutRef<"select
   contentClassName?: string
   value?: string
   defaultValue?: string
+  /**
+   * Value-typed change handler. `onChange` is taken by the native `<select>`
+   * event handler (same as TextInput / Textarea), so the value form keeps this
+   * name; both fire, native first.
+   */
   onValueChange?: (value: string) => void
 }
 
@@ -68,11 +74,16 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       onValueChange,
       onChange,
       disabled,
+      id,
       ...selectProps
     },
     ref
   ) => {
     const generatedId = React.useId()
+    // A consumer-supplied `id` has to be the one the label points at. It used to
+    // be set before the props spread, so `{...selectProps}` silently overrode it
+    // while `htmlFor` kept pointing at the generated one.
+    const selectId = id ?? generatedId
 
     const grouped = React.useMemo(() => {
       const out: { group?: string; items: SelectOption[] }[] = []
@@ -88,9 +99,11 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
       return out
     }, [items])
 
-    const isControlled = value !== undefined
-    const [uncontrolledValue, setUncontrolledValue] = React.useState(() => defaultValue ?? "")
-    const currentValue = isControlled ? (value ?? "") : uncontrolledValue
+    const [currentValue, setCurrentValue] = useControllableValue<string>({
+      value: value === undefined ? undefined : value ?? "",
+      defaultValue: defaultValue ?? "",
+      onChange: onValueChange,
+    })
 
     const selectedOption = React.useMemo(
       () => items.find((it) => it.value === currentValue),
@@ -100,13 +113,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
     const effectiveLeft = hasAdornment(selectedOption?.left) ? selectedOption?.left : left
 
     const mergedOnChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-      if (!isControlled) setUncontrolledValue(e.target.value)
       onChange?.(e)
-      onValueChange?.(e.target.value)
+      setCurrentValue(e.target.value)
     }
 
     return (
-      <FieldLayout label={label} htmlFor={generatedId} required={required} size={size} errorMessage={errorMessage}>
+      <FieldLayout label={label} htmlFor={selectId} required={required} size={size} errorMessage={errorMessage}>
         <div className="relative w-full">
           {hasAdornment(effectiveLeft) ? (
             <span className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground">
@@ -115,12 +127,12 @@ export const Select = React.forwardRef<HTMLSelectElement, SelectProps>(
           ) : null}
           <select
             ref={ref}
-            id={generatedId}
             {...selectProps}
+            id={selectId}
             aria-required={required}
             aria-invalid={Boolean(errorMessage) || undefined}
             disabled={disabled}
-            {...(isControlled ? { value: value ?? "" } : { defaultValue })}
+            value={currentValue}
             onChange={mergedOnChange}
             className={cn(
               fieldSurfaceVariants({ control: "input", size, variant, invalid: Boolean(errorMessage) }),

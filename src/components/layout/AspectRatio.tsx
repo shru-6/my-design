@@ -1,5 +1,6 @@
 import * as React from "react"
 import { cn } from "../../utils"
+import { sizeToCss } from "./shared"
 
 const DEFAULT_RATIO = 16 / 9
 
@@ -27,11 +28,6 @@ export function formatAspectRatioLabel(ratio: number): string {
     if (Math.abs(ratio - w / h) < 0.02) return `${w}:${h}`
   }
   return String(Math.round(ratio * 1000) / 1000)
-}
-
-function sizeToCss(value: number | string | undefined): string | undefined {
-  if (value == null) return undefined
-  return typeof value === "number" ? `${value}px` : value
 }
 
 export interface AspectRatioProps extends React.HTMLAttributes<HTMLDivElement> {

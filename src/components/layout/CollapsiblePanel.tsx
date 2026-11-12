@@ -7,10 +7,12 @@ import {
   PanelRightClose,
   PanelRightOpen,
 } from "lucide-react"
-import { cva, type VariantProps } from "class-variance-authority"
+import { cva } from "class-variance-authority"
 import { cn } from "../../utils"
-import { Button, type ButtonProps } from "../actions/Button"
+import { type ButtonProps } from "../actions/Button"
+import { IconButton } from "../actions/IconButton"
 import { useControllableOpen } from "../overlays/useControllableOpen"
+import { hasNonEmptyChildren, resolveSectionBorders, sizeToCss } from "./shared"
 
 /** Side the panel shrinks toward when closed. */
 export type CollapsiblePanelCloseDirection = "left" | "right" | "top" | "bottom"
@@ -26,7 +28,7 @@ const ICON_RAIL_WIDTH: Record<NonNullable<ButtonProps["size"]>, string> = {
   lg: "var(--control-height-lg, 2.75rem)",
 }
 
-const collapsiblePanelRootVariants = cva("relative shrink-0 transition-[width,height] duration-200 ease-in-out", {
+const collapsiblePanelRootVariants = cva("relative shrink-0 transition-[width,height] duration-normal ease-in-out", {
   variants: {
     closeDirection: {
       left: "",
@@ -72,18 +74,33 @@ const collapsiblePanelSurfaceVariants = cva("flex h-full w-full overflow-hidden 
   },
 })
 
-/** Seam-adjacent floater — derived from close direction + cross-axis centering. */
-const floaterTriggerVariants = cva("absolute z-10", {
+/** Seam-adjacent floater — centered on the seam when open; nudged outside when collapsed. */
+const floaterTriggerVariants = cva("pointer-events-auto absolute z-sticky", {
   variants: {
     closeDirection: {
-      left: "left-full top-1/2 -translate-x-1/2 -translate-y-1/2",
-      right: "right-full top-1/2 translate-x-1/2 -translate-y-1/2",
-      top: "top-full left-1/2 -translate-x-1/2 -translate-y-1/2",
-      bottom: "bottom-full left-1/2 -translate-x-1/2 translate-y-1/2",
+      left: "left-full top-1/2 -translate-y-1/2",
+      right: "right-full top-1/2 -translate-y-1/2",
+      top: "top-full left-1/2 -translate-x-1/2",
+      bottom: "bottom-full left-1/2 -translate-x-1/2",
+    },
+    open: {
+      true: "",
+      false: "",
     },
   },
+  compoundVariants: [
+    { closeDirection: "left", open: true, class: "-translate-x-1/2" },
+    { closeDirection: "left", open: false, class: "translate-x-1" },
+    { closeDirection: "right", open: true, class: "translate-x-1/2" },
+    { closeDirection: "right", open: false, class: "-translate-x-1" },
+    { closeDirection: "top", open: true, class: "-translate-y-1/2" },
+    { closeDirection: "top", open: false, class: "translate-y-1" },
+    { closeDirection: "bottom", open: true, class: "translate-y-1/2" },
+    { closeDirection: "bottom", open: false, class: "-translate-y-1" },
+  ],
   defaultVariants: {
     closeDirection: "left",
+    open: true,
   },
 })
 
@@ -118,10 +135,6 @@ export interface CollapsiblePanelProps extends Omit<React.HTMLAttributes<HTMLDiv
   children?: React.ReactNode
 }
 
-function toCssSize(value: string | number, fallback: string): string {
-  return typeof value === "number" ? `${value}px` : value
-}
-
 function isHorizontalClose(closeDirection: CollapsiblePanelCloseDirection): boolean {
   return closeDirection === "left" || closeDirection === "right"
 }
@@ -139,7 +152,7 @@ function resolveCollapsedSize(
   toggleButtonProps?: Partial<ButtonProps>
 ): string {
   if (collapsedSize !== undefined) {
-    return typeof collapsedSize === "number" ? `${collapsedSize}px` : collapsedSize
+    return sizeToCss(collapsedSize) ?? "0px"
   }
   if (triggerPlacement === "header") {
     const buttonSize = toggleButtonProps?.size ?? "sm"
@@ -182,17 +195,15 @@ function mergeTrigger(
   }
 
   return (
-    <Button
-      variant="ghost"
+    <IconButton
       size="sm"
-      iconOnly
       ariaLabel={open ? "Collapse panel" : "Expand panel"}
-      left={defaultToggleIcon(closeDirection, open)}
+      icon={defaultToggleIcon(closeDirection, open)}
+      shape={triggerVariant === "pill" ? "round" : "control"}
       onClick={onToggle}
       {...toggleButtonProps}
       className={cn(
-        triggerVariant === "pill" &&
-          "h-6 w-6 rounded-full border border-border bg-muted text-foreground shadow-md hover:bg-accent",
+        triggerVariant === "pill" && "h-6 w-6 border border-border bg-muted text-foreground shadow-md hover:bg-accent",
         toggleButtonProps?.className
       )}
     />
@@ -230,7 +241,7 @@ export const CollapsiblePanel = React.forwardRef<HTMLDivElement, CollapsiblePane
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange })
   const horizontalClose = isHorizontalClose(closeDirection)
   const resolvedCollapsed = resolveCollapsedSize(collapsedSize, triggerPlacement, toggleButtonProps)
-  const axisSize = open ? toCssSize(size, "16rem") : resolvedCollapsed
+  const axisSize = open ? (sizeToCss(size) ?? "16rem") : resolvedCollapsed
   const collapsedToZero = isCollapsedSizeZero(resolvedCollapsed)
 
   const showHeaderTrigger = triggerPlacement === "header"
@@ -238,6 +249,13 @@ export const CollapsiblePanel = React.forwardRef<HTMLDivElement, CollapsiblePane
   const showHeaderRow =
     Boolean(header || showHeaderTrigger) && (open || showHeaderTrigger || !collapsedToZero)
   const hideContent = !open && (collapsedToZero || showHeaderTrigger)
+  const hasContent = hasNonEmptyChildren(children)
+  const hasFooter = Boolean(footer)
+  const { headerBorderBottom, footerBorderTop } = resolveSectionBorders({
+    hasHeader: showHeaderRow,
+    hasContent,
+    hasFooter,
+  })
 
   const toggle = () => setOpen(!open)
   const triggerNode = mergeTrigger(trigger, toggle, closeDirection, open, triggerVariant, toggleButtonProps)
@@ -257,7 +275,8 @@ export const CollapsiblePanel = React.forwardRef<HTMLDivElement, CollapsiblePane
         {showHeaderRow ? (
           <div
             className={cn(
-              "flex shrink-0 items-center gap-2 border-b border-border px-2 py-2",
+              "flex shrink-0 items-center gap-2 px-2 py-2",
+              headerBorderBottom && "border-b border-border",
               !open && showHeaderTrigger && "justify-center px-1",
               headerClassName
             )}
@@ -280,14 +299,20 @@ export const CollapsiblePanel = React.forwardRef<HTMLDivElement, CollapsiblePane
         </div>
 
         {footer && open ? (
-          <div className={cn("shrink-0 border-t border-border px-2 py-2 text-sm text-muted-foreground", footerClassName)}>
+          <div
+            className={cn(
+              "shrink-0 px-2 py-2 text-sm text-muted-foreground",
+              footerBorderTop && "border-t border-border",
+              footerClassName
+            )}
+          >
             {footer}
           </div>
         ) : null}
       </div>
 
       {showFloaterTrigger ? (
-        <div className={floaterTriggerVariants({ closeDirection })}>{triggerNode}</div>
+        <div className={floaterTriggerVariants({ closeDirection, open })}>{triggerNode}</div>
       ) : null}
     </div>
   )

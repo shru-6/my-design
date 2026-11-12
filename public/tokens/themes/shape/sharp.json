@@ -1,8 +1,16 @@
 {
   "_createdBy": "shru-design-system library",
   "radius": {
-    "button": "0",
-    "card": "0",
-    "input": "0"
+    "control": {
+      "sm": "0",
+      "md": "0",
+      "lg": "0"
+    },
+    "surface": {
+      "sm": "0",
+      "md": "0",
+      "lg": "0"
+    },
+    "pill": "0"
   }
 }

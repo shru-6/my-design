@@ -2,20 +2,22 @@ import * as React from "react"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 import { Icon } from "../utilities/Icon"
+import { avatarShapeRadius, avatarSizeScale, type AvatarSizeKey } from "./shared"
+
+const sizeClass = (key: AvatarSizeKey) => `${avatarSizeScale[key].box} ${avatarSizeScale[key].text}`
 
 const avatarVariants = cva("relative inline-flex shrink-0 bg-muted text-muted-foreground", {
   variants: {
+    // Size + shape both come from `data-display/shared.ts` so AvatarGroup's
+    // overflow chip can't drift away from a real avatar.
     size: {
-      xs: "h-6 w-6 text-[10px]",
-      sm: "h-8 w-8 text-xs",
-      md: "h-10 w-10 text-sm",
-      lg: "h-12 w-12 text-base",
-      xl: "h-16 w-16 text-lg",
+      xs: sizeClass("xs"),
+      sm: sizeClass("sm"),
+      md: sizeClass("md"),
+      lg: sizeClass("lg"),
+      xl: sizeClass("xl"),
     },
-    shape: {
-      circle: "rounded-full",
-      square: "rounded-md",
-    },
+    shape: avatarShapeRadius,
   },
   defaultVariants: {
     size: "md",
@@ -64,7 +66,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
         <img
           src={src}
           alt={alt ?? "Avatar"}
-          className={cn("h-full w-full object-cover", shape === "square" ? "rounded-md" : "rounded-full")}
+          className={cn("h-full w-full object-cover", avatarShapeRadius[shape ?? "circle"])}
           onError={() => setFailed(true)}
         />
       ) : null
@@ -91,7 +93,7 @@ export const Avatar = React.forwardRef<HTMLDivElement, AvatarProps>(
           alt={alt}
           status={status}
           statusPosition="bottom-right"
-          size={size === "xs" ? "xs" : size === "sm" ? "sm" : size === "lg" ? "lg" : size === "xl" ? "xl" : "md"}
+          size={avatarSizeScale[size ?? "md"].icon}
           shape={shape === "square" ? "square" : "circle"}
           className="h-full w-full justify-center"
         />

@@ -47,6 +47,8 @@ export interface ModalProps
   showClose?: boolean
   /** When true, backdrop clicks do not close the dialog. */
   loading?: boolean
+  /** Override backdrop-close behavior. Defaults to closing only when there is no close icon. */
+  closeOnBackdropClick?: boolean
   minHeight?: string | number
   maxHeight?: string | number
   className?: string
@@ -54,6 +56,10 @@ export interface ModalProps
   cardProps?: Omit<CardProps, "header" | "footer" | "children" | "minHeight" | "maxHeight">
   /** Portal target for the backdrop — use `parent` inside `OverlayPortalScope` for scoped previews. */
   container?: OverlayPortalContainer
+  /** Accessible name for the dialog. Supply when `header` is not plain text. */
+  ariaLabel?: string
+  /** Focused when the dialog opens, instead of its first tabbable child. */
+  initialFocus?: React.RefObject<HTMLElement | null>
   children?: React.ReactNode
 }
 
@@ -67,6 +73,7 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     footer,
     showClose = true,
     loading,
+    closeOnBackdropClick,
     size,
     align,
     minHeight,
@@ -75,6 +82,8 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
     overlayClassName,
     cardProps,
     container,
+    ariaLabel,
+    initialFocus,
     children,
   },
   ref
@@ -92,8 +101,12 @@ export const Modal = React.forwardRef<HTMLDivElement, ModalProps>(function Modal
       onClose={handleClose}
       container={container}
       blur
+      dialog
+      dialogLabel={ariaLabel}
+      initialFocus={initialFocus}
+      closeOnEscape={!loading}
       showCloseButton={showClose}
-      closeOnBackdropClick={!loading}
+      closeOnBackdropClick={closeOnBackdropClick ?? (!showClose && !loading)}
       className={cn(modalOverlayLayout({ align }), overlayClassName)}
     >
       <Card
