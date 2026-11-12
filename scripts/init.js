@@ -8,7 +8,6 @@
 
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 // Get package name dynamically from package.json
 function getPackageName() {
@@ -49,15 +48,16 @@ function checkPackageInstalled(packageName) {
   }
 }
 
-function installPackage(packageName, isDev = true) {
-  log(`Installing ${packageName}...`, 'blue');
-  try {
-    execSync(`npm install ${isDev ? '-D' : ''} ${packageName}`, { stdio: 'inherit' });
-    return true;
-  } catch (error) {
-    log(`Failed to install ${packageName}`, 'red');
-    return false;
-  }
+// Deliberately does NOT shell out to `npm install` on the consumer's behalf.
+// Running a nested package-manager install from inside another package's
+// own `npm install`/postinstall is fragile under pnpm/yarn workspaces,
+// offline installs, locked lockfiles, and read-only CI/Docker build
+// filesystems — and it can silently install with whatever package manager
+// happens to be on PATH, not necessarily the one the consumer is using.
+// Warn with the exact command instead and let the consumer run it.
+function warnMissingPackage(packageName, isDev = true) {
+  log(`${packageName} not found. Install it yourself:`, 'yellow');
+  log(`   npm install ${isDev ? '-D ' : ''}${packageName}`, 'blue');
 }
 
 function createTailwindConfig() {
@@ -289,28 +289,38 @@ function checkMainFile() {
 }
 
 // Main execution
+// Skip entirely in CI / non-interactive installs, or when explicitly opted
+// out. This script mutates files in the consumer's cwd (tailwind.config.js,
+// postcss.config.js, src/index.css, public/tokens/**) every time it runs —
+// doing that during a CI build or a locked/frozen-lockfile install is
+// surprising at best and can break a read-only build filesystem at worst.
+// Run `npx shru-design-system-init` by hand in CI if you actually want it.
+function shouldSkip() {
+  if (process.env.CI) return 'CI environment detected'
+  if (process.env.SHRU_DESIGN_SYSTEM_SKIP_INIT) return 'SHRU_DESIGN_SYSTEM_SKIP_INIT is set'
+  return null
+}
+
 function main() {
+  const skipReason = shouldSkip();
+  if (skipReason) {
+    log(`Skipping ${PACKAGE_NAME} init (${skipReason}). Run "npx shru-design-system-init" manually if needed.`, 'yellow');
+    return;
+  }
+
   log(`\n🚀 Setting up ${PACKAGE_NAME}...\n`, 'blue');
-  
-  // Check and install Tailwind (only if missing, skip check if already installed)
+
+  // Warn (never auto-install) for missing peer tooling — see warnMissingPackage.
   if (!checkPackageInstalled('tailwindcss')) {
-    log('Tailwind CSS not found. Installing...', 'yellow');
-    if (!installPackage(`tailwindcss@${TAILWIND_VERSION}`)) {
-      log('Failed to install Tailwind CSS. Please install manually.', 'red');
-      process.exit(1);
-    }
+    warnMissingPackage(`tailwindcss@${TAILWIND_VERSION}`);
   }
-  
-  // Check and install PostCSS (only if missing)
   if (!checkPackageInstalled('postcss')) {
-    installPackage('postcss');
+    warnMissingPackage('postcss');
   }
-  
-  // Check and install Autoprefixer (only if missing)
   if (!checkPackageInstalled('autoprefixer')) {
-    installPackage('autoprefixer');
+    warnMissingPackage('autoprefixer');
   }
-  
+
   // Create configuration files
   createTailwindConfig();
   createPostCSSConfig();
@@ -333,4 +343,13 @@ function main() {
   log('\n');
 }
 
-main();
+try {
+  main();
+} catch (error) {
+  // Never let a setup-convenience script fail someone else's install.
+  // package.json's postinstall already has `|| true`, but failing closed
+  // here too means a direct `npx shru-design-system-init` run also degrades
+  // gracefully instead of printing a raw stack trace.
+  log(`\n${PACKAGE_NAME} init hit an error and stopped early: ${error.message}`, 'red');
+  log('This is non-fatal — your install is not affected. See docs/use/INSTALL.md for manual setup.', 'yellow');
+}

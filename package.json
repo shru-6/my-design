@@ -46,8 +46,8 @@
     "clsx": "^2.0.0",
     "input-otp": "^1.0.0",
     "lucide-react": "^0.400.0",
-    "react": ">=18",
-    "react-dom": ">=18",
+    "react": ">=18 <20",
+    "react-dom": ">=18 <20",
     "react-resizable-panels": "^2.0.0",
     "tailwind-merge": "^2.0.0"
   },
@@ -78,6 +78,18 @@
     "vitest": "^3.2.7"
   },
   "license": "MIT",
+  "author": "Shruti Goel",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/shru-6/my-design.git"
+  },
+  "homepage": "https://github.com/shru-6/my-design#readme",
+  "bugs": {
+    "url": "https://github.com/shru-6/my-design/issues"
+  },
+  "engines": {
+    "node": ">=18"
+  },
   "keywords": [
     "react",
     "components",

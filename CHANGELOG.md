@@ -13,11 +13,16 @@ Renamed from 0.6.3 — this is the "bump to 0.7.0 later if you want strict semve
 - **Release** — `postversion` pushes commits + tags to GitHub automatically on `npm version`.
 - **Packaging** — `sideEffects: false` in `package.json`, so bundlers can tree-shake per-component imports instead of pulling in all 99.
 - **docs/use/UPGRADE.md** — durable, consumer-facing migration guide by version (the `BREAKING-FOR-DESIGN-CMS.md` content, generalized past one consumer).
+- **LICENSE** — the MIT text `package.json` already declared was missing from the repo; added.
+- **package.json** — `repository`/`homepage`/`bugs`/`engines`/`author` fields (standard for a public package, previously absent); `react`/`react-dom` peer ranges capped at `<20`.
 
 ### Fixed
 - **ThemeToggle** — `useCallback` missing `triggerRef` dependency (lint-only, no behavior change)
 - **Form** — context value object was rebuilt every render (not memoized), causing every field to re-render on every keystroke in any field
 - **Tooltip, usePositionedPortal, Command, ThemeToggle** — `useLayoutEffect` swapped for a shared `useIsomorphicLayoutEffect` (falls back to `useEffect` when `window` is undefined). Found by the new SSR test: all four fired React's "useLayoutEffect does nothing on the server" warning on every SSR render, not just ones a consumer renders server-only on purpose.
+- **InputOTP test** — the fake-timer flush that drains `input-otp`'s mount-time selection-sync ran outside `act()`, producing a real "not wrapped in act()" warning on every test run; wrapped render/flush/unmount in `act()`.
+- **scripts/init.js (postinstall)** — no longer shells out to `npm install tailwindcss/postcss/autoprefixer` on a consumer's behalf (fragile under pnpm/yarn workspaces, offline installs, and read-only CI filesystems) — it now prints the install command instead. Skips entirely under `CI=true` or `SHRU_DESIGN_SYSTEM_SKIP_INIT=1` rather than rewriting `tailwind.config.js`/`postcss.config.js`/`src/index.css`/`public/tokens/**` during an automated build. The top-level call is also wrapped so a failure here can never fail someone else's install.
+- **CodeBlock** — documented in the `language` prop's own type that it has no effect on syntax highlighting (there is none) — it only sets the `sr-only` accessible label. Was easy to assume otherwise.
 
 ### Note
 - Breaking changes from the theme-engine refactor (batches tracked in `BREAKING-FOR-DESIGN-CMS.md`) ship in this release — see `docs/use/UPGRADE.md` for the consumer-facing version.

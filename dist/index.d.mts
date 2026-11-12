@@ -2404,6 +2404,12 @@ declare const codeBlockVariants: (props?: ({
 type CodeBlockVariant = NonNullable<VariantProps<typeof codeBlockVariants>["variant"]>;
 interface CodeBlockProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "children">, VariantProps<typeof codeBlockVariants> {
     code: string;
+    /**
+     * Announced to assistive tech (`sr-only` "Language: {language}") — does
+     * NOT enable syntax highlighting. This component has no highlighter; `code`
+     * always renders as plain monospaced text. Pair with a highlighting
+     * library upstream if you need colored tokens.
+     */
     language?: string;
     showLineNumbers?: boolean;
     showCopy?: boolean;

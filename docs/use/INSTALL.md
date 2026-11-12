@@ -32,6 +32,8 @@ npx shru-design-system-init
 
 Re-run after upgrading the package if token paths or preset guidance changed.
 
+This also runs automatically on `npm install` (via `postinstall`) — it writes `tailwind.config.js` / `postcss.config.js` / `src/index.css` if missing, and always re-copies the library's own token JSON into `public/tokens/` so updates land. It never shells out to install another package on your behalf (`tailwindcss`/`postcss`/`autoprefixer` missing → it prints the install command instead of running it) and it skips entirely under `CI=true` or `SHRU_DESIGN_SYSTEM_SKIP_INIT=1`, so it won't touch a CI build's filesystem.
+
 ---
 
 ## Styles
