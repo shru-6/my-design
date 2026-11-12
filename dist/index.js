@@ -1,6 +1,6 @@
 'use strict';
 
-var React10 = require('react');
+var React11 = require('react');
 var classVarianceAuthority = require('class-variance-authority');
 var clsx = require('clsx');
 var tailwindMerge = require('tailwind-merge');
@@ -29,7 +29,7 @@ function _interopNamespace(e) {
   return Object.freeze(n);
 }
 
-var React10__namespace = /*#__PURE__*/_interopNamespace(React10);
+var React11__namespace = /*#__PURE__*/_interopNamespace(React11);
 var SliderPrimitive__namespace = /*#__PURE__*/_interopNamespace(SliderPrimitive);
 
 // src/components/actions/Button.tsx
@@ -111,7 +111,7 @@ function isEmptyIconNode(node) {
   if (Array.isArray(node)) return node.length === 0 || node.every(isEmptyIconNode);
   return false;
 }
-var Icon = React10__namespace.forwardRef(
+var Icon = React11__namespace.forwardRef(
   ({
     node,
     alt,
@@ -137,7 +137,7 @@ var Icon = React10__namespace.forwardRef(
         className: cn(iconVariants({ size, variant, shape }), status && "relative", className),
         ...props,
         children: [
-          React10__namespace.isValidElement(resolvedContent) ? React10__namespace.cloneElement(resolvedContent, {
+          React11__namespace.isValidElement(resolvedContent) ? React11__namespace.cloneElement(resolvedContent, {
             "aria-hidden": alt ? void 0 : true
           }) : resolvedContent,
           status && /* @__PURE__ */ jsxRuntime.jsx(
@@ -200,7 +200,7 @@ var textIconSizeMap = {
   xl: "lg",
   "2xl": "xl"
 };
-var Text = React10__namespace.forwardRef(
+var Text = React11__namespace.forwardRef(
   ({ as: Comp = "div", left, right, truncate, lineClamp, size, variant, weight, className, children, ...props }, ref) => {
     const resolvedSize = size ?? "md";
     const iconSize = textIconSizeMap[resolvedSize];
@@ -243,7 +243,7 @@ var toneToVariant = {
   muted: "muted",
   error: "danger"
 };
-var HelperText = React10__namespace.forwardRef(
+var HelperText = React11__namespace.forwardRef(
   ({ tone = "muted", className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "p",
     {
@@ -272,7 +272,7 @@ var labelTextSizeMap = {
   md: "sm",
   lg: "base"
 };
-var Label = React10__namespace.forwardRef(
+var Label = React11__namespace.forwardRef(
   ({ size, required, left, className, children, ...props }, ref) => {
     const resolvedSize = size ?? "md";
     return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -324,15 +324,15 @@ function getStringFieldValidationError(value, opts) {
 }
 function useSyncStringFieldValidation(value, params) {
   const { validate, required, minLength, maxLength, errorMessage, onValidate } = params;
-  const validationOpts = React10__namespace.useMemo(
+  const validationOpts = React11__namespace.useMemo(
     () => ({ validate, required, minLength, maxLength, errorMessage }),
     [validate, required, minLength, maxLength, errorMessage]
   );
-  const validationError = React10__namespace.useMemo(
+  const validationError = React11__namespace.useMemo(
     () => getStringFieldValidationError(value, validationOpts),
     [value, validationOpts]
   );
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (validate) {
       onValidate?.(!validationError, validationError);
     }
@@ -474,7 +474,7 @@ function InputAdornmentSlot(props) {
         interactive ? "pointer-events-auto" : "pointer-events-none",
         textVariants({ variant: "muted" })
       ),
-      children: React10__namespace.isValidElement(node) ? node : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node, size: iconSize })
+      children: React11__namespace.isValidElement(node) ? node : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node, size: iconSize })
     }
   );
 }
@@ -484,7 +484,7 @@ var sizeClass = {
   md: "h-5 w-5",
   lg: "h-6 w-6"
 };
-var Spinner = React10__namespace.forwardRef(
+var Spinner = React11__namespace.forwardRef(
   ({ size = "md", className, label = "Loading", ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
     "svg",
     {
@@ -545,7 +545,7 @@ var buttonVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Button = React10__namespace.forwardRef((props, ref) => {
+var Button = React11__namespace.forwardRef((props, ref) => {
   const {
     variant,
     size,
@@ -621,7 +621,7 @@ var iconButtonVariants = classVarianceAuthority.cva("", {
     shape: "control"
   }
 });
-var IconButton = React10__namespace.forwardRef(
+var IconButton = React11__namespace.forwardRef(
   ({ icon, ariaLabel, tone, shape, variant = "ghost", size = "sm", iconSize, className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     Button,
     {
@@ -661,7 +661,7 @@ var fabVariants = classVarianceAuthority.cva("fixed z-dropdown shadow-lg transit
     position: "bottom-right"
   }
 });
-var FAB = React10__namespace.forwardRef(
+var FAB = React11__namespace.forwardRef(
   ({ left, ariaLabel, variant, size, position, className, type = "button", ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     IconButton,
     {
@@ -764,6 +764,7 @@ function computeFloatingMenuStyle(trigger, menu, options) {
     visibility: "visible"
   };
 }
+var useIsomorphicLayoutEffect = typeof window !== "undefined" ? React11__namespace.useLayoutEffect : React11__namespace.useEffect;
 var tooltipContentVariants = classVarianceAuthority.cva(
   [
     "z-toast overflow-visible rounded-control-md px-3 py-1.5 text-xs shadow-md",
@@ -879,7 +880,7 @@ function mergeRefs(...refs) {
     }
   };
 }
-var Tooltip = React10__namespace.forwardRef(function Tooltip2({
+var Tooltip = React11__namespace.forwardRef(function Tooltip2({
   content,
   disabled,
   children,
@@ -894,44 +895,44 @@ var Tooltip = React10__namespace.forwardRef(function Tooltip2({
   maxWidth,
   showArrow = true
 }, forwardedRef) {
-  const triggerRef = React10__namespace.useRef(null);
-  const floatingRef = React10__namespace.useRef(null);
-  const hideTimeoutRef = React10__namespace.useRef(null);
-  const [open, setOpen] = React10__namespace.useState(false);
-  const [entered, setEntered] = React10__namespace.useState(false);
-  const [coords, setCoords] = React10__namespace.useState(HIDDEN);
-  const [resolvedPlacement, setResolvedPlacement] = React10__namespace.useState(placement);
-  const id = React10__namespace.useId();
+  const triggerRef = React11__namespace.useRef(null);
+  const floatingRef = React11__namespace.useRef(null);
+  const hideTimeoutRef = React11__namespace.useRef(null);
+  const [open, setOpen] = React11__namespace.useState(false);
+  const [entered, setEntered] = React11__namespace.useState(false);
+  const [coords, setCoords] = React11__namespace.useState(HIDDEN);
+  const [resolvedPlacement, setResolvedPlacement] = React11__namespace.useState(placement);
+  const id = React11__namespace.useId();
   const tooltipId = `tooltip-${id}`;
   const maxWidthCss = maxWidth !== void 0 && maxWidth !== null && maxWidth !== "" ? typeof maxWidth === "number" ? `${maxWidth}px` : String(maxWidth) : void 0;
-  React10__namespace.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) setResolvedPlacement(placement);
   }, [placement, open]);
-  const clearCloseTimer = React10__namespace.useCallback(() => {
+  const clearCloseTimer = React11__namespace.useCallback(() => {
     if (hideTimeoutRef.current != null) {
       clearTimeout(hideTimeoutRef.current);
       hideTimeoutRef.current = null;
     }
   }, []);
-  const hide = React10__namespace.useCallback(() => {
+  const hide = React11__namespace.useCallback(() => {
     clearCloseTimer();
     setOpen(false);
     setEntered(false);
     setCoords(HIDDEN);
   }, [clearCloseTimer]);
-  const scheduleClose = React10__namespace.useCallback(() => {
+  const scheduleClose = React11__namespace.useCallback(() => {
     clearCloseTimer();
     hideTimeoutRef.current = window.setTimeout(() => {
       hideTimeoutRef.current = null;
       hide();
     }, CONTENT_HOVER_CLOSE_DELAY_MS);
   }, [hide, clearCloseTimer]);
-  const show = React10__namespace.useCallback(() => {
+  const show = React11__namespace.useCallback(() => {
     clearCloseTimer();
     if (!disabled) setOpen(true);
   }, [disabled, clearCloseTimer]);
-  React10__namespace.useEffect(() => () => clearCloseTimer(), [clearCloseTimer]);
-  const onTriggerPointerLeave = React10__namespace.useCallback(
+  React11__namespace.useEffect(() => () => clearCloseTimer(), [clearCloseTimer]);
+  const onTriggerPointerLeave = React11__namespace.useCallback(
     (e, childHandler) => {
       childHandler?.(e);
       if (keepOpenOnContentHover) {
@@ -944,7 +945,7 @@ var Tooltip = React10__namespace.forwardRef(function Tooltip2({
     },
     [keepOpenOnContentHover, scheduleClose, hide]
   );
-  const updatePosition = React10__namespace.useCallback(() => {
+  const updatePosition = React11__namespace.useCallback(() => {
     const trigger2 = triggerRef.current;
     const float = floatingRef.current;
     if (!trigger2 || !float) return;
@@ -963,7 +964,7 @@ var Tooltip = React10__namespace.forwardRef(function Tooltip2({
     setResolvedPlacement(resolved);
     setCoords(next);
   }, [placement, autoPlacement, xOffset, yOffset]);
-  React10__namespace.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) return;
     updatePosition();
     const onScrollOrResize = () => updatePosition();
@@ -974,7 +975,7 @@ var Tooltip = React10__namespace.forwardRef(function Tooltip2({
       window.removeEventListener("resize", onScrollOrResize);
     };
   }, [open, updatePosition, content, placement, maxWidthCss]);
-  React10__namespace.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) return;
     setEntered(false);
     const id2 = requestAnimationFrame(() => setEntered(true));
@@ -983,7 +984,7 @@ var Tooltip = React10__namespace.forwardRef(function Tooltip2({
   const bindTrigger = (el) => {
     triggerRef.current = el;
   };
-  const trigger = React10__namespace.isValidElement(children) && typeof children !== "string" ? React10__namespace.cloneElement(children, {
+  const trigger = React11__namespace.isValidElement(children) && typeof children !== "string" ? React11__namespace.cloneElement(children, {
     ref: mergeRefs(
       bindTrigger,
       forwardedRef,
@@ -1064,7 +1065,7 @@ function TooltipProvider({ children }) {
 TooltipProvider.displayName = "TooltipProvider";
 var defaultCopyIcon = /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Copy, { className: "h-4 w-4" });
 var defaultCopiedIcon = /* @__PURE__ */ jsxRuntime.jsx(lucideReact.Check, { className: "h-4 w-4" });
-var CopyButton = React10__namespace.forwardRef(
+var CopyButton = React11__namespace.forwardRef(
   ({
     value,
     onValueCopy,
@@ -1085,9 +1086,9 @@ var CopyButton = React10__namespace.forwardRef(
     ariaLabel,
     ...buttonProps
   }, ref) => {
-    const [copied, setCopied] = React10__namespace.useState(false);
-    const timerRef = React10__namespace.useRef();
-    React10__namespace.useEffect(() => () => clearTimeout(timerRef.current), []);
+    const [copied, setCopied] = React11__namespace.useState(false);
+    const timerRef = React11__namespace.useRef();
+    React11__namespace.useEffect(() => () => clearTimeout(timerRef.current), []);
     const handleCopy = async () => {
       if (disabled) return;
       try {
@@ -1129,8 +1130,8 @@ var CopyButton = React10__namespace.forwardRef(
 CopyButton.displayName = "CopyButton";
 var REVEAL_FALLBACK_MS = 48;
 function usePositionedPortal(open, updatePosition) {
-  const [positioned, setPositioned] = React10__namespace.useState(false);
-  React10__namespace.useLayoutEffect(() => {
+  const [positioned, setPositioned] = React11__namespace.useState(false);
+  useIsomorphicLayoutEffect(() => {
     if (!open) {
       setPositioned(false);
       return;
@@ -1175,8 +1176,8 @@ function useFloatingMenu({
   maxHeight: maxHeightCap = 320,
   zIndex = zLayerValue("dropdown")
 }) {
-  const [menuStyle, setMenuStyle] = React10__namespace.useState({ visibility: "hidden" });
-  const updatePosition = React10__namespace.useCallback(() => {
+  const [menuStyle, setMenuStyle] = React11__namespace.useState({ visibility: "hidden" });
+  const updatePosition = React11__namespace.useCallback(() => {
     const trigger = triggerRef.current;
     const menu = menuRef.current;
     if (!trigger) return;
@@ -1191,7 +1192,7 @@ function useFloatingMenu({
     );
   }, [align, maxHeightCap, minWidth, sideOffset, triggerRef, menuRef, zIndex]);
   const positioned = usePositionedPortal(open, updatePosition);
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!open) return;
     const onPointerDown = (e) => {
       const t = e.target;
@@ -1208,7 +1209,7 @@ function useFloatingMenu({
       document.removeEventListener("keydown", onKeyDown, true);
     };
   }, [open, onOpenChange, triggerRef, menuRef]);
-  const resolvedStyle = React10__namespace.useMemo(
+  const resolvedStyle = React11__namespace.useMemo(
     () => withPortalVisibility(menuStyle, positioned),
     [menuStyle, positioned]
   );
@@ -1219,10 +1220,10 @@ function useControllableOpen({
   defaultOpen = false,
   onOpenChange
 }) {
-  const [uncontrolled, setUncontrolled] = React10__namespace.useState(defaultOpen);
+  const [uncontrolled, setUncontrolled] = React11__namespace.useState(defaultOpen);
   const isControlled = openProp !== void 0;
   const open = isControlled ? openProp : uncontrolled;
-  const setOpen = React10__namespace.useCallback(
+  const setOpen = React11__namespace.useCallback(
     (next) => {
       if (!isControlled) setUncontrolled(next);
       onOpenChange?.(next);
@@ -1248,9 +1249,9 @@ function focusableWithin(root) {
 function useReturnFocusOnClose(open, options) {
   const enabled = options?.enabled ?? true;
   const triggerRef = options?.triggerRef;
-  const previous = React10__namespace.useRef(null);
-  const wasOpen = React10__namespace.useRef(false);
-  React10__namespace.useEffect(() => {
+  const previous = React11__namespace.useRef(null);
+  const wasOpen = React11__namespace.useRef(false);
+  React11__namespace.useEffect(() => {
     if (!enabled) return;
     if (open) {
       if (!wasOpen.current) {
@@ -1275,9 +1276,9 @@ function useDialogA11y({
   initialFocus,
   enabled = true
 }) {
-  const surfaceRef = React10__namespace.useRef(null);
+  const surfaceRef = React11__namespace.useRef(null);
   useReturnFocusOnClose(open, { enabled });
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!enabled || !open) return;
     const raf = requestAnimationFrame(() => {
       const surface = surfaceRef.current;
@@ -1288,7 +1289,7 @@ function useDialogA11y({
     });
     return () => cancelAnimationFrame(raf);
   }, [enabled, open, initialFocus]);
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!enabled || !open) return;
     const onKeyDown = (e) => {
       if (e.key === "Escape") {
@@ -1351,7 +1352,7 @@ var menuItemRowVariants = classVarianceAuthority.cva(cn(floatingMenuItemClass, f
     disabled: false
   }
 });
-var MenuItemRow = React10__namespace.forwardRef(
+var MenuItemRow = React11__namespace.forwardRef(
   ({ item, onSelect, className, onClick, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsxs(
     "button",
     {
@@ -1383,8 +1384,8 @@ function renderMenuItems(items, onSelect) {
   );
 }
 function useMenuKeyboard(menuRef, open) {
-  const activeIndex = React10__namespace.useRef(0);
-  const rows = React10__namespace.useCallback(
+  const activeIndex = React11__namespace.useRef(0);
+  const rows = React11__namespace.useCallback(
     () => Array.from(
       menuRef.current?.querySelectorAll(
         '[role="menuitem"]:not([aria-disabled="true"])'
@@ -1392,13 +1393,13 @@ function useMenuKeyboard(menuRef, open) {
     ),
     [menuRef]
   );
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!open) return;
     activeIndex.current = 0;
     const raf = requestAnimationFrame(() => rows()[0]?.focus());
     return () => cancelAnimationFrame(raf);
   }, [open, rows]);
-  return React10__namespace.useCallback(
+  return React11__namespace.useCallback(
     (e) => {
       if (!["ArrowDown", "ArrowUp", "Home", "End"].includes(e.key)) return;
       const nodes = rows();
@@ -1418,7 +1419,7 @@ function useMenuKeyboard(menuRef, open) {
     [rows]
   );
 }
-var Dropdown = React10__namespace.forwardRef(
+var Dropdown = React11__namespace.forwardRef(
   ({
     items,
     triggerProps,
@@ -1440,8 +1441,8 @@ var Dropdown = React10__namespace.forwardRef(
       className: triggerClassName
     } = triggerProps ?? {};
     const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-    const triggerRef = React10__namespace.useRef(null);
-    const menuRef = React10__namespace.useRef(null);
+    const triggerRef = React11__namespace.useRef(null);
+    const menuRef = React11__namespace.useRef(null);
     const { menuStyle } = useFloatingMenu({
       open,
       onOpenChange: setOpen,
@@ -1465,7 +1466,7 @@ var Dropdown = React10__namespace.forwardRef(
       }
     ) : null;
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative inline-block", className), ...rest, children: [
-      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React10__namespace.isValidElement(trigger) ? React10__namespace.cloneElement(trigger, {
+      /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React11__namespace.isValidElement(trigger) ? React11__namespace.cloneElement(trigger, {
         onClick: (e) => {
           trigger.props.onClick?.(e);
           setOpen(!open);
@@ -1522,7 +1523,7 @@ function menuToDropdownItems(items) {
     separator: item.separator
   }));
 }
-var SplitButton = React10__namespace.forwardRef(function SplitButton2({
+var SplitButton = React11__namespace.forwardRef(function SplitButton2({
   onClick,
   menuItems,
   disabled,
@@ -1594,7 +1595,7 @@ var SplitButton = React10__namespace.forwardRef(function SplitButton2({
   );
 });
 SplitButton.displayName = "SplitButton";
-var TextInput = React10__namespace.forwardRef(
+var TextInput = React11__namespace.forwardRef(
   ({
     id,
     label,
@@ -1616,9 +1617,9 @@ var TextInput = React10__namespace.forwardRef(
     maxLength,
     ...props
   }, ref) => {
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const inputId = id ?? generatedId;
-    const [uncontrolledValue, setUncontrolledValue] = React10__namespace.useState(String(defaultValue ?? ""));
+    const [uncontrolledValue, setUncontrolledValue] = React11__namespace.useState(String(defaultValue ?? ""));
     const resolvedValue = value != null ? String(value) : uncontrolledValue;
     const { validationError, hasError, validationOpts } = useSyncStringFieldValidation(resolvedValue, {
       validate,
@@ -1677,7 +1678,7 @@ function getResizeClass(resize) {
   if (resize === "horizontal") return "resize-x";
   return "resize";
 }
-var Textarea = React10__namespace.forwardRef(
+var Textarea = React11__namespace.forwardRef(
   ({
     id,
     label,
@@ -1697,9 +1698,9 @@ var Textarea = React10__namespace.forwardRef(
     resize = "vertical",
     ...props
   }, ref) => {
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const textareaId = id ?? generatedId;
-    const [uncontrolledValue, setUncontrolledValue] = React10__namespace.useState(String(defaultValue ?? ""));
+    const [uncontrolledValue, setUncontrolledValue] = React11__namespace.useState(String(defaultValue ?? ""));
     const resolvedValue = value != null ? String(value) : uncontrolledValue;
     const { validationError, hasError, validationOpts } = useSyncStringFieldValidation(resolvedValue, {
       validate,
@@ -1752,10 +1753,10 @@ function useControllableValue({
   defaultValue,
   onChange
 }) {
-  const [uncontrolled, setUncontrolled] = React10__namespace.useState(defaultValue);
+  const [uncontrolled, setUncontrolled] = React11__namespace.useState(defaultValue);
   const isControlled = valueProp !== void 0;
   const value = isControlled ? valueProp : uncontrolled;
-  const setValue = React10__namespace.useCallback(
+  const setValue = React11__namespace.useCallback(
     (next) => {
       if (!isControlled) setUncontrolled(next);
       onChange?.(next);
@@ -1779,7 +1780,7 @@ var checkboxVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Checkbox = React10__namespace.forwardRef(
+var Checkbox = React11__namespace.forwardRef(
   ({
     size,
     label,
@@ -1793,20 +1794,20 @@ var Checkbox = React10__namespace.forwardRef(
     indeterminate,
     ...props
   }, ref) => {
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const checkboxId = id ?? generatedId;
     const [resolvedChecked, setChecked] = useControllableValue({
       value: checked === void 0 ? void 0 : Boolean(checked),
       defaultValue: Boolean(defaultState),
       onChange
     });
-    const inputRef = React10__namespace.useRef(null);
-    React10__namespace.useEffect(() => {
+    const inputRef = React11__namespace.useRef(null);
+    React11__namespace.useEffect(() => {
       if (inputRef.current) {
         inputRef.current.indeterminate = Boolean(indeterminate);
       }
     }, [indeterminate]);
-    React10__namespace.useImperativeHandle(ref, () => inputRef.current);
+    React11__namespace.useImperativeHandle(ref, () => inputRef.current);
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "space-y-1", children: [
       /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start gap-2", children: [
         /* @__PURE__ */ jsxRuntime.jsxs("label", { htmlFor: checkboxId, className: "inline-flex shrink-0 cursor-pointer", children: [
@@ -1863,7 +1864,7 @@ var radioVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Radio = React10__namespace.forwardRef(
+var Radio = React11__namespace.forwardRef(
   ({
     size,
     checked,
@@ -1878,7 +1879,7 @@ var Radio = React10__namespace.forwardRef(
     disabled,
     ...props
   }, ref) => {
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const radioId = id ?? generatedId;
     const [resolvedChecked, setChecked] = useControllableValue({
       value: checked === void 0 ? void 0 : Boolean(checked),
@@ -1947,7 +1948,7 @@ var toggleThumbVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Toggle = React10__namespace.forwardRef(
+var Toggle = React11__namespace.forwardRef(
   ({
     size,
     label,
@@ -1963,7 +1964,7 @@ var Toggle = React10__namespace.forwardRef(
     onClick,
     ...props
   }, ref) => {
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const toggleId = id ?? generatedId;
     const [on, setOn] = useControllableValue({
       value: checked === void 0 ? void 0 : Boolean(checked),
@@ -2012,7 +2013,7 @@ var sliderVariants = classVarianceAuthority.cva("relative flex w-full touch-none
     size: "md"
   }
 });
-var Slider = React10__namespace.forwardRef(
+var Slider = React11__namespace.forwardRef(
   ({
     value,
     defaultValue = 0,
@@ -2028,7 +2029,7 @@ var Slider = React10__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const normalizeValue = React10__namespace.useCallback(
+    const normalizeValue = React11__namespace.useCallback(
       (nextValue) => {
         if (Array.isArray(nextValue)) return nextValue;
         if (range2) return [nextValue, nextValue];
@@ -2103,7 +2104,7 @@ function valueFromPointer(starIndex1Based, clientX, starLeft, starWidth, max, pr
   const raw = starIndex1Based - 1 + frac;
   return roundToStep(Math.min(max, raw), step);
 }
-var Rating = React10__namespace.forwardRef(
+var Rating = React11__namespace.forwardRef(
   ({
     className,
     size,
@@ -2129,14 +2130,14 @@ var Rating = React10__namespace.forwardRef(
       onChange
     });
     const value = roundToStep(rawValue, precision);
-    const setValue = React10__namespace.useCallback(
+    const setValue = React11__namespace.useCallback(
       (next) => {
         setRawValue(roundToStep(next, precision));
       },
       [setRawValue, precision]
     );
-    const starRefs = React10__namespace.useRef([]);
-    const onStarPointer = React10__namespace.useCallback(
+    const starRefs = React11__namespace.useRef([]);
+    const onStarPointer = React11__namespace.useCallback(
       (starIndex1Based, clientX) => {
         if (readOnly || disabled) return;
         const el = starRefs.current[starIndex1Based - 1];
@@ -2163,7 +2164,7 @@ var Rating = React10__namespace.forwardRef(
         setValue(max);
       }
     };
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const rootId = id ?? generatedId;
     const interactive = !readOnly && !disabled;
     return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("flex flex-col gap-1", className), ...props, children: [
@@ -2242,7 +2243,7 @@ var Rating = React10__namespace.forwardRef(
   }
 );
 Rating.displayName = "Rating";
-var InputOTP = React10__namespace.forwardRef(
+var InputOTP = React11__namespace.forwardRef(
   ({
     id,
     label,
@@ -2278,7 +2279,7 @@ var InputOTP = React10__namespace.forwardRef(
     });
     const showError = errorMessage ?? validationError;
     const invalid = Boolean(showError);
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const rootId = id ?? generatedId;
     return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, htmlFor: rootId, size, errorMessage: showError, children: /* @__PURE__ */ jsxRuntime.jsx(
       inputOtp.OTPInput,
@@ -2318,7 +2319,7 @@ var InputOTP = React10__namespace.forwardRef(
   }
 );
 InputOTP.displayName = "InputOTP";
-var SearchInput = React10__namespace.forwardRef(
+var SearchInput = React11__namespace.forwardRef(
   ({
     className,
     size = "md",
@@ -2341,7 +2342,7 @@ var SearchInput = React10__namespace.forwardRef(
       defaultValue: String(defaultValue ?? ""),
       onChange
     });
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!onSearch) return;
       if (debounceMs <= 0) {
         onSearch(value);
@@ -2462,7 +2463,7 @@ var phoneShellVariants = classVarianceAuthority.cva(
     defaultVariants: { variant: "outline" }
   }
 );
-var PhoneInput = React10__namespace.forwardRef(
+var PhoneInput = React11__namespace.forwardRef(
   ({
     value,
     defaultValue,
@@ -2483,7 +2484,7 @@ var PhoneInput = React10__namespace.forwardRef(
     className,
     ...rest
   }, ref) => {
-    const allowed = React10__namespace.useMemo(() => {
+    const allowed = React11__namespace.useMemo(() => {
       if (!allowedCountries?.length) return PHONE_COUNTRIES;
       return PHONE_COUNTRIES.filter((c) => allowedCountries.includes(c.code));
     }, [allowedCountries]);
@@ -2497,7 +2498,7 @@ var PhoneInput = React10__namespace.forwardRef(
       onChange
     });
     const resolved = normalizePhoneValue(rawValue, allowed);
-    const country = React10__namespace.useMemo(
+    const country = React11__namespace.useMemo(
       () => allowed.find((c) => c.code === resolved.countryCode) ?? findCountry(resolved.countryCode),
       [allowed, resolved.countryCode]
     );
@@ -2556,7 +2557,7 @@ function defaultFilter(item, query) {
   const haystack = [label, item.value, ...item.keywords ?? []].join(" ").toLowerCase();
   return haystack.includes(q);
 }
-var Command = React10__namespace.forwardRef(
+var Command = React11__namespace.forwardRef(
   ({
     items = [],
     value,
@@ -2579,11 +2580,11 @@ var Command = React10__namespace.forwardRef(
     children,
     ...rest
   }, ref) => {
-    const [open, setOpen] = React10__namespace.useState(false);
-    const [activeIndex, setActiveIndex] = React10__namespace.useState(0);
-    const triggerRef = React10__namespace.useRef(null);
-    const menuRef = React10__namespace.useRef(null);
-    const [menuStyle, setMenuStyle] = React10__namespace.useState({ visibility: "hidden" });
+    const [open, setOpen] = React11__namespace.useState(false);
+    const [activeIndex, setActiveIndex] = React11__namespace.useState(0);
+    const triggerRef = React11__namespace.useRef(null);
+    const menuRef = React11__namespace.useRef(null);
+    const [menuStyle, setMenuStyle] = React11__namespace.useState({ visibility: "hidden" });
     const [selectedValue, setSelectedValue] = useControllableValue({
       value: value === void 0 ? void 0 : value ?? "",
       defaultValue: defaultValue ?? "",
@@ -2594,11 +2595,11 @@ var Command = React10__namespace.forwardRef(
       defaultValue: defaultInputValue,
       onChange: onInputValueChange
     });
-    const filtered = React10__namespace.useMemo(
+    const filtered = React11__namespace.useMemo(
       () => items.filter((item) => !item.disabled && filterFn(item, query)),
       [items, query, filterFn]
     );
-    const grouped = React10__namespace.useMemo(() => {
+    const grouped = React11__namespace.useMemo(() => {
       const out = [];
       for (const item of filtered) {
         const g = item.group;
@@ -2620,7 +2621,7 @@ var Command = React10__namespace.forwardRef(
       setQuery(typeof item.label === "string" ? item.label : item.value);
       setOpen(false);
     };
-    const updatePosition = React10__namespace.useCallback(() => {
+    const updatePosition = React11__namespace.useCallback(() => {
       const el = triggerRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
@@ -2633,7 +2634,7 @@ var Command = React10__namespace.forwardRef(
         visibility: "visible"
       });
     }, []);
-    React10__namespace.useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       if (!open) return;
       updatePosition();
       const ro = () => updatePosition();
@@ -2644,7 +2645,7 @@ var Command = React10__namespace.forwardRef(
         window.removeEventListener("resize", ro);
       };
     }, [open, updatePosition]);
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!open) return;
       const onPointerDown = (e) => {
         const t = e.target;
@@ -2917,7 +2918,7 @@ function normalizeRange(value) {
   if (Array.isArray(value)) return { from: value[0] ?? null, to: value[1] ?? null };
   return { from: value.from ?? null, to: value.to ?? null };
 }
-var Calendar = React10__namespace.forwardRef(
+var Calendar = React11__namespace.forwardRef(
   ({
     value,
     defaultValue,
@@ -2937,8 +2938,8 @@ var Calendar = React10__namespace.forwardRef(
     ...rest
   }, ref) => {
     const initial = value ?? defaultValue ?? null;
-    const [month, setMonth] = React10__namespace.useState(() => startOfMonth(initial instanceof Date ? initial : /* @__PURE__ */ new Date()));
-    const [rangeDraft, setRangeDraft] = React10__namespace.useState(null);
+    const [month, setMonth] = React11__namespace.useState(() => startOfMonth(initial instanceof Date ? initial : /* @__PURE__ */ new Date()));
+    const [rangeDraft, setRangeDraft] = React11__namespace.useState(null);
     const [selected, setSelected] = useControllableValue({
       value,
       defaultValue: defaultValue ?? null,
@@ -3067,7 +3068,7 @@ var Calendar = React10__namespace.forwardRef(
   }
 );
 Calendar.displayName = "Calendar";
-var DatePicker = React10__namespace.forwardRef(
+var DatePicker = React11__namespace.forwardRef(
   ({
     value,
     defaultValue,
@@ -3090,10 +3091,10 @@ var DatePicker = React10__namespace.forwardRef(
     className,
     ...rest
   }, ref) => {
-    const [open, setOpen] = React10__namespace.useState(false);
-    const [inputText, setInputText] = React10__namespace.useState("");
-    const triggerRef = React10__namespace.useRef(null);
-    const menuRef = React10__namespace.useRef(null);
+    const [open, setOpen] = React11__namespace.useState(false);
+    const [inputText, setInputText] = React11__namespace.useState("");
+    const triggerRef = React11__namespace.useRef(null);
+    const menuRef = React11__namespace.useRef(null);
     const [selected, setSelectedValue] = useControllableValue({
       value,
       defaultValue: defaultValue ?? null,
@@ -3110,7 +3111,7 @@ var DatePicker = React10__namespace.forwardRef(
       setSelectedValue(next);
       setInputText(next ? formatDate(next, format) : "");
     };
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       setInputText(selected ? formatDate(selected, format) : "");
     }, [selected, format]);
     const menu = open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: menuRef, style: menuStyle, className: floatingMenuSurfaceClass, children: /* @__PURE__ */ jsxRuntime.jsx(
@@ -3181,7 +3182,7 @@ function buildTimeOptions(format, step) {
   }
   return options;
 }
-var TimePicker = React10__namespace.forwardRef(
+var TimePicker = React11__namespace.forwardRef(
   ({
     value,
     defaultValue,
@@ -3201,16 +3202,16 @@ var TimePicker = React10__namespace.forwardRef(
     className,
     ...rest
   }, ref) => {
-    const [open, setOpen] = React10__namespace.useState(false);
-    const [inputText, setInputText] = React10__namespace.useState("");
-    const triggerRef = React10__namespace.useRef(null);
-    const menuRef = React10__namespace.useRef(null);
+    const [open, setOpen] = React11__namespace.useState(false);
+    const [inputText, setInputText] = React11__namespace.useState("");
+    const triggerRef = React11__namespace.useRef(null);
+    const menuRef = React11__namespace.useRef(null);
     const [selected, setSelectedValue] = useControllableValue({
       value,
       defaultValue: defaultValue ?? null,
       onChange
     });
-    const options = React10__namespace.useMemo(() => buildTimeOptions(format, step), [format, step]);
+    const options = React11__namespace.useMemo(() => buildTimeOptions(format, step), [format, step]);
     const { menuStyle } = useFloatingMenu({
       open,
       onOpenChange: setOpen,
@@ -3223,7 +3224,7 @@ var TimePicker = React10__namespace.forwardRef(
       setInputText(next ? formatTime(next, format) : "");
       if (closeOnSelect) setOpen(false);
     };
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       setInputText(selected ? formatTime(selected, format) : "");
     }, [selected, format]);
     const menu = open ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: menuRef, role: "listbox", style: menuStyle, className: floatingMenuListClass, children: options.map((option) => /* @__PURE__ */ jsxRuntime.jsx(
@@ -3284,7 +3285,7 @@ function normalizeRangeInput(next) {
     to: next.to ? startOfDay(next.to) : null
   };
 }
-var DateRangePicker = React10__namespace.forwardRef(
+var DateRangePicker = React11__namespace.forwardRef(
   ({
     value,
     defaultValue,
@@ -3312,10 +3313,10 @@ var DateRangePicker = React10__namespace.forwardRef(
     className,
     ...rest
   }, ref) => {
-    const [open, setOpen] = React10__namespace.useState(false);
-    const [draft, setDraft] = React10__namespace.useState(EMPTY_RANGE);
-    const triggerRef = React10__namespace.useRef(null);
-    const menuRef = React10__namespace.useRef(null);
+    const [open, setOpen] = React11__namespace.useState(false);
+    const [draft, setDraft] = React11__namespace.useState(EMPTY_RANGE);
+    const triggerRef = React11__namespace.useRef(null);
+    const menuRef = React11__namespace.useRef(null);
     const [rawSelected, setRawSelected] = useControllableValue({
       value,
       defaultValue: normalizeRangeInput(defaultValue ?? null),
@@ -3324,14 +3325,14 @@ var DateRangePicker = React10__namespace.forwardRef(
     const hasRange = rawSelected != null;
     const fromTime = rawSelected?.from ? rawSelected.from.getTime() : null;
     const toTime = rawSelected?.to ? rawSelected.to.getTime() : null;
-    const selected = React10__namespace.useMemo(
+    const selected = React11__namespace.useMemo(
       () => hasRange ? {
         from: fromTime === null ? null : startOfDay(new Date(fromTime)),
         to: toTime === null ? null : startOfDay(new Date(toTime))
       } : null,
       [hasRange, fromTime, toTime]
     );
-    const limits = React10__namespace.useMemo(
+    const limits = React11__namespace.useMemo(
       () => ({ minDate, maxDate, minRangeDays, maxRangeDays }),
       [minDate, maxDate, minRangeDays, maxRangeDays]
     );
@@ -3342,7 +3343,7 @@ var DateRangePicker = React10__namespace.forwardRef(
       menuRef,
       maxHeight: 420
     });
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!open) return;
       setDraft(selected ?? EMPTY_RANGE);
     }, [open, selected]);
@@ -3516,7 +3517,7 @@ var skeletonVariants = classVarianceAuthority.cva("animate-pulse bg-skeleton", {
     variant: "text"
   }
 });
-var Skeleton = React10__namespace.forwardRef(
+var Skeleton = React11__namespace.forwardRef(
   ({ variant, width, height, count = 1, className, children, ...props }, ref) => {
     const shapeClass = cn(skeletonVariants({ variant }), className);
     const shapeStyle = { width: sizeToCss(width), height: sizeToCss(height) };
@@ -3605,7 +3606,7 @@ var imageVariants = classVarianceAuthority.cva("block bg-muted", {
     fit: "cover"
   }
 });
-var Image = React10__namespace.forwardRef(
+var Image = React11__namespace.forwardRef(
   ({
     src,
     alt,
@@ -3622,18 +3623,18 @@ var Image = React10__namespace.forwardRef(
     style,
     ...props
   }, ref) => {
-    const [loaded, setLoaded] = React10__namespace.useState(false);
-    const [failed, setFailed] = React10__namespace.useState(false);
-    const shellRef = React10__namespace.useRef(null);
-    const [isFullscreen, setIsFullscreen] = React10__namespace.useState(false);
-    React10__namespace.useEffect(() => {
+    const [loaded, setLoaded] = React11__namespace.useState(false);
+    const [failed, setFailed] = React11__namespace.useState(false);
+    const shellRef = React11__namespace.useRef(null);
+    const [isFullscreen, setIsFullscreen] = React11__namespace.useState(false);
+    React11__namespace.useEffect(() => {
       const onChange = () => {
         setIsFullscreen(document.fullscreenElement === shellRef.current);
       };
       document.addEventListener("fullscreenchange", onChange);
       return () => document.removeEventListener("fullscreenchange", onChange);
     }, []);
-    const toggleFullscreen = React10__namespace.useCallback(() => {
+    const toggleFullscreen = React11__namespace.useCallback(() => {
       const el = shellRef.current;
       if (!el) return;
       void (async () => {
@@ -3744,7 +3745,7 @@ function matchesAccept(file, accept) {
     return type === rule;
   });
 }
-var Upload = React10__namespace.forwardRef(
+var Upload = React11__namespace.forwardRef(
   ({
     onUpload,
     onRemove,
@@ -3768,16 +3769,16 @@ var Upload = React10__namespace.forwardRef(
     children,
     ...rest
   }, ref) => {
-    const inputRef = React10__namespace.useRef(null);
-    const [dragOver, setDragOver] = React10__namespace.useState(false);
-    const [localError, setLocalError] = React10__namespace.useState();
+    const inputRef = React11__namespace.useRef(null);
+    const [dragOver, setDragOver] = React11__namespace.useState(false);
+    const [localError, setLocalError] = React11__namespace.useState();
     const [files, setFiles] = useControllableValue({
       value,
       defaultValue,
       onChange
     });
-    const [previewUrls, setPreviewUrls] = React10__namespace.useState([]);
-    React10__namespace.useEffect(() => {
+    const [previewUrls, setPreviewUrls] = React11__namespace.useState([]);
+    React11__namespace.useEffect(() => {
       if (!preview) {
         setPreviewUrls([]);
         return;
@@ -3954,7 +3955,7 @@ function validateDraft(value, validate, required) {
   if (required && value.trim().length === 0) return false;
   return true;
 }
-var InlineEdit = React10__namespace.forwardRef(
+var InlineEdit = React11__namespace.forwardRef(
   ({
     value,
     defaultValue = "",
@@ -3973,16 +3974,16 @@ var InlineEdit = React10__namespace.forwardRef(
     className,
     ...rest
   }, ref) => {
-    const [editing, setEditing] = React10__namespace.useState(false);
-    const [internal, setInternal] = React10__namespace.useState(defaultValue);
-    const [draft, setDraft] = React10__namespace.useState(defaultValue);
-    const [saving, setSaving] = React10__namespace.useState(false);
-    const inputRef = React10__namespace.useRef(null);
+    const [editing, setEditing] = React11__namespace.useState(false);
+    const [internal, setInternal] = React11__namespace.useState(defaultValue);
+    const [draft, setDraft] = React11__namespace.useState(defaultValue);
+    const [saving, setSaving] = React11__namespace.useState(false);
+    const inputRef = React11__namespace.useRef(null);
     const isControlled = value !== void 0;
     const displayValue = isControlled ? value : internal;
     const busy = Boolean(loading || saving);
     const locked = Boolean(disabled || busy);
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!editing) setDraft(displayValue);
     }, [displayValue, editing]);
     const startEdit = () => {
@@ -3996,7 +3997,7 @@ var InlineEdit = React10__namespace.forwardRef(
       setEditing(false);
       onCancel?.();
     };
-    const save = React10__namespace.useCallback(async () => {
+    const save = React11__namespace.useCallback(async () => {
       if (busy) return;
       if (!validateDraft(draft, validate, required)) return;
       const result = onSave?.(draft);
@@ -4106,7 +4107,7 @@ function hasAdornment(node) {
   if (typeof node === "string") return node.trim().length > 0;
   return true;
 }
-var Select = React10__namespace.forwardRef(
+var Select = React11__namespace.forwardRef(
   ({
     items,
     left,
@@ -4126,9 +4127,9 @@ var Select = React10__namespace.forwardRef(
     id,
     ...selectProps
   }, ref) => {
-    const generatedId = React10__namespace.useId();
+    const generatedId = React11__namespace.useId();
     const selectId = id ?? generatedId;
-    const grouped = React10__namespace.useMemo(() => {
+    const grouped = React11__namespace.useMemo(() => {
       const out = [];
       for (const it of items) {
         const g = it.group;
@@ -4146,7 +4147,7 @@ var Select = React10__namespace.forwardRef(
       defaultValue: defaultValue ?? "",
       onChange: onValueChange
     });
-    const selectedOption = React10__namespace.useMemo(
+    const selectedOption = React11__namespace.useMemo(
       () => items.find((it) => it.value === currentValue),
       [items, currentValue]
     );
@@ -4156,7 +4157,7 @@ var Select = React10__namespace.forwardRef(
       setCurrentValue(e.target.value);
     };
     return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { label, htmlFor: selectId, required, size, errorMessage, children: /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "relative w-full", children: [
-      hasAdornment(effectiveLeft) ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground", children: React10__namespace.isValidElement(effectiveLeft) ? effectiveLeft : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: effectiveLeft, size: "sm", variant: "muted" }) }) : null,
+      hasAdornment(effectiveLeft) ? /* @__PURE__ */ jsxRuntime.jsx("span", { className: "pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3 text-muted-foreground", children: React11__namespace.isValidElement(effectiveLeft) ? effectiveLeft : /* @__PURE__ */ jsxRuntime.jsx(Icon, { node: effectiveLeft, size: "sm", variant: "muted" }) }) : null,
       /* @__PURE__ */ jsxRuntime.jsxs(
         "select",
         {
@@ -4208,7 +4209,7 @@ var groupVariants = classVarianceAuthority.cva("space-y-2", {
     orientation: "vertical"
   }
 });
-var RadioGroup = React10__namespace.forwardRef(
+var RadioGroup = React11__namespace.forwardRef(
   ({
     items,
     value,
@@ -4224,7 +4225,7 @@ var RadioGroup = React10__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const generatedName = React10__namespace.useId().replace(/:/g, "");
+    const generatedName = React11__namespace.useId().replace(/:/g, "");
     const name = nameProp ?? `radio-group-${generatedName}`;
     const [selected, setValue] = useControllableValue({
       value: value === void 0 ? void 0 : value ?? "",
@@ -4271,11 +4272,11 @@ var RadioGroup = React10__namespace.forwardRef(
   }
 );
 RadioGroup.displayName = "RadioGroup";
-var FormContext = React10__namespace.createContext(null);
+var FormContext = React11__namespace.createContext(null);
 function useFormContext() {
-  return React10__namespace.useContext(FormContext);
+  return React11__namespace.useContext(FormContext);
 }
-var Form = React10__namespace.forwardRef(
+var Form = React11__namespace.forwardRef(
   ({
     onSubmit,
     onCancel,
@@ -4301,30 +4302,30 @@ var Form = React10__namespace.forwardRef(
     className,
     ...props
   }, ref) => {
-    const [internalValues, setInternalValues] = React10__namespace.useState(initialValues ?? {});
-    const [internalErrors, setInternalErrors] = React10__namespace.useState({});
-    const [touched, setTouchedState] = React10__namespace.useState({});
-    const [internalSubmitted, setInternalSubmitted] = React10__namespace.useState(false);
+    const [internalValues, setInternalValues] = React11__namespace.useState(initialValues ?? {});
+    const [internalErrors, setInternalErrors] = React11__namespace.useState({});
+    const [touched, setTouchedState] = React11__namespace.useState({});
+    const [internalSubmitted, setInternalSubmitted] = React11__namespace.useState(false);
     const isControlled = valuesProp !== void 0;
     const isSubmittedControlled = submittedProp !== void 0;
     const submitted = isSubmittedControlled ? Boolean(submittedProp) : internalSubmitted;
-    const setSubmitted = React10__namespace.useCallback(
+    const setSubmitted = React11__namespace.useCallback(
       (next) => {
         if (!isSubmittedControlled) setInternalSubmitted(next);
         onSubmittedChange?.(next);
       },
       [isSubmittedControlled, onSubmittedChange]
     );
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!resetSubmittedAfterMs || !submitted) return;
       const timer = window.setTimeout(() => setSubmitted(false), resetSubmittedAfterMs);
       return () => window.clearTimeout(timer);
     }, [resetSubmittedAfterMs, submitted, setSubmitted]);
     const values = isControlled ? valuesProp : internalValues;
     const errors = errorsProp ?? internalErrors;
-    const valuesRef = React10__namespace.useRef(values);
+    const valuesRef = React11__namespace.useRef(values);
     valuesRef.current = values;
-    const setValue = React10__namespace.useCallback(
+    const setValue = React11__namespace.useCallback(
       (name, value) => {
         const next = { ...valuesRef.current, [name]: value };
         valuesRef.current = next;
@@ -4333,17 +4334,17 @@ var Form = React10__namespace.forwardRef(
       },
       [isControlled, onValuesChange]
     );
-    const setError = React10__namespace.useCallback(
+    const setError = React11__namespace.useCallback(
       (name, error) => {
         if (errorsProp) return;
         setInternalErrors((prev) => ({ ...prev, [name]: error }));
       },
       [errorsProp]
     );
-    const setTouched = React10__namespace.useCallback((name, isTouched) => {
+    const setTouched = React11__namespace.useCallback((name, isTouched) => {
       setTouchedState((prev) => ({ ...prev, [name]: isTouched }));
     }, []);
-    const runValidation = React10__namespace.useCallback(() => {
+    const runValidation = React11__namespace.useCallback(() => {
       if (!validate) return true;
       const result = validate(values) ?? {};
       if (!errorsProp) setInternalErrors(result);
@@ -4361,7 +4362,7 @@ var Form = React10__namespace.forwardRef(
       if (!valid) return;
       await onSubmit(values);
     };
-    const ctx = React10__namespace.useMemo(
+    const ctx = React11__namespace.useMemo(
       () => ({
         values,
         errors,
@@ -4457,7 +4458,7 @@ function FormField({
   onUpload
 }) {
   const form = useFormContext();
-  const fieldId = React10__namespace.useId();
+  const fieldId = React11__namespace.useId();
   const value = valueProp != null ? String(valueProp) : form ? String(form.values[name] ?? "") : String(defaultValue ?? "");
   const touched = touchedProp ?? form?.touched[name] ?? false;
   const contextError = form?.errors[name];
@@ -4499,9 +4500,9 @@ function FormField({
     return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { className, label, htmlFor: fieldId, required, errorMessage: displayError, children: render(shared) });
   }
   if (children) {
-    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { className, label, htmlFor: fieldId, required, errorMessage: displayError, children: React10__namespace.Children.map(children, (child) => {
-      if (!React10__namespace.isValidElement(child)) return child;
-      return React10__namespace.cloneElement(child, {
+    return /* @__PURE__ */ jsxRuntime.jsx(FieldLayout, { className, label, htmlFor: fieldId, required, errorMessage: displayError, children: React11__namespace.Children.map(children, (child) => {
+      if (!React11__namespace.isValidElement(child)) return child;
+      return React11__namespace.cloneElement(child, {
         id: fieldId,
         name,
         value,
@@ -4618,11 +4619,11 @@ function isNonEmptyLead(node) {
   if (Array.isArray(node)) return node.some((n) => isNonEmptyLead(n));
   return true;
 }
-var InputGroupContext = React10__namespace.createContext(null);
+var InputGroupContext = React11__namespace.createContext(null);
 function useInputGroupContext() {
-  return React10__namespace.useContext(InputGroupContext);
+  return React11__namespace.useContext(InputGroupContext);
 }
-var InputGroup = React10__namespace.forwardRef(
+var InputGroup = React11__namespace.forwardRef(
   ({
     children,
     disabled = false,
@@ -4638,7 +4639,7 @@ var InputGroup = React10__namespace.forwardRef(
     ...props
   }, ref) => {
     const vertical = orientation === "vertical";
-    const ctx = React10__namespace.useMemo(
+    const ctx = React11__namespace.useMemo(
       () => ({
         attached: attached && !vertical,
         vertical,
@@ -4680,7 +4681,7 @@ var InputGroup = React10__namespace.forwardRef(
   }
 );
 InputGroup.displayName = "InputGroup";
-var InputGroupInput = React10__namespace.forwardRef(
+var InputGroupInput = React11__namespace.forwardRef(
   ({
     className,
     size: sizeProp,
@@ -4754,7 +4755,7 @@ var InputGroupInput = React10__namespace.forwardRef(
   }
 );
 InputGroupInput.displayName = "InputGroupInput";
-var InputGroupAddon = React10__namespace.forwardRef(
+var InputGroupAddon = React11__namespace.forwardRef(
   ({ className, children, ...props }, ref) => {
     const ctx = useInputGroupContext();
     const inShell = ctx?.attached && !ctx.vertical;
@@ -4778,7 +4779,7 @@ var InputGroupAddon = React10__namespace.forwardRef(
   }
 );
 InputGroupAddon.displayName = "InputGroupAddon";
-var InputGroupButton = React10__namespace.forwardRef(
+var InputGroupButton = React11__namespace.forwardRef(
   ({ className, variant = "outline", size = "md", disabled, ...props }, ref) => {
     const ctx = useInputGroupContext();
     const inShell = ctx?.attached && !ctx.vertical;
@@ -4825,7 +4826,7 @@ var sectionPad = {
   md: "px-4 py-3",
   lg: "px-6 py-4"
 };
-var Card = React10__namespace.forwardRef(
+var Card = React11__namespace.forwardRef(
   ({ variant, size = "md", header, footer, minHeight, maxHeight, className, children, style, ...props }, ref) => {
     const effectiveSize = size ?? "md";
     const hasContent = hasNonEmptyChildren(children);
@@ -4899,7 +4900,7 @@ var separatorVariants = classVarianceAuthority.cva("shrink-0 bg-border", {
     variant: "solid"
   }
 });
-var Separator = React10__namespace.forwardRef(
+var Separator = React11__namespace.forwardRef(
   ({ variant, orientation, decorative = true, className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
@@ -4968,12 +4969,12 @@ var StackInner = ({
       "data-slot": "stack",
       className: cn(stackVariants({ direction, gap, align, justify, wrap }), className),
       ...props,
-      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React10__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
+      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React11__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
     }
   );
 };
 var Stack = Object.assign(
-  React10__namespace.forwardRef(StackInner),
+  React11__namespace.forwardRef(StackInner),
   { displayName: "Stack" }
 );
 var columnClass = {
@@ -5069,12 +5070,12 @@ var GridInner = ({
       ),
       style: minChildWidth ? { ...style, ["--grid-min"]: minChildWidth } : style,
       ...props,
-      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React10__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
+      children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsx(React11__namespace.Fragment, { children: renderItem(item, index) }, getItemKey?.(item, index) ?? index))
     }
   );
 };
 var Grid = Object.assign(
-  React10__namespace.forwardRef(GridInner),
+  React11__namespace.forwardRef(GridInner),
   { displayName: "Grid" }
 );
 var DEFAULT_RATIO = 16 / 9;
@@ -5101,7 +5102,7 @@ function formatAspectRatioLabel(ratio) {
   }
   return String(Math.round(ratio * 1e3) / 1e3);
 }
-var AspectRatio = React10__namespace.forwardRef(
+var AspectRatio = React11__namespace.forwardRef(
   ({ className, ratio: ratioProp = DEFAULT_RATIO, children, minWidth, maxWidth, style, ...props }, ref) => {
     const ratio = toRatioNumber(ratioProp, DEFAULT_RATIO);
     const ratioLabel = formatAspectRatioLabel(ratio);
@@ -5116,7 +5117,7 @@ var AspectRatio = React10__namespace.forwardRef(
   }
 );
 AspectRatio.displayName = "AspectRatio";
-var ResizablePanelGroup = React10__namespace.forwardRef(
+var ResizablePanelGroup = React11__namespace.forwardRef(
   ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     reactResizablePanels.PanelGroup,
     {
@@ -5127,7 +5128,7 @@ var ResizablePanelGroup = React10__namespace.forwardRef(
   )
 );
 ResizablePanelGroup.displayName = "ResizablePanelGroup";
-var ResizablePanel = React10__namespace.forwardRef((props, ref) => /* @__PURE__ */ jsxRuntime.jsx(reactResizablePanels.Panel, { ref, ...props }));
+var ResizablePanel = React11__namespace.forwardRef((props, ref) => /* @__PURE__ */ jsxRuntime.jsx(reactResizablePanels.Panel, { ref, ...props }));
 ResizablePanel.displayName = "ResizablePanel";
 function ResizableHandle({ className, withHandle, children, ...props }) {
   return /* @__PURE__ */ jsxRuntime.jsx(
@@ -5143,7 +5144,7 @@ function ResizableHandle({ className, withHandle, children, ...props }) {
   );
 }
 ResizableHandle.displayName = "ResizableHandle";
-var Collapsible = React10__namespace.forwardRef(function Collapsible2({
+var Collapsible = React11__namespace.forwardRef(function Collapsible2({
   open: openProp,
   defaultOpen = false,
   onOpenChange,
@@ -5293,8 +5294,8 @@ function defaultToggleIcon(closeDirection, open) {
 }
 function mergeTrigger(trigger, onToggle, closeDirection, open, triggerVariant = "default", toggleButtonProps) {
   if (trigger != null) {
-    if (React10__namespace.isValidElement(trigger)) {
-      return React10__namespace.cloneElement(trigger, {
+    if (React11__namespace.isValidElement(trigger)) {
+      return React11__namespace.cloneElement(trigger, {
         onClick: (event) => {
           trigger.props.onClick?.(event);
           onToggle();
@@ -5319,7 +5320,7 @@ function mergeTrigger(trigger, onToggle, closeDirection, open, triggerVariant = 
     }
   );
 }
-var CollapsiblePanel = React10__namespace.forwardRef(function CollapsiblePanel2({
+var CollapsiblePanel = React11__namespace.forwardRef(function CollapsiblePanel2({
   open: openProp,
   defaultOpen = true,
   onOpenChange,
@@ -5427,7 +5428,7 @@ function asArray(multiple, v) {
   if (Array.isArray(v)) return v.length ? [v[0]] : [];
   return [];
 }
-var Accordion = React10__namespace.forwardRef(function Accordion2({ items = [], type = "single", value, defaultValue, onChange, className, ...props }, ref) {
+var Accordion = React11__namespace.forwardRef(function Accordion2({ items = [], type = "single", value, defaultValue, onChange, className, ...props }, ref) {
   const multiple = type === "multiple";
   const [selection, setSelection] = useControllableValue({
     value,
@@ -5512,7 +5513,7 @@ var resizeContentVariants = classVarianceAuthority.cva("origin-top-left transiti
     fit: "contain"
   }
 });
-var ResizeContainer = React10__namespace.forwardRef(
+var ResizeContainer = React11__namespace.forwardRef(
   function ResizeContainer2({
     direction = "both",
     minScale = 0.5,
@@ -5622,7 +5623,7 @@ var linkVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Link = React10__namespace.forwardRef(
+var Link = React11__namespace.forwardRef(
   ({ href, target, rel, variant, className, children, ...props }, ref) => {
     const opensNewTab = typeof target === "string" && target.toLowerCase() === "_blank";
     const resolvedRel = rel ?? (opensNewTab ? "noopener noreferrer" : void 0);
@@ -5641,10 +5642,10 @@ var Link = React10__namespace.forwardRef(
   }
 );
 Link.displayName = "Link";
-var Breadcrumb = React10__namespace.forwardRef(
+var Breadcrumb = React11__namespace.forwardRef(
   ({ items, separator, maxItems, className, "aria-label": ariaLabel = "Breadcrumb", ...props }, ref) => {
     const sep = separator ?? /* @__PURE__ */ jsxRuntime.jsx(lucideReact.ChevronRight, { className: "h-3.5 w-3.5 shrink-0 text-muted-foreground", "aria-hidden": true });
-    const visible = React10__namespace.useMemo(() => {
+    const visible = React11__namespace.useMemo(() => {
       if (!maxItems || items.length <= maxItems) return items;
       const first = items[0];
       const last = items[items.length - 1];
@@ -5744,7 +5745,7 @@ function SidebarNavItem({
   const value = itemIdentity(item, index, pathPrefix);
   const isActive = activeValue === value;
   const hasChildren = Boolean(item.children?.length);
-  const [nestedOpen, setNestedOpen] = React10__namespace.useState(false);
+  const [nestedOpen, setNestedOpen] = React11__namespace.useState(false);
   const rowClass2 = cn(
     "flex w-full items-center gap-2 rounded-control-md px-2 py-2 text-sm font-medium transition-colors",
     "hover:bg-muted/80",
@@ -5806,7 +5807,7 @@ function SidebarNavItem({
     )) }) : null
   ] });
 }
-var Sidebar = React10__namespace.forwardRef(function Sidebar2({
+var Sidebar = React11__namespace.forwardRef(function Sidebar2({
   items = [],
   value,
   defaultValue,
@@ -5937,7 +5938,7 @@ function computePopoverStyle(trigger, content, placement, offset) {
       return base;
   }
 }
-var Popover = React10__namespace.forwardRef(function Popover2({
+var Popover = React11__namespace.forwardRef(function Popover2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -5955,17 +5956,17 @@ var Popover = React10__namespace.forwardRef(function Popover2({
 }, ref) {
   const { label = "Open", left, variant = "outline", size = "md", className: triggerClassName } = triggerProps ?? {};
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const triggerRef = React10__namespace.useRef(null);
-  const contentRef = React10__namespace.useRef(null);
-  const [contentStyle, setContentStyle] = React10__namespace.useState({ visibility: "hidden" });
-  const updatePosition = React10__namespace.useCallback(() => {
+  const triggerRef = React11__namespace.useRef(null);
+  const contentRef = React11__namespace.useRef(null);
+  const [contentStyle, setContentStyle] = React11__namespace.useState({ visibility: "hidden" });
+  const updatePosition = React11__namespace.useCallback(() => {
     const el = triggerRef.current;
     const panel = contentRef.current;
     if (!el) return;
     setContentStyle(computePopoverStyle(el, panel, placement, offset));
   }, [placement, offset]);
   const positioned = usePositionedPortal(open, updatePosition);
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!open || !closeOnOutsideClick) return;
     const onPointerDown = (e) => {
       const t = e.target;
@@ -5975,7 +5976,7 @@ var Popover = React10__namespace.forwardRef(function Popover2({
     document.addEventListener("pointerdown", onPointerDown, true);
     return () => document.removeEventListener("pointerdown", onPointerDown, true);
   }, [open, closeOnOutsideClick, setOpen]);
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!open || !closeOnEscape) return;
     const onKeyDown = (e) => {
       if (e.key === "Escape") setOpen(false);
@@ -5993,7 +5994,7 @@ var Popover = React10__namespace.forwardRef(function Popover2({
     }
   ) : null;
   return /* @__PURE__ */ jsxRuntime.jsxs("div", { ref, className: cn("relative inline-block", className), ...rest, children: [
-    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React10__namespace.isValidElement(trigger) ? React10__namespace.cloneElement(trigger, {
+    /* @__PURE__ */ jsxRuntime.jsx("div", { ref: triggerRef, children: trigger ? React11__namespace.isValidElement(trigger) ? React11__namespace.cloneElement(trigger, {
       onClick: (e) => {
         trigger.props.onClick?.(e);
         if (openOnClick) setOpen(!open);
@@ -6097,7 +6098,7 @@ function NavMenuSubmenu({
     }
   );
 }
-var NavigationMenu = React10__namespace.forwardRef(function NavigationMenu2({ items, value, defaultValue, onChange, orientation = "horizontal", onNavigate, children, className, ...rest }, ref) {
+var NavigationMenu = React11__namespace.forwardRef(function NavigationMenu2({ items, value, defaultValue, onChange, orientation = "horizontal", onNavigate, children, className, ...rest }, ref) {
   const autoDefault = value === void 0 && defaultValue === void 0 ? firstEnabledValue(items) : void 0;
   const [activeValue, select] = useControllableValue({
     value,
@@ -6162,7 +6163,7 @@ var menubarVariants = classVarianceAuthority.cva("inline-flex items-center gap-1
 function menuValue(menu, index) {
   return menu.value ?? `menu-${index}`;
 }
-var Menubar = React10__namespace.forwardRef(
+var Menubar = React11__namespace.forwardRef(
   ({ menus = [], value, defaultValue, onChange, variant, className, ...rest }, ref) => {
     const [activeValue, setActive] = useControllableValue({
       value,
@@ -6212,7 +6213,7 @@ var contextMenuVariants = classVarianceAuthority.cva(floatingMenuListClass, {
     size: "sm"
   }
 });
-var ContextMenu = React10__namespace.forwardRef(
+var ContextMenu = React11__namespace.forwardRef(
   ({
     items,
     open: openProp,
@@ -6226,10 +6227,10 @@ var ContextMenu = React10__namespace.forwardRef(
     ...rest
   }, ref) => {
     const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-    const [coords, setCoords] = React10__namespace.useState({ x: 0, y: 0 });
-    const [menuStyle, setMenuStyle] = React10__namespace.useState({ visibility: "hidden" });
-    const menuRef = React10__namespace.useRef(null);
-    const updatePosition = React10__namespace.useCallback(() => {
+    const [coords, setCoords] = React11__namespace.useState({ x: 0, y: 0 });
+    const [menuStyle, setMenuStyle] = React11__namespace.useState({ visibility: "hidden" });
+    const menuRef = React11__namespace.useRef(null);
+    const updatePosition = React11__namespace.useCallback(() => {
       const menu2 = menuRef.current;
       const width = menu2?.offsetWidth ?? 0;
       const height = menu2?.offsetHeight ?? 0;
@@ -6247,7 +6248,7 @@ var ContextMenu = React10__namespace.forwardRef(
     }, [coords]);
     const positioned = usePositionedPortal(open, updatePosition);
     const onMenuKeyDown = useMenuKeyboard(menuRef, open);
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!open) return;
       const onPointerDown = (e) => {
         const t = e.target;
@@ -6317,7 +6318,7 @@ function navChildrenToDropdownItems(children, onNavigate) {
     onClick: c.disabled || !c.href ? void 0 : () => navigateToHref(c.href, c, onNavigate)
   }));
 }
-var Navbar = React10__namespace.forwardRef(function Navbar2({
+var Navbar = React11__namespace.forwardRef(function Navbar2({
   logo,
   items = [],
   left,
@@ -6426,7 +6427,7 @@ function paginationWindow(current, totalPages, siblingCount) {
   items.push(totalPages);
   return items;
 }
-var Pagination = React10__namespace.forwardRef(
+var Pagination = React11__namespace.forwardRef(
   ({
     total,
     pageSize = 10,
@@ -6443,10 +6444,10 @@ var Pagination = React10__namespace.forwardRef(
   }, ref) => {
     const pageCount = Math.max(1, pageCountProp ?? Math.ceil(total / Math.max(1, pageSize)));
     const isControlled = value !== void 0;
-    const [internalPage, setInternalPage] = React10__namespace.useState(
+    const [internalPage, setInternalPage] = React11__namespace.useState(
       () => Math.min(Math.max(1, defaultValue), pageCount)
     );
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!isControlled) {
         setInternalPage((p) => Math.min(Math.max(1, p), pageCount));
       }
@@ -6586,7 +6587,7 @@ function StepCircle({
     }
   );
 }
-var Stepper = React10__namespace.forwardRef(
+var Stepper = React11__namespace.forwardRef(
   ({
     steps = [],
     value,
@@ -6599,7 +6600,7 @@ var Stepper = React10__namespace.forwardRef(
     style,
     ...props
   }, ref) => {
-    const [internal, setInternal] = React10__namespace.useState(defaultValue);
+    const [internal, setInternal] = React11__namespace.useState(defaultValue);
     const isControlled = value !== void 0;
     const active = isControlled ? value : internal;
     const setStep = (next) => {
@@ -6728,7 +6729,7 @@ var tabsTriggerVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Tabs = React10__namespace.forwardRef(
+var Tabs = React11__namespace.forwardRef(
   ({
     items,
     orientation = "horizontal",
@@ -6748,8 +6749,8 @@ var Tabs = React10__namespace.forwardRef(
       defaultValue: defaultValue ?? autoDefault ?? "",
       onChange: onValueChange
     });
-    const enabledValues = React10__namespace.useMemo(() => items.filter((i) => !i.disabled).map((i) => i.value), [items]);
-    const tabIds = React10__namespace.useId();
+    const enabledValues = React11__namespace.useMemo(() => items.filter((i) => !i.disabled).map((i) => i.value), [items]);
+    const tabIds = React11__namespace.useId();
     const onTabListKeyDown = (e) => {
       const horizontal = orientation === "horizontal";
       const prevKey = horizontal ? "ArrowLeft" : "ArrowUp";
@@ -6912,7 +6913,7 @@ var alertVariants = feedbackSurfaceVariants("relative flex w-full gap-3 rounded-
   tone: "neutral",
   variant: "subtle"
 });
-var Alert = React10__namespace.forwardRef(
+var Alert = React11__namespace.forwardRef(
   ({
     tone,
     variant,
@@ -6927,8 +6928,8 @@ var Alert = React10__namespace.forwardRef(
     role = "alert",
     ...props
   }, ref) => {
-    const [dismissed, setDismissed] = React10__namespace.useState(false);
-    const handleDismiss = React10__namespace.useCallback(() => {
+    const [dismissed, setDismissed] = React11__namespace.useState(false);
+    const handleDismiss = React11__namespace.useCallback(() => {
       setDismissed(true);
       onClose?.();
     }, [onClose]);
@@ -6953,7 +6954,7 @@ var toastVariants = feedbackSurfaceVariants(
   "pointer-events-auto relative flex w-full max-w-sm gap-3 rounded-surface-md border p-4 shadow-lg",
   { tone: "neutral", variant: "solid" }
 );
-var Toast = React10__namespace.forwardRef(
+var Toast = React11__namespace.forwardRef(
   ({
     tone,
     variant,
@@ -7031,14 +7032,14 @@ var positionClasses = {
   "bottom-right": "bottom-4 right-4 items-end"
 };
 function Toaster({ position = "bottom-right", maxVisible = 5, className }) {
-  const [items, setItems] = React10__namespace.useState([]);
-  React10__namespace.useEffect(() => subscribeToasts(setItems), []);
+  const [items, setItems] = React11__namespace.useState([]);
+  React11__namespace.useEffect(() => subscribeToasts(setItems), []);
   const visible = items.slice(-maxVisible);
-  const timers = React10__namespace.useRef(/* @__PURE__ */ new Map());
-  const visibleRef = React10__namespace.useRef(visible);
+  const timers = React11__namespace.useRef(/* @__PURE__ */ new Map());
+  const visibleRef = React11__namespace.useRef(visible);
   visibleRef.current = visible;
   const visibleKey = visible.map((item) => item.id).join("|");
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     const current = visibleRef.current;
     const liveIds = new Set(current.map((item) => item.id));
     for (const [id, handle] of timers.current) {
@@ -7059,7 +7060,7 @@ function Toaster({ position = "bottom-right", maxVisible = 5, className }) {
       );
     }
   }, [visibleKey]);
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     const handles = timers.current;
     return () => {
       handles.forEach((handle) => clearTimeout(handle));
@@ -7106,7 +7107,7 @@ var overlayVariants = classVarianceAuthority.cva(
     }
   }
 );
-var OverlayPortalParentContext = React10__namespace.createContext(null);
+var OverlayPortalParentContext = React11__namespace.createContext(null);
 function isPortalRef(value) {
   if (value === null || typeof value !== "object") return false;
   if (typeof HTMLElement !== "undefined" && value instanceof HTMLElement) return false;
@@ -7129,10 +7130,10 @@ function OverlayPortalScope({
   children,
   className
 }) {
-  const [host, setHost] = React10__namespace.useState(null);
+  const [host, setHost] = React11__namespace.useState(null);
   return /* @__PURE__ */ jsxRuntime.jsx(OverlayPortalParentContext.Provider, { value: host, children: /* @__PURE__ */ jsxRuntime.jsx("div", { ref: setHost, className: cn("relative isolate", className), children }) });
 }
-var Overlay = React10__namespace.forwardRef(function Overlay2({
+var Overlay = React11__namespace.forwardRef(function Overlay2({
   open = false,
   onClose,
   container,
@@ -7150,7 +7151,7 @@ var Overlay = React10__namespace.forwardRef(function Overlay2({
   children,
   ...rest
 }, ref) {
-  const parentHost = React10__namespace.useContext(OverlayPortalParentContext);
+  const parentHost = React11__namespace.useContext(OverlayPortalParentContext);
   const target = resolvePortalTarget(container, parentHost);
   const viewportFixed = typeof document !== "undefined" && target !== null && target === document.body;
   const modal = dialog && viewportFixed;
@@ -7266,7 +7267,7 @@ var emptyStateVariants = classVarianceAuthority.cva("mx-auto flex flex-col items
     size: "md"
   }
 });
-var EmptyState = React10__namespace.forwardRef(
+var EmptyState = React11__namespace.forwardRef(
   ({ variant, size, title, description, icon, action, className, ...props }, ref) => {
     const iconMuted = variant === "minimal" ? "text-muted-foreground/80" : variant === "error" ? "text-destructive/80" : "text-muted-foreground";
     return /* @__PURE__ */ jsxRuntime.jsxs(
@@ -7402,7 +7403,7 @@ var pillTextSize = {
   sm: "xs",
   md: "sm"
 };
-var Pill = React10__namespace.forwardRef(
+var Pill = React11__namespace.forwardRef(
   ({
     as = "span",
     appearance,
@@ -7483,11 +7484,11 @@ var Pill = React10__namespace.forwardRef(
   }
 );
 Pill.displayName = "Pill";
-var Badge = React10__namespace.forwardRef(function Badge2(props, ref) {
+var Badge = React11__namespace.forwardRef(function Badge2(props, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(Pill, { ref, ...props });
 });
 Badge.displayName = "Badge";
-var Tag = React10__namespace.forwardRef(function Tag2({ label, onRemove, variant = "subtle", left, disabled, className, ...props }, ref) {
+var Tag = React11__namespace.forwardRef(function Tag2({ label, onRemove, variant = "subtle", left, disabled, className, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     Pill,
     {
@@ -7516,7 +7517,7 @@ var pageHeaderVariants = classVarianceAuthority.cva("w-full", {
     variant: "default"
   }
 });
-var PageHeader = React10__namespace.forwardRef(function PageHeader2({
+var PageHeader = React11__namespace.forwardRef(function PageHeader2({
   heading,
   subheading,
   description,
@@ -7576,7 +7577,7 @@ var pageFooterVariants = classVarianceAuthority.cva("w-full", {
     variant: "default"
   }
 });
-var PageFooter = React10__namespace.forwardRef(function PageFooter2({ left, right, sticky, separator, variant, className, children, ...props }, ref) {
+var PageFooter = React11__namespace.forwardRef(function PageFooter2({ left, right, sticky, separator, variant, className, children, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "footer",
     {
@@ -7612,7 +7613,7 @@ var heroVariants = classVarianceAuthority.cva("w-full", {
     variant: "default"
   }
 });
-var Hero = React10__namespace.forwardRef(function Hero2({ title, description, image, badge, actions, variant = "default", className, children, ...props }, ref) {
+var Hero = React11__namespace.forwardRef(function Hero2({ title, description, image, badge, actions, variant = "default", className, children, ...props }, ref) {
   const actionButtons = [
     actions?.secondary ? { key: "secondary", variant: "outline", props: actions.secondary } : null,
     actions?.primary ? { key: "primary", variant: "primary", props: actions.primary } : null
@@ -7666,7 +7667,7 @@ var Hero = React10__namespace.forwardRef(function Hero2({ title, description, im
   );
 });
 Hero.displayName = "Hero";
-var AuthLayout = React10__namespace.forwardRef(function AuthLayout2({ title, subtitle, logo, footer, children, className, ...props }, ref) {
+var AuthLayout = React11__namespace.forwardRef(function AuthLayout2({ title, subtitle, logo, footer, children, className, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     "div",
     {
@@ -7687,7 +7688,7 @@ var AuthLayout = React10__namespace.forwardRef(function AuthLayout2({ title, sub
   );
 });
 AuthLayout.displayName = "AuthLayout";
-var AppShell = React10__namespace.forwardRef(function AppShell2({ sidebar, header, footer, children, className, ...props }, ref) {
+var AppShell = React11__namespace.forwardRef(function AppShell2({ sidebar, header, footer, children, className, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsxs(
     "div",
     {
@@ -7707,7 +7708,7 @@ var AppShell = React10__namespace.forwardRef(function AppShell2({ sidebar, heade
   );
 });
 AppShell.displayName = "AppShell";
-var HistoryControlButtons = React10__namespace.forwardRef(
+var HistoryControlButtons = React11__namespace.forwardRef(
   function HistoryControlButtons2({
     canUndo = true,
     canRedo = true,
@@ -7841,7 +7842,7 @@ var slideVariants = classVarianceAuthority.cva("transition-all duration-normal e
   }
 });
 var EXIT_MS = 300;
-var FixedScreenWidget = React10__namespace.forwardRef(
+var FixedScreenWidget = React11__namespace.forwardRef(
   function FixedScreenWidget2({
     open: openProp,
     defaultOpen = false,
@@ -7862,10 +7863,10 @@ var FixedScreenWidget = React10__namespace.forwardRef(
     ...rest
   }, ref) {
     const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-    const panelRef = React10__namespace.useRef(null);
-    const [mounted, setMounted] = React10__namespace.useState(open);
-    const [state, setState] = React10__namespace.useState(open ? "open" : "closed");
-    React10__namespace.useEffect(() => {
+    const panelRef = React11__namespace.useRef(null);
+    const [mounted, setMounted] = React11__namespace.useState(open);
+    const [state, setState] = React11__namespace.useState(open ? "open" : "closed");
+    React11__namespace.useEffect(() => {
       if (open) {
         setMounted(true);
         const frame = requestAnimationFrame(() => setState("open"));
@@ -7875,7 +7876,7 @@ var FixedScreenWidget = React10__namespace.forwardRef(
       const timer = window.setTimeout(() => setMounted(false), EXIT_MS);
       return () => window.clearTimeout(timer);
     }, [open]);
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!open || !closeOnOutsideClick) return;
       const onPointerDown = (e) => {
         if (panelRef.current?.contains(e.target)) return;
@@ -7884,7 +7885,7 @@ var FixedScreenWidget = React10__namespace.forwardRef(
       document.addEventListener("pointerdown", onPointerDown, true);
       return () => document.removeEventListener("pointerdown", onPointerDown, true);
     }, [open, closeOnOutsideClick, setOpen]);
-    React10__namespace.useEffect(() => {
+    React11__namespace.useEffect(() => {
       if (!open || !closeOnEscape) return;
       const onKeyDown = (e) => {
         if (e.key === "Escape") setOpen(false);
@@ -7903,7 +7904,7 @@ var FixedScreenWidget = React10__namespace.forwardRef(
         style: { marginLeft: offsetX, marginTop: offsetY, pointerEvents, ...style },
         ...rest,
         children: [
-          trigger ? React10__namespace.isValidElement(trigger) ? React10__namespace.cloneElement(trigger, {
+          trigger ? React11__namespace.isValidElement(trigger) ? React11__namespace.cloneElement(trigger, {
             onClick: () => setOpen(!open)
           }) : trigger : /* @__PURE__ */ jsxRuntime.jsx(Button, { variant: "primary", onClick: () => setOpen(!open), ...triggerProps, children: triggerProps?.label ?? "Open" }),
           mounted ? /* @__PURE__ */ jsxRuntime.jsx("div", { ref: panelRef, "data-state": state, "aria-hidden": state === "closed", children: /* @__PURE__ */ jsxRuntime.jsx(
@@ -7963,7 +7964,7 @@ var modalOverlayLayout = classVarianceAuthority.cva("flex justify-center p-4", {
     align: "center"
   }
 });
-var Modal = React10__namespace.forwardRef(function Modal2({
+var Modal = React11__namespace.forwardRef(function Modal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -7986,7 +7987,7 @@ var Modal = React10__namespace.forwardRef(function Modal2({
   children
 }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const handleClose = React10__namespace.useCallback(() => {
+  const handleClose = React11__namespace.useCallback(() => {
     setOpen(false);
     onClose?.();
   }, [setOpen, onClose]);
@@ -8022,7 +8023,7 @@ var Modal = React10__namespace.forwardRef(function Modal2({
   );
 });
 Modal.displayName = "Modal";
-var TriggerModal = React10__namespace.forwardRef(function TriggerModal2({ trigger, triggerProps, showClose = true, open: openProp, defaultOpen, onOpenChange, ...modalProps }, ref) {
+var TriggerModal = React11__namespace.forwardRef(function TriggerModal2({ trigger, triggerProps, showClose = true, open: openProp, defaultOpen, onOpenChange, ...modalProps }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const triggerNode = trigger ?? (triggerProps ? /* @__PURE__ */ jsxRuntime.jsx(
     Button,
@@ -8057,7 +8058,7 @@ var intentConfirmButton = {
   destructive: { variant: "destructive" },
   delete: { variant: "destructive" }
 };
-var ConfirmModal = React10__namespace.forwardRef(function ConfirmModal2({
+var ConfirmModal = React11__namespace.forwardRef(function ConfirmModal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -8078,15 +8079,15 @@ var ConfirmModal = React10__namespace.forwardRef(function ConfirmModal2({
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const confirmButton = intentConfirmButton[intent];
   const busy = Boolean(loading || confirmProps?.loading);
-  const handleClose = React10__namespace.useCallback(() => {
+  const handleClose = React11__namespace.useCallback(() => {
     if (busy) return;
     setOpen(false);
   }, [busy, setOpen]);
-  const handleConfirm = React10__namespace.useCallback(async () => {
+  const handleConfirm = React11__namespace.useCallback(async () => {
     await confirmProps.onClick?.();
     handleClose();
   }, [confirmProps, handleClose]);
-  const handleCancel = React10__namespace.useCallback(() => {
+  const handleCancel = React11__namespace.useCallback(() => {
     cancelProps?.onClick?.();
     handleClose();
   }, [cancelProps, handleClose]);
@@ -8221,7 +8222,7 @@ function SchemaFieldRow({
     onChange: (value) => form?.setValue(field.name, value),
     onBlur: () => form?.setTouched(field.name, true)
   };
-  return /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
+  return /* @__PURE__ */ jsxRuntime.jsxs(React11__namespace.Fragment, { children: [
     row,
     renderAfter({
       ...changeHelpers,
@@ -8238,7 +8239,7 @@ function FormModalFields({
 }) {
   return /* @__PURE__ */ jsxRuntime.jsx(jsxRuntime.Fragment, { children: fields.map((field) => /* @__PURE__ */ jsxRuntime.jsx(SchemaFieldRow, { field, busy }, field.name)) });
 }
-var FormModal = React10__namespace.forwardRef(function FormModal2({
+var FormModal = React11__namespace.forwardRef(function FormModal2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -8269,15 +8270,15 @@ var FormModal = React10__namespace.forwardRef(function FormModal2({
   ...rest
 }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const [submitting, setSubmitting] = React10__namespace.useState(false);
+  const [submitting, setSubmitting] = React11__namespace.useState(false);
   const busy = Boolean(loading || submitting);
   const resolvedSubmitLabel = busy && submittingLabel ? submittingLabel : submitLabel ?? (mode === "edit" ? "Save changes" : "Create");
-  const handleClose = React10__namespace.useCallback(() => {
+  const handleClose = React11__namespace.useCallback(() => {
     if (busy) return;
     setOpen(false);
     onCancel?.();
   }, [busy, setOpen, onCancel]);
-  const handleSubmit = React10__namespace.useCallback(
+  const handleSubmit = React11__namespace.useCallback(
     async (values) => {
       setSubmitting(true);
       try {
@@ -8292,7 +8293,7 @@ var FormModal = React10__namespace.forwardRef(function FormModal2({
     },
     [onSubmit, onSubmitSuccess, onSubmitError, setOpen]
   );
-  const initialValues = React10__namespace.useMemo(() => {
+  const initialValues = React11__namespace.useMemo(() => {
     if (formProps?.initialValues) return formProps.initialValues;
     if (!fields) return {};
     return fields.reduce((acc, field) => {
@@ -8398,9 +8399,9 @@ function getAvatarInitials(name) {
   if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
   return `${parts[0][0] ?? ""}${parts[parts.length - 1][0] ?? ""}`.toUpperCase();
 }
-var Avatar = React10__namespace.forwardRef(
+var Avatar = React11__namespace.forwardRef(
   ({ src, alt, name, color, fallback, status, size, shape, className, style, ...props }, ref) => {
-    const [failed, setFailed] = React10__namespace.useState(false);
+    const [failed, setFailed] = React11__namespace.useState(false);
     const imageNode = src && !failed ? /* @__PURE__ */ jsxRuntime.jsx(
       "img",
       {
@@ -8439,7 +8440,7 @@ var Avatar = React10__namespace.forwardRef(
   }
 );
 Avatar.displayName = "Avatar";
-var AvatarGroup = React10__namespace.forwardRef(
+var AvatarGroup = React11__namespace.forwardRef(
   ({ items = [], max, size = "md", className, ...props }, ref) => {
     const visible = max != null ? items.slice(0, max) : items;
     const overflow = max != null && items.length > max ? items.length - max : 0;
@@ -8488,7 +8489,7 @@ var progressVariants = classVarianceAuthority.cva("relative w-full overflow-hidd
     size: "md"
   }
 });
-var Progress = React10__namespace.forwardRef(
+var Progress = React11__namespace.forwardRef(
   ({ value, max = 100, showLabel, loading: loadingProp, size, className, ...props }, ref) => {
     const isLoading = Boolean(loadingProp) || value === null;
     const numeric = isLoading ? 0 : value ?? 0;
@@ -8542,9 +8543,9 @@ var kbdVariants = classVarianceAuthority.cva(
     }
   }
 );
-var Kbd = React10__namespace.forwardRef(({ size, className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("kbd", { ref, className: cn(kbdVariants({ size }), className), ...props, children }));
+var Kbd = React11__namespace.forwardRef(({ size, className, children, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("kbd", { ref, className: cn(kbdVariants({ size }), className), ...props, children }));
 Kbd.displayName = "Kbd";
-var KbdGroup = React10__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("inline-flex items-center gap-1", className), ...props }));
+var KbdGroup = React11__namespace.forwardRef(({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx("div", { ref, className: cn("inline-flex items-center gap-1", className), ...props }));
 KbdGroup.displayName = "KbdGroup";
 var groupVariants2 = classVarianceAuthority.cva("flex", {
   variants: {
@@ -8568,7 +8569,7 @@ function removeLabelFor(item) {
   if (typeof item.label === "string" || typeof item.label === "number") return String(item.label);
   return item.value;
 }
-var PillGroup = React10__namespace.forwardRef(function PillGroup2({
+var PillGroup = React11__namespace.forwardRef(function PillGroup2({
   items,
   value,
   defaultValue,
@@ -8592,7 +8593,7 @@ var PillGroup = React10__namespace.forwardRef(function PillGroup2({
 }, ref) {
   const groupBusy = Boolean(groupLoading);
   const resolvedToggleSurface = toggleSurface != null && toggleSurface !== "" ? toggleSurface : void 0;
-  const [initialSelectedValues] = React10__namespace.useState(
+  const [initialSelectedValues] = React11__namespace.useState(
     () => defaultValue ?? items.filter((item) => item.selected).map((item) => item.value)
   );
   const [selectedValues, setSelectedValues] = useControllableValue({
@@ -8697,7 +8698,7 @@ var descriptionListVariants = classVarianceAuthority.cva("", {
     size: "md"
   }
 });
-var DescriptionList = React10__namespace.forwardRef(
+var DescriptionList = React11__namespace.forwardRef(
   ({ className, items, layout = "vertical", size, ...props }, ref) => {
     const isHorizontal = layout === "horizontal";
     return /* @__PURE__ */ jsxRuntime.jsx(
@@ -8707,7 +8708,7 @@ var DescriptionList = React10__namespace.forwardRef(
         "data-slot": "description-list",
         className: cn(descriptionListVariants({ layout, size }), className),
         ...props,
-        children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
+        children: items.map((item, index) => /* @__PURE__ */ jsxRuntime.jsxs(React11__namespace.Fragment, { children: [
           /* @__PURE__ */ jsxRuntime.jsx(
             "dt",
             {
@@ -8740,7 +8741,7 @@ function reactNodeToSearchText(node) {
   if (node == null || typeof node === "boolean") return "";
   if (typeof node === "string" || typeof node === "number") return String(node).toLowerCase();
   if (Array.isArray(node)) return node.map(reactNodeToSearchText).join(" ");
-  if (React10__namespace.isValidElement(node)) {
+  if (React11__namespace.isValidElement(node)) {
     const ch = node.props.children;
     return reactNodeToSearchText(ch);
   }
@@ -8764,7 +8765,7 @@ function defaultListChipFilter(items, selected) {
     return keys.some((key) => selected.includes(key));
   });
 }
-var List = React10__namespace.forwardRef(
+var List = React11__namespace.forwardRef(
   ({
     className,
     items,
@@ -8820,8 +8821,8 @@ var List = React10__namespace.forwardRef(
       defaultValue: defaultQuery ?? "",
       onChange: onSearchChangeProp
     });
-    const [debouncedQuery, setDebouncedQuery] = React10__namespace.useState(() => defaultQuery ?? "");
-    React10__namespace.useEffect(() => {
+    const [debouncedQuery, setDebouncedQuery] = React11__namespace.useState(() => defaultQuery ?? "");
+    React11__namespace.useEffect(() => {
       onDebouncedChange?.(debouncedQuery);
     }, [debouncedQuery, onDebouncedChange]);
     const [selectedValue, setSelectedValue] = useControllableValue({
@@ -8829,7 +8830,7 @@ var List = React10__namespace.forwardRef(
       defaultValue: defaultSelectedValue,
       onChange: void 0
     });
-    const filteredItems = React10__namespace.useMemo(() => {
+    const filteredItems = React11__namespace.useMemo(() => {
       let next = [...items];
       if (filterChipsEnabled && chipFilterItems) {
         const runChip = customChipFilter ?? defaultListChipFilter;
@@ -8851,7 +8852,7 @@ var List = React10__namespace.forwardRef(
       customChipFilter,
       chipSelection
     ]);
-    const select = React10__namespace.useCallback(
+    const select = React11__namespace.useCallback(
       (item) => {
         if (!selectable || item.disabled || item.value == null) return;
         setSelectedValue(item.value);
@@ -9099,21 +9100,21 @@ function Table({
   className,
   ...props
 }) {
-  const [internalSortKey, setInternalSortKey] = React10__namespace.useState(defaultSortKey);
-  const [internalSortDir, setInternalSortDir] = React10__namespace.useState(defaultSortDirection);
+  const [internalSortKey, setInternalSortKey] = React11__namespace.useState(defaultSortKey);
+  const [internalSortDir, setInternalSortDir] = React11__namespace.useState(defaultSortDirection);
   const sortKey = sortKeyProp !== void 0 ? sortKeyProp : internalSortKey;
   const sortDir = sortDirectionProp !== void 0 ? sortDirectionProp : internalSortDir;
-  const [internalSelected, setInternalSelected] = React10__namespace.useState(defaultSelectedRows ?? []);
+  const [internalSelected, setInternalSelected] = React11__namespace.useState(defaultSelectedRows ?? []);
   const selectionControlled = selectedRowsProp !== void 0;
-  const selectedSet = React10__namespace.useMemo(() => {
+  const selectedSet = React11__namespace.useMemo(() => {
     const list = selectionControlled ? selectedRowsProp : internalSelected;
     return new Set(list);
   }, [selectionControlled, selectedRowsProp, internalSelected]);
-  const rows = React10__namespace.useMemo(
+  const rows = React11__namespace.useMemo(
     () => data.map((row, index) => ({ row, index, id: getRowId(row, index) })),
     [data, getRowId]
   );
-  const sortedRows = React10__namespace.useMemo(() => {
+  const sortedRows = React11__namespace.useMemo(() => {
     if (!tableSortable || !sortKey) return rows;
     const col = columns.find((c) => c.key === sortKey);
     if (!col?.sortable) return rows;
@@ -9350,7 +9351,7 @@ function Table({
 }
 Table.displayName = "Table";
 var videoLetterbox = "bg-muted";
-var Video = React10__namespace.forwardRef(
+var Video = React11__namespace.forwardRef(
   ({ className, src, width, height, style, ...props }, ref) => {
     return /* @__PURE__ */ jsxRuntime.jsx(
       "video",
@@ -9701,7 +9702,7 @@ function TreeRow({
     )) : null
   ] });
 }
-var TreeView = React10__namespace.forwardRef(function TreeView2({
+var TreeView = React11__namespace.forwardRef(function TreeView2({
   items,
   selectedId,
   defaultSelectedId,
@@ -9723,10 +9724,10 @@ var TreeView = React10__namespace.forwardRef(function TreeView2({
   className,
   ...props
 }, ref) {
-  const [internalSelected, setInternalSelected] = React10__namespace.useState(defaultSelectedId);
-  const [internalExpanded, setInternalExpanded] = React10__namespace.useState(defaultExpandedIds);
-  const [draggedId, setDraggedId] = React10__namespace.useState(null);
-  const [dropHint, setDropHint] = React10__namespace.useState(null);
+  const [internalSelected, setInternalSelected] = React11__namespace.useState(defaultSelectedId);
+  const [internalExpanded, setInternalExpanded] = React11__namespace.useState(defaultExpandedIds);
+  const [draggedId, setDraggedId] = React11__namespace.useState(null);
+  const [dropHint, setDropHint] = React11__namespace.useState(null);
   const isSelectedControlled = selectedId !== void 0;
   const isExpandedControlled = expandedIds !== void 0;
   const resolvedSelected = isSelectedControlled ? selectedId : internalSelected;
@@ -9743,7 +9744,7 @@ var TreeView = React10__namespace.forwardRef(function TreeView2({
     if (!isExpandedControlled) setInternalExpanded(arr);
     onExpandedChange?.(arr);
   };
-  const normalizedItems = React10__namespace.useMemo(() => normalizeTreeItems(items), [items]);
+  const normalizedItems = React11__namespace.useMemo(() => normalizeTreeItems(items), [items]);
   const handleDragOver = (event, item) => {
     event.preventDefault();
     if (!draggedId || draggedId === item.id) return;
@@ -9811,7 +9812,7 @@ var TreeView = React10__namespace.forwardRef(function TreeView2({
   );
 });
 TreeView.displayName = "TreeView";
-var Carousel = React10__namespace.forwardRef(function Carousel2({
+var Carousel = React11__namespace.forwardRef(function Carousel2({
   items = [],
   autoPlay = false,
   loop = true,
@@ -9822,9 +9823,9 @@ var Carousel = React10__namespace.forwardRef(function Carousel2({
   className,
   ...props
 }, ref) {
-  const [index, setIndex] = React10__namespace.useState(0);
+  const [index, setIndex] = React11__namespace.useState(0);
   const count = items.length;
-  const go = React10__namespace.useCallback(
+  const go = React11__namespace.useCallback(
     (next) => {
       if (!count) return;
       if (loop) setIndex((next % count + count) % count);
@@ -9832,7 +9833,7 @@ var Carousel = React10__namespace.forwardRef(function Carousel2({
     },
     [count, loop]
   );
-  React10__namespace.useEffect(() => {
+  React11__namespace.useEffect(() => {
     if (!autoPlay || count < 2) return;
     const timer = window.setInterval(() => go(index + 1), interval);
     return () => window.clearInterval(timer);
@@ -9911,7 +9912,7 @@ var codeBlockVariants = classVarianceAuthority.cva("relative flex min-h-0 flex-c
     variant: "default"
   }
 });
-var CodeBlock = React10__namespace.forwardRef(function CodeBlock2({
+var CodeBlock = React11__namespace.forwardRef(function CodeBlock2({
   code = "",
   language,
   showLineNumbers = false,
@@ -9930,7 +9931,7 @@ var CodeBlock = React10__namespace.forwardRef(function CodeBlock2({
     defaultValue: defaultWrap,
     onChange: onWrapChange
   });
-  const lines = React10__namespace.useMemo(() => code.split(/\n/), [code]);
+  const lines = React11__namespace.useMemo(() => code.split(/\n/), [code]);
   const lineClassName = cn(
     "font-mono text-foreground",
     wrap ? "whitespace-pre-wrap break-words" : "whitespace-pre"
@@ -9953,7 +9954,7 @@ var CodeBlock = React10__namespace.forwardRef(function CodeBlock2({
         showCopy ? /* @__PURE__ */ jsxRuntime.jsx(CopyButton, { value: code, variant: "ghost", size: "sm", tooltip: false }) : null
       ] })
     ] }) : null,
-    /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "min-h-0 flex-1 overflow-auto p-4 text-sm leading-relaxed", children: showLineNumbers ? /* @__PURE__ */ jsxRuntime.jsx("code", { className: "grid grid-cols-[auto_minmax(0,1fr)] gap-x-4", children: lines.map((line, i) => /* @__PURE__ */ jsxRuntime.jsxs(React10__namespace.Fragment, { children: [
+    /* @__PURE__ */ jsxRuntime.jsx("pre", { className: "min-h-0 flex-1 overflow-auto p-4 text-sm leading-relaxed", children: showLineNumbers ? /* @__PURE__ */ jsxRuntime.jsx("code", { className: "grid grid-cols-[auto_minmax(0,1fr)] gap-x-4", children: lines.map((line, i) => /* @__PURE__ */ jsxRuntime.jsxs(React11__namespace.Fragment, { children: [
       /* @__PURE__ */ jsxRuntime.jsx("span", { className: "select-none text-right tabular-nums text-muted-foreground", children: i + 1 }),
       /* @__PURE__ */ jsxRuntime.jsx("span", { className: lineClassName, children: line })
     ] }, i)) }) : /* @__PURE__ */ jsxRuntime.jsx("code", { className: cn("block", lineClassName), children: code }) }),
@@ -9976,7 +9977,7 @@ var alertDialogVariants = classVarianceAuthority.cva("", {
     variant: "default"
   }
 });
-var AlertDialog = React10__namespace.forwardRef(function AlertDialog2({
+var AlertDialog = React11__namespace.forwardRef(function AlertDialog2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -9992,7 +9993,7 @@ var AlertDialog = React10__namespace.forwardRef(function AlertDialog2({
 }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const busy = Boolean(loading || confirmProps?.loading);
-  const handleClose = React10__namespace.useCallback(() => {
+  const handleClose = React11__namespace.useCallback(() => {
     if (busy) return;
     setOpen(false);
   }, [busy, setOpen]);
@@ -10103,7 +10104,7 @@ var overlayAlign = {
   left: "flex items-stretch justify-start p-0",
   right: "flex items-stretch justify-end p-0"
 };
-var Drawer = React10__namespace.forwardRef(function Drawer2({
+var Drawer = React11__namespace.forwardRef(function Drawer2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -10122,7 +10123,7 @@ var Drawer = React10__namespace.forwardRef(function Drawer2({
 }, ref) {
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
   const resolvedPlacement = placement ?? "right";
-  const handleClose = React10__namespace.useCallback(() => {
+  const handleClose = React11__namespace.useCallback(() => {
     setOpen(false);
   }, [setOpen]);
   const resolvedHeader = header || showClose ? /* @__PURE__ */ jsxRuntime.jsxs("div", { className: "flex items-start justify-between gap-3", children: [
@@ -10171,7 +10172,7 @@ var Drawer = React10__namespace.forwardRef(function Drawer2({
   );
 });
 Drawer.displayName = "Drawer";
-var HoverCard = React10__namespace.forwardRef(function HoverCard2({
+var HoverCard = React11__namespace.forwardRef(function HoverCard2({
   open: openProp,
   defaultOpen,
   onOpenChange,
@@ -10188,8 +10189,8 @@ var HoverCard = React10__namespace.forwardRef(function HoverCard2({
 }, ref) {
   const { label = "Hover", left, variant = "ghost", size = "md", className: triggerClassName } = triggerProps ?? {};
   const [open, setOpen] = useControllableOpen({ open: openProp, defaultOpen, onOpenChange });
-  const openTimer = React10__namespace.useRef(null);
-  const closeTimer = React10__namespace.useRef(null);
+  const openTimer = React11__namespace.useRef(null);
+  const closeTimer = React11__namespace.useRef(null);
   const clearTimers = () => {
     if (openTimer.current) clearTimeout(openTimer.current);
     if (closeTimer.current) clearTimeout(closeTimer.current);
@@ -10204,7 +10205,7 @@ var HoverCard = React10__namespace.forwardRef(function HoverCard2({
     clearTimers();
     closeTimer.current = setTimeout(() => setOpen(false), closeDelay);
   };
-  React10__namespace.useEffect(() => clearTimers, []);
+  React11__namespace.useEffect(() => clearTimers, []);
   const hoverHandlers = {
     onMouseEnter: scheduleOpen,
     onMouseLeave: scheduleClose,
@@ -10234,7 +10235,7 @@ var HoverCard = React10__namespace.forwardRef(function HoverCard2({
   );
 });
 HoverCard.displayName = "HoverCard";
-var VisuallyHidden = React10__namespace.forwardRef(
+var VisuallyHidden = React11__namespace.forwardRef(
   ({ className, ...props }, ref) => /* @__PURE__ */ jsxRuntime.jsx(
     "span",
     {
@@ -10254,7 +10255,7 @@ function haveResetKeysChanged(prev, next) {
   if (prev.length !== next.length) return true;
   return prev.some((value, i) => !Object.is(value, next[i]));
 }
-var ErrorBoundary = class extends React10__namespace.Component {
+var ErrorBoundary = class extends React11__namespace.Component {
   constructor() {
     super(...arguments);
     this.state = { hasError: false };
@@ -10514,7 +10515,7 @@ function ScatterChartSvg({ data, xKey, yKey }) {
     return /* @__PURE__ */ jsxRuntime.jsx("circle", { cx: x, cy: y, r: 4, fill: CHART_COLORS[index % CHART_COLORS.length] }, index);
   }) });
 }
-var Chart = React10__namespace.forwardRef(function Chart2({
+var Chart = React11__namespace.forwardRef(function Chart2({
   type,
   data,
   xKey,
@@ -10604,11 +10605,11 @@ var Chart = React10__namespace.forwardRef(function Chart2({
   );
 });
 Chart.displayName = "Chart";
-var BarChart = React10__namespace.forwardRef(function BarChart2({ data, xKey, yKey, horizontal, ...props }, ref) {
+var BarChart = React11__namespace.forwardRef(function BarChart2({ data, xKey, yKey, horizontal, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(Chart, { ref, type: "bar", data, xKey, yKey, horizontal, ...props });
 });
 BarChart.displayName = "BarChart";
-var LineChart = React10__namespace.forwardRef(function LineChart2({ data, xKey, yKey, curve = "linear", showPoints = true, area, ...props }, ref) {
+var LineChart = React11__namespace.forwardRef(function LineChart2({ data, xKey, yKey, curve = "linear", showPoints = true, area, ...props }, ref) {
   return /* @__PURE__ */ jsxRuntime.jsx(
     Chart,
     {
@@ -10625,7 +10626,7 @@ var LineChart = React10__namespace.forwardRef(function LineChart2({ data, xKey, 
   );
 });
 LineChart.displayName = "LineChart";
-var PieChart = React10__namespace.forwardRef(function PieChart2({ data, valueKey, labelKey, innerRadius, padAngle, startAngle, endAngle, ...props }, ref) {
+var PieChart = React11__namespace.forwardRef(function PieChart2({ data, valueKey, labelKey, innerRadius, padAngle, startAngle, endAngle, ...props }, ref) {
   const isDonut = innerRadius != null && innerRadius > 0;
   return /* @__PURE__ */ jsxRuntime.jsx(
     Chart,
@@ -11908,10 +11909,10 @@ function broadcastThemeSync(themes) {
   window.dispatchEvent(new CustomEvent(THEME_SYNC_EVENT, { detail: themes }));
 }
 function useTheme(registry = defaultRegistry) {
-  const [selectedThemes, setSelectedThemes] = React10.useState(getDefaultThemes());
-  const [isLoading, setIsLoading] = React10.useState(false);
-  const [error, setError] = React10.useState(null);
-  const applyTheme = React10.useCallback(async (themes) => {
+  const [selectedThemes, setSelectedThemes] = React11.useState(getDefaultThemes());
+  const [isLoading, setIsLoading] = React11.useState(false);
+  const [error, setError] = React11.useState(null);
+  const applyTheme = React11.useCallback(async (themes) => {
     setIsLoading(true);
     setError(null);
     try {
@@ -11929,7 +11930,7 @@ function useTheme(registry = defaultRegistry) {
       setIsLoading(false);
     }
   }, [registry]);
-  React10.useEffect(() => {
+  React11.useEffect(() => {
     if (typeof window !== "undefined") {
       const stored = localStorage.getItem(STORAGE_KEY);
       if (stored) {
@@ -11948,7 +11949,7 @@ function useTheme(registry = defaultRegistry) {
       }
     }
   }, [applyTheme]);
-  React10.useEffect(() => {
+  React11.useEffect(() => {
     if (typeof window === "undefined") return;
     const applyExternal = (themes) => {
       setSelectedThemes(themes);
@@ -11969,7 +11970,7 @@ function useTheme(registry = defaultRegistry) {
       window.removeEventListener("storage", onStorage);
     };
   }, []);
-  const updateTheme = React10.useCallback(async (category, themeId) => {
+  const updateTheme = React11.useCallback(async (category, themeId) => {
     const newThemes = {
       ...selectedThemes,
       [category]: themeId || void 0
@@ -11978,13 +11979,13 @@ function useTheme(registry = defaultRegistry) {
     broadcastThemeSync(newThemes);
     await applyTheme(newThemes);
   }, [selectedThemes, applyTheme]);
-  const resetToDefaults = React10.useCallback(async () => {
+  const resetToDefaults = React11.useCallback(async () => {
     const defaults = getDefaultThemes();
     setSelectedThemes(defaults);
     broadcastThemeSync(defaults);
     await applyTheme(defaults);
   }, [applyTheme]);
-  const applyPresetSelection = React10.useCallback(
+  const applyPresetSelection = React11.useCallback(
     async (preset) => {
       const next = { ...selectedThemes, ...preset };
       setSelectedThemes(next);
@@ -11993,7 +11994,7 @@ function useTheme(registry = defaultRegistry) {
     },
     [selectedThemes, applyTheme]
   );
-  const getAvailableThemes = React10.useCallback(async (category) => {
+  const getAvailableThemes = React11.useCallback(async (category) => {
     const categories = await registry.getThemeCategories();
     return categories[category]?.themes || {};
   }, [registry]);
@@ -12013,22 +12014,22 @@ function useThemeToggle(options) {
   const embedded = options?.embedded ?? false;
   const registry = options?.registry ?? defaultRegistry;
   const { selectedThemes, updateTheme, resetToDefaults, isLoading, getAvailableThemes } = useTheme(registry);
-  const [isOpen, setIsOpen] = React10.useState(false);
-  const [activeCategory, setActiveCategory] = React10.useState("color");
-  const [themeCategories, setThemeCategories] = React10.useState(null);
-  const [categoryThemes, setCategoryThemes] = React10.useState({});
-  const [themesLoading, setThemesLoading] = React10.useState(false);
-  const menuRef = React10.useRef(null);
-  const triggerRef = React10.useRef(null);
-  React10.useEffect(() => {
+  const [isOpen, setIsOpen] = React11.useState(false);
+  const [activeCategory, setActiveCategory] = React11.useState("color");
+  const [themeCategories, setThemeCategories] = React11.useState(null);
+  const [categoryThemes, setCategoryThemes] = React11.useState({});
+  const [themesLoading, setThemesLoading] = React11.useState(false);
+  const menuRef = React11.useRef(null);
+  const triggerRef = React11.useRef(null);
+  React11.useEffect(() => {
     registry.getThemeCategories().then(setThemeCategories);
   }, [registry]);
-  React10.useEffect(() => {
+  React11.useEffect(() => {
     if (!embedded && !isOpen) return;
     setThemesLoading(true);
     getAvailableThemes(activeCategory).then(setCategoryThemes).finally(() => setThemesLoading(false));
   }, [embedded, isOpen, activeCategory, getAvailableThemes]);
-  React10.useEffect(() => {
+  React11.useEffect(() => {
     if (!isOpen) return;
     function handleClickOutside(event) {
       const target = event.target;
@@ -12045,7 +12046,7 @@ function useThemeToggle(options) {
       document.removeEventListener("keydown", handleKeyDown);
     };
   }, [isOpen]);
-  const handleThemeSelect = React10.useCallback(
+  const handleThemeSelect = React11.useCallback(
     async (category, themeId) => {
       const currentTheme = selectedThemes[category];
       const newTheme = currentTheme === themeId ? void 0 : themeId;
@@ -12053,10 +12054,10 @@ function useThemeToggle(options) {
     },
     [selectedThemes, updateTheme]
   );
-  const handleResetAll = React10.useCallback(async () => {
+  const handleResetAll = React11.useCallback(async () => {
     await resetToDefaults();
   }, [resetToDefaults]);
-  const toggleMenu = React10.useCallback(() => {
+  const toggleMenu = React11.useCallback(() => {
     setIsOpen((prev) => {
       const next = !prev;
       if (next) {
@@ -12066,7 +12067,7 @@ function useThemeToggle(options) {
       return next;
     });
   }, [selectedThemes]);
-  const closeMenu = React10.useCallback(() => setIsOpen(false), []);
+  const closeMenu = React11.useCallback(() => setIsOpen(false), []);
   const categories = themeCategories ? Object.entries(themeCategories).sort(([, a], [, b]) => (a.order || 0) - (b.order || 0)) : [];
   return {
     selectedThemes,
@@ -12291,13 +12292,13 @@ function ThemeToggle({ className, position = "bottom-right", registry }) {
     toggleMenu,
     closeMenu
   } = useThemeToggle({ registry });
-  const [panelStyle, setPanelStyle] = React10.useState({ visibility: "hidden" });
-  const updatePanelPosition = React10__namespace.default.useCallback(() => {
+  const [panelStyle, setPanelStyle] = React11.useState({ visibility: "hidden" });
+  const updatePanelPosition = React11__namespace.default.useCallback(() => {
     const trigger = triggerRef.current;
     if (!trigger) return;
     setPanelStyle(computePanelStyle(trigger.getBoundingClientRect(), position));
   }, [position, triggerRef]);
-  React10.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!isOpen) return;
     updatePanelPosition();
     const onReflow = () => updatePanelPosition();

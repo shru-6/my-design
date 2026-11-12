@@ -1,4 +1,5 @@
 import * as React from "react"
+import { useIsomorphicLayoutEffect } from "../../utils/useIsomorphicLayoutEffect"
 
 /** Safety net: reveal even if the two rAFs never land (background tab, reduced motion shims). */
 const REVEAL_FALLBACK_MS = 48
@@ -17,7 +18,7 @@ const REVEAL_FALLBACK_MS = 48
 export function usePositionedPortal(open: boolean, updatePosition: () => void) {
   const [positioned, setPositioned] = React.useState(false)
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) {
       setPositioned(false)
       return

@@ -1,10 +1,16 @@
 import "@testing-library/jest-dom/vitest"
 
+// This setup file runs for every test file, including src/ssr.test.tsx,
+// which deliberately opts into the `node` environment (no window/document
+// at all) to prove the SSR guards actually work. Everything below is
+// jsdom-only, so skip it entirely when there's no `window` to patch.
+const hasDom = typeof window !== "undefined"
+
 // jsdom doesn't implement these — several overlay/navigation/data-viz
 // components (Radix Slider, popovers, ResizeContainer, charts) touch them
 // during mount. Stub the minimum needed to render without crashing.
 
-if (typeof window.matchMedia !== "function") {
+if (hasDom && typeof window.matchMedia !== "function") {
   window.matchMedia = ((query: string) => ({
     matches: false,
     media: query,
@@ -17,7 +23,7 @@ if (typeof window.matchMedia !== "function") {
   })) as unknown as typeof window.matchMedia
 }
 
-if (typeof window.ResizeObserver === "undefined") {
+if (hasDom && typeof window.ResizeObserver === "undefined") {
   class ResizeObserverStub {
     observe() {}
     unobserve() {}
@@ -29,7 +35,7 @@ if (typeof window.ResizeObserver === "undefined") {
   global.ResizeObserver = ResizeObserverStub
 }
 
-if (typeof window.IntersectionObserver === "undefined") {
+if (hasDom && typeof window.IntersectionObserver === "undefined") {
   class IntersectionObserverStub {
     root = null
     rootMargin = ""
@@ -47,23 +53,23 @@ if (typeof window.IntersectionObserver === "undefined") {
   global.IntersectionObserver = IntersectionObserverStub
 }
 
-if (!Element.prototype.scrollIntoView) {
+if (hasDom && !Element.prototype.scrollIntoView) {
   Element.prototype.scrollIntoView = () => {}
 }
 
-if (!Element.prototype.hasPointerCapture) {
+if (hasDom && !Element.prototype.hasPointerCapture) {
   Element.prototype.hasPointerCapture = () => false
 }
-if (!Element.prototype.setPointerCapture) {
+if (hasDom && !Element.prototype.setPointerCapture) {
   Element.prototype.setPointerCapture = () => {}
 }
-if (!Element.prototype.releasePointerCapture) {
+if (hasDom && !Element.prototype.releasePointerCapture) {
   Element.prototype.releasePointerCapture = () => {}
 }
 
 // Radix primitives (Slider) read getBoundingClientRect for geometry — jsdom
 // defaults to all-zero rects, which is fine for a "does it render" smoke test.
-if (!Element.prototype.getAnimations) {
+if (hasDom && !Element.prototype.getAnimations) {
   // @ts-expect-error jsdom has no Web Animations API
   Element.prototype.getAnimations = () => []
 }

@@ -1,12 +1,13 @@
 "use client"
 
-import React, { useLayoutEffect, useState } from "react"
+import React, { useState } from "react"
 import { createPortal } from "react-dom"
 import { useThemeToggle } from "./useThemeToggle"
 import { ThemePanel } from "./ThemePanel"
 import { computePanelStyle, positionClasses } from "./themeToggleConfig"
 import { cn } from "../../../utils"
 import { Tooltip } from "../../../components/overlays/Tooltip"
+import { useIsomorphicLayoutEffect } from "../../../utils/useIsomorphicLayoutEffect"
 import type { ThemeRegistry } from "../../themeConfig"
 
 export interface ThemeToggleProps {
@@ -42,7 +43,7 @@ export function ThemeToggle({ className, position = "bottom-right", registry }: 
     setPanelStyle(computePanelStyle(trigger.getBoundingClientRect(), position))
   }, [position, triggerRef])
 
-  useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!isOpen) return
     updatePanelPosition()
     const onReflow = () => updatePanelPosition()

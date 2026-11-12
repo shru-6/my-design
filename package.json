@@ -5,6 +5,7 @@
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "sideEffects": false,
   "files": [
     "dist",
     "scripts/init.js",
@@ -18,6 +19,7 @@
     "build": "node scripts/copy-tokens.js && rm -rf dist && tsup && node scripts/dev/copy-styles.js",
     "check": "node scripts/dev/check.js",
     "check:metadata": "node scripts/dev/check-metadata-props.js",
+    "check:unused-props": "node scripts/dev/check-unused-props.js",
     "lint": "eslint src",
     "test": "vitest run",
     "test:watch": "vitest",
@@ -58,6 +60,7 @@
     "@typescript-eslint/parser": "^8.19.0",
     "@vitejs/plugin-react": "^6.3.0",
     "autoprefixer": "^10.4.23",
+    "axe-core": "^4.14.0",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.0",
     "eslint": "^9.17.0",

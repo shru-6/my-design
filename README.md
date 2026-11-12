@@ -29,6 +29,7 @@ Published: `dist/` components, `styles.css`, Tailwind preset.
 | [Theming](./docs/use/THEMING.md) | Presets, `useTheme`, `applyPreset`, ThemeToggle |
 | [Recipes](./docs/use/RECIPES.md) | App shell, TreeView, forms, modals |
 | [Features](./docs/use/FEATURES.md) | Overlays, toasts, forms, input API contracts |
+| [Upgrade](./docs/use/UPGRADE.md) | Breaking changes by version, what to change in your app |
 
 ### Contributors — `docs/build/`
 

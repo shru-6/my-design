@@ -7,6 +7,7 @@ import { Spinner } from "../data-display/Spinner"
 import { Icon } from "../utilities/Icon"
 import { disabledSurfaceStyles } from "./fieldPieces"
 import { SearchInput, type SearchInputProps } from "./SearchInput"
+import { useIsomorphicLayoutEffect } from "../../utils/useIsomorphicLayoutEffect"
 
 export type CommandItem = {
   label: React.ReactNode
@@ -137,7 +138,7 @@ export const Command = React.forwardRef<HTMLDivElement, CommandProps>(
       })
     }, [])
 
-    React.useLayoutEffect(() => {
+    useIsomorphicLayoutEffect(() => {
       if (!open) return
       updatePosition()
       const ro = () => updatePosition()

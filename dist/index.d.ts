@@ -4,7 +4,7 @@ import { VariantProps } from 'class-variance-authority';
 import * as react_jsx_runtime from 'react/jsx-runtime';
 import * as SliderPrimitive from '@radix-ui/react-slider';
 import { OTPInput } from 'input-otp';
-import { PanelGroupProps, ImperativePanelGroupHandle, PanelProps, ImperativePanelHandle, PanelResizeHandleProps } from 'react-resizable-panels';
+import { PanelResizeHandleProps, PanelProps, ImperativePanelHandle, PanelGroupProps, ImperativePanelGroupHandle } from 'react-resizable-panels';
 
 declare const iconVariants: (props?: ({
     size?: "xs" | "sm" | "md" | "lg" | "xl" | null | undefined;

@@ -70,4 +70,4 @@ Verify styles, preset, and one component render with theme toggle.
 
 ## Consumer upgrades
 
-When a release has breaking changes, document migration in changelog and add notes to `use/INSTALL.md` or a future `use/UPGRADE.md`.
+When a release has breaking changes, document migration in the changelog and add a version section to [`use/UPGRADE.md`](../use/UPGRADE.md).

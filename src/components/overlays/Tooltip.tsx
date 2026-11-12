@@ -3,6 +3,7 @@ import { createPortal } from "react-dom"
 import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "../../utils"
 import { clampToViewport, fitsInViewport } from "../../utils/floatingPosition"
+import { useIsomorphicLayoutEffect } from "../../utils/useIsomorphicLayoutEffect"
 
 const tooltipContentVariants = cva(
   [
@@ -223,7 +224,7 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
         : String(maxWidth)
       : undefined
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) setResolvedPlacement(placement)
   }, [placement, open])
 
@@ -290,7 +291,7 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
     setCoords(next)
   }, [placement, autoPlacement, xOffset, yOffset])
 
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) return
     updatePosition()
     const onScrollOrResize = () => updatePosition()
@@ -303,7 +304,7 @@ export const Tooltip = React.forwardRef<HTMLElement, TooltipProps>(function Tool
   }, [open, updatePosition, content, placement, maxWidthCss])
 
   /** One rAF so the first paint is opacity-0, then we toggle class → transition runs. */
-  React.useLayoutEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     if (!open) return
     setEntered(false)
     const id = requestAnimationFrame(() => setEntered(true))
