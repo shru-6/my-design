@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.4
+
+Bumped from 0.6.3 only because the registry left that exact version number stuck in a "previously staged" state after an interrupted publish attempt (failed OTP mid-publish) — no content change from 0.6.3 below.
+
 ## 0.6.3
 
 ### Added
